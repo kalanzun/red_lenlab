@@ -94,7 +94,7 @@
 volatile uint32_t g_ui32SysTickCount = 0;
 
 unsigned char *data = "Flags used to pass commands from interrupt context to the main loop. Flags used to pass commands from interrupt context to the main loop.";
-unsigned char pi8Data[256];
+unsigned char pi8Data[100*64];
 static uint32_t g_ui32uDMAErrCount = 0;
 
 static tUSBDMAInstance *g_psUSBDMAInst;
@@ -266,17 +266,6 @@ void *pvMsgData)
 
             //USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
 
-
-            // Configure and enable DMA for the IN transfer.
-            //
-            USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 128);
-
-            //
-            // Start the DMA transfer.
-            //
-            USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
-
-
             return g_ui32RxCount;
         }
     }
@@ -368,6 +357,8 @@ main(void)
     volatile uint32_t ui32Loop;
     uint32_t ui32TxCount;
     uint32_t ui32RxCount;
+
+    uint32_t i;
 
     //
     // Enable lazy stacking for interrupt handlers.  This allows floating-point
@@ -509,6 +500,19 @@ main(void)
         {
             UARTprintf("%s\n", pi8Data);
             g_ui32RxCount = 0;
+
+            for (i = 64; i < 100*64; i++)
+                pi8Data[i] = pi8Data[i%64];
+
+            // Configure and enable DMA for the IN transfer.
+            //
+            USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
+
+            //
+            // Start the DMA transfer.
+            //
+            USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
+
         }
     }
 }

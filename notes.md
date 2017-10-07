@@ -36,3 +36,4 @@ Do include stdint.h and stdbool.h before the tivaware driverlib library, else it
 #include "driverlib/gpio.h"
 ```
 
+DMA kann nicht von Konstanten kopieren.
