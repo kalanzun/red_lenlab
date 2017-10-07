@@ -15,7 +15,7 @@
 #include "utils/uartstdio.h"
 
 uint8_t ui8PinData=2;
-
+/*
 int main(void) {
 
     // System Clock 80 MHz
@@ -53,3 +53,4 @@ int main(void) {
 
     return 0;
 }
+*/
