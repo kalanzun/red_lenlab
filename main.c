@@ -12,6 +12,7 @@
 #include "inc/hw_types.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
+#include "utils/uartstdio.h"
 
 uint8_t ui8PinData=2;
 
@@ -22,6 +23,24 @@ int main(void) {
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+
+    //
+    // Configure the appropriate pins as UART pins; in this case, PA0/PA1 are
+    // used for UART0.
+    //
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+
+    //
+    // Initialize the UART standard IO module, when using an 80 MHz system
+    // clock.
+    //
+    UARTStdioConfig(0, 115200, 80000000);
+
+    //
+    // Print a string.
+    //
+    UARTprintf("Hello world!\n");
 
     while(1)
     {
