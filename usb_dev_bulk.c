@@ -37,6 +37,7 @@
 #include "driverlib/timer.h"
 #include "driverlib/uart.h"
 #include "driverlib/rom.h"
+#include "driverlib/udma.h"
 #include "usblib/usblib.h"
 #include "usblib/usb-ids.h"
 #include "usblib/device/usbdevice.h"
@@ -92,6 +93,23 @@ volatile uint32_t g_ui32SysTickCount = 0;
 
 unsigned char *data = "Flags used to pass commands from interrupt context to the main loop.";
 unsigned char pi8Data[256];
+static uint32_t g_ui32uDMAErrCount = 0;
+
+//*****************************************************************************
+//
+// The control table used by the uDMA controller.  This table must be aligned
+// to a 1024 byte boundary.
+//
+//*****************************************************************************
+#if defined(ewarm)
+#pragma data_alignment=1024
+uint8_t ui8ControlTable[1024];
+#elif defined(ccs)
+#pragma DATA_ALIGN(ui8ControlTable, 1024)
+uint8_t ui8ControlTable[1024];
+#else
+uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
+#endif
 
 //*****************************************************************************
 //
@@ -176,6 +194,33 @@ SysTickIntHandler(void)
     g_ui32SysTickCount++;
 }
 
+//*****************************************************************************
+//
+// The interrupt handler for uDMA errors.  This interrupt will occur if the
+// uDMA encounters a bus error while trying to perform a transfer.  This
+// handler just increments a counter if an error occurs.
+//
+//*****************************************************************************
+void
+uDMAErrorHandler(void)
+{
+    uint32_t ui32Status;
+
+    //
+    // Check for uDMA error bit
+    //
+    ui32Status = uDMAErrorStatusGet();
+
+    //
+    // If there is a uDMA error, then clear the error and increment
+    // the error counter.
+    //
+    if(ui32Status)
+    {
+        uDMAErrorStatusClear();
+        g_ui32uDMAErrCount++;
+    }
+}
 //*****************************************************************************
 //
 // Receive new data and echo it back to the host.
@@ -333,6 +378,11 @@ main(void)
     UARTprintf("---------------------------------\n\n");
 
     //
+    // Show the clock frequency on the display.
+    //
+    UARTprintf("Tiva C Series @ %u MHz\n\n", SysCtlClockGet() / 1000000);
+
+    //
     // Not configured initially.
     //
     g_bUSBConfigured = false;
@@ -350,6 +400,29 @@ main(void)
     SysTickPeriodSet(SysCtlClockGet() / SYSTICKS_PER_SECOND);
     SysTickIntEnable();
     SysTickEnable();
+
+    //
+    // Enable the uDMA controller at the system level.  Enable it to continue
+    // to run while the processor is in sleep.
+    //
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);
+    //SysCtlPeripheralSleepEnable(SYSCTL_PERIPH_UDMA);
+
+    //
+    // Enable the uDMA controller error interrupt.  This interrupt will occur
+    // if there is a bus error during a transfer.
+    //
+    IntEnable(INT_UDMAERR);
+
+    //
+    // Enable the uDMA controller.
+    //
+    uDMAEnable();
+
+    //
+    // Point at the control table to use for channel control structures.
+    //
+    uDMAControlBaseSet(ui8ControlTable);
 
     //
     // Tell the user what we are up to.
