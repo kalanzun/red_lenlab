@@ -38,7 +38,9 @@
 #include "driverlib/uart.h"
 #include "driverlib/rom.h"
 #include "driverlib/udma.h"
+#include "driverlib/usb.h"
 #include "usblib/usblib.h"
+#include "usblib/usblibpriv.h"
 #include "usblib/usb-ids.h"
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdbulk.h"
@@ -94,6 +96,11 @@ volatile uint32_t g_ui32SysTickCount = 0;
 unsigned char *data = "Flags used to pass commands from interrupt context to the main loop.";
 unsigned char pi8Data[256];
 static uint32_t g_ui32uDMAErrCount = 0;
+
+static tUSBDMAInstance *g_psUSBDMAInst;
+
+volatile uint8_t ui8INDMA;
+volatile uint8_t ui8OUTDMA;
 
 //*****************************************************************************
 //
@@ -439,6 +446,30 @@ main(void)
     // on the bus.
     //
     USBDBulkInit(0, &g_sBulkDevice);
+
+    g_psUSBDMAInst = 0;
+    g_psUSBDMAInst = USBLibDMAInit(0);
+
+    while (g_psUSBDMAInst == 0) {};
+
+    //
+    // Configure the DMA for the OUT endpoint.
+    //
+    ui8OUTDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_RX | USB_DMA_EP_DEVICE);
+
+    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8OUTDMA, 32);
+
+    USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8OUTDMA, 16);
+
+
+    //
+    // Configure the DMA for the IN endpoint.
+    //
+    ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
+
+    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 32);
+
+    USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8INDMA, 16);
 
     //
     // Wait for initial configuration to complete.
