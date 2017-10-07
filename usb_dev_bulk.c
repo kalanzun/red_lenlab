@@ -93,7 +93,7 @@
 //*****************************************************************************
 volatile uint32_t g_ui32SysTickCount = 0;
 
-unsigned char *data = "Flags used to pass commands from interrupt context to the main loop.";
+unsigned char *data = "Flags used to pass commands from interrupt context to the main loop. Flags used to pass commands from interrupt context to the main loop.";
 unsigned char pi8Data[256];
 static uint32_t g_ui32uDMAErrCount = 0;
 
@@ -263,7 +263,20 @@ void *pvMsgData)
             g_ui32RxCount = USBDBulkRxPacketAvailable(&g_sBulkDevice);
             USBDBulkPacketRead(&g_sBulkDevice, pi8Data, g_ui32RxCount, true);
             pi8Data[g_ui32RxCount] = 0;
-            USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
+
+            //USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
+
+
+            // Configure and enable DMA for the IN transfer.
+            //
+            USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 128);
+
+            //
+            // Start the DMA transfer.
+            //
+            USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
+
+
             return g_ui32RxCount;
         }
     }
@@ -289,6 +302,7 @@ void *pvMsgData)
         //
         case USB_EVENT_TX_COMPLETE:
         {
+            /*
             if (g_ui32TxCount == 0)
             {
                 USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
@@ -296,6 +310,8 @@ void *pvMsgData)
             }
             else
                 g_ui32TxCount = 0;
+            */
+
             return 0;
         }
     }
@@ -457,7 +473,7 @@ main(void)
     //
     ui8OUTDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_RX | USB_DMA_EP_DEVICE);
 
-    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8OUTDMA, 32);
+    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8OUTDMA, 8);
 
     USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8OUTDMA, 16);
 
@@ -467,7 +483,7 @@ main(void)
     //
     ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
 
-    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 32);
+    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
 
     USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8INDMA, 16);
 
