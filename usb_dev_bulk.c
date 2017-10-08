@@ -522,14 +522,14 @@ main(void)
                                                pvFIFO, 1024);
             USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
                                               1024/64);
-            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_DMA_MODE_1 | USB_EP_HOST_OUT | USB_EP_AUTO_SET);
+            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_DMA_MODE_1 | USB_EP_DEV_IN | USB_EP_AUTO_SET);
 
             //
             // Start the DMA transfer.
             //
             //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
 
-            USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN | USB_EP_HOST_OUT);
+            USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
             uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
         }
     }
