@@ -354,6 +354,7 @@ ConfigureUART(void)
 int
 main(void)
 {
+    void *pvFIFO;
     volatile uint32_t ui32Loop;
     uint32_t ui32TxCount;
     uint32_t ui32RxCount;
@@ -492,6 +493,11 @@ main(void)
     //USBDBulkPacketWrite(&g_sBulkDevice, data, 64, false);
 
     //
+    // Need the address of the FIFO.
+    //
+    pvFIFO = (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1);
+
+    //
     // Main application loop.
     //
     while(1)
@@ -506,13 +512,21 @@ main(void)
 
             // Configure and enable DMA for the IN transfer.
             //
-            USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
+            //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
+
+            uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, pi8Data,
+                                               pvFIFO, 1024);
+            USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
+                                              1024/64);
+            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_DMA_MODE_1 | USB_EP_HOST_OUT | USB_EP_AUTO_SET);
 
             //
             // Start the DMA transfer.
             //
-            USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
+            //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
 
+            USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN | USB_EP_HOST_OUT);
+            uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
         }
     }
 }
