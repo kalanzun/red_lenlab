@@ -56,7 +56,7 @@ extern uint32_t __STACK_TOP;
 //*****************************************************************************
 extern void UARTStdioIntHandler(void);
 extern void SysTickIntHandler(void);
-extern void USB0DeviceIntHandler(void);
+extern void USBIntHandler(void);
 extern void uDMAErrorHandler(void);
 
 //*****************************************************************************
@@ -130,7 +130,7 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // Hibernate
-    USB0DeviceIntHandler,                   // USB0
+    USBIntHandler,                   // USB0
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
     uDMAErrorHandler,                       // uDMA Error

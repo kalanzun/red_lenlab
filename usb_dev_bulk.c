@@ -94,10 +94,13 @@
 volatile uint32_t g_ui32SysTickCount = 0;
 
 unsigned char *data = "Flags used to pass commands from interrupt context to the main loop. Flags used to pass commands from interrupt context to the main loop.";
-unsigned char pi8Data[100*64];
+unsigned char pi8Data[4096];
 static uint32_t g_ui32uDMAErrCount = 0;
 
 static tUSBDMAInstance *g_psUSBDMAInst;
+
+volatile uint32_t g_ui32USBInterruptCounter;
+volatile uint8_t dma_pending;
 
 volatile uint8_t ui8INDMA;
 volatile uint8_t ui8OUTDMA;
@@ -226,6 +229,32 @@ uDMAErrorHandler(void)
     {
         uDMAErrorStatusClear();
         g_ui32uDMAErrCount++;
+    }
+}
+
+void USBIntHandler(void)
+{
+    if((dma_pending) &&
+    (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
+    {
+    //
+    // Handle the DMA complete case.
+    //
+        dma_pending=0;
+        g_ui32USBInterruptCounter++;
+
+        USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+        uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, pi8Data,
+                               (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
+        dma_pending = 1;
+        USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+        uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+
+
+    }
+    else
+    {
+        USB0DeviceIntHandler();
     }
 }
 //*****************************************************************************
@@ -358,8 +387,12 @@ main(void)
     volatile uint32_t ui32Loop;
     uint32_t ui32TxCount;
     uint32_t ui32RxCount;
+    volatile uint32_t last_counter_value;
 
     uint32_t i;
+
+    last_counter_value = 0;
+    g_ui32USBInterruptCounter = 0;
 
     //
     // Enable lazy stacking for interrupt handlers.  This allows floating-point
@@ -516,7 +549,7 @@ main(void)
             UARTprintf("%s\n", pi8Data);
             g_ui32RxCount = 0;
 
-            for (i = 64; i < 100*64; i++)
+            for (i = 64; i < 4096; i++)
                 pi8Data[i] = pi8Data[i%64];
 
             // Configure and enable DMA for the IN transfer.
@@ -527,7 +560,7 @@ main(void)
             uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, pi8Data,
                                                pvFIFO, 1024);
             //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
-            //                                  1024/64);
+            //                                  2048/64);
             // offenbar nicht nötig
 
             //
@@ -535,9 +568,15 @@ main(void)
             //
             //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
 
+            dma_pending = 1;
             USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
             uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
             // both are needed here
+        }
+        if (g_ui32USBInterruptCounter > last_counter_value+100)
+        {
+            last_counter_value = g_ui32USBInterruptCounter;
+            UARTprintf("%i\n", last_counter_value);
         }
     }
 }
