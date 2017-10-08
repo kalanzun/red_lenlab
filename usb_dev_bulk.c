@@ -476,8 +476,12 @@ main(void)
     //ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
     USBEndpointDMAChannel(USB0_BASE, USB_EP_1, UDMA_CHANNEL_USBEP1TX);
     uDMAChannelAttributeDisable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_ALL);
+    uDMAChannelAttributeEnable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_USEBURST);
+    // manual says to set burst mode, the DMA code of usblib doesn't. Both work.
     uDMAChannelControlSet(UDMA_CHANNEL_USBEP1TX, UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_64);
-    USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    // FIFO byte-weise befüllen, UDMA_SIZE_32 funktioniert nicht
+    // USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    // offenbar nicht nötig
 
     //USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
 
@@ -501,6 +505,7 @@ main(void)
     //
     pvFIFO = (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1);
 
+
     //
     // Main application loop.
     //
@@ -517,12 +522,13 @@ main(void)
             // Configure and enable DMA for the IN transfer.
             //
             //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
-
+            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+            // does not work if moved up into the config section
             uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, pi8Data,
                                                pvFIFO, 1024);
-            USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
-                                              1024/64);
-            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_DMA_MODE_1 | USB_EP_DEV_IN | USB_EP_AUTO_SET);
+            //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
+            //                                  1024/64);
+            // offenbar nicht nötig
 
             //
             // Start the DMA transfer.
@@ -531,6 +537,7 @@ main(void)
 
             USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
             uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+            // both are needed here
         }
     }
 }
