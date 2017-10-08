@@ -463,21 +463,25 @@ main(void)
     //
     // Configure the DMA for the OUT endpoint.
     //
-    ui8OUTDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_RX | USB_DMA_EP_DEVICE);
+    //ui8OUTDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_RX | USB_DMA_EP_DEVICE);
 
-    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8OUTDMA, 8);
+    //USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8OUTDMA, 8);
 
-    USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8OUTDMA, 16);
+    //USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8OUTDMA, 16);
 
 
     //
     // Configure the DMA for the IN endpoint.
     //
-    ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
+    //ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
+    USBEndpointDMAChannel(USB0_BASE, USB_EP_1, UDMA_CHANNEL_USBEP1TX);
+    uDMAChannelAttributeDisable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_ALL);
+    uDMAChannelControlSet(UDMA_CHANNEL_USBEP1TX, UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_64);
+    USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
 
-    USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
+    //USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
 
-    USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8INDMA, 16);
+    //USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8INDMA, 16);
 
     //
     // Wait for initial configuration to complete.
