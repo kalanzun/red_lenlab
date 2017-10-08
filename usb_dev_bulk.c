@@ -40,7 +40,7 @@
 #include "driverlib/udma.h"
 #include "driverlib/usb.h"
 #include "usblib/usblib.h"
-#include "usblib/usblibpriv.h"
+//#include "usblib/usblibpriv.h"
 #include "usblib/usb-ids.h"
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdbulk.h"
@@ -456,9 +456,9 @@ main(void)
     USBDBulkInit(0, &g_sBulkDevice);
 
     g_psUSBDMAInst = 0;
-    g_psUSBDMAInst = USBLibDMAInit(0);
+    //g_psUSBDMAInst = USBLibDMAInit(0);
 
-    while (g_psUSBDMAInst == 0) {};
+    //while (g_psUSBDMAInst == 0) {};
 
     //
     // Configure the DMA for the OUT endpoint.
