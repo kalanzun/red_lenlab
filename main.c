@@ -17,6 +17,11 @@
 #include "debug.h"
 #include "usb_device.h"
 
+tCommandHandler CommandHandler;
+tUSBDevice USBDevice = {
+    &CommandHandler.command_queue
+};
+
 
 //*****************************************************************************
 //
@@ -71,7 +76,12 @@ main(void) {
     //
     // Configure USB Device
     //
-    USBDeviceInit();
+    USBDeviceInit(&USBDevice);
+
+    //
+    // Initialize Command Handler
+    //
+    CommandHandlerInit(&CommandHandler);
 
     //
     // Print a string.
@@ -81,12 +91,7 @@ main(void) {
 
     while(1)
     {
-        /*
-        if (command_received) {
-            command_received = 0;
-            command_handler();
-        }
-        */
+        CommandHandlerMain(&CommandHandler);
     }
 
 }
