@@ -46,7 +46,6 @@
 #include "usblib/device/usbdbulk.h"
 #include "utils/uartstdio.h"
 #include "utils/ustdlib.h"
-#include "usb_bulk_structs.h"
 
 //*****************************************************************************
 //
@@ -274,68 +273,7 @@ void USBIntHandler(void)
 // \return Returns the number of bytes of data processed.
 //
 //*****************************************************************************
-uint32_t YourUSBReceiveEventCallback(void *pvCBData,
-uint32_t ui32Event,
-uint32_t ui32MsgParam,
-void *pvMsgData)
-{
-    //
-    // Which event have we been sent?
-    //
-    switch(ui32Event)
-    {
-        //
-        // Data is available from the lower layer.
-        //
-        case USB_EVENT_RX_AVAILABLE:
-        {
-            g_ui32RxCount = USBDBulkRxPacketAvailable(&g_sBulkDevice);
-            USBDBulkPacketRead(&g_sBulkDevice, pi8Data, g_ui32RxCount, true);
-            pi8Data[g_ui32RxCount] = 0;
 
-            //USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
-
-            return g_ui32RxCount;
-        }
-    }
-
-    return 0;
-
-}
-
-
-uint32_t YourUSBTransmitEventCallback(void *pvCBData,
-uint32_t ui32Event,
-uint32_t ui32MsgParam,
-void *pvMsgData)
-{
-
-    //
-    // Which event have we been sent?
-    //
-    switch(ui32Event)
-    {
-        //
-        // A previous transmission has completed.
-        //
-        case USB_EVENT_TX_COMPLETE:
-        {
-            /*
-            if (g_ui32TxCount == 0)
-            {
-                USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
-                g_ui32TxCount = 1;
-            }
-            else
-                g_ui32TxCount = 0;
-            */
-
-            return 0;
-        }
-    }
-
-    return 0;
-}
 
 
 

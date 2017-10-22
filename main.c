@@ -8,32 +8,14 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/uart.h"
-#include "utils/uartstdio.h"
-
-
-//*****************************************************************************
-//
-// Debug-related definitions and declarations.
-//
-// Debug output is available via UART0 if DEBUG is defined during build.
-//
-//*****************************************************************************
-#ifdef DEBUG
-// Map all debug print calls to UARTprintf in debug builds.
-#define DEBUG_PRINT UARTprintf
-
-#else
-
-// Compile out all debug print calls in release builds.
-#define DEBUG_PRINT while(0) ((int (*)(char *, ...))0)
-#endif
+#include "command_handler.h"
+#include "debug.h"
+#include "usb_device.h"
 
 
 //*****************************************************************************
@@ -41,7 +23,7 @@
 // Configure the UART and its pins.  This must be called before UARTprintf().
 //
 //*****************************************************************************
-void
+inline void
 ConfigureUART(void)
 {
 #ifdef DEBUG
@@ -87,12 +69,24 @@ main(void) {
     ConfigureUART();
 
     //
+    // Configure USB Device
+    //
+    USBDeviceInit();
+
+    //
     // Print a string.
     //
-    DEBUG_PRINT("Red Firmware Init!\n");
+    DEBUG_PRINT("Red Firmware\n");
+    DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
 
     while(1)
     {
+        /*
+        if (command_received) {
+            command_received = 0;
+            command_handler();
+        }
+        */
     }
 
 }
