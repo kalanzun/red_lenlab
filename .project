@@ -35,10 +35,5 @@
 			<type>1</type>
 			<locationURI>TIVAWARE_INSTALL/utils/uartstdio.c</locationURI>
 		</link>
-		<link>
-			<name>usblib.lib</name>
-			<type>1</type>
-			<locationURI>TIVAWARE_INSTALL/usblib/ccs/Debug/usblib.lib</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
