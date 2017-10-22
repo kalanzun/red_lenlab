@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "utils/ustdlib.h"
 #include "debug.h"
 #include "command_handler.h"
 #include "reply_handler.h"
@@ -50,18 +51,42 @@ const uint8_t name[] = "KIT Lenlab Red Firmware version 0.1 year 2017";
 void
 GetName (tCommandHandler *self, tPacket *command)
 {
-    DEBUG_PRINT("GetName()\n");
+    DEBUG_PRINT("GetName\n");
     if (!PacketQueueFull(self->reply_queue)) {
         SendMessage(self->reply_queue, name, NAME_SIZE);
     }
 }
+
+
+void
+SetLoggerTimestep(tCommandHandler *self, tPacket *command)
+{
+    tPacket *packet;
+    uint32_t timestep;
+
+    if (command->size < 5) return;
+
+    timestep = *(uint32_t *) (command->payload+1);
+    DEBUG_PRINT("SetLoggerTimestamp %i\n", timestep);
+    // set timestep
+    if (!PacketQueueFull(self->reply_queue)) {
+        packet = PacketQueueWrite(self->reply_queue);
+        packet->payload[0] = 2; // Reply Code for OK
+        packet->size = usnprintf((char *) packet->payload+1, PACKET_QUEUE_PAYLOAD_SIZE-1, "SetLoggerTimestep %i", timestep) + 1 + 1; // reply code and string terminator
+
+        PacketQueueWriteDone(self->reply_queue);
+    }
+
+}
+
 
 typedef void (* const tCommandFunction)(tCommandHandler *, tPacket *);
 
 tCommandFunction commands[] =
 {
     NoOperation,
-    GetName
+    GetName,
+    SetLoggerTimestep
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))

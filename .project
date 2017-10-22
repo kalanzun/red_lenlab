@@ -35,5 +35,10 @@
 			<type>1</type>
 			<locationURI>TIVAWARE_INSTALL/utils/uartstdio.c</locationURI>
 		</link>
+		<link>
+			<name>ustdlib.c</name>
+			<type>1</type>
+			<locationURI>TIVAWARE_INSTALL/utils/ustdlib.c</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
