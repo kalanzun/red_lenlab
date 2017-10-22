@@ -1,23 +1,22 @@
 /*
- * command_handler.h
+ * data_handler.h
  *
  *  Created on: 22.10.2017
  *      Author: Christoph
  */
 
-#ifndef COMMAND_HANDLER_H_
-#define COMMAND_HANDLER_H_
+#ifndef DATA_HANDLER_H_
+#define DATA_HANDLER_H_
 
-// receives USB packets and parses the commands
+// handles sending of USB packets directly or via uDMA.
 
 
 #include "packet_queue.h"
 
 
 typedef struct {
-    tPacketQueue *reply_queue;
     tPacketQueue command_queue;
-} tCommandHandler;
+} tReplyHandler;
 
 
 
@@ -26,4 +25,7 @@ void CommandHandlerInit(tCommandHandler *self);
 void CommandHandlerMain(tCommandHandler *self);
 
 
-#endif /* COMMAND_HANDLER_H_ */
+
+void DataHandlerSendMessage(const char* text);
+
+#endif /* DATA_HANDLER_H_ */

@@ -43,28 +43,27 @@ PacketQueueFull(tPacketQueue *self)
 inline tPacket*
 PacketQueueRead(tPacketQueue *self)
 {
-    tPacket *packet = 0;
+    return self->packets + self->read;
+}
 
-    if (!PacketQueueEmpty(self)) {
-        packet = self->packets + self->read;
-        self->read = (self->read + 1) % PACKET_QUEUE_SIZE;
-    }
 
-    return packet;
+inline void
+PacketQueueReadDone(tPacketQueue *self)
+{
+    self->read = (self->read + 1) % PACKET_QUEUE_SIZE;
 }
 
 
 inline tPacket*
 PacketQueueWrite(tPacketQueue *self)
 {
-    tPacket *packet = 0;
+    return self->packets + self->write;
+}
 
-    if (!PacketQueueFull(self)) {
-        packet = self->packets + self->write;
-        self->write = (self->write + 1) % PACKET_QUEUE_SIZE;
-    }
-
-    return packet;
+inline void
+PacketQueueWriteDone(tPacketQueue *self)
+{
+    self->write = (self->write + 1) % PACKET_QUEUE_SIZE;
 }
 
 

@@ -170,10 +170,11 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
             size = USBDBulkRxPacketAvailable(self->bulk_device);
             if (size > PACKET_QUEUE_PAYLOAD_SIZE) size = PACKET_QUEUE_PAYLOAD_SIZE;
             if (size) {
-                packet = PacketQueueWrite(self->command_queue);
-                if (packet) {
+                if (!PacketQueueFull(self->command_queue)) {
+                    packet = PacketQueueWrite(self->command_queue);
                     packet->size = size;
                     USBDBulkPacketRead(self->bulk_device, packet->payload, size, true);
+                    PacketQueueWriteDone(self->command_queue);
                 }
                 else {
                     DEBUG_PRINT("Error, buffer overflow in USB receive callback\n");
@@ -218,6 +219,19 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
     }
 
     return 0;
+}
+
+void
+USBDeviceMain(tUSBDevice *self)
+{
+    tPacket *packet;
+
+    if (!PacketQueueEmpty(self->reply_queue)) {
+        packet = PacketQueueRead(self->reply_queue);
+        USBDBulkPacketWrite(self->bulk_device, packet->payload, packet->size, true);
+        PacketQueueReadDone(self->reply_queue);
+    }
+
 }
 
 void

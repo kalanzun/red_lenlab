@@ -14,12 +14,20 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/uart.h"
 #include "command_handler.h"
+#include "reply_handler.h"
 #include "debug.h"
 #include "usb_device.h"
 
-tCommandHandler CommandHandler;
+tReplyHandler ReplyHandler;
+
+tCommandHandler CommandHandler =
+{
+    &ReplyHandler.reply_queue
+};
+
 tUSBDevice USBDevice = {
-    &CommandHandler.command_queue
+    &CommandHandler.command_queue,
+    &ReplyHandler.reply_queue
 };
 
 
@@ -81,6 +89,7 @@ main(void) {
     //
     // Initialize Command Handler
     //
+    ReplyHandlerInit(&ReplyHandler);
     CommandHandlerInit(&CommandHandler);
 
     //
@@ -92,6 +101,7 @@ main(void) {
     while(1)
     {
         CommandHandlerMain(&CommandHandler);
+        USBDeviceMain(&USBDevice);
     }
 
 }

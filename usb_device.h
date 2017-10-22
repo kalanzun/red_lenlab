@@ -16,6 +16,7 @@
 
 typedef struct {
     tPacketQueue *command_queue;
+    tPacketQueue *reply_queue;
     tUSBDBulkDevice *bulk_device;
 } tUSBDevice;
 
@@ -23,6 +24,8 @@ typedef struct {
 extern tUSBDevice USBDevice;
 
 void USBDeviceInit(tUSBDevice *self);
+
+void USBDeviceMain(tUSBDevice *self);
 
 
 #endif /* USB_DEVICE_H_ */
