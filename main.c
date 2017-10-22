@@ -6,51 +6,93 @@
  *      Author: Christoph Simon
  */
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/uart.h"
 #include "utils/uartstdio.h"
 
-uint8_t ui8PinData=2;
-/*
-int main(void) {
 
-    // System Clock 80 MHz
-    SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+//*****************************************************************************
+//
+// Debug-related definitions and declarations.
+//
+// Debug output is available via UART0 if DEBUG is defined during build.
+//
+//*****************************************************************************
+#ifdef DEBUG
+// Map all debug print calls to UARTprintf in debug builds.
+#define DEBUG_PRINT UARTprintf
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+#else
 
+// Compile out all debug print calls in release builds.
+#define DEBUG_PRINT while(0) ((int (*)(char *, ...))0)
+#endif
+
+
+//*****************************************************************************
+//
+// Configure the UART and its pins.  This must be called before UARTprintf().
+//
+//*****************************************************************************
+void
+ConfigureUART(void)
+{
+#ifdef DEBUG
     //
-    // Configure the appropriate pins as UART pins; in this case, PA0/PA1 are
-    // used for UART0.
+    // Enable the GPIO Peripheral used by the UART.
     //
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA))
+    {
+    }
+
+    //
+    // Configure GPIO Pins for UART mode.
+    //
+    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinConfigure(GPIO_PA1_U0TX);
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
     //
-    // Initialize the UART standard IO module, when using an 80 MHz system
-    // clock.
+    // Initialize the UART for console I/O.
     //
     UARTStdioConfig(0, 115200, 80000000);
+#endif
+}
+
+
+//*****************************************************************************
+//
+// This is the main application entry function.
+//
+//*****************************************************************************
+int
+main(void) {
+
+    //
+    // System Clock 80 MHz
+    //
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+
+    //
+    // Configure UART for DEBUG_PRINT
+    //
+    ConfigureUART();
 
     //
     // Print a string.
     //
-    UARTprintf("Hello world!\n");
+    DEBUG_PRINT("Red Firmware Init!\n");
 
     while(1)
     {
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, ui8PinData);
-        SysCtlDelay(2000000);
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0x00);
-        SysCtlDelay(2000000);
-        if(ui8PinData==8) {ui8PinData=2;} else {ui8PinData=ui8PinData*2;}
     }
 
-    return 0;
 }
-*/

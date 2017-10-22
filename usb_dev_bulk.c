@@ -97,7 +97,7 @@ unsigned char *data = "Flags used to pass commands from interrupt context to the
 unsigned char pi8Data[4096];
 static uint32_t g_ui32uDMAErrCount = 0;
 
-static tUSBDMAInstance *g_psUSBDMAInst;
+//static tUSBDMAInstance *g_psUSBDMAInst;
 
 volatile uint32_t g_ui32USBInterruptCounter;
 volatile uint8_t dma_pending;
@@ -344,6 +344,7 @@ void *pvMsgData)
 // Configure the UART and its pins.  This must be called before UARTprintf().
 //
 //*****************************************************************************
+/*
 void
 ConfigureUART(void)
 {
@@ -374,12 +375,14 @@ ConfigureUART(void)
     //
     UARTStdioConfig(0, 115200, 16000000);
 }
+*/
 
 //*****************************************************************************
 //
 // This is the main application entry function.
 //
 //*****************************************************************************
+/*
 int
 main(void)
 {
@@ -580,3 +583,4 @@ main(void)
         }
     }
 }
+*/
