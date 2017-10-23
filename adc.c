@@ -25,12 +25,13 @@
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
 #include "adc.h"
+#include "usb_device.h"
 
 
-#define ADC0_DSTBUF_SIZE 512
 
-uint16_t g_ulAdc0Buf_ping[ADC0_DSTBUF_SIZE];
-uint16_t g_ulAdc0Buf_pong[ADC0_DSTBUF_SIZE];
+uint16_t buffer[4][512];
+bool ping;
+bool pong;
 
 volatile uint32_t adc_interrupt_counter;
 
@@ -89,6 +90,29 @@ ADCInit(void)
 
 }
 
+void
+StartADCuDMAChannel(uint32_t ui32ChannelStructIndex)
+{
+    uint8_t index;
+
+    if (ui32ChannelStructIndex & UDMA_ALT_SELECT) {
+        // pong
+        pong = !pong;
+        index = 2+pong;
+    }
+    else {
+        // ping
+        ping = !ping;
+        index = ping;
+    }
+
+    uDMAChannelTransferSet(ui32ChannelStructIndex,
+            UDMA_MODE_PINGPONG,
+            (void *)(ADC0_BASE + ADC_O_SSFIFO0 + (0x20 * 0)),
+            buffer[index], 512);
+
+}
+
 //*****************************************************************************
 //
 // The interrupt handler for ADC0, sequence 0.  This interrupt will occur when
@@ -110,88 +134,15 @@ ADC0IntHandler(void)
 
     if(!uDMAChannelSizeGet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT))
     {
-        // g_ulAdcBuf_ping is ready for processing
-        // rewrite channel configuration for next transfer
-        // toggle Pin PA4
-        //g_bPingReadyADC0 = true;
-        /*
-        if(!(ui8Oszi_state == PONG_SENT))
-        {
-            errorCounter++;
-            return; // drastic debug message
-        }
-        */
-
-        //MAP_GPIOPinWrite(GPIO_PORTC_BASE, GPIO_PIN_5, GPIO_PIN_5);          // debug purposes
-
-        uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT,
-                UDMA_MODE_PINGPONG,
-                (void *)(ADC0_BASE + ADC_O_SSFIFO0 + (0x20 * 0)),
-                g_ulAdc0Buf_ping, ADC0_DSTBUF_SIZE);
-        //MAP_uDMAChannelEnable(UDMA_CHANNEL_ADC0);
-        //MAP_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7);            // debug purposes
-        //g_ui32PacketSize = create_oszi_packet();//g_ui8ADCModules, PING_DONE, ADC0_DSTBUF_SIZE+8);
-
-
-        //if(ui8Oszi_state == PONG_SENT || ui8Oszi_state == PING_SENT) // we may drop a package here
-        //    ui8Oszi_state = PING_DONE;
-
-
-        //MAP_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0);                 // debug purposes
-        //MAP_GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_PIN_0);
-        //send_packet(PING_DONE);
-        //EchoNewDataToHost(ADC0_DSTBUF_SIZE);
-        //MAP_GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0, 0);
-
-        //USBDBulkPacketWrite(pvBulkDeviceA, (uint8_t *)&g_TestBuffer+128*g_ulBadPeriphIsr1, 64,1);
-
-        //g_ulBadPeriphIsr1++;
+        SendBuffer((uint8_t *) buffer[ping]);
+        StartADCuDMAChannel(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT);
         uDMAChannelEnable(UDMA_CHANNEL_ADC0);
         adc_interrupt_counter++;
-
     }
     else if(!uDMAChannelSizeGet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT))
     {
-        // g_ulAdcBuf_pong is ready for processing
-        // rewrite channel configuration for next transfer
-        // toggle Pin PA4
-
-        /*
-        if(!(ui8Oszi_state == PING_SENT))
-        {
-            errorCounter++;
-            return; // drastic debug message
-        }
-        */
-
-        //MAP_GPIOPinWrite(GPIO_PORTC_BASE, GPIO_PIN_6, GPIO_PIN_6);                  // debug purposes
-
-        uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT,
-                UDMA_MODE_PINGPONG,
-                (void *)(ADC0_BASE + ADC_O_SSFIFO0 + (0x20 * 0)),
-                g_ulAdc0Buf_pong, ADC0_DSTBUF_SIZE);
-        //MAP_uDMAChannelEnable(UDMA_CHANNEL_ADC0);
-        //MAP_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, GPIO_PIN_7);            // debug purposes
-        //g_ui32PacketSize = create_oszi_packet();//g_ui8ADCModules, PONG_DONE, ADC0_DSTBUF_SIZE+8);
-        //if(ui8Oszi_state == PING_SENT || ui8Oszi_state == PONG_SENT) // we may drop a package here
-        //    ui8Oszi_state = PONG_DONE;
-        //send_packet(PONG_DONE);
-        //MAP_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_7, 0);
-
-        /*if(g_ulBadPeriphIsr2 == 8)
-        {
-            g_ulBadPeriphIsr2 = 0;
-            g_ulBadPeriphIsr1 = 0;
-            USBDBulkPacketWrite(pvBulkDeviceA, (uint8_t *)&g_TestBuffer+128*g_ulBadPeriphIsr2+64, 63,1);
-        }
-        else
-        {
-            USBDBulkPacketWrite(pvBulkDeviceA, (uint8_t *)&g_TestBuffer+128*g_ulBadPeriphIsr2+64, 64,1);
-        }*/
-
-        //g_ulBadPeriphIsr2++;
-
-        //USBBufferDataWritten(&g_sTxBufferBulk, 92);
+        SendBuffer((uint8_t *) buffer[2+pong]);
+        StartADCuDMAChannel(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT);
         uDMAChannelEnable(UDMA_CHANNEL_ADC0);
         adc_interrupt_counter++;
     }
@@ -222,16 +173,11 @@ ADCStart(void)
              UDMA_SIZE_16 | UDMA_SRC_INC_NONE |
              UDMA_DST_INC_16 | UDMA_ARB_4);
 
-     uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT,
-             UDMA_MODE_PINGPONG,
-             (void *)(ADC0_BASE + ADC_O_SSFIFO0 + (0x20 * 0)),
-             g_ulAdc0Buf_ping, ADC0_DSTBUF_SIZE);
+     ping = 0;
+     pong = 0;
 
-
-     uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT,
-             UDMA_MODE_PINGPONG,
-             (void *)(ADC0_BASE + ADC_O_SSFIFO0 + (0x20 * 0)),
-             g_ulAdc0Buf_pong, ADC0_DSTBUF_SIZE);
+     StartADCuDMAChannel(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT);
+     StartADCuDMAChannel(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT);
 
      uDMAChannelEnable(UDMA_CHANNEL_ADC0);
         ADCSequenceEnable(ADC0_BASE, 0);

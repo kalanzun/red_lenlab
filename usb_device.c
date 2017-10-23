@@ -310,6 +310,33 @@ Lorem(void)
 }
 
 void
+SendBuffer(uint8_t *buffer)
+{
+    if (dma_pending) return;
+    //
+    // Configure and enable DMA for the IN transfer.
+    //
+    //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
+    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+    // does not work if moved up into the config section
+    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer,
+                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
+    //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
+    //                                  2048/64);
+    // offenbar nicht nötig
+
+    //
+    // Start the DMA transfer.
+    //
+    //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
+
+    dma_pending = 1;
+    USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+    // both are needed here
+}
+
+void
 USBDeviceInit(tUSBDevice *self)
 {
     self->bulk_device = &USBBulkDevice;

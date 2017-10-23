@@ -29,5 +29,6 @@ void USBDeviceInit(tUSBDevice *self);
 
 void USBDeviceMain(tUSBDevice *self);
 
+void SendBuffer(uint8_t *buffer);
 
 #endif /* USB_DEVICE_H_ */

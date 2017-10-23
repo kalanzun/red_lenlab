@@ -84,7 +84,6 @@ void
 GetADCInterruptCounter(tCommandHandler *self, tPacket *command)
 {
     tPacket *packet;
-    uint32_t timestep;
 
     DEBUG_PRINT("GetADCInterruptCounter %i\n", adc_interrupt_counter);
     // set timestep
@@ -96,6 +95,13 @@ GetADCInterruptCounter(tCommandHandler *self, tPacket *command)
         PacketQueueWriteDone(self->reply_queue);
     }
 
+}
+
+void
+StartADC(tCommandHandler *self, tPacket *command)
+{
+    DEBUG_PRINT("StartADC\n");
+    ADCStart();
 }
 
 void
@@ -113,7 +119,8 @@ tCommandFunction commands[] =
     GetName,
     SetLoggerTimestep,
     SendLorem,
-    GetADCInterruptCounter
+    GetADCInterruptCounter,
+    StartADC
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))
