@@ -239,15 +239,6 @@ USBDeviceInit(tUSBDevice *self)
 {
     self->bulk_device = &USBBulkDevice;
 
-    //
-    // Enable the GPIO peripheral used for USB, and configure the USB
-    // pins.
-    //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD))
-    {
-    }
-
     GPIOPinTypeUSBAnalog(GPIO_PORTD_BASE, GPIO_PIN_4 | GPIO_PIN_5);
 
     //

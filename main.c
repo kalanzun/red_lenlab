@@ -17,6 +17,7 @@
 #include "reply_handler.h"
 #include "debug.h"
 #include "usb_device.h"
+#include "peripherals.h"
 
 tReplyHandler ReplyHandler;
 
@@ -40,14 +41,6 @@ inline void
 ConfigureUART(void)
 {
 #ifdef DEBUG
-    //
-    // Enable the GPIO Peripheral used by the UART.
-    //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA))
-    {
-    }
-
     //
     // Configure GPIO Pins for UART mode.
     //
@@ -77,6 +70,11 @@ main(void) {
     SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
 
     //
+    // GPIO Pin Configuration
+    //
+    ConfigurePins();
+
+    //
     // Configure UART for DEBUG_PRINT
     //
     ConfigureUART();
@@ -87,7 +85,7 @@ main(void) {
     USBDeviceInit(&USBDevice);
 
     //
-    // Initialize Command Handler
+    // Initialize Command and Reply Handler
     //
     ReplyHandlerInit(&ReplyHandler);
     CommandHandlerInit(&CommandHandler);
