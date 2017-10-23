@@ -21,6 +21,7 @@
 #include "debug.h"
 #include "usb_device.h"
 #include "peripherals.h"
+#include "adc.h"
 
 tReplyHandler ReplyHandler;
 
@@ -129,6 +130,8 @@ main(void) {
     //
     USBDeviceInit(&USBDevice);
 
+    ADCInit();
+
     //
     // Initialize Command and Reply Handler
     //
@@ -140,6 +143,8 @@ main(void) {
     //
     DEBUG_PRINT("Red Firmware\n");
     DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
+
+    ADCStart();
 
     while(1)
     {

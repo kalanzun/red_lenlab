@@ -12,6 +12,7 @@
 #include "command_handler.h"
 #include "reply_handler.h"
 #include "usb_device.h"
+#include "adc.h"
 
 
 void
@@ -79,6 +80,23 @@ SetLoggerTimestep(tCommandHandler *self, tPacket *command)
     }
 
 }
+void
+GetADCInterruptCounter(tCommandHandler *self, tPacket *command)
+{
+    tPacket *packet;
+    uint32_t timestep;
+
+    DEBUG_PRINT("GetADCInterruptCounter %i\n", adc_interrupt_counter);
+    // set timestep
+    if (!PacketQueueFull(self->reply_queue)) {
+        packet = PacketQueueWrite(self->reply_queue);
+        packet->payload[0] = 2; // Reply Code for OK
+        packet->size = usnprintf((char *) packet->payload+1, PACKET_QUEUE_PAYLOAD_SIZE-1, "GetADCInterruptCounter %i", adc_interrupt_counter) + 1 + 1; // reply code and string terminator
+
+        PacketQueueWriteDone(self->reply_queue);
+    }
+
+}
 
 void
 SendLorem(tCommandHandler *self, tPacket *command)
@@ -94,7 +112,8 @@ tCommandFunction commands[] =
     NoOperation,
     GetName,
     SetLoggerTimestep,
-    SendLorem
+    SendLorem,
+    GetADCInterruptCounter
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))
