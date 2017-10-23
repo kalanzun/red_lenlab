@@ -10,6 +10,8 @@
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
+#include "driverlib/usb.h"
+#include "driverlib/udma.h"
 #include "usblib/usb-ids.h"
 #include "usb_device.h"
 #include "command_handler.h"
@@ -20,6 +22,9 @@
 #include "inc/hw_types.h"
 #include "usblib/usb-ids.h"
 */
+
+uint8_t lorem_data[] = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis a";
+volatile uint8_t dma_pending;
 
 //*****************************************************************************
 //
@@ -221,6 +226,49 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
     return 0;
 }
 
+//*****************************************************************************
+//
+// The interrupt handler for uDMA errors.  This interrupt will occur if the
+// uDMA encounters a bus error while trying to perform a transfer.  This
+// handler just increments a counter if an error occurs.
+//
+//*****************************************************************************
+void
+uDMAErrorHandler(void)
+{
+    uint32_t ui32Status;
+
+    //
+    // Check for uDMA error bit
+    //
+    ui32Status = uDMAErrorStatusGet();
+
+    //
+    // If there is a uDMA error, then clear the error and increment
+    // the error counter.
+    //
+    if(ui32Status)
+    {
+        uDMAErrorStatusClear();
+        while (1) {};
+    }
+}
+
+void USBIntHandler(void)
+{
+    if((dma_pending) &&
+    (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
+    {
+    //
+    // Handle the DMA complete case.
+    //
+        dma_pending=0;
+    }
+    else
+    {
+        USB0DeviceIntHandler();
+    }
+}
 void
 USBDeviceMain(tUSBDevice *self)
 {
@@ -231,6 +279,33 @@ USBDeviceMain(tUSBDevice *self)
         USBDBulkPacketWrite(self->bulk_device, packet->payload, packet->size, true);
         PacketQueueReadDone(self->reply_queue);
     }
+
+}
+
+void
+Lorem(void)
+{
+    //
+    // Configure and enable DMA for the IN transfer.
+    //
+    //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
+    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+    // does not work if moved up into the config section
+    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, lorem_data,
+                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
+    //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
+    //                                  2048/64);
+    // offenbar nicht nötig
+
+    //
+    // Start the DMA transfer.
+    //
+    //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
+
+    dma_pending = 1;
+    USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+    // both are needed here
 
 }
 
@@ -255,7 +330,6 @@ USBDeviceInit(tUSBDevice *self)
     //
     // Configure the DMA for the IN endpoint.
     //
-    /*
     //ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
     USBEndpointDMAChannel(USB0_BASE, USB_EP_1, UDMA_CHANNEL_USBEP1TX);
     uDMAChannelAttributeDisable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_ALL);
@@ -269,6 +343,4 @@ USBDeviceInit(tUSBDevice *self)
     //USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
 
     //USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8INDMA, 16);
-    */
-
 }

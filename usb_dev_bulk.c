@@ -205,59 +205,6 @@ SysTickIntHandler(void)
 
 //*****************************************************************************
 //
-// The interrupt handler for uDMA errors.  This interrupt will occur if the
-// uDMA encounters a bus error while trying to perform a transfer.  This
-// handler just increments a counter if an error occurs.
-//
-//*****************************************************************************
-void
-uDMAErrorHandler(void)
-{
-    uint32_t ui32Status;
-
-    //
-    // Check for uDMA error bit
-    //
-    ui32Status = uDMAErrorStatusGet();
-
-    //
-    // If there is a uDMA error, then clear the error and increment
-    // the error counter.
-    //
-    if(ui32Status)
-    {
-        uDMAErrorStatusClear();
-        g_ui32uDMAErrCount++;
-    }
-}
-
-void USBIntHandler(void)
-{
-    if((dma_pending) &&
-    (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
-    {
-    //
-    // Handle the DMA complete case.
-    //
-        dma_pending=0;
-        g_ui32USBInterruptCounter++;
-
-        USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
-        uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, pi8Data,
-                               (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
-        dma_pending = 1;
-        USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-        uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
-
-
-    }
-    else
-    {
-        USB0DeviceIntHandler();
-    }
-}
-//*****************************************************************************
-//
 // Receive new data and echo it back to the host.
 //
 // \param psDevice points to the instance data for the device whose data is to

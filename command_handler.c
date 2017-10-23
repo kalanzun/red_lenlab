@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "command_handler.h"
 #include "reply_handler.h"
+#include "usb_device.h"
 
 
 void
@@ -79,6 +80,12 @@ SetLoggerTimestep(tCommandHandler *self, tPacket *command)
 
 }
 
+void
+SendLorem(tCommandHandler *self, tPacket *command)
+{
+    Lorem();
+}
+
 
 typedef void (* const tCommandFunction)(tCommandHandler *, tPacket *);
 
@@ -86,7 +93,8 @@ tCommandFunction commands[] =
 {
     NoOperation,
     GetName,
-    SetLoggerTimestep
+    SetLoggerTimestep,
+    SendLorem
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))

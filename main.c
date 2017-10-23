@@ -9,10 +9,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "inc/hw_memmap.h"
+#include "inc/hw_ints.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/uart.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/udma.h"
 #include "command_handler.h"
 #include "reply_handler.h"
 #include "debug.h"
@@ -31,6 +34,21 @@ tUSBDevice USBDevice = {
     &ReplyHandler.reply_queue
 };
 
+//*****************************************************************************
+//
+// The control table used by the uDMA controller.  This table must be aligned
+// to a 1024 byte boundary.
+//
+//*****************************************************************************
+#if defined(ewarm)
+#pragma data_alignment=1024
+uint8_t ui8ControlTable[1024];
+#elif defined(ccs)
+#pragma DATA_ALIGN(ui8ControlTable, 1024)
+uint8_t ui8ControlTable[1024];
+#else
+uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
+#endif
 
 //*****************************************************************************
 //
@@ -56,6 +74,28 @@ ConfigureUART(void)
 }
 
 
+inline void
+ConfigureuDMA(void)
+{
+    //
+    // Enable the uDMA controller error interrupt.  This interrupt will occur
+    // if there is a bus error during a transfer.
+    //
+    IntEnable(INT_UDMAERR);
+
+    //
+    // Enable the uDMA controller.
+    //
+    uDMAEnable();
+
+    //
+    // Point at the control table to use for channel control structures.
+    //
+    uDMAControlBaseSet(ui8ControlTable);
+
+}
+
+
 //*****************************************************************************
 //
 // This is the main application entry function.
@@ -78,6 +118,11 @@ main(void) {
     // Configure UART for DEBUG_PRINT
     //
     ConfigureUART();
+
+    //
+    // Configure uDMA
+    //
+    ConfigureuDMA();
 
     //
     // Configure USB Device

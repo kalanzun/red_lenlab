@@ -23,6 +23,8 @@ typedef struct {
 
 extern tUSBDevice USBDevice;
 
+void Lorem(void);
+
 void USBDeviceInit(tUSBDevice *self);
 
 void USBDeviceMain(tUSBDevice *self);
