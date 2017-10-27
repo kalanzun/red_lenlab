@@ -18,22 +18,13 @@
 #include "driverlib/udma.h"
 #include "command_handler.h"
 #include "reply_handler.h"
+#include "data_handler.h"
 #include "debug.h"
 #include "usb_device.h"
 #include "peripherals.h"
 #include "adc.h"
 
-tReplyHandler ReplyHandler;
 
-tCommandHandler CommandHandler =
-{
-    &ReplyHandler.reply_queue
-};
-
-tUSBDevice USBDevice = {
-    &CommandHandler.command_queue,
-    &ReplyHandler.reply_queue
-};
 
 //*****************************************************************************
 //
@@ -50,6 +41,24 @@ uint8_t ui8ControlTable[1024];
 #else
 uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
 #endif
+
+
+//*****************************************************************************
+//
+// The error routine that is called if an ASSERT fails. (driverlib/debug.h)
+//
+//*****************************************************************************
+#ifdef DEBUG
+void
+__error__(char *pcFilename, uint32_t ui32Line)
+{
+    UARTprintf("Error at line %d of %s\n", ui32Line, pcFilename);
+    while(1)
+    {
+    }
+}
+#endif
+
 
 //*****************************************************************************
 //
@@ -104,7 +113,6 @@ ConfigureuDMA(void)
 //*****************************************************************************
 int
 main(void) {
-
     //
     // System Clock 80 MHz
     //
@@ -128,15 +136,19 @@ main(void) {
     //
     // Configure USB Device
     //
-    USBDeviceInit(&USBDevice);
+    USBDeviceInit();
 
+    //
+    // Configure ADC
+    //
     ADCInit();
 
     //
-    // Initialize Command and Reply Handler
+    // Initialize Command, Data and Reply Handler
     //
-    ReplyHandlerInit(&ReplyHandler);
-    CommandHandlerInit(&CommandHandler);
+    CommandHandlerInit();
+    DataHandlerInit();
+    ReplyHandlerInit();
 
     //
     // Print a string.
@@ -148,8 +160,11 @@ main(void) {
 
     while(1)
     {
-        CommandHandlerMain(&CommandHandler);
-        USBDeviceMain(&USBDevice);
+        CommandHandlerMain();
+        DataHandlerMain();
+        ReplyHandlerMain();
+        USBDeviceMain();
+        ADCMain();
     }
 
 }

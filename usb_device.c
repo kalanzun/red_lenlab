@@ -12,9 +12,12 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
+#include "driverlib/debug.h"
 #include "usblib/usb-ids.h"
 #include "usb_device.h"
 #include "command_handler.h"
+#include "data_handler.h"
+#include "reply_handler.h"
 #include "debug.h"
 
 /*
@@ -23,8 +26,9 @@
 #include "usblib/usb-ids.h"
 */
 
-uint8_t lorem_data[] = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis a";
-volatile uint8_t dma_pending;
+
+//uint8_t lorem_data[] = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis a";
+
 
 //*****************************************************************************
 //
@@ -140,26 +144,26 @@ uint32_t YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_
 uint32_t YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData);
 
 // USBDBulkInit does not accept a const tUSBDBulkDevice *
-tUSBDBulkDevice USBBulkDevice = {
+tUSBDBulkDevice bulk_device = {
     USB_VID_TI_1CBE,
     USB_PID_BULK,
     500, // mA
     USB_CONF_ATTR_SELF_PWR,
     YourUSBReceiveEventCallback,
-    &USBDevice,
+    0,
     YourUSBTransmitEventCallback,
-    &USBDevice,
+    0,
     g_ppui8StringDescriptors,
     NUM_STRING_DESCRIPTORS
 };
 
+tUSBDevice usb_device;
 
 uint32_t
 YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
-    tUSBDevice *self;
     uint32_t size;
-    tPacket *packet;
+    tEvent *event;
 
     //
     // Which event have we been sent?
@@ -171,19 +175,17 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         //
         case USB_EVENT_RX_AVAILABLE:
         {
-            self = (tUSBDevice*) pvCBData;
-            size = USBDBulkRxPacketAvailable(self->bulk_device);
-            if (size > PACKET_QUEUE_PAYLOAD_SIZE) size = PACKET_QUEUE_PAYLOAD_SIZE;
+            size = USBDBulkRxPacketAvailable(&bulk_device);
+            if (size > EVENT_PAYLOAD_LENGTH) size = EVENT_PAYLOAD_LENGTH;
             if (size) {
-                if (!PacketQueueFull(self->command_queue)) {
-                    packet = PacketQueueWrite(self->command_queue);
-                    packet->size = size;
-                    USBDBulkPacketRead(self->bulk_device, packet->payload, size, true);
-                    PacketQueueWriteDone(self->command_queue);
+                if (!QueueFull(&command_handler.command_queue)) {
+                    event = QueueAcquire(&command_handler.command_queue);
+                    event->length = size;
+                    USBDBulkPacketRead(&bulk_device, event->payload, size, true);
+                    QueueWrite(&command_handler.command_queue);
                 }
                 else {
-                    DEBUG_PRINT("Error, buffer overflow in USB receive callback\n");
-                    while (1) {}; // TODO Implement Buffer Overflow Handling
+                    ASSERT(0);
                 }
             }
             return size;
@@ -226,6 +228,7 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
     return 0;
 }
 
+
 //*****************************************************************************
 //
 // The interrupt handler for uDMA errors.  This interrupt will occur if the
@@ -254,34 +257,26 @@ uDMAErrorHandler(void)
     }
 }
 
+
 void USBIntHandler(void)
 {
-    if((dma_pending) &&
+    if((usb_device.dma_pending) &&
     (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
     {
     //
     // Handle the DMA complete case.
     //
-        dma_pending=0;
+        DataQueueRelease(&data_handler.data_queue);
+        usb_device.dma_pending=0;
     }
     else
     {
         USB0DeviceIntHandler();
     }
 }
-void
-USBDeviceMain(tUSBDevice *self)
-{
-    tPacket *packet;
 
-    if (!PacketQueueEmpty(self->reply_queue)) {
-        packet = PacketQueueRead(self->reply_queue);
-        USBDBulkPacketWrite(self->bulk_device, packet->payload, packet->size, true);
-        PacketQueueReadDone(self->reply_queue);
-    }
 
-}
-
+/*
 void
 Lorem(void)
 {
@@ -308,19 +303,20 @@ Lorem(void)
     // both are needed here
 
 }
+*/
 
-void
-SendBuffer(uint8_t *buffer)
+inline void
+USBDeviceStartuDMA(uint8_t *payload)
 {
-    if (dma_pending) return;
+    if (usb_device.dma_pending) return;
     //
     // Configure and enable DMA for the IN transfer.
     //
     //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
     USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
     // does not work if moved up into the config section
-    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer,
-                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
+    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, payload,
+                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), DATA_PAYLOAD_LENGTH);
     //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
     //                                  2048/64);
     // offenbar nicht nötig
@@ -330,18 +326,46 @@ SendBuffer(uint8_t *buffer)
     //
     //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
 
-    dma_pending = 1;
+    usb_device.dma_pending = 1;
     USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
     uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
     // both are needed here
 }
 
-void
-USBDeviceInit(tUSBDevice *self)
-{
-    self->bulk_device = &USBBulkDevice;
 
+void
+USBDeviceMain()
+{
+    tEvent *event;
+    tDataEvent *data_event;
+
+    if (!QueueEmpty(&reply_handler.reply_queue)) {
+        event = QueueRead(&reply_handler.reply_queue);
+        USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
+        QueueRelease(&reply_handler.reply_queue);
+    }
+
+    if (!usb_device.dma_pending && !DataQueueEmpty(&data_handler.data_queue)) {
+        data_event = DataQueueRead(&data_handler.data_queue);
+        USBDeviceStartuDMA(data_event->payload);
+        QueueRelease(&reply_handler.reply_queue);
+    }
+}
+
+
+inline void
+ConfigureUSBDevice(void)
+{
     GPIOPinTypeUSBAnalog(GPIO_PORTD_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+}
+
+
+void
+USBDeviceInit(void)
+{
+    usb_device.dma_pending = 0;
+
+    ConfigureUSBDevice();
 
     //
     // Set the USB stack mode to Device mode with VBUS monitoring.
@@ -352,7 +376,7 @@ USBDeviceInit(tUSBDevice *self)
     // Pass our device information to the USB library and place the device
     // on the bus.
     //
-    USBDBulkInit(0, self->bulk_device);
+    USBDBulkInit(0, &bulk_device);
 
     //
     // Configure the DMA for the IN endpoint.

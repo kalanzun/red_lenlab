@@ -1,26 +1,28 @@
 /*
  * reply_handler.c
  *
- *  Created on: 22.10.2017
+ *  Created on: 27.10.2017
  *      Author: Christoph
  */
 
-#include <stdbool.h>
-#include <stdint.h>
-#include "debug.h"
+
 #include "reply_handler.h"
 
 
+tReplyHandler reply_handler;
+
+
 void
-ReplyHandlerInit(tReplyHandler *self)
+ReplyHandlerMain(void)
 {
-    PacketQueueInit(&self->reply_queue);
+
 }
 
 
 void
-ReplyHandlerMain(tReplyHandler *self)
+ReplyHandlerInit(void)
 {
+    QueueInit(&reply_handler.reply_queue);
 }
 
 

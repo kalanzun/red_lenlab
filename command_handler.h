@@ -11,19 +11,21 @@
 // receives USB packets and parses the commands
 
 
-#include "packet_queue.h"
+#include "event_queue.h"
 
 
 typedef struct {
-    tPacketQueue *reply_queue;
-    tPacketQueue command_queue;
+    tQueue command_queue;
 } tCommandHandler;
 
 
+// Singleton
+extern tCommandHandler command_handler;
 
-void CommandHandlerInit(tCommandHandler *self);
 
-void CommandHandlerMain(tCommandHandler *self);
+void CommandHandlerInit(void);
+
+void CommandHandlerMain(void);
 
 
 #endif /* COMMAND_HANDLER_H_ */

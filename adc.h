@@ -9,11 +9,23 @@
 #define ADC_H_
 
 
-extern volatile uint32_t adc_interrupt_counter;
+#include "adc_queue.h"
 
-void ADCInit(void);
+
+typedef struct ADC {
+    tADCQueue adc_queue;
+} tADC;
+
+
+// Singleton
+extern tADC adc;
+
 
 void ADCStart(void);
+
+void ADCMain(void);
+
+void ADCInit(void);
 
 
 #endif /* ADC_H_ */

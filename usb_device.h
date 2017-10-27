@@ -11,24 +11,21 @@
 #include "usblib/usblib.h"
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdbulk.h"
-#include "packet_queue.h"
+#include "event_queue.h"
 
 
 typedef struct {
-    tPacketQueue *command_queue;
-    tPacketQueue *reply_queue;
-    tUSBDBulkDevice *bulk_device;
+    volatile uint8_t dma_pending;
 } tUSBDevice;
 
 
 extern tUSBDevice USBDevice;
 
-void Lorem(void);
 
-void USBDeviceInit(tUSBDevice *self);
+//void SendBuffer(uint8_t *buffer);
 
-void USBDeviceMain(tUSBDevice *self);
+void USBDeviceMain(void);
 
-void SendBuffer(uint8_t *buffer);
+void USBDeviceInit(void);
 
 #endif /* USB_DEVICE_H_ */

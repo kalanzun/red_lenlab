@@ -10,24 +10,22 @@
 #include "utils/ustdlib.h"
 #include "debug.h"
 #include "command_handler.h"
-#include "reply_handler.h"
 #include "usb_device.h"
 #include "adc.h"
 
 
-void
-CommandHandlerInit(tCommandHandler *self)
-{
-    PacketQueueInit(&self->command_queue);
-}
+tCommandHandler command_handler;
+
 
 void
-NoOperation (tCommandHandler *self, tPacket *command)
+NoOperation(tEvent *event)
 {
 
 }
 
-#define min(a, b) (((a) < (b))? (a) : (b))
+//#define min(a, b) (((a) < (b))? (a) : (b))
+
+/*
 
 inline void
 SendMessage(tPacketQueue *queue, const uint8_t data[], uint32_t size)
@@ -103,41 +101,45 @@ StartADC(tCommandHandler *self, tPacket *command)
     DEBUG_PRINT("StartADC\n");
     ADCStart();
 }
-
+*/
+/*
 void
 SendLorem(tCommandHandler *self, tPacket *command)
 {
     Lorem();
 }
+*/
 
 
-typedef void (* const tCommandFunction)(tCommandHandler *, tPacket *);
+typedef void (* const tCommandFunction)(tEvent *);
 
 tCommandFunction commands[] =
 {
-    NoOperation,
-    GetName,
-    SetLoggerTimestep,
-    SendLorem,
-    GetADCInterruptCounter,
-    StartADC
+    NoOperation
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))
 
 
 void
-CommandHandlerMain(tCommandHandler *self)
+CommandHandlerMain(void)
 {
-    tPacket *packet;
+    tEvent *event;
     uint8_t command;
 
-    if (!PacketQueueEmpty(&self->command_queue)) {
-        packet = PacketQueueRead(&self->command_queue);
-        command = packet->payload[0];
+    if (!QueueEmpty(&command_handler.command_queue)) {
+        event = QueueRead(&command_handler.command_queue);
+        command = event->payload[0];
         if (command < NUM_COMMANDS)
-            commands[command](self, packet);
-        PacketQueueReadDone(&self->command_queue);
+            commands[command](event);
+        QueueRelease(&command_handler.command_queue);
     }
-
 }
+
+
+void
+CommandHandlerInit(void)
+{
+    QueueInit(&command_handler.command_queue);
+}
+
