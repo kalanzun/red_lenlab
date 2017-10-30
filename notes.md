@@ -111,3 +111,10 @@ Events and queues are therefore component dependant types
 ### Data flow
 
 A DMA channel reads data from the ADC and the ADC component appends it to an ADCQueue. The DataHandler reads ADCQueue in the main context and copies the data to a DataQueue. It may apply compression. USB reads the DataQueue and starts a DMA transfer for each event.
+
+## Testing
+
+A component produces know test data and fills the ADC queue with it. DataHandler processes the data. Another component reads the DataQueue with higher priority than the USBDevice. It test the data.
+
+Test runs for a fixed time, is started by command handler, and sends back a result through reply handler.
+
