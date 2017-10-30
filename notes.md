@@ -112,6 +112,24 @@ Events and queues are therefore component dependant types
 
 A DMA channel reads data from the ADC and the ADC component appends it to an ADCQueue. The DataHandler reads ADCQueue in the main context and copies the data to a DataQueue. It may apply compression. USB reads the DataQueue and starts a DMA transfer for each event.
 
+## Protocol
+
+4 bytes header, up to 60 bytes data for commands, up to 1020 bytes data for replies.
+
+Note: 64 bytes is a single USB packet, 1024 bytes is the maximum transfer size at once with uDMA.
+
+### Command header
+
+* 1 byte command code
+* 1 byte command variant
+* 2 bytes command specifc header information, i.e. length of command packet
+
+### Reply header
+
+* 1 byte reply code
+* 1 byte reply variant (i.e. encoding of data)
+* 2 bytes reply specific header information, i.e. length of reply packet
+
 ## Testing
 
 A component produces know test data and fills the ADC queue with it. DataHandler processes the data. Another component reads the DataQueue with higher priority than the USBDevice. It test the data.
