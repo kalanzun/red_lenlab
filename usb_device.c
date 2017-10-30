@@ -308,7 +308,8 @@ Lorem(void)
 inline void
 USBDeviceStartuDMA(uint8_t *payload)
 {
-    if (usb_device.dma_pending) return;
+    ASSERT(!usb_device.dma_pending);
+    usb_device.dma_pending = 1;
     //
     // Configure and enable DMA for the IN transfer.
     //
@@ -326,7 +327,6 @@ USBDeviceStartuDMA(uint8_t *payload)
     //
     //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
 
-    usb_device.dma_pending = 1;
     USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
     uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
     // both are needed here
@@ -339,16 +339,17 @@ USBDeviceMain()
     tEvent *event;
     tDataEvent *data_event;
 
-    if (!QueueEmpty(&reply_handler.reply_queue)) {
-        event = QueueRead(&reply_handler.reply_queue);
-        USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
-        QueueRelease(&reply_handler.reply_queue);
-    }
-
-    if (!usb_device.dma_pending && !DataQueueEmpty(&data_handler.data_queue)) {
-        data_event = DataQueueRead(&data_handler.data_queue);
-        USBDeviceStartuDMA(data_event->payload);
-        QueueRelease(&reply_handler.reply_queue);
+    if (!usb_device.dma_pending)
+    {
+        if (!QueueEmpty(&reply_handler.reply_queue)) {
+            event = QueueRead(&reply_handler.reply_queue);
+            USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
+            QueueRelease(&reply_handler.reply_queue);
+        }
+        else if (!DataQueueEmpty(&data_handler.data_queue)) {
+            data_event = DataQueueRead(&data_handler.data_queue);
+            USBDeviceStartuDMA(data_event->payload);
+        }
     }
 }
 
