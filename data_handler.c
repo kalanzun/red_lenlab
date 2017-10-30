@@ -22,6 +22,9 @@ DataHandlerMain(void)
     tDataEvent *data_event;
     uint8_t *buffer;
     uint32_t i, b;
+    uint16_t current_value;
+    int32_t current_delta;
+    int8_t delta;
 
     if(!ADCQueueEmpty(&adc.adc_queue))
     {
@@ -58,6 +61,7 @@ DataHandlerMain(void)
             }
         }
 #endif
+#if 0
         // compress 2 uint16_t with 12 bit values into 3 uint8_t
         b = 0;
 
@@ -91,6 +95,51 @@ DataHandlerMain(void)
                 b = 0;
             }
         }
+        ADCQueueRelease(&adc.adc_queue);
+#endif
+        // compress uint16_t with 12 bit values into uint8_t with deltas
+        b = 0;
+
+        // ADC payload is uint16_t, but data payload is uint8_t.
+        ASSERT(DATA_PAYLOAD_LENGTH == 1024);
+        ASSERT(ADC_PAYLOAD_LENGTH == 1021);
+        // 1020 bytes payload, 4 bytes header, header consumes first ADC item
+
+        // This copy function sends all the data of one ADC event to the data queue at once.
+
+        current_value = adc_event->payload[0];
+
+        ASSERT(!DataQueueFull(&data_handler.data_queue));
+        data_event = DataQueueAcquire(&data_handler.data_queue);
+        buffer = data_event->payload;
+        buffer[b++] = 0x01; // adc data event
+        buffer[b++] = 0x02; // compression algorithm 2
+        *((uint16_t *) buffer + b) = current_value; // start value
+        b += 2;
+
+        for (i = 1; i < ADC_PAYLOAD_LENGTH; i++)
+        {
+            current_delta = adc_event->payload[i] - current_value;
+            if (current_delta < 0)
+            {
+
+                if (current_delta < -127) // this is not -128, the max. slope shall be identical for rising and falling edges
+                    delta = -127;
+                else
+                    delta = 0x80 | (~(current_delta & 0x7F) + 1);
+            }
+            else
+            {
+                if (current_delta > 127)
+                    delta = 127;
+                else
+                    delta = current_delta & 0x7F;
+            }
+            current_value += delta;
+            buffer[b++] = (uint8_t) delta;
+        }
+
+        DataQueueWrite(&data_handler.data_queue);
         ADCQueueRelease(&adc.adc_queue);
 
     }
