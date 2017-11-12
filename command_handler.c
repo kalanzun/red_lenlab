@@ -8,10 +8,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "utils/ustdlib.h"
+#include "driverlib/debug.h"
 #include "debug.h"
 #include "command_handler.h"
 #include "usb_device.h"
 #include "adc.h"
+#include "reply_handler.h"
+#include "timer.h"
+#include "logger.h"
 
 
 tCommandHandler command_handler;
@@ -21,6 +25,67 @@ void
 NoOperation(tEvent *event)
 {
 
+}
+
+const uint8_t name[] = "KIT Lenlab Red Firmware version 0.1 year 2017";
+
+#define NAME_SIZE (sizeof(name))
+
+void
+getName(tEvent *event)
+{
+    int i;
+    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+
+    reply->payload[0] = event->payload[0];
+    reply->payload[1] = REPLY_TYPE_STRING;
+    ASSERT(4 + NAME_SIZE + 1 < EVENT_PAYLOAD_LENGTH);
+    *((uint16_t *) (reply->payload + 2)) = NAME_SIZE;
+    for (i = 0; i < NAME_SIZE; i++)
+        reply->payload[4+i] = name[i];
+    reply->payload[i] = 0;
+    reply->length = 4 + NAME_SIZE + 1;
+
+    QueueWrite(&reply_handler.reply_queue);
+}
+
+void
+acquireLogger(tEvent *event)
+{
+    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+
+    reply->payload[0] = event->payload[0];
+    reply->payload[1] = REPLY_TYPE_BOOL;
+    reply->payload[4] = LoggerAcquire();
+    reply->length = 5;
+
+    QueueWrite(&reply_handler.reply_queue);
+
+}
+
+void
+releaseLogger(tEvent *event)
+{
+    LoggerRelease();
+}
+
+void
+setLoggerInterval(tEvent *event)
+{
+    uint32_t value = *(uint32_t *) (event->payload + 4);
+    LoggerSetInterval(value);
+}
+
+void
+startLogger(tEvent *event)
+{
+    LoggerStart();
+}
+
+void
+stopLogger(tEvent *event)
+{
+    LoggerStop();
 }
 
 //#define min(a, b) (((a) < (b))? (a) : (b))
@@ -43,10 +108,6 @@ SendMessage(tPacketQueue *queue, const uint8_t data[], uint32_t size)
     PacketQueueWriteDone(queue);
 
 }
-
-const uint8_t name[] = "KIT Lenlab Red Firmware version 0.1 year 2017";
-
-#define NAME_SIZE (sizeof(name))
 
 void
 GetName (tCommandHandler *self, tPacket *command)
@@ -115,7 +176,13 @@ typedef void (* const tCommandFunction)(tEvent *);
 
 tCommandFunction commands[] =
 {
-    NoOperation
+    NoOperation,
+    getName,
+    acquireLogger,
+    releaseLogger,
+    setLoggerInterval,
+    startLogger,
+    stopLogger
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))

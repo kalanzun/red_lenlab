@@ -27,6 +27,7 @@ typedef struct ADCQueue {
     tADCEvent queue[ADC_QUEUE_LENGTH];
     uint32_t read;
     uint32_t write;
+    uint32_t acquire;
 } tADCQueue;
 
 
@@ -40,14 +41,16 @@ ADCQueueEmpty(tADCQueue *self)
 inline bool
 ADCQueueFull(tADCQueue *self)
 {
-    return (self->write+1) % ADC_QUEUE_LENGTH == self->read;
+    return (self->acquire+1) % ADC_QUEUE_LENGTH == self->read;
 }
 
 
 inline tADCEvent*
 ADCQueueAcquire(tADCQueue *self)
 {
-    return self->queue + self->write;
+    tADCEvent *event = self->queue + self->acquire;
+    self->acquire = (self->acquire + 1) % ADC_QUEUE_LENGTH;
+    return event;
 }
 
 
@@ -77,6 +80,7 @@ ADCQueueInit(tADCQueue *self)
 {
     self->read = 0;
     self->write = 0;
+    self->acquire = 0;
 }
 
 

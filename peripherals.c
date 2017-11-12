@@ -22,6 +22,8 @@ const uint32_t peripherals[] = {
     SYSCTL_PERIPH_ADC0,
     SYSCTL_PERIPH_ADC1,
 
+    SYSCTL_PERIPH_TIMER0,
+
     SYSCTL_PERIPH_UDMA
 };
 

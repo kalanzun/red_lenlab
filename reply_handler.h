@@ -14,6 +14,13 @@
 #include "event_queue.h"
 
 
+#define REPLY_TYPE_BOOL 1
+#define REPLY_TYPE_UINT8 2
+#define REPLY_TYPE_UINT16 3
+#define REPLY_TYPE_UINT32 4
+#define REPLY_TYPE_STRING 5
+
+
 typedef struct ReplyHandler {
     tQueue reply_queue;
 } tReplyHandler;

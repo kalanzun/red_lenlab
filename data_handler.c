@@ -10,18 +10,22 @@
 #include "driverlib/debug.h"
 #include "adc.h"
 #include "data_handler.h"
+#include "reply_handler.h"
+#include "timer.h"
+#include "debug.h"
 
 
 tDataHandler data_handler;
 
 
+#if 0
 void
 DataHandlerMain(void)
 {
     tADCEvent *adc_event;
     tDataEvent *data_event;
     uint8_t *buffer;
-    uint32_t i, b;
+    uint32_t i; //, b;
     uint16_t current_value;
     int32_t current_delta;
     int8_t delta;
@@ -97,8 +101,9 @@ DataHandlerMain(void)
         }
         ADCQueueRelease(&adc.adc_queue);
 #endif
+#if 0
         // compress uint16_t with 12 bit values into uint8_t with deltas
-        b = 0;
+        //b = 0;
 
         // ADC payload is uint16_t, but data payload is uint8_t.
         ASSERT(DATA_PAYLOAD_LENGTH == 1024);
@@ -112,14 +117,14 @@ DataHandlerMain(void)
         ASSERT(!DataQueueFull(&data_handler.data_queue));
         data_event = DataQueueAcquire(&data_handler.data_queue);
         buffer = data_event->payload;
-        buffer[b++] = 0x01; // adc data event
-        buffer[b++] = 0x02; // compression algorithm 2
-        *((uint16_t *) buffer + b) = current_value; // start value
-        b += 2;
+        buffer[0] = 0x01; // adc data event
+        buffer[1] = 0x02; // compression algorithm 2
+        *((uint16_t *) buffer + 2) = current_value; // start value
 
         for (i = 1; i < ADC_PAYLOAD_LENGTH; i++)
         {
             current_delta = adc_event->payload[i] - current_value;
+            // delta is equal to current_delta with saturation at -127 and 127
             if (current_delta < 0)
             {
 
@@ -136,12 +141,55 @@ DataHandlerMain(void)
                     delta = current_delta & 0x7F;
             }
             current_value += delta;
-            buffer[b++] = (uint8_t) delta;
+            buffer[3+i] = (uint8_t) delta;
         }
+#endif
 
         DataQueueWrite(&data_handler.data_queue);
         ADCQueueRelease(&adc.adc_queue);
 
+    }
+}
+#endif
+
+
+void
+DataHandlerMain(void)
+{
+    tADCEvent *adc_event;
+    tEvent *reply;
+
+    uint32_t *buffer;
+    uint32_t i;
+
+    if(!ADCQueueEmpty(&adc.adc_queue))
+    {
+        ASSERT(!QueueFull(&reply_handler.reply_queue));
+
+        adc_event = ADCQueueRead(&adc.adc_queue);
+        reply = QueueAcquire(&reply_handler.reply_queue);
+
+        reply->payload[0] = 5;
+        reply->payload[1] = REPLY_TYPE_UINT32;
+        *((uint16_t *) (reply->payload + 2)) = ADC_PAYLOAD_LENGTH / 4;
+
+        *((uint32_t *) (reply->payload + 4)) = *((uint32_t *) (adc_event->payload));
+
+        DEBUG_PRINT("reply %d\n", *((uint32_t *) (reply->payload + 4)));
+
+        buffer = (uint32_t *) (reply->payload + 8);
+
+        for (i = 0; i < 4; i++) buffer[i] = 0;
+
+        for (i = 0; i < ADC_PAYLOAD_LENGTH - 4; i++)
+        {
+            buffer[i%4] += adc_event->payload[4+i];
+        }
+
+        reply->length = 4 + 4 + 4*4;
+
+        QueueWrite(&reply_handler.reply_queue);
+        ADCQueueRelease(&adc.adc_queue);
     }
 }
 

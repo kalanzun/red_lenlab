@@ -267,7 +267,7 @@ void USBIntHandler(void)
     // Handle the DMA complete case.
     //
         DataQueueRelease(&data_handler.data_queue);
-        usb_device.dma_pending=0;
+        usb_device.dma_pending = 0;
     }
     else
     {

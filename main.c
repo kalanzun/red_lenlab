@@ -23,7 +23,8 @@
 #include "usb_device.h"
 #include "peripherals.h"
 #include "adc.h"
-
+#include "timer.h"
+#include "logger.h"
 
 
 //*****************************************************************************
@@ -144,11 +145,18 @@ main(void) {
     ADCInit();
 
     //
+    // Configure Timer
+    //
+    TimerInit();
+
+    //
     // Initialize Command, Data and Reply Handler
     //
     CommandHandlerInit();
     DataHandlerInit();
     ReplyHandlerInit();
+
+    LoggerInit();
 
     //
     // Print a string.
@@ -164,7 +172,6 @@ main(void) {
         DataHandlerMain();
         ReplyHandlerMain();
         USBDeviceMain();
-        ADCMain();
     }
 
 }
