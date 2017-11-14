@@ -18,6 +18,18 @@ SignalForm::~SignalForm()
 }
 
 void
+SignalForm::setMainWindow(MainWindow *_main_window)
+{
+    main_window = _main_window;
+}
+
+void
+SignalForm::setLenlab(model::Lenlab *_lenlab)
+{
+    lenlab = _lenlab;
+}
+
+void
 SignalForm::setTitle(QString title)
 {
     ui->title->setText(title);

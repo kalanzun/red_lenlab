@@ -24,19 +24,31 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
+    main.cpp \
     gui/mainwindow.cpp \
     gui/signalform.cpp \
     gui/loggerform.cpp \
     gui/oscilloscopeform.cpp \
-    gui/frequencyform.cpp
+    gui/frequencyform.cpp \
+    model/lenlab.cpp \
+    model/logger.cpp \
+    model/oscilloscope.cpp \
+    model/frequency.cpp \
+    model/signal.cpp \
+    model/component.cpp
 
 HEADERS += \
     gui/mainwindow.h \
     gui/signalform.h \
     gui/loggerform.h \
     gui/oscilloscopeform.h \
-    gui/frequencyform.h
+    gui/frequencyform.h \
+    model/lenlab.h \
+    model/logger.h \
+    model/oscilloscope.h \
+    model/frequency.h \
+    model/signal.h \
+    model/component.h
 
 FORMS += \
     gui/mainwindow.ui \

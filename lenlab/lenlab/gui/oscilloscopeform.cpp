@@ -15,4 +15,33 @@ OscilloscopeForm::~OscilloscopeForm()
     delete ui;
 }
 
+void
+OscilloscopeForm::setMainWindow(MainWindow *_main_window)
+{
+    main_window = _main_window;
+}
+
+void
+OscilloscopeForm::setLenlab(model::Lenlab *_lenlab)
+{
+    lenlab = _lenlab;
+}
+
+void
+OscilloscopeForm::on_startButton_clicked()
+{
+    if (!lenlab->oscilloscope->isActive()) {
+        if (lenlab->isActive()) {
+            if (!main_window->askToCancelActiveComponent(lenlab->oscilloscope)) return;
+        }
+        lenlab->oscilloscope->start();
+    }
+}
+
+void
+OscilloscopeForm::on_stopButton_clicked()
+{
+    lenlab->oscilloscope->stop();
+}
+
 } // namespace gui

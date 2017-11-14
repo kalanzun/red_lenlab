@@ -1,13 +1,26 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QMessageBox>
 
 namespace gui {
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(model::Lenlab *lenlab, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    lenlab(lenlab)
 {
     ui->setupUi(this);
+
+    ui->frequencyPage->setMainWindow(this);
+    ui->frequencyPage->setLenlab(lenlab);
+    ui->loggerPage->setMainWindow(this);
+    ui->loggerPage->setLenlab(lenlab);
+    ui->oscilloscopePage->setMainWindow(this);
+    ui->oscilloscopePage->setLenlab(lenlab);
+    ui->signalA->setMainWindow(this);
+    ui->signalA->setLenlab(lenlab);
+    ui->signalB->setMainWindow(this);
+    ui->signalB->setLenlab(lenlab);
 
     ui->signalA->hide();
     ui->signalA->setTitle("Signalgenerator A");
@@ -18,6 +31,24 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+bool
+MainWindow::askToCancelActiveComponent(model::Component *next_component)
+{
+    QString previous = lenlab->getActiveComponent()->getNameNominative();
+    QString next = next_component->getNameAccusative();
+    QMessageBox msgBox;
+    msgBox.setText(QString(
+        "D%1 ist noch aktiv. Um d%2 zu starten muss d%1 gestoppt werden.").arg(
+            previous,
+            next));
+    msgBox.setInformativeText(QString(
+        "Möchten Sie d%1 stoppen und d%2 starten?").arg(
+            previous,
+            next));
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    return msgBox.exec() == QMessageBox::Ok;
 }
 
 void
@@ -53,6 +84,10 @@ MainWindow::on_logButton_toggled(bool checked)
 void
 MainWindow::on_toolBox_currentChanged(int index)
 {
+    // changing the ToolBox only changes the GUI.
+    // I cannot prevent the change of the ToolBox here, so I cannot implement a
+    // diaglog to ask whether to cancel another measurement.
+
     if (index == 2) {
         bool _signalA_checked = ui->signalAButton->isChecked();
         bool _signalB_checked = ui->signalBButton->isChecked();
