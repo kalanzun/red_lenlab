@@ -21,9 +21,13 @@ private slots:
     void on_signalAButton_toggled(bool checked);
     void on_signalBButton_toggled(bool checked);
     void on_logButton_toggled(bool checked);
+    void on_toolBox_currentChanged(int index);
 
 private:
     Ui::MainWindow *ui;
+
+    bool signalA_checked = false;
+    bool signalB_checked = false;
 };
 
 
