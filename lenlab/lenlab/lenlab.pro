@@ -25,10 +25,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    gui/mainwindow.cpp
+    gui/mainwindow.cpp \
+    gui/signalform.cpp \
+    gui/loggerform.cpp \
+    gui/oscilloscopeform.cpp \
+    gui/frequencyform.cpp
 
 HEADERS += \
-    gui/mainwindow.h
+    gui/mainwindow.h \
+    gui/signalform.h \
+    gui/loggerform.h \
+    gui/oscilloscopeform.h \
+    gui/frequencyform.h
 
 FORMS += \
-    gui/mainwindow.ui
+    gui/mainwindow.ui \
+    gui/signalform.ui \
+    gui/loggerform.ui \
+    gui/oscilloscopeform.ui \
+    gui/frequencyform.ui
+
+unix {
+    include( /usr/lib/qt/mkspecs/features/qwt.prf )
+}
