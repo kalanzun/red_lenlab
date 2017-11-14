@@ -1,7 +1,9 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef GUI_MAINWINDOW_H
+#define GUI_MAINWINDOW_H
 
 #include <QMainWindow>
+
+namespace gui {
 
 namespace Ui {
 class MainWindow;
@@ -19,4 +21,6 @@ private:
     Ui::MainWindow *ui;
 };
 
-#endif // MAINWINDOW_H
+
+} // namespace gui
+#endif // GUI_MAINWINDOW_H
