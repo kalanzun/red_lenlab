@@ -17,7 +17,10 @@ public:
     explicit SignalForm(QWidget *parent = 0);
     ~SignalForm();
 
+    void setTitle(QString title);
+
 private:
+    void setParameterUIConfiguration(bool amplitude, bool frequency, bool dutycycle);
     Ui::SignalForm *ui;
 };
 

@@ -17,6 +17,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_signalAButton_toggled(bool checked);
+    void on_signalBButton_toggled(bool checked);
+    void on_logButton_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
 };

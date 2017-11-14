@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>gui::MainWindow</class>
  <widget class="QMainWindow" name="gui::MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>618</width>
+    <height>470</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -10,7 +18,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QwtPlot" name="qwtPlot">
+       <widget class="QwtPlot" name="plot">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -28,43 +36,63 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="gui::SignalForm" name="widget" native="true"/>
+         <widget class="gui::SignalForm" name="signalA" native="true">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="gui::SignalForm" name="widget_2" native="true"/>
+         <widget class="gui::SignalForm" name="signalB" native="true">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QToolButton" name="toolButton_3">
+         <widget class="QToolButton" name="signalAButton">
           <property name="text">
            <string>Signalgenerator A</string>
           </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="toolButton_2">
+         <widget class="QToolButton" name="signalBButton">
           <property name="text">
            <string>Signalgenerator B</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="toolButton">
-          <property name="text">
-           <string>Nachrichten</string>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QToolButton" name="logButton">
+          <property name="text">
+           <string>Nachrichten</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="logLineEdit"/>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit">
+       <widget class="QPlainTextEdit" name="logPlainTextEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -97,20 +125,20 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>150</width>
+        <width>200</width>
         <height>0</height>
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
-      <widget class="gui::LoggerForm" name="page">
+      <widget class="gui::LoggerForm" name="loggerPage">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>150</width>
-         <height>457</height>
+         <width>200</width>
+         <height>365</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -123,13 +151,13 @@
         <string>Logger</string>
        </attribute>
       </widget>
-      <widget class="gui::OscilloscopeForm" name="page_2">
+      <widget class="gui::OscilloscopeForm" name="oscilloscopePage">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>150</width>
-         <height>457</height>
+         <width>200</width>
+         <height>365</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -142,7 +170,7 @@
         <string>Oszilloskop</string>
        </attribute>
       </widget>
-      <widget class="gui::FrequencyForm" name="page_3">
+      <widget class="gui::FrequencyForm" name="frequencyPage">
        <attribute name="label">
         <string>Frequenzanalyse</string>
        </attribute>
@@ -156,7 +184,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>568</width>
+     <width>618</width>
      <height>18</height>
     </rect>
    </property>
