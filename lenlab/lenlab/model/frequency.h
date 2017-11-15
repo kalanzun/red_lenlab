@@ -6,6 +6,9 @@
 
 namespace model {
 
+/**
+ * @brief Lenlab Frequency Analysis component.
+ */
 class Frequency : public Component
 {
     Q_OBJECT

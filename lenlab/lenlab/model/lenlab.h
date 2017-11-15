@@ -9,6 +9,10 @@
 
 namespace model {
 
+/**
+ * @brief Root object of the Lenlab data model.
+ */
+
 class Lenlab : public QObject
 {
     Q_OBJECT

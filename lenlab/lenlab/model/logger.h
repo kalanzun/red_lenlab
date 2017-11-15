@@ -6,6 +6,10 @@
 
 namespace model {
 
+/**
+ * @brief Lenlab Logger component.
+ */
+
 class Logger : public Component
 {
     Q_OBJECT

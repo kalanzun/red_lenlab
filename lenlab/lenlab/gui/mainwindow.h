@@ -10,6 +10,10 @@ namespace Ui {
 class MainWindow;
 }
 
+/**
+ * @brief Lenlab main window.
+ */
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

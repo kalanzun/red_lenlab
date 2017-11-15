@@ -11,6 +11,10 @@ namespace Ui {
 class LoggerForm;
 }
 
+/**
+ * @brief Controls for the Lenlab Logger component.
+ */
+
 class LoggerForm : public QWidget
 {
     Q_OBJECT

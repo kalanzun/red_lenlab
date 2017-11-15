@@ -11,6 +11,10 @@ namespace Ui {
 class SignalForm;
 }
 
+/**
+ * @brief Controls for the Lenlab Signal Generator component.
+ */
+
 class SignalForm : public QWidget
 {
     Q_OBJECT

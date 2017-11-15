@@ -6,6 +6,10 @@
 
 namespace model {
 
+/**
+ * @brief Lenlab oscilloscope component.
+ */
+
 class Oscilloscope : public Component
 {
     Q_OBJECT
