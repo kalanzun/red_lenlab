@@ -62,7 +62,6 @@ FORMS += \
     gui/frequencyform.ui
 
 unix {
-    include( /usr/lib/qt/mkspecs/features/qwt.prf )
 }
 
 win32 {
