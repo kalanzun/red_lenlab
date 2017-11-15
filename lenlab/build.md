@@ -49,6 +49,8 @@ For running, Qt Creator additionally needs the library paths
 
 Qwt path to run lenlab in Qt Creator is hard coded in lenlab.pro
 
+You may delete the source directory after installing.
+
 ### Linux
 
 #### Qt 5.9
