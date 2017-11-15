@@ -88,13 +88,12 @@ todo_include_todos = False
 
 def listdir_recursive(path):
     for dp, dn, fn in walk(path):
-        _dp = dp[len(path)+1:]
         for f in fn:
             if splitext(f)[1] in ['.cpp', '.h']:
-                yield join(_dp, f)
+                yield join(dp, f)
 
 breathe_projects_source = {
-    'lenlab': ('../lenlab/lenlab', list(listdir_recursive('../lenlab/lenlab'))),
+    'lenlab': ('', list(listdir_recursive('../lenlab'))),
 }
 
 breathe_projects = {
