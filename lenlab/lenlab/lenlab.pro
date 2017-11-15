@@ -11,6 +11,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = lenlab
 TEMPLATE = app
 
+CONFIG += c++11
+
+CONFIG += qwt
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -21,7 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
+# Note: qwt uses deprecated APIs and lenlab will fail to build
 
 SOURCES += \
     main.cpp \
@@ -59,4 +63,10 @@ FORMS += \
 
 unix {
     include( /usr/lib/qt/mkspecs/features/qwt.prf )
+}
+
+win32 {
+    # Qt Creator uses this variable to construct the PATH variable for the dynamic linker to run lenlab
+    CONFIG(release, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwt
+    else:CONFIG(debug, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwtd
 }
