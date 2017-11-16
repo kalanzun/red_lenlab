@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "lenlab_protocol.h"
 
 
 #define EVENT_QUEUE_LENGTH 8
@@ -80,5 +81,28 @@ QueueInit(tQueue *self)
     self->write = 0;
 }
 
+inline void
+EventSetCommand(tEvent *self, enum Command cmd)
+{
+    self->payload[0] = cmd;
+}
+
+inline enum Command
+EventGetCommand(tEvent *self)
+{
+    return (enum Command) self->payload[0];
+}
+
+inline void
+EventSetReply(tEvent *self, enum Reply reply)
+{
+    self->payload[1] = reply;
+}
+
+inline enum Reply
+EventGetReply(tEvent *self)
+{
+    return (enum Reply) self->payload[1];
+}
 
 #endif /* EVENT_QUEUE_H_ */

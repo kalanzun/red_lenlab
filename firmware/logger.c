@@ -20,7 +20,6 @@ void
 LoggerStart(void)
 {
     DEBUG_PRINT("start\n");
-    ASSERT(logger.locked);
 
     if (logger.active)
         return;
@@ -48,37 +47,8 @@ LoggerSetInterval(uint32_t interval)
     logger.interval = interval;
 }
 
-bool
-LoggerAcquire(void)
-{
-    DEBUG_PRINT("acquire\n");
-
-    if (logger.locked)
-        return 0;
-
-    if (!TimerAcquire())
-        return 0;
-
-    DEBUG_PRINT("ok\n");
-
-    logger.locked = 1;
-    return 1;
-}
-
-void
-LoggerRelease(void)
-{
-    if (logger.locked) {
-        TimerRelease();
-
-        logger.locked = 0;
-    }
-}
-
 void
 LoggerInit(void)
 {
-    logger.locked = 0;
-    logger.active = 0;
     logger.interval = 1000;
 }

@@ -128,7 +128,7 @@ ADC0IntHandler(void)
 void
 ADCStart(void)
 {
-    if (!adc.locked && adc.basic && adc.pingpong)
+    if (adc.basic || adc.pingpong)
         return;
 
     adc.pingpong = 1;
@@ -166,7 +166,7 @@ ADCStop(void)
 void
 ADCStartSingle(uint32_t time)
 {
-    if (!adc.locked && adc.basic && adc.pingpong)
+    if (adc.basic || adc.pingpong)
         return;
 
     adc.basic = 1;
@@ -186,26 +186,6 @@ ADCStartSingle(uint32_t time)
     ADCSequenceEnable(ADC0_BASE, 0);
 
     IntEnable(INT_ADC0SS0);
-}
-
-
-bool
-ADCAcquire(void)
-{
-    if (adc.locked)
-        return 0;
-
-    adc.locked = 1;
-    return 1;
-}
-
-
-void
-ADCRelease(void)
-{
-    if (adc.locked) {
-        adc.locked = 0;
-    }
 }
 
 
@@ -264,7 +244,6 @@ ConfigureADC()
 void
 ADCInit(void)
 {
-    adc.locked = 0;
     adc.pingpong = 0;
     adc.basic = 0;
     ADCQueueInit(&adc.adc_queue);

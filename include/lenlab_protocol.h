@@ -6,14 +6,16 @@ enum Command {
     getName,
     setLoggerInterval,
     startLogger,
-    stopLogger
+    stopLogger,
+    NUM_COMMANDS
 };
 
 enum Reply {
     None,
     Bool,
     String,
-    Logger
+    uInt32,
+    NUM_REPLIES
 };
 
 #endif // LENLAB_PROTOCOL_H

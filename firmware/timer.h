@@ -10,7 +10,6 @@
 
 
 typedef struct Timer {
-    bool locked;
     bool active;
     volatile uint32_t interval;
     volatile uint32_t time;
@@ -24,9 +23,6 @@ void TimerStart(void);
 void TimerStop(void);
 
 void TimerSetInterval(uint32_t interval);
-
-bool TimerAcquire(void);
-void TimerRelease(void);
 
 void TimerInit(void);
 

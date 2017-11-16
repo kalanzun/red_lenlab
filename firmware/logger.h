@@ -10,7 +10,6 @@
 
 
 typedef struct Logger {
-    bool locked;
     bool active;
     uint32_t interval; // milliseconds
 } tLogger;
@@ -23,9 +22,6 @@ void LoggerStart(void);
 void LoggerStop(void);
 
 void LoggerSetInterval(uint32_t interval);
-
-bool LoggerAcquire(void);
-void LoggerRelease(void);
 
 void LoggerInit(void);
 

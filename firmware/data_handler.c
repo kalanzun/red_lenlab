@@ -169,8 +169,8 @@ DataHandlerMain(void)
         adc_event = ADCQueueRead(&adc.adc_queue);
         reply = QueueAcquire(&reply_handler.reply_queue);
 
-        reply->payload[0] = 5;
-        reply->payload[1] = REPLY_TYPE_UINT32;
+        EventSetCommand(reply, startLogger);
+        EventSetReply(reply, uInt32);
         *((uint16_t *) (reply->payload + 2)) = ADC_PAYLOAD_LENGTH / 4;
 
         *((uint32_t *) (reply->payload + 4)) = *((uint32_t *) (adc_event->payload));

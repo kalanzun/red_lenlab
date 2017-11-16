@@ -21,18 +21,12 @@
 tCommandHandler command_handler;
 
 
-void
-NoOperation(tEvent *event)
-{
-
-}
-
 const uint8_t name[] = "KIT Lenlab Red Firmware version 0.1 year 2017";
 
 #define NAME_SIZE (sizeof(name))
 
 void
-getName(tEvent *event)
+on_getName(tEvent *event)
 {
     int i;
     tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
@@ -50,40 +44,20 @@ getName(tEvent *event)
 }
 
 void
-acquireLogger(tEvent *event)
-{
-    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
-
-    reply->payload[0] = event->payload[0];
-    reply->payload[1] = REPLY_TYPE_BOOL;
-    reply->payload[4] = LoggerAcquire();
-    reply->length = 5;
-
-    QueueWrite(&reply_handler.reply_queue);
-
-}
-
-void
-releaseLogger(tEvent *event)
-{
-    LoggerRelease();
-}
-
-void
-setLoggerInterval(tEvent *event)
+on_setLoggerInterval(tEvent *event)
 {
     uint32_t value = *(uint32_t *) (event->payload + 4);
     LoggerSetInterval(value);
 }
 
 void
-startLogger(tEvent *event)
+on_startLogger(tEvent *event)
 {
     LoggerStart();
 }
 
 void
-stopLogger(tEvent *event)
+on_stopLogger(tEvent *event)
 {
     LoggerStop();
 }
@@ -171,7 +145,7 @@ SendLorem(tCommandHandler *self, tPacket *command)
 }
 */
 
-
+/*
 typedef void (* const tCommandFunction)(tEvent *);
 
 tCommandFunction commands[] =
@@ -186,19 +160,23 @@ tCommandFunction commands[] =
 };
 
 #define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))
-
+*/
 
 void
 CommandHandlerMain(void)
 {
     tEvent *event;
-    uint8_t command;
+    enum Command command;
 
     if (!QueueEmpty(&command_handler.command_queue)) {
         event = QueueRead(&command_handler.command_queue);
-        command = event->payload[0];
-        if (command < NUM_COMMANDS)
-            commands[command](event);
+        command = EventGetCommand(event);
+        if (command < NUM_COMMANDS) {
+            if (command == getName) on_getName(event);
+            else if (command == setLoggerInterval) on_setLoggerInterval(event);
+            else if (command == startLogger) on_startLogger(event);
+            else if (command == stopLogger) on_stopLogger(event);
+        }
         QueueRelease(&command_handler.command_queue);
     }
 }

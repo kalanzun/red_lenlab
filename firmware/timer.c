@@ -35,8 +35,6 @@ Timer0IntHandler(void)
 void
 TimerStart()
 {
-    ASSERT(timer.locked);
-
     if (timer.active)
         return;
 
@@ -60,34 +58,11 @@ TimerSetInterval(uint32_t interval)
 {
     uint32_t load_value;
 
-    if (timer.locked && !timer.active) {
+    if (!timer.active) {
         timer.interval = interval;
         load_value = interval * (SysCtlClockGet() / 1000);
         DEBUG_PRINT("%d\n", interval);
         TimerLoadSet(TIMER0_BASE, TIMER_A, load_value);
-    }
-}
-
-bool
-TimerAcquire(void)
-{
-    if (timer.locked)
-        return 0;
-
-    if (!ADCAcquire())
-        return 0;
-
-    timer.locked = 1;
-    return 1;
-}
-
-void
-TimerRelease(void)
-{
-    if (timer.locked) {
-        ADCRelease();
-
-        timer.locked = 0;
     }
 }
 
@@ -103,7 +78,6 @@ ConfigureTimer(void)
 void
 TimerInit(void)
 {
-    timer.locked = 0;
     timer.active = 0;
     timer.interval = 1000;
     timer.time = 0;

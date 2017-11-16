@@ -13,7 +13,6 @@
 
 
 typedef struct ADC {
-    bool locked;
     volatile bool pingpong;
     volatile bool basic;
     tADCQueue adc_queue;
@@ -27,9 +26,6 @@ void ADCStart(void);
 void ADCStop(void);
 
 void ADCStartSingle(uint32_t time);
-
-bool ADCAcquire(void);
-void ADCRelease(void);
 
 void ADCMain(void);
 
