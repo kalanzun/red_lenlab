@@ -41,7 +41,9 @@ OscilloscopeForm::on_startButton_clicked()
 void
 OscilloscopeForm::on_stopButton_clicked()
 {
-    lenlab->oscilloscope->stop();
+    if (lenlab->oscilloscope->isActive()) {
+        lenlab->oscilloscope->stop();
+    }
 }
 
 } // namespace gui

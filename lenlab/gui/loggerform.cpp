@@ -43,7 +43,9 @@ LoggerForm::on_startButton_clicked()
 void
 LoggerForm::on_stopButton_clicked()
 {
-    lenlab->logger->stop();
+    if (lenlab->logger->isActive()) {
+        lenlab->logger->stop();
+    }
 }
 
 } // namespace gui

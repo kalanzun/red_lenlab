@@ -14,7 +14,7 @@ class Signal : public Component
 {
     Q_OBJECT
 public:
-    explicit Signal(QObject *parent = nullptr);
+    explicit Signal(Lenlab *parent);
 
 signals:
 

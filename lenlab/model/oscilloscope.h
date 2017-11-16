@@ -14,7 +14,7 @@ class Oscilloscope : public Component
 {
     Q_OBJECT
 public:
-    explicit Oscilloscope(QObject *parent = nullptr);
+    explicit Oscilloscope(Lenlab *parent);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();

@@ -41,7 +41,9 @@ FrequencyForm::on_startButton_clicked()
 void
 FrequencyForm::on_stopButton_clicked()
 {
-    lenlab->frequency->stop();
+    if (lenlab->frequency->isActive()) {
+        lenlab->frequency->stop();
+    }
 }
 
 } // namespace gui

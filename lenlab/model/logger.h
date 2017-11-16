@@ -14,10 +14,15 @@ class Logger : public Component
 {
     Q_OBJECT
 public:
-    explicit Logger(QObject *parent = nullptr);
+    explicit Logger(Lenlab *parent);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
+
+    uint32_t getInterval() const;
+    void setInterval(uint32_t interval);
+
+    virtual void start();
 
 signals:
 
@@ -25,6 +30,8 @@ public slots:
 
 private:
     typedef Component super;
+
+    uint32_t interval = 1000;
 };
 
 } // namespace model

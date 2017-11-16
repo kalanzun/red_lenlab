@@ -31,4 +31,17 @@ Lenlab::getActiveComponent()
     throw std::exception();
 }
 
+void
+Lenlab::send()
+{
+    emit command();
+}
+
+void
+Lenlab::reply()
+{
+    // switch reply->cmd
+    logger->reply();
+}
+
 } // namespace model

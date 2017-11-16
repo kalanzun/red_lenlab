@@ -2,7 +2,7 @@
 
 namespace model {
 
-Frequency::Frequency(QObject *parent) : Component(parent)
+Frequency::Frequency(Lenlab *parent) : Component(parent)
 {
 
 }

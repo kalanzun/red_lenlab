@@ -13,7 +13,7 @@ class Frequency : public Component
 {
     Q_OBJECT
 public:
-    explicit Frequency(QObject *parent = nullptr);
+    explicit Frequency(Lenlab *parent);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();

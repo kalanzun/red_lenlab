@@ -1,8 +1,9 @@
 #include "component.h"
+#include "lenlab.h"
 
 namespace model {
 
-Component::Component(QObject *parent) : QObject(parent)
+Component::Component(Lenlab *parent) : QObject(parent), lenlab(parent)
 {
 
 }
@@ -28,13 +29,21 @@ Component::getNameAccusative()
 void
 Component::start()
 {
+    Q_ASSERT_X(!lenlab->isActive(), "Component::start()", "No component may be active.");
     active = true;
 }
 
 void
 Component::stop()
 {
+    Q_ASSERT_X(active, "Component::stop()", "This component was not active.");
     active = false;
+}
+
+void
+Component::reply()
+{
+
 }
 
 } // namespace model

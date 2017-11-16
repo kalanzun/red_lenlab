@@ -22,14 +22,18 @@ public:
     bool isActive();
     Component *getActiveComponent();
 
+    void send();
+
     Frequency *frequency;
     Logger *logger;
     Oscilloscope *oscilloscope;
     Signal *signal;
 
 signals:
+    void command();
 
 public slots:
+    void reply();
 
 private:
 };

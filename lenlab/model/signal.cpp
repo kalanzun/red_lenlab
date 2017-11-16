@@ -2,7 +2,7 @@
 
 namespace model {
 
-Signal::Signal(QObject *parent) : Component(parent)
+Signal::Signal(Lenlab *parent) : Component(parent)
 {
 
 }

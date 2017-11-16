@@ -2,7 +2,7 @@
 
 namespace model {
 
-Oscilloscope::Oscilloscope(QObject *parent) : Component(parent)
+Oscilloscope::Oscilloscope(Lenlab *parent) : Component(parent)
 {
 
 }

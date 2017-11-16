@@ -5,6 +5,8 @@
 
 namespace model {
 
+class Lenlab;
+
 /**
  * @brief Base class for Lenlab components.
  */
@@ -13,7 +15,7 @@ class Component : public QObject
 {
     Q_OBJECT
 public:
-    explicit Component(QObject *parent = nullptr);
+    explicit Component(Lenlab *parent);
 
     bool isActive();
 
@@ -23,11 +25,14 @@ public:
     virtual void start();
     virtual void stop();
 
+    virtual void reply();
+
 signals:
 
 public slots:
 
 protected:
+    Lenlab *lenlab;
     bool active = 0;
 
 };
