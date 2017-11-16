@@ -1,6 +1,9 @@
 #include "logger.h"
 #include "lenlab.h"
 
+#define MSEC (1000.0)
+#define VOLT (4096.0 / 3.3)
+
 namespace model {
 
 Logger::Logger(Lenlab *parent) : Component(parent)
@@ -36,9 +39,36 @@ void
 Logger::start()
 {
     qDebug("set intervall");
-    lenlab->send();
+    usb::pMessage cmdSetInterval(new usb::Message());
+    cmdSetInterval->setCommand(3);
+    *((uint32_t *) cmdSetInterval->getPayload()) = interval;
+    cmdSetInterval->setPayloadLength(4);
+    lenlab->send(cmdSetInterval);
+
     qDebug("start");
+    usb::pMessage cmdStart(new usb::Message());
+    cmdStart->setCommand(4);
+    lenlab->send(cmdStart);
+
     super::start();
+}
+
+void
+Logger::receive(const usb::pMessage &reply)
+{
+    uint32_t *buffer = (uint32_t *) reply->getPayload();
+
+    Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
+
+    // 4 bytes timestamp
+    data[0].append((double) *buffer / MSEC);
+
+    // 4 channels, 4 bytes each
+    for (int i = 1; i < data.size(); i++) {
+        data[i].append((double) buffer[i] / (double) reply->getHeader() / VOLT);
+    }
+
+    emit replot();
 }
 
 } // namespace model

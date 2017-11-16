@@ -51,6 +51,16 @@ Qwt path to run lenlab in Qt Creator is hard coded in lenlab.pro
 
 You may delete the source directory after installing.
 
+#### libusb
+
+http://libusb.info
+
+Downloads -> Latest Windows Binaries
+
+Extract file to project directory, libusb
+
+/libusb
+
 ### Linux
 
 #### Qt 5.9

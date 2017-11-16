@@ -39,7 +39,21 @@ SOURCES += \
     model/oscilloscope.cpp \
     model/frequency.cpp \
     model/signal.cpp \
-    model/component.cpp
+    model/component.cpp \
+    usb/active.cpp \
+    usb/activeguard.cpp \
+    usb/context.cpp \
+    usb/devhandle.cpp \
+    usb/device.cpp \
+    usb/devicelist.cpp \
+    usb/eventloop.cpp \
+    usb/exception.cpp \
+    usb/handler.cpp \
+    usb/interface.cpp \
+    usb/message.cpp \
+    usb/notetoself.cpp \
+    usb/thread.cpp \
+    usb/transfer.cpp
 
 HEADERS += \
     gui/mainwindow.h \
@@ -52,7 +66,21 @@ HEADERS += \
     model/oscilloscope.h \
     model/frequency.h \
     model/signal.h \
-    model/component.h
+    model/component.h \
+    usb/active.h \
+    usb/activeguard.h \
+    usb/context.h \
+    usb/devhandle.h \
+    usb/device.h \
+    usb/devicelist.h \
+    usb/eventloop.h \
+    usb/exception.h \
+    usb/handler.h \
+    usb/interface.h \
+    usb/message.h \
+    usb/notetoself.h \
+    usb/thread.h \
+    usb/transfer.h
 
 FORMS += \
     gui/mainwindow.ui \
@@ -68,4 +96,7 @@ win32 {
     # Qt Creator uses this variable to construct the PATH variable for the dynamic linker to run lenlab
     CONFIG(release, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwt
     else:CONFIG(debug, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwtd
+
+    INCLUDEPATH += $$PWD/../libusb/include/libusb-1.0
+    LIBS += -L$$PWD/../libusb/MinGW32/dll/ -llibusb-1.0
 }

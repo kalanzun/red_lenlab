@@ -1,6 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include "usb/message.h"
 #include <QObject>
 
 namespace model {
@@ -25,7 +26,7 @@ public:
     virtual void start();
     virtual void stop();
 
-    virtual void reply();
+    virtual void receive(const usb::pMessage &reply);
 
 signals:
 

@@ -9,7 +9,8 @@ Lenlab::Lenlab(QObject *parent) :
     oscilloscope(new Oscilloscope(this)),
     signal(new Signal(this))
 {
-
+    connect(this, SIGNAL(reply(usb::pMessage reply)),
+            this, SLOT(on_reply(usb::pMessage reply)));
 }
 
 bool
@@ -32,16 +33,17 @@ Lenlab::getActiveComponent()
 }
 
 void
-Lenlab::send()
+Lenlab::send(const usb::pMessage &cmd)
 {
-    emit command();
+    emit command(cmd);
 }
 
 void
-Lenlab::reply()
+Lenlab::on_reply(const usb::pMessage &reply)
 {
-    // switch reply->cmd
-    logger->reply();
+    uint8_t cmd = reply->getCommand();
+    if (cmd == 3)
+        logger->receive(reply);
 }
 
 } // namespace model

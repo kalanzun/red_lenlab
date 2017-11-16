@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "oscilloscope.h"
 #include "signal.h"
+#include "usb/message.h"
 #include <QObject>
 
 namespace model {
@@ -22,7 +23,7 @@ public:
     bool isActive();
     Component *getActiveComponent();
 
-    void send();
+    void send(const usb::pMessage &cmd);
 
     Frequency *frequency;
     Logger *logger;
@@ -30,10 +31,13 @@ public:
     Signal *signal;
 
 signals:
-    void command();
+    void command(const usb::pMessage &command);
+    void reply(const usb::pMessage &reply);
 
 public slots:
-    void reply();
+
+private slots:
+    void on_reply(const usb::pMessage &reply);
 
 private:
 };

@@ -3,6 +3,7 @@
 
 #include "component.h"
 #include <QObject>
+#include <QVector>
 
 namespace model {
 
@@ -24,7 +25,10 @@ public:
 
     virtual void start();
 
+    virtual void receive(const usb::pMessage &reply);
+
 signals:
+    void replot();
 
 public slots:
 
@@ -32,6 +36,7 @@ private:
     typedef Component super;
 
     uint32_t interval = 1000;
+    std::array<QVector<double>, 5> data;
 };
 
 } // namespace model
