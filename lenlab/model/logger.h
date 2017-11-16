@@ -1,16 +1,20 @@
-#ifndef OSCILLOSCOPE_H
-#define OSCILLOSCOPE_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include "component.h"
 #include <QObject>
 
 namespace model {
 
-class Oscilloscope : public Component
+/**
+ * @brief Lenlab Logger component.
+ */
+
+class Logger : public Component
 {
     Q_OBJECT
 public:
-    explicit Oscilloscope(QObject *parent = nullptr);
+    explicit Logger(QObject *parent = nullptr);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
@@ -25,4 +29,4 @@ private:
 
 } // namespace model
 
-#endif // OSCILLOSCOPE_H
+#endif // LOGGER_H

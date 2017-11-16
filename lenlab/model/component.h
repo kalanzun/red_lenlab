@@ -5,6 +5,10 @@
 
 namespace model {
 
+/**
+ * @brief Base class for Lenlab components.
+ */
+
 class Component : public QObject
 {
     Q_OBJECT

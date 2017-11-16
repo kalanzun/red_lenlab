@@ -1,16 +1,20 @@
-#ifndef FREQUENCY_H
-#define FREQUENCY_H
+#ifndef OSCILLOSCOPE_H
+#define OSCILLOSCOPE_H
 
 #include "component.h"
 #include <QObject>
 
 namespace model {
 
-class Frequency : public Component
+/**
+ * @brief Lenlab oscilloscope component.
+ */
+
+class Oscilloscope : public Component
 {
     Q_OBJECT
 public:
-    explicit Frequency(QObject *parent = nullptr);
+    explicit Oscilloscope(QObject *parent = nullptr);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
@@ -25,4 +29,4 @@ private:
 
 } // namespace model
 
-#endif // FREQUENCY_H
+#endif // OSCILLOSCOPE_H

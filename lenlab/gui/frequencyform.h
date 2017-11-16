@@ -11,6 +11,10 @@ namespace Ui {
 class FrequencyForm;
 }
 
+/**
+ * @brief Controls for the Lenlab Frequency Analysis component.
+ */
+
 class FrequencyForm : public QWidget
 {
     Q_OBJECT

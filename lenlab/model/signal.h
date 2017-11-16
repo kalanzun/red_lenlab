@@ -6,6 +6,10 @@
 
 namespace model {
 
+/**
+ * @brief Lenlab Signal Generator Component.
+ */
+
 class Signal : public Component
 {
     Q_OBJECT

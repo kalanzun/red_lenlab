@@ -11,6 +11,10 @@ namespace Ui {
 class OscilloscopeForm;
 }
 
+/**
+ * @brief Controls for the Lenlab oscilloscope component.
+ */
+
 class OscilloscopeForm : public QWidget
 {
     Q_OBJECT

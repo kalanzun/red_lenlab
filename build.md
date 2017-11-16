@@ -65,6 +65,13 @@ System installation on
 
 Arch Linux,
 
+## Documentation
+
+* Sphinx http://www.sphinx-doc.org
+* Breathe https://github.com/michaeljones/breathe
+* Doxygen http://doxygen.org
+* sphinxcontrib-mermaid https://github.com/mgaitan/sphinxcontrib-mermaid
+
 ## Build
 
 Open lenlab.pro in Qt Creator
