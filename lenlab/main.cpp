@@ -11,11 +11,11 @@ int main(int argc, char *argv[])
 
     usb::Handler handler;
 
-    QObject::connect(&handler, SIGNAL(reply(usb::pMessage reply)),
-                     &lenlab, SIGNAL(reply(usb::pMessage reply)));
+    QObject::connect(&handler, SIGNAL(reply(usb::pMessage)),
+                     &lenlab, SIGNAL(reply(usb::pMessage)));
 
-    QObject::connect(&lenlab, SIGNAL(command(usb::pMessage command)),
-                     &handler, SIGNAL(command(usb::pMessage command)));
+    QObject::connect(&lenlab, SIGNAL(command(usb::pMessage)),
+                     &handler, SIGNAL(command(usb::pMessage)));
 
     gui::MainWindow w(&lenlab);
     w.show();

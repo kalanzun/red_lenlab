@@ -2,8 +2,8 @@
 #define LOGGER_H
 
 #include "component.h"
+#include "minmaxvector.h"
 #include <QObject>
-#include <QVector>
 
 namespace model {
 
@@ -27,8 +27,9 @@ public:
 
     virtual void receive(const usb::pMessage &reply);
 
+    std::array<MinMaxVector, 5> data;
+
 signals:
-    void replot();
 
 public slots:
 
@@ -36,7 +37,6 @@ private:
     typedef Component super;
 
     uint32_t interval = 1000;
-    std::array<QVector<double>, 5> data;
 };
 
 } // namespace model

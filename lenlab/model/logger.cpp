@@ -40,14 +40,14 @@ Logger::start()
 {
     qDebug("set intervall");
     usb::pMessage cmdSetInterval(new usb::Message());
-    cmdSetInterval->setCommand(3);
+    cmdSetInterval->setCommand(setLoggerInterval);
     *((uint32_t *) cmdSetInterval->getPayload()) = interval;
     cmdSetInterval->setPayloadLength(4);
     lenlab->send(cmdSetInterval);
 
     qDebug("start");
     usb::pMessage cmdStart(new usb::Message());
-    cmdStart->setCommand(4);
+    cmdStart->setCommand(startLogger);
     lenlab->send(cmdStart);
 
     super::start();
@@ -64,11 +64,11 @@ Logger::receive(const usb::pMessage &reply)
     data[0].append((double) *buffer / MSEC);
 
     // 4 channels, 4 bytes each
-    for (int i = 1; i < data.size(); i++) {
+    for (size_t i = 1; i < data.size(); i++) {
         data[i].append((double) buffer[i] / (double) reply->getHeader() / VOLT);
     }
 
-    emit replot();
+    emit lenlab->replot();
 }
 
 } // namespace model

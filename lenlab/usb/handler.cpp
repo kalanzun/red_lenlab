@@ -6,8 +6,6 @@ using namespace usb;
 
 Handler::Handler(QObject *parent) : QObject(parent)
 {
-    qInfo("Handler constructor");
-
     timer_id = startTimer(250);
 }
 

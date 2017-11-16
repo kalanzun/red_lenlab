@@ -1,6 +1,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include "lenlab_protocol.h"
 #include <QSharedPointer>
 
 #define MESSAGE_BUFFER_LENGTH 1024
@@ -13,11 +14,11 @@ namespace usb {
         uint8_t buffer[MESSAGE_BUFFER_LENGTH];
 
     public:
-        void setCommand(uint8_t command);
-        uint8_t getCommand();
+        void setCommand(Command command);
+        Command getCommand();
 
-        void setReply(uint8_t reply);
-        uint8_t getReply();
+        void setReply(Reply reply);
+        Reply getReply();
 
         void setHeader(uint16_t header);
         uint16_t getHeader();

@@ -25,6 +25,7 @@ public:
     bool askToCancelActiveComponent(model::Component *next_component);
 
 private slots:
+    void on_replot();
     void on_signalAButton_toggled(bool checked);
     void on_signalBButton_toggled(bool checked);
     void on_logButton_toggled(bool checked);

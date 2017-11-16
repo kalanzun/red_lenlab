@@ -31,13 +31,15 @@ public:
     Signal *signal;
 
 signals:
-    void command(const usb::pMessage &command);
-    void reply(const usb::pMessage &reply);
+    void command(const usb::pMessage &);
+    void reply(const usb::pMessage &);
+
+    void replot();
 
 public slots:
 
 private slots:
-    void on_reply(const usb::pMessage &reply);
+    void on_reply(const usb::pMessage &);
 
 private:
 };

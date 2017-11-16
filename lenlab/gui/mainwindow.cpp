@@ -22,10 +22,15 @@ MainWindow::MainWindow(model::Lenlab *lenlab, QWidget *parent) :
     ui->signalB->setMainWindow(this);
     ui->signalB->setLenlab(lenlab);
 
+    ui->loggerPage->configurePlot(ui->plot);
+
     ui->signalA->hide();
     ui->signalA->setTitle("Signalgenerator A");
     ui->signalB->hide();
     ui->signalB->setTitle("Signalgenerator B");
+
+    connect(lenlab, SIGNAL(replot()),
+            this, SLOT(on_replot()));
 }
 
 MainWindow::~MainWindow()
@@ -55,6 +60,12 @@ MainWindow::askToCancelActiveComponent(model::Component *next_component)
     else {
         return false;
     }
+}
+
+void
+MainWindow::on_replot()
+{
+    ui->plot->replot();
 }
 
 void

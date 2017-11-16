@@ -34,6 +34,7 @@ SOURCES += \
     gui/loggerform.cpp \
     gui/oscilloscopeform.cpp \
     gui/frequencyform.cpp \
+    gui/pointvectorseriesdata.cpp \
     model/lenlab.cpp \
     model/logger.cpp \
     model/oscilloscope.cpp \
@@ -53,7 +54,8 @@ SOURCES += \
     usb/message.cpp \
     usb/notetoself.cpp \
     usb/thread.cpp \
-    usb/transfer.cpp
+    usb/transfer.cpp \
+    model/minmaxvector.cpp
 
 HEADERS += \
     gui/mainwindow.h \
@@ -61,6 +63,7 @@ HEADERS += \
     gui/loggerform.h \
     gui/oscilloscopeform.h \
     gui/frequencyform.h \
+    gui/pointvectorseriesdata.h \
     model/lenlab.h \
     model/logger.h \
     model/oscilloscope.h \
@@ -80,7 +83,8 @@ HEADERS += \
     usb/message.h \
     usb/notetoself.h \
     usb/thread.h \
-    usb/transfer.h
+    usb/transfer.h \
+    model/minmaxvector.h
 
 FORMS += \
     gui/mainwindow.ui \
@@ -89,14 +93,21 @@ FORMS += \
     gui/oscilloscopeform.ui \
     gui/frequencyform.ui
 
+INCLUDEPATH += $$PWD/../include
+
 unix {
+    # libusb
+    CONFIG += link_pkgconfig
+    PKGCONFIG += libusb-1.0
 }
 
 win32 {
+    # qwt
     # Qt Creator uses this variable to construct the PATH variable for the dynamic linker to run lenlab
     CONFIG(release, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwt
     else:CONFIG(debug, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwtd
 
+    # libusb
     INCLUDEPATH += $$PWD/../libusb/include/libusb-1.0
     LIBS += -L$$PWD/../libusb/MinGW32/dll/ -llibusb-1.0
 }

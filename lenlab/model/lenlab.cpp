@@ -9,8 +9,8 @@ Lenlab::Lenlab(QObject *parent) :
     oscilloscope(new Oscilloscope(this)),
     signal(new Signal(this))
 {
-    connect(this, SIGNAL(reply(usb::pMessage reply)),
-            this, SLOT(on_reply(usb::pMessage reply)));
+    connect(this, SIGNAL(reply(usb::pMessage)),
+            this, SLOT(on_reply(usb::pMessage)));
 }
 
 bool
@@ -41,8 +41,10 @@ Lenlab::send(const usb::pMessage &cmd)
 void
 Lenlab::on_reply(const usb::pMessage &reply)
 {
-    uint8_t cmd = reply->getCommand();
-    if (cmd == 3)
+    qDebug("on_reply");
+    Command cmd = reply->getCommand();
+
+    if (cmd == startLogger)
         logger->receive(reply);
 }
 

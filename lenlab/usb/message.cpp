@@ -5,27 +5,26 @@ using namespace usb;
 int p_message_type_id = qRegisterMetaType<usb::pMessage>("pMessage");
 
 void
-Message::setCommand(uint8_t command)
+Message::setCommand(Command command)
 {
     buffer[0] = command;
 }
 
-uint8_t
-Message::getCommand()
+Command Message::getCommand()
 {
-    return buffer[0];
+    return (Command) buffer[0];
 }
 
 void
-Message::setReply(uint8_t reply)
+Message::setReply(Reply reply)
 {
     buffer[1] = reply;
 }
 
-uint8_t
+Reply
 Message::getReply()
 {
-    return buffer[1];
+    return (Reply) buffer[1];
 }
 
 void
