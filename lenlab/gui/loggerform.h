@@ -34,6 +34,10 @@ public:
 private slots:
     void on_startButton_clicked();
     void on_stopButton_clicked();
+    void on_saveButton_clicked();
+    void on_clearButton_clicked();
+    void on_autoSaveCheckBox_stateChanged(int);
+    void on_autoSaveChanged(bool);
 
 private:
     Ui::LoggerForm *ui;

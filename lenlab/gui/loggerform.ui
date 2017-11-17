@@ -72,21 +72,21 @@
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="pushButton_4">
+    <widget class="QPushButton" name="saveButton">
      <property name="text">
       <string>Speichern</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkBox">
+    <widget class="QCheckBox" name="autoSaveCheckBox">
      <property name="text">
       <string>Automatisch Speichern</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="lineEdit_2">
+    <widget class="QLineEdit" name="autoSaveLineEdit">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -96,7 +96,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="pushButton_5">
+    <widget class="QPushButton" name="clearButton">
      <property name="text">
       <string>Zurücksetzen</string>
      </property>

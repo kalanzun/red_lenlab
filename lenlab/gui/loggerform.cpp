@@ -3,6 +3,7 @@
 #include "pointvectorseriesdata.h"
 #include "mainwindow.h"
 #include <QMessageBox>
+#include <QFileDialog>
 
 namespace gui {
 
@@ -11,6 +12,8 @@ LoggerForm::LoggerForm(QWidget *parent) :
     ui(new Ui::LoggerForm)
 {
     ui->setupUi(this);
+
+    ui->autoSaveCheckBox->setEnabled(false);
 }
 
 LoggerForm::~LoggerForm()
@@ -28,6 +31,9 @@ void
 LoggerForm::setLenlab(model::Lenlab *_lenlab)
 {
     lenlab = _lenlab;
+
+    connect(lenlab->logger, SIGNAL(autoSaveChanged(bool)),
+            this, SLOT(on_autoSaveChanged(bool)));
 }
 
 void
@@ -65,6 +71,51 @@ LoggerForm::on_stopButton_clicked()
     if (lenlab->logger->isActive()) {
         lenlab->logger->stop();
     }
+}
+
+void
+LoggerForm::on_saveButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
+    try {
+        lenlab->logger->save(fileName);
+        ui->autoSaveLineEdit->setText(fileName);
+        ui->autoSaveCheckBox->setEnabled(true);
+        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+    }
+    catch (std::exception) {
+        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+        ui->autoSaveLineEdit->setText(QString());
+        ui->autoSaveCheckBox->setEnabled(false);
+        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+    }
+}
+
+void
+LoggerForm::on_clearButton_clicked()
+{
+    ui->autoSaveLineEdit->setText(QString());
+    ui->autoSaveCheckBox->setEnabled(false);
+    ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+    lenlab->logger->clear();
+}
+
+void
+LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
+{
+    if (state == Qt::Unchecked)
+        lenlab->logger->setAutoSave(false);
+    else if (state == Qt::Checked)
+        lenlab->logger->setAutoSave(true);
+}
+
+void
+LoggerForm::on_autoSaveChanged(bool autoSave)
+{
+    if (autoSave && ui->autoSaveCheckBox->checkState() == Qt::Unchecked)
+        ui->autoSaveCheckBox->setCheckState(Qt::Checked);
+    if (!autoSave && ui->autoSaveCheckBox->checkState() == Qt::Checked)
+        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
 }
 
 } // namespace gui
