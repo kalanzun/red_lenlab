@@ -34,6 +34,8 @@ signals:
     void command(const usb::pMessage &);
     void reply(const usb::pMessage &);
 
+    void logMessage(const QString &);
+
     void replot();
 
 public slots:

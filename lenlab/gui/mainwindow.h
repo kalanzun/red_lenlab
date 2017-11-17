@@ -26,10 +26,11 @@ public:
 
 private slots:
     void on_replot();
-    void on_signalAButton_toggled(bool checked);
-    void on_signalBButton_toggled(bool checked);
-    void on_logButton_toggled(bool checked);
-    void on_toolBox_currentChanged(int index);
+    void on_signalAButton_toggled(bool);
+    void on_signalBButton_toggled(bool);
+    void on_logButton_toggled(bool);
+    void on_toolBox_currentChanged(int);
+    void on_logMessage(const QString &);
 
 private:
     Ui::MainWindow *ui;

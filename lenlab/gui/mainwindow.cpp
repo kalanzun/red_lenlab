@@ -31,6 +31,9 @@ MainWindow::MainWindow(model::Lenlab *lenlab, QWidget *parent) :
 
     connect(lenlab, SIGNAL(replot()),
             this, SLOT(on_replot()));
+
+    connect(lenlab, SIGNAL(logMessage(QString)),
+            this, SLOT(on_logMessage(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -121,6 +124,12 @@ MainWindow::on_toolBox_currentChanged(int index)
         ui->signalAButton->setEnabled(true);
         ui->signalBButton->setEnabled(true);
     }
+}
+
+void
+MainWindow::on_logMessage(const QString &msg)
+{
+    ui->logPlainTextEdit->appendPlainText(msg);
 }
 
 } // namespace gui
