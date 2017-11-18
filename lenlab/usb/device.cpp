@@ -27,6 +27,13 @@ Device::Device(libusb_device *dev, QObject *parent) :
     connect(&*receiver1, SIGNAL(completed(pMessage)),
             this, SLOT(on_reply_transfer_ready()));
 
+    connect(&*sender, SIGNAL(error(QString)),
+            this, SIGNAL(error(QString)));
+    connect(&*receiver0, SIGNAL(error(QString)),
+            this, SIGNAL(error(QString)));
+    connect(&*receiver1, SIGNAL(error(QString)),
+            this, SIGNAL(error(QString)));
+
     receiver0->start(pMessage(new Message()));
     receiver1->start(pMessage(new Message()));
 

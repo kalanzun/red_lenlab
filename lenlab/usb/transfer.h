@@ -24,11 +24,11 @@ namespace usb {
         bool isActive();
 
     signals:
-        void completed(const pMessage&);
-        void error();
+        void completed(const pMessage &);
+        void error(const QString &);
 
     public slots:
-        void start(const pMessage&);
+        void start(const pMessage &);
 
     private:
         static void LIBUSB_CALL callbackComplete(struct libusb_transfer *xfr);

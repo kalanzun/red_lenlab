@@ -2,6 +2,7 @@
 #define COMPONENT_H
 
 #include "usb/message.h"
+#include "usb/handler.h"
 #include <QObject>
 
 namespace model {
@@ -28,6 +29,7 @@ public:
     virtual void stop();
 
     virtual void receive(const usb::pMessage &reply);
+    virtual void ready();
 
 signals:
 
@@ -35,6 +37,7 @@ public slots:
 
 protected:
     Lenlab *lenlab;
+
     bool active = 0;
 
 };

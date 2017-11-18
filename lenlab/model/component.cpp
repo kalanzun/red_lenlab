@@ -52,4 +52,10 @@ Component::receive(const usb::pMessage &reply)
 
 }
 
+void
+Component::ready()
+{
+
+}
+
 } // namespace model

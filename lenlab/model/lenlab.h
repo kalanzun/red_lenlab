@@ -35,7 +35,6 @@ public:
     Signal *signal;
 
 signals:
-    void command(const usb::pMessage &);
     void reply(const usb::pMessage &);
 
     void logMessage(const QString &);
@@ -46,9 +45,13 @@ public slots:
 
 private slots:
     void on_reply(const usb::pMessage &);
+    void on_ready();
+    void on_error();
 
 private:
     usb::Handler *handler;
+
+    bool ignore = true;
 };
 
 } // namespace model

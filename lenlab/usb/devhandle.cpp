@@ -7,8 +7,8 @@ using namespace usb::resource;
 DevHandle::DevHandle(libusb_device *dev)
 {
     qDebug("open");
-    int err = libusb_open(dev, &dev_handle);
-    if (err) throw Exception();
+    auto err = libusb_open(dev, &dev_handle);
+    if (err) throw Exception(libusb_strerror((libusb_error) err));
 }
 
 DevHandle::~DevHandle()

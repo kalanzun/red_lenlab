@@ -29,6 +29,10 @@ Lenlab::setHandler(usb::Handler *handler)
 
     connect(handler, SIGNAL(reply(usb::pMessage)),
             this, SLOT(on_reply(usb::pMessage)));
+    connect(handler, SIGNAL(ready()),
+            this, SLOT(on_ready()));
+    connect(handler, SIGNAL(error()),
+            this, SLOT(on_error()));
 }
 
 bool
@@ -62,8 +66,35 @@ Lenlab::on_reply(const usb::pMessage &reply)
     qDebug("on_reply");
     Command cmd = reply->getCommand();
 
+    if (cmd == init) {
+        ignore = false;
+    }
+
+    if (ignore) return;
+
     if (cmd == startLogger)
         logger->receive(reply);
+}
+
+void
+Lenlab::on_error()
+{
+    ignore = true;
+}
+
+void
+Lenlab::on_ready()
+{
+    qDebug("on_ready");
+
+    usb::pMessage cmd(new usb::Message());
+    cmd->setCommand(init);
+    send(cmd);
+
+    frequency->ready();
+    logger->ready();
+    oscilloscope->ready();
+    signal->ready();
 }
 
 } // namespace model

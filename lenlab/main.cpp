@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     */
     gui::MainWindow main_window;
     main_window.setModel(&lenlab);
+    main_window.setHandler(&handler);
     main_window.show();
 
     return application.exec();

@@ -7,8 +7,8 @@ using namespace usb::resource;
 Interface::Interface(libusb_device_handle *dev_handle) : dev_handle(dev_handle)
 {
     qDebug("claim");
-    int err = libusb_claim_interface(dev_handle, 0);
-    if (err) throw Exception();
+    auto err = libusb_claim_interface(dev_handle, 0);
+    if (err) throw Exception(libusb_strerror((libusb_error) err));
 }
 
 Interface::~Interface()

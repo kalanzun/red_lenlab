@@ -2,6 +2,7 @@
 #define GUI_MAINWINDOW_H
 
 #include "model/lenlab.h"
+#include "usb/handler.h"
 #include <QMainWindow>
 
 namespace gui {
@@ -23,6 +24,7 @@ public:
     ~MainWindow();
 
     void setModel(model::Lenlab *lenlab);
+    void setHandler(usb::Handler *handler);
 
     bool askToCancelActiveComponent(model::Component *next_component);
 
@@ -37,6 +39,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     model::Lenlab *lenlab;
+    usb::Handler *handler;
 
     bool signalA_checked = false;
     bool signalB_checked = false;

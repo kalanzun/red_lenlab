@@ -29,6 +29,9 @@ public:
     void clear();
 
     virtual void receive(const usb::pMessage &reply);
+    virtual void ready();
+
+    void restart();
 
     void setAutoSave(bool autoSave);
     bool autoSave() const;
@@ -55,6 +58,8 @@ private:
     bool m_autoSave = false;
     bool newData = false;
     int timer_id = 0;
+    double time_offset;
+
 };
 
 } // namespace model

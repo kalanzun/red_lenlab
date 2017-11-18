@@ -10,7 +10,7 @@ Transfer::Transfer(libusb_device_handle *dev_handle, unsigned char endpoint, QOb
     active(),
     xfr(libusb_alloc_transfer(0), libusb_free_transfer)
 {
-    if (!xfr) throw Exception();
+    if (!xfr) throw Exception("Error allocating transfer");
 
     xfr->dev_handle = dev_handle;
     xfr->endpoint = endpoint;
@@ -39,7 +39,9 @@ Transfer::start(const pMessage &message)
     xfr->length = message->getPacketLength();
     xfr->user_data = note.get();
     xfr->callback = callbackComplete;
-    if(libusb_submit_transfer(xfr.get()) < 0) throw Exception();
+
+    auto err = libusb_submit_transfer(xfr.get());
+    if (err) throw Exception(libusb_strerror((libusb_error) err));
 
     note.release(); // release ownership
 }
@@ -60,28 +62,28 @@ LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer *xfr)
             emit note->transfer->completed(note->message);
             break;
         case LIBUSB_TRANSFER_CANCELLED:
-            qDebug("USBTransfer error: LIBUSB_TRANSFER_CANCELLED");
-            //emit error();
+            qDebug("USB transfer error: LIBUSB_TRANSFER_CANCELLED");
+            emit note->transfer->error("USB transfer error: LIBUSB_TRANSFER_CANCELLED");
             break;
         case LIBUSB_TRANSFER_NO_DEVICE:
-            qDebug("USBTransfer error LIBUSB_TRANSFER_NO_DEVICE");
-            //emit error();
+            qDebug("USB transfer error: LIBUSB_TRANSFER_NO_DEVICE");
+            emit note->transfer->error("USB transfer error: LIBUSB_TRANSFER_NO_DEVICE");
             break;
         case LIBUSB_TRANSFER_TIMED_OUT:
-            qDebug("USBTransfer error LIBUSB_TRANSFER_TIMED_OUT");
-            //emit error();
+            qDebug("USB transfer error: LIBUSB_TRANSFER_TIMED_OUT");
+            emit note->transfer->error("USB transfer error: LIBUSB_TRANSFER_TIMED_OUT");
             break;
         case LIBUSB_TRANSFER_ERROR:
-            qDebug("USBTransfer error LIBUSB_TRANSFER_ERROR");
-            //emit error();
+            qDebug("USB transfer error: LIBUSB_TRANSFER_ERROR");
+            emit note->transfer->error("USB transfer error: LIBUSB_TRANSFER_ERROR");
             break;
         case LIBUSB_TRANSFER_STALL:
-            qDebug("USBTransfer error LIBUSB_TRANSFER_STALL");
-            //emit error();
+            qDebug("USB transfer error: LIBUSB_TRANSFER_STALL");
+            emit note->transfer->error("USB transfer error: LIBUSB_TRANSFER_STALL");
             break;
         case LIBUSB_TRANSFER_OVERFLOW:
-            qDebug("USBTransfer error LIBUSB_TRANSFER_OVERFLOW");
-            //emit error();
+            qDebug("USB transfer error: LIBUSB_TRANSFER_OVERFLOW");
+            emit note->transfer->error("USB transfer error: LIBUSB_TRANSFER_OVERFLOW");
             break;
     }
 }

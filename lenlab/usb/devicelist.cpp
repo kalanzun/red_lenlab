@@ -25,8 +25,9 @@ DeviceListIterator::operator *()
 
 DeviceList::DeviceList()
 {
-    count = libusb_get_device_list(NULL, &list);
-    if (!list) throw Exception();
+    auto err = libusb_get_device_list(NULL, &list);
+    if (err < 0) throw Exception(libusb_strerror((libusb_error) err));
+    else count = err;
 }
 
 DeviceList::~DeviceList()

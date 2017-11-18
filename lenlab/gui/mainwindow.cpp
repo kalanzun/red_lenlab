@@ -56,6 +56,15 @@ MainWindow::setModel(model::Lenlab *lenlab)
     ui->signalB->setModel(lenlab);
 }
 
+void
+MainWindow::setHandler(usb::Handler *handler)
+{
+    this->handler = handler;
+
+    connect(handler, SIGNAL(logMessage(QString)),
+            this, SLOT(on_logMessage(QString)));
+}
+
 bool
 MainWindow::askToCancelActiveComponent(model::Component *next_component)
 {

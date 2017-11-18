@@ -5,8 +5,8 @@ using namespace usb::resource;
 
 Context::Context()
 {
-    int err = libusb_init(&ctx);
-    if (err) throw Exception();
+    auto err = libusb_init(&ctx);
+    if (err) throw Exception(libusb_strerror((libusb_error) err));
 }
 
 Context::~Context()

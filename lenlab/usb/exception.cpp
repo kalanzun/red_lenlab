@@ -2,7 +2,13 @@
 
 using namespace usb;
 
-Exception::Exception() : std::exception()
+Exception::Exception(const QString &msg) : std::exception(), msg(msg)
 {
 
+}
+
+const QString &
+Exception::getMsg() const
+{
+    return msg;
 }

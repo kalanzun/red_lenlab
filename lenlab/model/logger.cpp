@@ -41,6 +41,19 @@ Logger::setInterval(uint32_t interval)
 void
 Logger::start()
 {
+    super::start();
+
+    restart();
+}
+
+void
+Logger::restart()
+{
+    if (data[0].isEmpty())
+        time_offset = 0;
+    else
+        time_offset = data[0].last() + interval / MSEC;
+
     qDebug("set intervall");
     usb::pMessage cmdSetInterval(new usb::Message());
     cmdSetInterval->setCommand(setLoggerInterval);
@@ -52,8 +65,6 @@ Logger::start()
     usb::pMessage cmdStart(new usb::Message());
     cmdStart->setCommand(startLogger);
     lenlab->send(cmdStart);
-
-    super::start();
 }
 
 void
@@ -75,7 +86,7 @@ Logger::receive(const usb::pMessage &reply)
     Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
 
     // 4 bytes timestamp
-    data[0].append((double) *buffer / MSEC);
+    data[0].append(time_offset + (double) *buffer / MSEC);
 
     // 4 channels, 4 bytes each
     for (size_t i = 1; i < data.size(); i++) {
@@ -85,6 +96,13 @@ Logger::receive(const usb::pMessage &reply)
     newData = true;
 
     emit replot();
+}
+
+void
+Logger::ready()
+{
+    if (active)
+        restart();
 }
 
 void

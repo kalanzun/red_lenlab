@@ -26,11 +26,18 @@ namespace usb {
 
     signals:
         void reply(const pMessage &);
-
         void ready();
+        void logMessage(const QString &);
+
+        void query();
+
+    private slots:
+        void on_error(const QString &);
+        void on_query();
 
     private:
-        void queryUSBDevices();
+        void open(libusb_device *dev);
+
         void timerEvent(QTimerEvent *event);
     };
 
