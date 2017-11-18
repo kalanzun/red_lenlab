@@ -30,12 +30,12 @@ namespace usb {
     public:
         explicit Device(libusb_device *dev, QObject *parent = nullptr);
 
+        void send(const pMessage &cmd);
+
     signals:
         void reply(const pMessage &);
-        void command(const pMessage &);
 
     private slots:
-        void on_command(const pMessage &command);
         void on_reply_transfer_ready();
         void on_send_transfer_ready();
 

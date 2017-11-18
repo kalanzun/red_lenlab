@@ -9,6 +9,13 @@ Handler::Handler(QObject *parent) : QObject(parent)
     timer_id = startTimer(250);
 }
 
+void
+Handler::send(const pMessage &cmd)
+{
+    if (device)
+        device->send(cmd);
+}
+
 bool
 Handler::isReady()
 {
@@ -29,7 +36,7 @@ void Handler::queryUSBDevices() {
           // Open USB device
           device.reset(new Device(dev));
           connect(device.data(), SIGNAL(reply(pMessage)), this, SIGNAL(reply(pMessage)));
-          connect(this, SIGNAL(command(pMessage)), device.data(), SIGNAL(command(pMessage)));
+          //connect(this, SIGNAL(command(pMessage)), device.data(), SIGNAL(command(pMessage)));
 
           break;
        }

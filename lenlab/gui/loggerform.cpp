@@ -24,56 +24,68 @@ LoggerForm::~LoggerForm()
     delete ui;
 }
 
+/**
+ * @brief LoggerForm::setMainWindow
+ * @param main_window
+ *
+ * It does not take ownership.
+ */
+
 void
-LoggerForm::setMainWindow(MainWindow *_main_window)
+LoggerForm::setMainWindow(MainWindow *main_window)
 {
-    main_window = _main_window;
+    this->main_window = main_window;
+}
+
+/**
+ * @brief LoggerForm::setModel
+ * @param lenlab
+ *
+ * It does not take ownership.
+ */
+
+void
+LoggerForm::setModel(model::Lenlab *lenlab)
+{
+    this->lenlab = lenlab;
+    this->logger = lenlab->logger;
+
+    newCurve(&logger->data[0], &logger->data[1], Qt::yellow, 2, true);
+    newCurve(&logger->data[0], &logger->data[2], Qt::green, 2, false);
+    newCurve(&logger->data[0], &logger->data[3], Qt::blue, 2, false);
+    newCurve(&logger->data[0], &logger->data[4], Qt::red, 2, false);
+
+    connect(logger, SIGNAL(replot()),
+            this, SLOT(on_replot()));
 }
 
 void
-LoggerForm::setLenlab(model::Lenlab *_lenlab)
+LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible)
 {
-    lenlab = _lenlab;
-    /*
-    connect(lenlab->logger, SIGNAL(autoSaveChanged(bool)),
-            this, SLOT(on_autoSaveChanged(bool)));
-            */
-}
-
-void
-LoggerForm::configurePlot(QwtPlot *plot)
-{
-    configureCurve(plot, &curves[0], &lenlab->logger->data[0], &lenlab->logger->data[1], Qt::yellow, 2, true);
-    configureCurve(plot, &curves[1], &lenlab->logger->data[0], &lenlab->logger->data[2], Qt::green, 2, false);
-    configureCurve(plot, &curves[2], &lenlab->logger->data[0], &lenlab->logger->data[3], Qt::blue, 2, false);
-    configureCurve(plot, &curves[3], &lenlab->logger->data[0], &lenlab->logger->data[4], Qt::red, 2, false);
-}
-
-void
-LoggerForm::configureCurve(QwtPlot *plot, QwtPlotCurve *curve, model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible)
-{
+    // Todo this may leak curves
+    QwtPlotCurve *curve(new QwtPlotCurve());
     curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
     curve->setPen(color, width);
     curve->setVisible(visible);
-    //curve->attach(plot);
+    curve->attach(ui->plot); // acquires ownership
 }
 
 void
 LoggerForm::on_startButton_clicked()
 {
-    if (!lenlab->logger->isActive()) {
+    if (!logger->isActive()) {
         if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(lenlab->logger)) return;
+            if (!main_window->askToCancelActiveComponent(logger)) return;
         }
-        lenlab->logger->start();
+        logger->start();
     }
 }
 
 void
 LoggerForm::on_stopButton_clicked()
 {
-    if (lenlab->logger->isActive()) {
-        lenlab->logger->stop();
+    if (logger->isActive()) {
+        logger->stop();
     }
 }
 
@@ -82,14 +94,14 @@ LoggerForm::on_saveButton_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
-        lenlab->logger->save(fileName);
-        ui->autoSaveLineEdit->setText(fileName);
+        logger->save(fileName);
+        ui->autoSaveEdit->setText(fileName);
         ui->autoSaveCheckBox->setEnabled(true);
         ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
     }
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
-        ui->autoSaveLineEdit->setText(QString());
+        ui->autoSaveEdit->setText(QString());
         ui->autoSaveCheckBox->setEnabled(false);
         ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
     }
@@ -98,19 +110,26 @@ LoggerForm::on_saveButton_clicked()
 void
 LoggerForm::on_clearButton_clicked()
 {
-    ui->autoSaveLineEdit->setText(QString());
+    ui->autoSaveEdit->setText(QString());
     ui->autoSaveCheckBox->setEnabled(false);
     ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
-    lenlab->logger->clear();
+
+    logger->clear();
 }
 
 void
 LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
 {
     if (state == Qt::Unchecked)
-        lenlab->logger->setAutoSave(false);
+        logger->setAutoSave(false);
     else if (state == Qt::Checked)
-        lenlab->logger->setAutoSave(true);
+        logger->setAutoSave(true);
+}
+
+void
+LoggerForm::on_replot()
+{
+    ui->plot->replot();
 }
 
 void
@@ -120,6 +139,18 @@ LoggerForm::on_autoSaveChanged(bool autoSave)
         ui->autoSaveCheckBox->setCheckState(Qt::Checked);
     if (!autoSave && ui->autoSaveCheckBox->checkState() == Qt::Checked)
         ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+}
+
+void
+LoggerForm::on_intervalButton_clicked()
+{
+
+}
+
+void
+LoggerForm::on_intervalEdit_editingFinished()
+{
+
 }
 
 } // namespace gui

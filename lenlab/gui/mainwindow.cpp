@@ -5,33 +5,17 @@
 
 namespace gui {
 
-MainWindow::MainWindow(model::Lenlab *lenlab, QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    lenlab(lenlab)
+    ui(new Ui::MainWindow)
 {
     qDebug() << "MainWindow";
     ui->setupUi(this);
-
-    /*
-    ui->frequencyPage->setMainWindow(this);
-    ui->frequencyPage->setLenlab(lenlab);
-    ui->loggerPage->setMainWindow(this);
-    ui->loggerPage->setLenlab(lenlab);
-    ui->oscilloscopePage->setMainWindow(this);
-    ui->oscilloscopePage->setLenlab(lenlab);
-    ui->signalA->setMainWindow(this);
-    ui->signalA->setLenlab(lenlab);
-    ui->signalB->setMainWindow(this);
-    ui->signalB->setLenlab(lenlab);
-
-    ui->loggerPage->configurePlot(ui->plot);
 
     ui->signalA->hide();
     ui->signalA->setTitle("Signalgenerator A");
     ui->signalB->hide();
     ui->signalB->setTitle("Signalgenerator B");
-    */
 
     /*
     connect(lenlab, SIGNAL(replot()),
@@ -46,6 +30,30 @@ MainWindow::~MainWindow()
 {
     qDebug("~MainWindow");
     delete ui;
+}
+
+/**
+ * @brief MainWindow::setModel
+ * @param lenlab
+ *
+ * It does not take ownership.
+ */
+
+void
+MainWindow::setModel(model::Lenlab *lenlab)
+{
+    this->lenlab = lenlab;
+
+    ui->loggerTab->setMainWindow(this);
+    ui->loggerTab->setModel(lenlab);
+    ui->oscilloscopeTab->setMainWindow(this);
+    ui->oscilloscopeTab->setModel(lenlab);
+    ui->FrequencyTab->setMainWindow(this);
+    ui->FrequencyTab->setModel(lenlab);
+    ui->signalA->setMainWindow(this);
+    ui->signalA->setModel(lenlab);
+    ui->signalB->setMainWindow(this);
+    ui->signalB->setModel(lenlab);
 }
 
 bool

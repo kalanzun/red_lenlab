@@ -19,33 +19,34 @@ FrequencyForm::~FrequencyForm()
 }
 
 void
-FrequencyForm::setMainWindow(MainWindow *_main_window)
+FrequencyForm::setMainWindow(MainWindow *main_window)
 {
-    main_window = _main_window;
+    this->main_window = main_window;
 }
 
 void
-FrequencyForm::setLenlab(model::Lenlab *_lenlab)
+FrequencyForm::setModel(model::Lenlab *lenlab)
 {
-    lenlab = _lenlab;
+    this->lenlab = lenlab;
+    this->frequency = lenlab->frequency;
 }
 
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!lenlab->frequency->isActive()) {
+    if (!frequency->isActive()) {
         if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(lenlab->frequency)) return;
+            if (!main_window->askToCancelActiveComponent(frequency)) return;
         }
-        lenlab->frequency->start();
+        frequency->start();
     }
 }
 
 void
 FrequencyForm::on_stopButton_clicked()
 {
-    if (lenlab->frequency->isActive()) {
-        lenlab->frequency->stop();
+    if (frequency->isActive()) {
+        frequency->stop();
     }
 }
 

@@ -19,9 +19,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_3">
+  <layout class="QHBoxLayout" name="horizontalLayout_0">
    <item>
-    <widget class="QwtPlot" name="qwtPlot">
+    <widget class="QwtPlot" name="plot">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -31,9 +31,30 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout_0">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="intervalButton">
+         <property name="text">
+          <string>Intervall [s]</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="intervalEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_1">
        <item>
         <widget class="QPushButton" name="startButton">
          <property name="text">
@@ -53,7 +74,7 @@
      <item>
       <widget class="QScrollArea" name="scrollArea">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -72,39 +93,11 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>232</width>
-          <height>542</height>
+          <width>230</width>
+          <height>506</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QWidget" name="widget" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QPushButton" name="pushButton">
-              <property name="text">
-               <string>Intervall [s]</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEdit"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
          <item>
           <widget class="QPushButton" name="saveButton">
            <property name="text">
@@ -120,7 +113,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="autoSaveLineEdit">
+          <widget class="QLineEdit" name="autoSaveEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>

@@ -11,7 +11,7 @@ SignalForm::SignalForm(QWidget *parent) :
     qDebug() << "SignalForm";
     ui->setupUi(this);
 
-    setParameterUIConfiguration(true, false, false);
+    setUIConfiguration(true, false, false);
 }
 
 SignalForm::~SignalForm()
@@ -21,15 +21,16 @@ SignalForm::~SignalForm()
 }
 
 void
-SignalForm::setMainWindow(MainWindow *_main_window)
+SignalForm::setMainWindow(MainWindow *main_window)
 {
-    main_window = _main_window;
+    this->main_window = main_window;
 }
 
 void
-SignalForm::setLenlab(model::Lenlab *_lenlab)
+SignalForm::setModel(model::Lenlab *lenlab)
 {
-    lenlab = _lenlab;
+    this->lenlab = lenlab;
+    this->signal = lenlab->signal;
 }
 
 void
@@ -39,7 +40,7 @@ SignalForm::setTitle(QString title)
 }
 
 void
-SignalForm::setParameterUIConfiguration(bool amplitude, bool frequency, bool dutycycle)
+SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool dutycycle)
 {
     if (amplitude) {
         ui->amplitudeButton->show();

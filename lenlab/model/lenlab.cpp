@@ -22,6 +22,15 @@ Lenlab::~Lenlab()
     qDebug() << "~Lenlab";
 }
 
+void
+Lenlab::setHandler(usb::Handler *handler)
+{
+    this->handler = handler;
+
+    connect(handler, SIGNAL(reply(usb::pMessage)),
+            this, SLOT(on_reply(usb::pMessage)));
+}
+
 bool
 Lenlab::isActive()
 {
@@ -44,7 +53,7 @@ Lenlab::getActiveComponent()
 void
 Lenlab::send(const usb::pMessage &cmd)
 {
-    emit command(cmd);
+    handler->send(cmd);
 }
 
 void

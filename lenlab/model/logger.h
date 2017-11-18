@@ -39,6 +39,7 @@ public:
 
 
 signals:
+    void replot();
     void autoSaveChanged(bool);
 
 public slots:

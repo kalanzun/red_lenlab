@@ -19,8 +19,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(model::Lenlab *lenlab, QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    void setModel(model::Lenlab *lenlab);
 
     bool askToCancelActiveComponent(model::Component *next_component);
 
@@ -39,7 +41,6 @@ private:
     bool signalA_checked = false;
     bool signalB_checked = false;
 };
-
 
 } // namespace gui
 #endif // GUI_MAINWINDOW_H

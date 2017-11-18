@@ -2,7 +2,9 @@
 
 namespace gui {
 
-PointVectorSeriesData::PointVectorSeriesData(model::MinMaxVector *time, model::MinMaxVector *value) : time(time), value(value)
+PointVectorSeriesData::PointVectorSeriesData(model::MinMaxVector *time, model::MinMaxVector *value) :
+    time(time),
+    value(value)
 {
 
 }

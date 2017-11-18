@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "oscilloscope.h"
 #include "signal.h"
+#include "usb/handler.h"
 #include "usb/message.h"
 #include <QObject>
 
@@ -20,6 +21,8 @@ class Lenlab : public QObject
 public:
     explicit Lenlab(QObject *parent = nullptr);
     virtual ~Lenlab();
+
+    void setHandler(usb::Handler *handler);
 
     bool isActive();
     Component *getActiveComponent();
@@ -45,6 +48,7 @@ private slots:
     void on_reply(const usb::pMessage &);
 
 private:
+    usb::Handler *handler;
 };
 
 } // namespace model

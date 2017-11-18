@@ -5,11 +5,12 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication application(argc, argv);
+
+    usb::Handler handler;
 
     model::Lenlab lenlab;
-
-    //usb::Handler handler;
+    lenlab.setHandler(&handler);
 
     /*
     QObject::connect(&handler, SIGNAL(reply(usb::pMessage)),
@@ -18,8 +19,9 @@ int main(int argc, char *argv[])
     QObject::connect(&lenlab, SIGNAL(command(usb::pMessage)),
                      &handler, SIGNAL(command(usb::pMessage)));
     */
-    gui::MainWindow w(&lenlab);
-    w.show();
+    gui::MainWindow main_window;
+    main_window.setModel(&lenlab);
+    main_window.show();
 
-    return a.exec();
+    return application.exec();
 }

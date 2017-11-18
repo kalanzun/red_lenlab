@@ -19,33 +19,34 @@ OscilloscopeForm::~OscilloscopeForm()
 }
 
 void
-OscilloscopeForm::setMainWindow(MainWindow *_main_window)
+OscilloscopeForm::setMainWindow(MainWindow *main_window)
 {
-    main_window = _main_window;
+    this->main_window = main_window;
 }
 
 void
-OscilloscopeForm::setLenlab(model::Lenlab *_lenlab)
+OscilloscopeForm::setModel(model::Lenlab *lenlab)
 {
-    lenlab = _lenlab;
+    this->lenlab = lenlab;
+    this->oscilloscope = lenlab->oscilloscope;
 }
 
 void
 OscilloscopeForm::on_startButton_clicked()
 {
-    if (!lenlab->oscilloscope->isActive()) {
+    if (!oscilloscope->isActive()) {
         if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(lenlab->oscilloscope)) return;
+            if (!main_window->askToCancelActiveComponent(oscilloscope)) return;
         }
-        lenlab->oscilloscope->start();
+        oscilloscope->start();
     }
 }
 
 void
 OscilloscopeForm::on_stopButton_clicked()
 {
-    if (lenlab->oscilloscope->isActive()) {
-        lenlab->oscilloscope->stop();
+    if (oscilloscope->isActive()) {
+        oscilloscope->stop();
     }
 }
 

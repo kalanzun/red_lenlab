@@ -23,17 +23,19 @@ public:
     explicit SignalForm(QWidget *parent = 0);
     ~SignalForm();
 
-    void setMainWindow(MainWindow *_main_window);
-    void setLenlab(model::Lenlab *_lenlab);
+    void setMainWindow(MainWindow *main_window);
+    void setModel(model::Lenlab *lenlab);
     void setTitle(QString title);
 
 private:
-    void setParameterUIConfiguration(bool amplitude, bool frequency, bool dutycycle);
+    void setUIConfiguration(bool amplitude, bool frequency, bool dutycycle);
+
     Ui::SignalForm *ui;
+
     MainWindow *main_window;
     model::Lenlab *lenlab;
+    model::Signal *signal;
 };
-
 
 } // namespace gui
 #endif // GUI_SIGNALFORM_H

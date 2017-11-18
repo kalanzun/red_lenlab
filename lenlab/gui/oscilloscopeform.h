@@ -23,8 +23,8 @@ public:
     explicit OscilloscopeForm(QWidget *parent = 0);
     ~OscilloscopeForm();
 
-    void setMainWindow(MainWindow *_main_window);
-    void setLenlab(model::Lenlab *_lenlab);
+    void setMainWindow(MainWindow *main_window);
+    void setModel(model::Lenlab *lenlab);
 
 private slots:
     void on_startButton_clicked();
@@ -32,8 +32,10 @@ private slots:
 
 private:
     Ui::OscilloscopeForm *ui;
+
     MainWindow *main_window;
     model::Lenlab *lenlab;
+    model::Oscilloscope *oscilloscope;
 };
 
 

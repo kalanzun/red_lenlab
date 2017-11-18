@@ -62,11 +62,14 @@ Logger::clear()
     this->fileName = QString();
     setAutoSave(false);
     for (auto vector : data) vector.clear();
+    emit replot();
 }
 
 void
 Logger::receive(const usb::pMessage &reply)
 {
+    qDebug("receive");
+
     uint32_t *buffer = (uint32_t *) reply->getPayload();
 
     Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
@@ -81,7 +84,7 @@ Logger::receive(const usb::pMessage &reply)
 
     newData = true;
 
-    emit lenlab->replot();
+    emit replot();
 }
 
 void

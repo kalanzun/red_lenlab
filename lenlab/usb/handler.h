@@ -20,10 +20,11 @@ namespace usb {
     public:
         explicit Handler(QObject *parent = nullptr);
 
+        void send(const pMessage &cmd);
+
         bool isReady();
 
     signals:
-        void command(const pMessage &);
         void reply(const pMessage &);
 
         void ready();
