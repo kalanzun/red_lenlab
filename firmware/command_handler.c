@@ -21,6 +21,20 @@
 tCommandHandler command_handler;
 
 
+void
+on_init(tEvent *event)
+{
+    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+
+    LoggerStop();
+
+    EventSetCommand(reply, init);
+    reply->length = 4;
+
+    QueueWrite(&reply_handler.reply_queue);
+}
+
+
 const uint8_t name[] = "KIT Lenlab Red Firmware version 0.1 year 2017";
 
 #define NAME_SIZE (sizeof(name))
@@ -172,7 +186,8 @@ CommandHandlerMain(void)
         event = QueueRead(&command_handler.command_queue);
         command = EventGetCommand(event);
         if (command < NUM_COMMANDS) {
-            if (command == getName) on_getName(event);
+            if (command == init) on_init(event);
+            else if (command == getName) on_getName(event);
             else if (command == setLoggerInterval) on_setLoggerInterval(event);
             else if (command == startLogger) on_startLogger(event);
             else if (command == stopLogger) on_stopLogger(event);
