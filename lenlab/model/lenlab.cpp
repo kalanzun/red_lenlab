@@ -1,4 +1,5 @@
 #include "lenlab.h"
+#include <QDebug>
 
 namespace model {
 
@@ -9,8 +10,16 @@ Lenlab::Lenlab(QObject *parent) :
     oscilloscope(new Oscilloscope(this)),
     signal(new Signal(this))
 {
+    qDebug() << "Lenlab";
+    /*
     connect(this, SIGNAL(reply(usb::pMessage)),
             this, SLOT(on_reply(usb::pMessage)));
+            */
+}
+
+Lenlab::~Lenlab()
+{
+    qDebug() << "~Lenlab";
 }
 
 bool

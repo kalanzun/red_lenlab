@@ -1,5 +1,6 @@
 #include "signalform.h"
 #include "ui_signalform.h"
+#include <QDebug>
 
 namespace gui {
 
@@ -7,6 +8,7 @@ SignalForm::SignalForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SignalForm)
 {
+    qDebug() << "SignalForm";
     ui->setupUi(this);
 
     setParameterUIConfiguration(true, false, false);
@@ -14,6 +16,7 @@ SignalForm::SignalForm(QWidget *parent) :
 
 SignalForm::~SignalForm()
 {
+    qDebug() << "~SignalForm";
     delete ui;
 }
 

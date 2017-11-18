@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include <QDebug>
 
 namespace gui {
 
@@ -9,8 +10,10 @@ MainWindow::MainWindow(model::Lenlab *lenlab, QWidget *parent) :
     ui(new Ui::MainWindow),
     lenlab(lenlab)
 {
+    qDebug() << "MainWindow";
     ui->setupUi(this);
 
+    /*
     ui->frequencyPage->setMainWindow(this);
     ui->frequencyPage->setLenlab(lenlab);
     ui->loggerPage->setMainWindow(this);
@@ -28,16 +31,20 @@ MainWindow::MainWindow(model::Lenlab *lenlab, QWidget *parent) :
     ui->signalA->setTitle("Signalgenerator A");
     ui->signalB->hide();
     ui->signalB->setTitle("Signalgenerator B");
+    */
 
+    /*
     connect(lenlab, SIGNAL(replot()),
             this, SLOT(on_replot()));
 
     connect(lenlab, SIGNAL(logMessage(QString)),
             this, SLOT(on_logMessage(QString)));
+            */
 }
 
 MainWindow::~MainWindow()
 {
+    qDebug("~MainWindow");
     delete ui;
 }
 
@@ -68,7 +75,7 @@ MainWindow::askToCancelActiveComponent(model::Component *next_component)
 void
 MainWindow::on_replot()
 {
-    ui->plot->replot();
+    //ui->plot->replot();
 }
 
 void

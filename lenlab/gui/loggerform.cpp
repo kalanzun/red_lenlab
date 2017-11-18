@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QDebug>
 
 namespace gui {
 
@@ -11,6 +12,7 @@ LoggerForm::LoggerForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LoggerForm)
 {
+    qDebug() << "LoggerForm";
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
@@ -18,6 +20,7 @@ LoggerForm::LoggerForm(QWidget *parent) :
 
 LoggerForm::~LoggerForm()
 {
+    qDebug() << "~LoggerForm";
     delete ui;
 }
 
@@ -31,9 +34,10 @@ void
 LoggerForm::setLenlab(model::Lenlab *_lenlab)
 {
     lenlab = _lenlab;
-
+    /*
     connect(lenlab->logger, SIGNAL(autoSaveChanged(bool)),
             this, SLOT(on_autoSaveChanged(bool)));
+            */
 }
 
 void
@@ -51,7 +55,7 @@ LoggerForm::configureCurve(QwtPlot *plot, QwtPlotCurve *curve, model::MinMaxVect
     curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
     curve->setPen(color, width);
     curve->setVisible(visible);
-    curve->attach(plot);
+    //curve->attach(plot);
 }
 
 void

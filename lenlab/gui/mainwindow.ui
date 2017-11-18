@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>618</width>
-    <height>470</height>
+    <width>628</width>
+    <height>495</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,19 +18,25 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QwtPlot" name="plot">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
         </property>
-        <property name="minimumSize">
-         <size>
-          <width>400</width>
-          <height>300</height>
-         </size>
-        </property>
+        <widget class="gui::LoggerForm" name="loggerTab">
+         <attribute name="title">
+          <string>Logger</string>
+         </attribute>
+        </widget>
+        <widget class="gui::OscilloscopeForm" name="oscilloscopeTab">
+         <attribute name="title">
+          <string>Oszilloskop</string>
+         </attribute>
+        </widget>
+        <widget class="gui::FrequencyForm" name="FrequencyTab">
+         <attribute name="title">
+          <string>Frequenzanalyse</string>
+         </attribute>
+        </widget>
        </widget>
       </item>
       <item>
@@ -115,68 +121,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <widget class="QToolBox" name="toolBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="gui::LoggerForm" name="loggerPage">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>200</width>
-         <height>365</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <attribute name="label">
-        <string>Logger</string>
-       </attribute>
-      </widget>
-      <widget class="gui::OscilloscopeForm" name="oscilloscopePage">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>200</width>
-         <height>365</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <attribute name="label">
-        <string>Oszilloskop</string>
-       </attribute>
-      </widget>
-      <widget class="gui::FrequencyForm" name="frequencyPage">
-       <attribute name="label">
-        <string>Frequenzanalyse</string>
-       </attribute>
-      </widget>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -184,8 +128,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>618</width>
-     <height>18</height>
+     <width>628</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLenlab">
@@ -234,11 +178,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-  </customwidget>
   <customwidget>
    <class>gui::SignalForm</class>
    <extends>QWidget</extends>

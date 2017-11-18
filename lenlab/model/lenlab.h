@@ -19,6 +19,7 @@ class Lenlab : public QObject
     Q_OBJECT
 public:
     explicit Lenlab(QObject *parent = nullptr);
+    virtual ~Lenlab();
 
     bool isActive();
     Component *getActiveComponent();

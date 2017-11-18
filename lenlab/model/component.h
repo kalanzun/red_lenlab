@@ -17,6 +17,7 @@ class Component : public QObject
     Q_OBJECT
 public:
     explicit Component(Lenlab *parent);
+    virtual ~Component();
 
     bool isActive();
 

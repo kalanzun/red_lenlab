@@ -1,11 +1,17 @@
 #include "component.h"
 #include "lenlab.h"
+#include <QDebug>
 
 namespace model {
 
 Component::Component(Lenlab *parent) : QObject(parent), lenlab(parent)
 {
+    qDebug() << "Component";
+}
 
+Component::~Component()
+{
+    qDebug() << "~Component";
 }
 
 bool

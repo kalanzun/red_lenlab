@@ -1,5 +1,6 @@
 #include "frequencyform.h"
 #include "ui_frequencyform.h"
+#include <QDebug>
 
 namespace gui {
 
@@ -7,11 +8,13 @@ FrequencyForm::FrequencyForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FrequencyForm)
 {
+    qDebug() << "FrequencyForm";
     ui->setupUi(this);
 }
 
 FrequencyForm::~FrequencyForm()
 {
+    qDebug() << "~FrequencyForm";
     delete ui;
 }
 
