@@ -1,6 +1,7 @@
 #include "handler.h"
 #include "devicelist.h"
 #include "exception.h"
+#include "lenlab_protocol.h"
 #include <QTimerEvent>
 #include <QDebug>
 
@@ -37,7 +38,7 @@ Handler::on_query() {
         libusb_get_device_descriptor(dev, &desc);
 
         // Is it our device?
-        if(desc.idVendor == 0x1cbe && desc.idProduct == 0x0003) {
+        if(desc.idVendor == LENLAB_VID && desc.idProduct == LENLAB_PID) {
             open(dev);
             return;
         }
