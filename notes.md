@@ -136,3 +136,8 @@ A component produces know test data and fills the ADC queue with it. DataHandler
 
 Test runs for a fixed time, is started by command handler, and sends back a result through reply handler.
 
+# USB Device
+
+New PID. The former Lenlab board had a different configuration and so computers, which saw the old device, cannot assign the driver anymore.
+
+The old Lenlab won't find the new device, the new Lenlab won't find the old ones.
