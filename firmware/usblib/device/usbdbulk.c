@@ -96,7 +96,9 @@ uint8_t g_pui8BulkDeviceDescriptor[] =
 {
     18,                         // Size of this structure.
     USB_DTYPE_DEVICE,           // Type of this structure.
-    USBShort(0x110),            // USB version 1.1 (if we say 2.0, hosts assume
+    USBShort(0x200),            // PATCH for Microsoft OS Descriptor Support
+                                // Microsoft OS Descriptor only works with USB Version 2.0
+                                // USB version 1.1 (if we say 2.0, hosts assume
                                 // high-speed - see USB 2.0 spec 9.2.6.6)
     USB_CLASS_VEND_SPECIFIC,    // USB Device Class
     0,                          // USB Device Sub-class
@@ -326,6 +328,9 @@ static void HandleResume(void *pvBulkDevice);
 static void HandleDevice(void *pvBulkDevice, uint32_t ui32Request,
                          void *pvRequestData);
 
+// PATCH for Microsoft OS Descriptor Support
+extern void MSOSDescriptorHandleVendorRequest(void *pvBulkDevice, tUSBRequest *pUSBRequest);
+
 //*****************************************************************************
 //
 // Device event handler callbacks.
@@ -341,7 +346,8 @@ const tCustomHandlers g_sBulkHandlers =
     //
     // RequestHandler
     //
-    0,
+    // PATCH for Microsoft OS Descriptor Support
+    MSOSDescriptorHandleVendorRequest,
 
     //
     // InterfaceChange
