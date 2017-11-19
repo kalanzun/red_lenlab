@@ -14,6 +14,7 @@
 #include "driverlib/udma.h"
 #include "driverlib/debug.h"
 #include "usblib/usb-ids.h"
+#include "lenlab_protocol.h"
 #include "usb_device.h"
 #include "command_handler.h"
 #include "data_handler.h"
@@ -146,8 +147,8 @@ uint32_t YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32
 
 // USBDBulkInit does not accept a const tUSBDBulkDevice *
 tUSBDBulkDevice bulk_device = {
-    USB_VID_TI_1CBE,
-    0x0270,
+    LENLAB_VID,
+    LENLAB_PID,
     500, // mA
     USB_CONF_ATTR_SELF_PWR,
     YourUSBReceiveEventCallback,
