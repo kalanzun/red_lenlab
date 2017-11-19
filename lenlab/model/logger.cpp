@@ -68,11 +68,25 @@ Logger::restart()
 }
 
 void
+Logger::stop()
+{
+    qDebug("stop");
+    usb::pMessage cmd(new usb::Message());
+    cmd->setCommand(stopLogger);
+    lenlab->send(cmd);
+
+    super::stop();
+}
+
+void
 Logger::clear()
 {
+    if (active)
+        stop();
+
     this->fileName = QString();
     setAutoSave(false);
-    for (auto vector : data) vector.clear();
+    for (auto &vector : data) vector.clear();
     emit replot();
 }
 
@@ -111,7 +125,8 @@ Logger::setAutoSave(bool autoSave)
     if (m_autoSave != autoSave) {
         m_autoSave = autoSave;
         if (m_autoSave) {
-            timer_id = startTimer(1000);
+            timer_id = startTimer(3000);
+            newData = false;
         }
         else {
             killTimer(timer_id);
@@ -133,11 +148,12 @@ Logger::timerEvent(QTimerEvent *event)
         if (newData) {
             try {
                 _save();
-                throw std::exception();
+                newData = false;
+                //throw std::exception();
             }
             catch (std::exception) {
                 setAutoSave(false);
-                emit lenlab->logMessage("Logger automatic save failed."); // TODO include reason
+                emit lenlab->logMessage("Logger: Fehler beim automatischen Speichern."); // TODO include reason
             }
         }
     }
@@ -177,14 +193,12 @@ Logger::_save()
     for (size_t t = 0; t < data[0].size(); t++) {
         stream << data[0][t];
         for (size_t i = 1; i < data.size(); i++) {
-            stream << ", " << data[i][t]; // TODO double format for save file
+            stream << ", " << data[i][t];
         }
         stream << "\n";
     }
 
     file.commit();
-
-    newData = false;
 }
 
 } // namespace model

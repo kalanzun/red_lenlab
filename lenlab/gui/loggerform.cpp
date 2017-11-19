@@ -50,24 +50,26 @@ LoggerForm::setModel(model::Lenlab *lenlab)
     this->lenlab = lenlab;
     this->logger = lenlab->logger;
 
-    newCurve(&logger->data[0], &logger->data[1], Qt::yellow, 2, true);
-    newCurve(&logger->data[0], &logger->data[2], Qt::green, 2, false);
-    newCurve(&logger->data[0], &logger->data[3], Qt::blue, 2, false);
-    newCurve(&logger->data[0], &logger->data[4], Qt::red, 2, false);
+    curves[0] = newCurve(&logger->data[0], &logger->data[1], Qt::yellow, 2, true);
+    curves[1] = newCurve(&logger->data[0], &logger->data[2], Qt::green, 2, false);
+    curves[2] = newCurve(&logger->data[0], &logger->data[3], Qt::blue, 2, false);
+    curves[3] = newCurve(&logger->data[0], &logger->data[4], Qt::red, 2, false);
 
     connect(logger, SIGNAL(replot()),
             this, SLOT(on_replot()));
 }
 
-void
+QwtPlotCurve *
 LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible)
 {
     // Todo this may leak curves
-    QwtPlotCurve *curve(new QwtPlotCurve());
+    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
     curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
     curve->setPen(color, width);
     curve->setVisible(visible);
     curve->attach(ui->plot); // acquires ownership
+
+    return curve.release();
 }
 
 void
@@ -87,6 +89,34 @@ LoggerForm::on_stopButton_clicked()
     if (logger->isActive()) {
         logger->stop();
     }
+}
+
+void
+LoggerForm::on_ch1CheckBox_stateChanged(int state)
+{
+    curves[0]->setVisible(state != 0);
+    ui->plot->replot();
+}
+
+void
+LoggerForm::on_ch2CheckBox_stateChanged(int state)
+{
+    curves[1]->setVisible(state != 0);
+    ui->plot->replot();
+}
+
+void
+LoggerForm::on_ch3CheckBox_stateChanged(int state)
+{
+    curves[2]->setVisible(state != 0);
+    ui->plot->replot();
+}
+
+void
+LoggerForm::on_ch4CheckBox_stateChanged(int state)
+{
+    curves[3]->setVisible(state != 0);
+    ui->plot->replot();
 }
 
 void

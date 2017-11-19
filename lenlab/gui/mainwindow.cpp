@@ -54,6 +54,9 @@ MainWindow::setModel(model::Lenlab *lenlab)
     ui->signalA->setModel(lenlab);
     ui->signalB->setMainWindow(this);
     ui->signalB->setModel(lenlab);
+
+    connect(lenlab, SIGNAL(logMessage(QString)),
+            this, SLOT(on_logMessage(QString)));
 }
 
 void

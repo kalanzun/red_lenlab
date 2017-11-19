@@ -26,6 +26,7 @@ public:
     void setInterval(uint32_t interval);
 
     virtual void start();
+    virtual void stop();
     void clear();
 
     virtual void receive(const usb::pMessage &reply);
