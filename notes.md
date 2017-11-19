@@ -141,3 +141,8 @@ Test runs for a fixed time, is started by command handler, and sends back a resu
 New PID. The former Lenlab board had a different configuration and so computers, which saw the old device, cannot assign the driver anymore.
 
 The old Lenlab won't find the new device, the new Lenlab won't find the old ones.
+
+## Microsoft OS Descriptor
+
+https://e2e.ti.com/support/microcontrollers/tiva_arm/f/908/t/481401
+
