@@ -1,0 +1,72 @@
+From e4fe07321bad23957d8ee91ee931bf1bbde5d26a Mon Sep 17 00:00:00 2001
+From: Christoph Simon <christoph.simon@kit.edu>
+Date: Sun, 19 Nov 2017 13:28:28 +0100
+Subject: [PATCH] Support for Microsoft OS Descriptor, usblib patch
+
+---
+ firmware/usblib/device/usbdbulk.c | 10 ++++++++--
+ firmware/usblib/device/usbdenum.c | 13 +++++++++++++
+ 2 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/firmware/usblib/device/usbdbulk.c b/firmware/usblib/device/usbdbulk.c
+index 0e5a6f3..a351805 100644
+--- a/firmware/usblib/device/usbdbulk.c
++++ b/firmware/usblib/device/usbdbulk.c
+@@ -96,7 +96,9 @@ uint8_t g_pui8BulkDeviceDescriptor[] =
+ {
+     18,                         // Size of this structure.
+     USB_DTYPE_DEVICE,           // Type of this structure.
+-    USBShort(0x110),            // USB version 1.1 (if we say 2.0, hosts assume
++    USBShort(0x200),            // PATCH for Microsoft OS Descriptor Support
++                                // Microsoft OS Descriptor only works with USB Version 2.0
++                                // USB version 1.1 (if we say 2.0, hosts assume
+                                 // high-speed - see USB 2.0 spec 9.2.6.6)
+     USB_CLASS_VEND_SPECIFIC,    // USB Device Class
+     0,                          // USB Device Sub-class
+@@ -326,6 +328,9 @@ static void HandleResume(void *pvBulkDevice);
+ static void HandleDevice(void *pvBulkDevice, uint32_t ui32Request,
+                          void *pvRequestData);
+ 
++// PATCH for Microsoft OS Descriptor Support
++extern void MSOSDescriptorHandleVendorRequest(void *pvBulkDevice, tUSBRequest *pUSBRequest);
++
+ //*****************************************************************************
+ //
+ // Device event handler callbacks.
+@@ -341,7 +346,8 @@ const tCustomHandlers g_sBulkHandlers =
+     //
+     // RequestHandler
+     //
+-    0,
++    // PATCH for Microsoft OS Descriptor Support
++    MSOSDescriptorHandleVendorRequest,
+ 
+     //
+     // InterfaceChange
+diff --git a/firmware/usblib/device/usbdenum.c b/firmware/usblib/device/usbdenum.c
+index f78c3b8..21a7995 100644
+--- a/firmware/usblib/device/usbdenum.c
++++ b/firmware/usblib/device/usbdenum.c
+@@ -2056,6 +2056,19 @@ USBDGetDescriptor(void *pvInstance, tUSBRequest *psUSBRequest)
+         //
+         case USB_DTYPE_STRING:
+         {
++
++            // PATCH for Microsoft OS Descriptor Support
++            // Handle request for string descriptor at index 0xEE
++extern bool MSOSDescriptorHandleStringRequest(uint8_t **ppui8EP0Data, volatile uint32_t *pui32EP0DataRemain, uint16_t ui16Lang, uint16_t ui16Index);
++
++            if (MSOSDescriptorHandleStringRequest(&psUSBControl->pui8EP0Data,
++                                                  &psUSBControl->ui32EP0DataRemain,
++                                                  psUSBRequest->wIndex,
++                                                  psUSBRequest->wValue & 0xFF))
++            {
++                break;
++            }
++
+             //
+             // Determine the correct descriptor index based on the requested
+             // language ID and index.
+-- 
+2.12.2.windows.1
+
