@@ -195,8 +195,8 @@ ConfigureADC()
     //
     // Configure Pins
     //
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_2);
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1);
+    GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_0);
+    GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_1);
     GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_2);
     GPIOPinTypeADC(GPIO_PORTD_BASE, GPIO_PIN_3);
 
@@ -204,13 +204,13 @@ ConfigureADC()
     // and to generate an interrupt every 4 samples.
     // This is an arbitration size of 4 for the uDMA transfer
     ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_ALWAYS, 0);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_CH1);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 1, ADC_CTL_CH2);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 2, ADC_CTL_CH3);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 3, ADC_CTL_CH4 | ADC_CTL_IE);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 4, ADC_CTL_CH1);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 5, ADC_CTL_CH2);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 6, ADC_CTL_CH3);
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_CH7); // Pin PD0
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 1, ADC_CTL_CH6); // Pin PD1
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 2, ADC_CTL_CH5); // Pin PD2
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 3, ADC_CTL_CH4 | ADC_CTL_IE); // Pin PD3
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 4, ADC_CTL_CH7);
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 5, ADC_CTL_CH6);
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 6, ADC_CTL_CH5);
     ADCSequenceStepConfigure(ADC0_BASE, 0, 7, ADC_CTL_CH4 | ADC_CTL_IE | ADC_CTL_END);
 
     /*  TODO: second ADC Module
