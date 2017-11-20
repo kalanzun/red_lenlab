@@ -146,3 +146,28 @@ The old Lenlab won't find the new device, the new Lenlab won't find the old ones
 
 https://e2e.ti.com/support/microcontrollers/tiva_arm/f/908/t/481401
 
+# Release Script
+
+## Lenlab
+
+* Build, dependencies are installed
+* copy lenlab, qwt and libusb to release
+* copy qt with windeployqt
+
+## Firmware
+
+* Build, ccs is installed, TivaWare is installed
+  * http://processors.wiki.ti.com/index.php/Projects_-_Command_Line_Build/Create
+  * create new workspace
+  * create new ccs project, importing the source code
+  * build it
+* copy uniflash skeleton into release
+* copy out file into release
+
+The uniflash tool does not generate the skeleton from a command line. Easiest to have the skeleton checked in right now.
+
+## Documentation
+
+* Build, dependencies and build tools are available
+* copy html and pdf to release
+
