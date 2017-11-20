@@ -61,6 +61,20 @@ Extract file to project directory, libusb
 
 /libusb
 
+#### Anaconda
+
+https://www.anaconda.com/download/
+
+sphinx, breathe, doxygen, 
+
+`conda install -c conda-forge breathe`
+
+`pip install sphinxcontrib-mermaid`
+
+doxygen.org, download and install
+
+#### TI Code Composer Studio
+
 ### Linux
 
 #### Qt 5.9
