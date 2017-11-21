@@ -2,9 +2,13 @@
 #include "ui_loggerform.h"
 #include "pointvectorseriesdata.h"
 #include "mainwindow.h"
+#include "qwt_text.h"
+#include "qwt_plot_renderer.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDebug>
+#include <QPen>
+#include <QColor>
 
 namespace gui {
 
@@ -16,6 +20,18 @@ LoggerForm::LoggerForm(QWidget *parent) :
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
+
+    QwtText x_label("Zeit [s]");
+    QFont x_font(ui->plot->axisFont(2));
+    x_label.setFont(x_font);
+    ui->plot->setAxisTitle(2, x_label);
+
+    QwtText y_label("Spannung [V]");
+    QFont y_font(ui->plot->axisFont(0));
+    y_label.setFont(y_font);
+    ui->plot->setAxisTitle(0, y_label);
+
+    newGrid();
 }
 
 LoggerForm::~LoggerForm()
@@ -49,11 +65,16 @@ LoggerForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
     this->logger = lenlab->logger;
-
-    curves[0] = newCurve(&logger->data[0], &logger->data[1], Qt::yellow, 2, true);
-    curves[1] = newCurve(&logger->data[0], &logger->data[2], Qt::green, 2, false);
-    curves[2] = newCurve(&logger->data[0], &logger->data[3], Qt::blue, 2, false);
-    curves[3] = newCurve(&logger->data[0], &logger->data[4], Qt::red, 2, false);
+/*
+    curves[0] = newCurve(&logger->data[0], &logger->data[1], QColor("#edd400"), 2, true); // butter 1
+    curves[1] = newCurve(&logger->data[0], &logger->data[2], QColor("#73d216"), 2, false); // green 1
+    curves[2] = newCurve(&logger->data[0], &logger->data[3], QColor("#3465a4"), 2, false); // sky blue 1
+    curves[3] = newCurve(&logger->data[0], &logger->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
+*/
+    curves[0] = newCurve(&logger->data[0], &logger->data[1], QColor("#fce94f"), true); // butter 0
+    curves[1] = newCurve(&logger->data[0], &logger->data[2], QColor("#8ae234"), false); // green 0
+    curves[2] = newCurve(&logger->data[0], &logger->data[3], QColor("#729fcf"), false); // sky blue 0
+    curves[3] = newCurve(&logger->data[0], &logger->data[4], QColor("#ef2929"), false); // scarlet red 0
 
     connect(logger, SIGNAL(measurementDataChanged(bool)),
             this, SLOT(on_measurementDataChanged(bool)));
@@ -71,16 +92,35 @@ LoggerForm::setModel(model::Lenlab *lenlab)
 }
 
 QwtPlotCurve *
-LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible)
+LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible)
 {
-    // Todo this may leak curves
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
-    curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
-    curve->setPen(color, width);
-    curve->setVisible(visible);
-    curve->attach(ui->plot); // acquires ownership
 
+    curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    curve->setVisible(visible);
+
+    QPen pen;
+    pen.setColor(color);
+    pen.setWidth(2);
+    curve->setPen(pen);
+
+    curve->attach(ui->plot); // acquires ownership
     return curve.release();
+}
+
+QwtPlotGrid *
+LoggerForm::newGrid()
+{
+    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
+
+    QPen pen;
+    pen.setStyle(Qt::DotLine);
+    pen.setColor("#555753"); // aluminium 4
+    grid->setPen(pen);
+
+    grid->attach(ui->plot); // acquires ownership
+    return grid.release();
 }
 
 void
@@ -136,6 +176,12 @@ LoggerForm::on_ch4CheckBox_stateChanged(int state)
 
 void
 LoggerForm::on_saveButton_clicked()
+{
+    save();
+}
+
+void
+LoggerForm::save()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
@@ -220,6 +266,13 @@ LoggerForm::on_intervalComboBox_activated(int index)
 {
     static const int interval[] = {100, 200, 500, 1000, 2000, 5000};
     logger->setInterval(interval[index]);
+}
+
+void
+LoggerForm::saveImage()
+{
+    QwtPlotRenderer renderer;
+    renderer.exportTo(ui->plot, "Logger_Graph");
 }
 
 } // namespace gui

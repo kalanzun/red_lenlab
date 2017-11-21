@@ -5,6 +5,7 @@
 #include "model/lenlab.h"
 #include "model/minmaxvector.h"
 #include "qwt_plot_curve.h"
+#include "qwt_plot_grid.h"
 #include <QWidget>
 
 namespace gui {
@@ -28,6 +29,9 @@ public:
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab *lenlab);
 
+    void saveImage();
+    void save();
+
 private slots:
     void on_intervalComboBox_activated(int);
     void on_startButton_clicked();
@@ -48,7 +52,8 @@ private slots:
     void on_channelsChanged(const std::bitset<4> &);
 
 private:
-    QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible);
+    QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
 
     Ui::LoggerForm *ui;
 

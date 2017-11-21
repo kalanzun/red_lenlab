@@ -129,39 +129,38 @@
      <x>0</x>
      <y>0</y>
      <width>628</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLenlab">
     <property name="title">
      <string>Lenlab</string>
     </property>
-    <addaction name="action_ber"/>
-    <addaction name="actionBild_exportierne"/>
+    <addaction name="actionSaveData"/>
+    <addaction name="actionSaveImage"/>
     <addaction name="separator"/>
-    <addaction name="actionBeenden"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHilfe">
     <property name="title">
      <string>Hilfe</string>
     </property>
-    <addaction name="actionHandbuch"/>
-    <addaction name="action_ber_2"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuLenlab"/>
    <addaction name="menuHilfe"/>
   </widget>
-  <action name="action_ber">
+  <action name="actionSaveData">
    <property name="text">
     <string>Daten speichern...</string>
    </property>
   </action>
-  <action name="actionBeenden">
+  <action name="actionQuit">
    <property name="text">
     <string>Beenden</string>
    </property>
   </action>
-  <action name="actionBild_exportierne">
+  <action name="actionSaveImage">
    <property name="text">
     <string>Bild speichern...</string>
    </property>
@@ -171,7 +170,7 @@
     <string>Handbuch</string>
    </property>
   </action>
-  <action name="action_ber_2">
+  <action name="actionAbout">
    <property name="text">
     <string>Über</string>
    </property>
