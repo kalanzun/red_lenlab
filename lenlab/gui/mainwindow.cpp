@@ -129,7 +129,7 @@ MainWindow::on_logButton_toggled(bool checked)
 }
 
 void
-MainWindow::on_toolBox_currentChanged(int index)
+MainWindow::on_tabWidget_currentChanged(int index)
 {
     // changing the ToolBox only changes the GUI.
     // I cannot prevent the change of the ToolBox here, so I cannot implement a
@@ -156,6 +156,7 @@ MainWindow::on_toolBox_currentChanged(int index)
 void
 MainWindow::on_logMessage(const QString &msg)
 {
+    ui->logLineEdit->setText(msg);
     ui->logPlainTextEdit->appendPlainText(msg);
 }
 

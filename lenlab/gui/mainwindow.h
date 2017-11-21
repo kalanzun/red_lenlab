@@ -33,7 +33,7 @@ private slots:
     void on_signalAButton_toggled(bool);
     void on_signalBButton_toggled(bool);
     void on_logButton_toggled(bool);
-    void on_toolBox_currentChanged(int);
+    void on_tabWidget_currentChanged(int);
     void on_logMessage(const QString &);
 
 private:
