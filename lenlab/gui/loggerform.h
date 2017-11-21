@@ -29,8 +29,7 @@ public:
     void setModel(model::Lenlab *lenlab);
 
 private slots:
-    void on_intervalButton_clicked();
-    void on_intervalEdit_editingFinished();
+    void on_intervalComboBox_activated(int);
     void on_startButton_clicked();
     void on_stopButton_clicked();
     void on_ch1CheckBox_stateChanged(int);

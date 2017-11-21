@@ -171,12 +171,10 @@ void
 LoggerForm::on_measurementDataChanged(bool measurementData)
 {
     if (measurementData) {
-        ui->intervalButton->setEnabled(false);
-        ui->intervalEdit->setEnabled(false);
+        ui->intervalComboBox->setEnabled(false);
     }
     else {
-        ui->intervalButton->setEnabled(true);
-        ui->intervalEdit->setEnabled(true);
+        ui->intervalComboBox->setEnabled(true);
     }
 }
 
@@ -218,15 +216,10 @@ LoggerForm::on_channelsChanged(const std::bitset<4> &channels)
 }
 
 void
-LoggerForm::on_intervalButton_clicked()
+LoggerForm::on_intervalComboBox_activated(int index)
 {
-
-}
-
-void
-LoggerForm::on_intervalEdit_editingFinished()
-{
-
+    static const int interval[] = {100, 200, 500, 1000, 2000, 5000};
+    logger->setInterval(interval[index]);
 }
 
 } // namespace gui
