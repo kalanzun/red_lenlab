@@ -4,6 +4,7 @@
 #include "component.h"
 #include "minmaxvector.h"
 #include <QObject>
+#include <bitset>
 
 namespace model {
 
@@ -18,6 +19,7 @@ class Logger : public Component
     Q_PROPERTY(bool unsavedData READ unsavedData WRITE setUnsavedData NOTIFY unsavedDataChanged)
     Q_PROPERTY(bool autoSave READ autoSave WRITE setAutoSave NOTIFY autoSaveChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
+    Q_PROPERTY(std::bitset<4> channels READ channels WRITE setChannels NOTIFY channelsChanged)
 
 public:
     explicit Logger(Lenlab *parent);
@@ -49,10 +51,12 @@ public:
     void setFileName(const QString &fileName);
     const QString &fileName() const;
 
+    void setChannels(const std::bitset<4> &channels);
+    const std::bitset<4> &channels() const;
+
     void save(const QString &fileName);
 
     std::array<MinMaxVector, 5> data;
-
 
 signals:
     void replot();
@@ -60,6 +64,7 @@ signals:
     void unsavedDataChanged(bool);
     void autoSaveChanged(bool);
     void fileNameChanged(const QString &);
+    void channelsChanged(const std::bitset<4> &);
 
 public slots:
 
@@ -75,6 +80,7 @@ private:
     bool m_unsavedData = false;
     bool m_autoSave = false;
     QString m_fileName;
+    std::bitset<4> m_channels = 1;
 
     int timer_id = 0;
     double time_offset;

@@ -46,6 +46,7 @@ private slots:
     void on_unsavedDataChanged(bool);
     void on_autoSaveChanged(bool);
     void on_fileNameChanged(const QString &);
+    void on_channelsChanged(const std::bitset<4> &);
 
 private:
     QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible);

@@ -3,6 +3,7 @@
 #include <QSaveFile>
 #include <QIODevice>
 #include <QTextStream>
+#include <QDebug>
 
 #define MSEC (1000.0)
 #define VOLT (4096.0 / 3.3)
@@ -194,6 +195,21 @@ Logger::fileName() const
 }
 
 void
+Logger::setChannels(const std::bitset<4> &channels)
+{
+    if (m_channels != channels) {
+        m_channels = channels;
+        emit channelsChanged(m_channels);
+    }
+}
+
+const std::bitset<4> &
+Logger::channels() const
+{
+    return m_channels;
+}
+
+void
 Logger::timerEvent(QTimerEvent *event)
 {
     if (m_autoSave) {
@@ -238,14 +254,18 @@ Logger::_save()
 
     stream << "Zeit";
     for (size_t i = 1; i < data.size(); i++) {
-        stream << ", " << "Kanal_" << i;
+        if (m_channels[i-1]) {
+            stream << ", " << "Kanal_" << i;
+        }
     }
     stream << "\n";
 
     for (int t = 0; t < data[0].size(); t++) {
         stream << data[0][t];
         for (size_t i = 1; i < data.size(); i++) {
-            stream << ", " << data[i][t];
+            if (m_channels[i-1]) {
+                stream << ", " << data[i][t];
+            }
         }
         stream << "\n";
     }

@@ -63,6 +63,8 @@ LoggerForm::setModel(model::Lenlab *lenlab)
             this, SLOT(on_autoSaveChanged(bool)));
     connect(logger, SIGNAL(fileNameChanged(QString)),
             this, SLOT(on_fileNameChanged(QString)));
+    connect(logger, SIGNAL(channelsChanged(std::bitset<4>)),
+            this, SLOT(on_channelsChanged(std::bitset<4>)));
 
     connect(logger, SIGNAL(replot()),
             this, SLOT(on_replot()));
@@ -103,29 +105,33 @@ LoggerForm::on_stopButton_clicked()
 void
 LoggerForm::on_ch1CheckBox_stateChanged(int state)
 {
-    curves[0]->setVisible(state != 0);
-    ui->plot->replot();
+    auto channels = logger->channels();
+    channels[0] = (state == Qt::Checked);
+    logger->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch2CheckBox_stateChanged(int state)
 {
-    curves[1]->setVisible(state != 0);
-    ui->plot->replot();
+    auto channels = logger->channels();
+    channels[1] = (state == Qt::Checked);
+    logger->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch3CheckBox_stateChanged(int state)
 {
-    curves[2]->setVisible(state != 0);
-    ui->plot->replot();
+    auto channels = logger->channels();
+    channels[2] = (state == Qt::Checked);
+    logger->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch4CheckBox_stateChanged(int state)
 {
-    curves[3]->setVisible(state != 0);
-    ui->plot->replot();
+    auto channels = logger->channels();
+    channels[3] = (state == Qt::Checked);
+    logger->setChannels(channels);
 }
 
 void
@@ -201,6 +207,14 @@ LoggerForm::on_fileNameChanged(const QString &fileName)
         ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
         ui->autoSaveCheckBox->setEnabled(true);
     }
+}
+
+void
+LoggerForm::on_channelsChanged(const std::bitset<4> &channels)
+{
+    for (auto i = 0; i < 4; i++)
+        curves[i]->setVisible(channels[i]);
+    ui->plot->replot();
 }
 
 void
