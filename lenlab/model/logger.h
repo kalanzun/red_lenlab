@@ -14,7 +14,10 @@ namespace model {
 class Logger : public Component
 {
     Q_OBJECT
+    Q_PROPERTY(bool measurementData READ measurementData WRITE setMeasurementData NOTIFY measurementDataChanged)
+    Q_PROPERTY(bool unsavedData READ unsavedData WRITE setUnsavedData NOTIFY unsavedDataChanged)
     Q_PROPERTY(bool autoSave READ autoSave WRITE setAutoSave NOTIFY autoSaveChanged)
+    Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
 
 public:
     explicit Logger(Lenlab *parent);
@@ -34,17 +37,29 @@ public:
 
     void restart();
 
+    void setMeasurementData(bool measurementData);
+    bool measurementData() const;
+
+    void setUnsavedData(bool unsavedData);
+    bool unsavedData() const;
+
     void setAutoSave(bool autoSave);
     bool autoSave() const;
 
-    void save(QString fileName);
+    void setFileName(const QString &fileName);
+    const QString &fileName() const;
+
+    void save(const QString &fileName);
 
     std::array<MinMaxVector, 5> data;
 
 
 signals:
     void replot();
+    void measurementDataChanged(bool);
+    void unsavedDataChanged(bool);
     void autoSaveChanged(bool);
+    void fileNameChanged(const QString &);
 
 public slots:
 
@@ -55,9 +70,12 @@ private:
     virtual void timerEvent(QTimerEvent *event);
 
     uint32_t interval = 1000;
-    QString fileName;
+
+    bool m_measurementData = false;
+    bool m_unsavedData = false;
     bool m_autoSave = false;
-    bool newData = false;
+    QString m_fileName;
+
     int timer_id = 0;
     double time_offset;
 

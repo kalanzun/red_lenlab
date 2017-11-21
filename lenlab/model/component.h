@@ -16,11 +16,14 @@ class Lenlab;
 class Component : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
+
 public:
     explicit Component(Lenlab *parent);
     virtual ~Component();
 
-    bool isActive();
+    bool active() const;
+    void setActive(bool active);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
@@ -32,13 +35,14 @@ public:
     virtual void ready();
 
 signals:
+    void activeChanged(bool);
 
 public slots:
 
 protected:
     Lenlab *lenlab;
 
-    bool active = 0;
+    bool m_active = 0;
 
 };
 

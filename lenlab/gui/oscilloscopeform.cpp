@@ -34,7 +34,7 @@ OscilloscopeForm::setModel(model::Lenlab *lenlab)
 void
 OscilloscopeForm::on_startButton_clicked()
 {
-    if (!oscilloscope->isActive()) {
+    if (!oscilloscope->active()) {
         if (lenlab->isActive()) {
             if (!main_window->askToCancelActiveComponent(oscilloscope)) return;
         }
@@ -45,7 +45,7 @@ OscilloscopeForm::on_startButton_clicked()
 void
 OscilloscopeForm::on_stopButton_clicked()
 {
-    if (oscilloscope->isActive()) {
+    if (oscilloscope->active()) {
         oscilloscope->stop();
     }
 }

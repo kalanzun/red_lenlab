@@ -55,6 +55,15 @@ LoggerForm::setModel(model::Lenlab *lenlab)
     curves[2] = newCurve(&logger->data[0], &logger->data[3], Qt::blue, 2, false);
     curves[3] = newCurve(&logger->data[0], &logger->data[4], Qt::red, 2, false);
 
+    connect(logger, SIGNAL(measurementDataChanged(bool)),
+            this, SLOT(on_measurementDataChanged(bool)));
+    connect(logger, SIGNAL(unsavedDataChanged(bool)),
+            this, SLOT(on_unsavedDataChanged(bool)));
+    connect(logger, SIGNAL(autoSaveChanged(bool)),
+            this, SLOT(on_autoSaveChanged(bool)));
+    connect(logger, SIGNAL(fileNameChanged(QString)),
+            this, SLOT(on_fileNameChanged(QString)));
+
     connect(logger, SIGNAL(replot()),
             this, SLOT(on_replot()));
 }
@@ -75,7 +84,7 @@ LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, cons
 void
 LoggerForm::on_startButton_clicked()
 {
-    if (!logger->isActive()) {
+    if (!logger->active()) {
         if (lenlab->isActive()) {
             if (!main_window->askToCancelActiveComponent(logger)) return;
         }
@@ -86,7 +95,7 @@ LoggerForm::on_startButton_clicked()
 void
 LoggerForm::on_stopButton_clicked()
 {
-    if (logger->isActive()) {
+    if (logger->active()) {
         logger->stop();
     }
 }
@@ -125,25 +134,15 @@ LoggerForm::on_saveButton_clicked()
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
         logger->save(fileName);
-        ui->autoSaveEdit->setText(fileName);
-        ui->autoSaveCheckBox->setEnabled(true);
-        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
     }
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
-        ui->autoSaveEdit->setText(QString());
-        ui->autoSaveCheckBox->setEnabled(false);
-        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
     }
 }
 
 void
 LoggerForm::on_clearButton_clicked()
 {
-    ui->autoSaveEdit->setText(QString());
-    ui->autoSaveCheckBox->setEnabled(false);
-    ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
-
     logger->clear();
 }
 
@@ -163,12 +162,45 @@ LoggerForm::on_replot()
 }
 
 void
+LoggerForm::on_measurementDataChanged(bool measurementData)
+{
+    if (measurementData) {
+        ui->intervalButton->setEnabled(false);
+        ui->intervalEdit->setEnabled(false);
+    }
+    else {
+        ui->intervalButton->setEnabled(true);
+        ui->intervalEdit->setEnabled(true);
+    }
+}
+
+void
+LoggerForm::on_unsavedDataChanged(bool unsavedData)
+{
+
+}
+
+void
 LoggerForm::on_autoSaveChanged(bool autoSave)
 {
     if (autoSave && ui->autoSaveCheckBox->checkState() == Qt::Unchecked)
         ui->autoSaveCheckBox->setCheckState(Qt::Checked);
     if (!autoSave && ui->autoSaveCheckBox->checkState() == Qt::Checked)
         ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+}
+
+void
+LoggerForm::on_fileNameChanged(const QString &fileName)
+{
+    ui->autoSaveEdit->setText(fileName);
+    if (fileName.isEmpty()) {
+        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+        ui->autoSaveCheckBox->setEnabled(false);
+    }
+    else {
+        ui->autoSaveCheckBox->setCheckState(Qt::Unchecked);
+        ui->autoSaveCheckBox->setEnabled(true);
+    }
 }
 
 void

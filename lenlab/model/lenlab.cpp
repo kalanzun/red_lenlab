@@ -38,17 +38,17 @@ Lenlab::setHandler(usb::Handler *handler)
 bool
 Lenlab::isActive()
 {
-    return frequency->isActive() || logger->isActive() || oscilloscope->isActive();
+    return frequency->active() || logger->active() || oscilloscope->active();
 }
 
 Component *
 Lenlab::getActiveComponent()
 {
-    if (frequency->isActive())
+    if (frequency->active())
         return frequency;
-    if (logger->isActive())
+    if (logger->active())
         return logger;
-    if (oscilloscope->isActive())
+    if (oscilloscope->active())
         return oscilloscope;
 
     throw std::exception();

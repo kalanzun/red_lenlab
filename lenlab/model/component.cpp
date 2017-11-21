@@ -14,10 +14,20 @@ Component::~Component()
     qDebug() << "~Component";
 }
 
-bool
-Component::isActive()
+void
+Component::setActive(bool active)
 {
-    return active;
+    if (m_active != active)
+    {
+        m_active = active;
+        emit activeChanged(m_active);
+    }
+}
+
+bool
+Component::active() const
+{
+    return m_active;
 }
 
 QString
@@ -36,14 +46,14 @@ void
 Component::start()
 {
     Q_ASSERT_X(!lenlab->isActive(), "Component::start()", "No component may be active.");
-    active = true;
+    setActive(true);
 }
 
 void
 Component::stop()
 {
-    Q_ASSERT_X(active, "Component::stop()", "This component was not active.");
-    active = false;
+    Q_ASSERT_X(m_active, "Component::stop()", "This component was not active.");
+    setActive(false);
 }
 
 void

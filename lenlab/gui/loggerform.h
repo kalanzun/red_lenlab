@@ -42,7 +42,10 @@ private slots:
     void on_clearButton_clicked();
 
     void on_replot();
+    void on_measurementDataChanged(bool);
+    void on_unsavedDataChanged(bool);
     void on_autoSaveChanged(bool);
+    void on_fileNameChanged(const QString &);
 
 private:
     QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, qreal width, bool visible);

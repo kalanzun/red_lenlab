@@ -81,12 +81,16 @@ Logger::stop()
 void
 Logger::clear()
 {
-    if (active)
+    if (m_active)
         stop();
 
-    this->fileName = QString();
-    setAutoSave(false);
     for (auto &vector : data) vector.clear();
+
+    setAutoSave(false);
+    setFileName(QString());
+    setUnsavedData(false);
+    setMeasurementData(false);
+
     emit replot();
 }
 
@@ -107,7 +111,8 @@ Logger::receive(const usb::pMessage &reply)
         data[i].append((double) buffer[i] / (double) reply->getHeader() / VOLT);
     }
 
-    newData = true;
+    setMeasurementData(true);
+    setUnsavedData(true);
 
     emit replot();
 }
@@ -115,8 +120,40 @@ Logger::receive(const usb::pMessage &reply)
 void
 Logger::ready()
 {
-    if (active)
+    if (m_active)
         restart();
+}
+
+void
+Logger::setMeasurementData(bool measurementData)
+{
+    if (m_measurementData != measurementData)
+    {
+        m_measurementData = measurementData;
+        emit measurementDataChanged(m_measurementData);
+    }
+}
+
+bool
+Logger::measurementData() const
+{
+    return m_measurementData;
+}
+
+void
+Logger::setUnsavedData(bool unsavedData)
+{
+    if (m_unsavedData != unsavedData)
+    {
+        m_unsavedData = unsavedData;
+        emit unsavedDataChanged(m_unsavedData);
+    }
+}
+
+bool
+Logger::unsavedData() const
+{
+    return m_unsavedData;
 }
 
 void
@@ -125,13 +162,13 @@ Logger::setAutoSave(bool autoSave)
     if (m_autoSave != autoSave) {
         m_autoSave = autoSave;
         if (m_autoSave) {
+            Q_ASSERT_X(!m_fileName.isEmpty(), "Logger::setAutoSave()", "No fileName set");
             timer_id = startTimer(3000);
-            newData = false;
         }
         else {
             killTimer(timer_id);
         }
-        emit autoSaveChanged(autoSave);
+        emit autoSaveChanged(m_autoSave);
     }
 }
 
@@ -142,13 +179,28 @@ Logger::autoSave() const
 }
 
 void
+Logger::setFileName(const QString &fileName)
+{
+    if (m_fileName != fileName) {
+        m_fileName = fileName;
+        emit fileNameChanged(m_fileName);
+    }
+}
+
+const QString &
+Logger::fileName() const
+{
+    return m_fileName;
+}
+
+void
 Logger::timerEvent(QTimerEvent *event)
 {
     if (m_autoSave) {
-        if (newData) {
+        if (m_unsavedData) {
             try {
                 _save();
-                newData = false;
+                setUnsavedData(false);
                 //throw std::exception();
             }
             catch (std::exception) {
@@ -163,17 +215,17 @@ Logger::timerEvent(QTimerEvent *event)
 }
 
 void
-Logger::save(QString fileName)
+Logger::save(const QString &fileName)
 {
     setAutoSave(false);
-    this->fileName = fileName;
+    setFileName(fileName);
     _save();
 }
 
 void
 Logger::_save()
 {
-    QSaveFile file(fileName);
+    QSaveFile file(m_fileName);
     qDebug("save");
 
     if (!file.open(QIODevice::WriteOnly)) {
@@ -190,7 +242,7 @@ Logger::_save()
     }
     stream << "\n";
 
-    for (size_t t = 0; t < data[0].size(); t++) {
+    for (int t = 0; t < data[0].size(); t++) {
         stream << data[0][t];
         for (size_t i = 1; i < data.size(); i++) {
             stream << ", " << data[i][t];

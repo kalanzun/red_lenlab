@@ -34,7 +34,7 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!frequency->isActive()) {
+    if (!frequency->active()) {
         if (lenlab->isActive()) {
             if (!main_window->askToCancelActiveComponent(frequency)) return;
         }
@@ -45,7 +45,7 @@ FrequencyForm::on_startButton_clicked()
 void
 FrequencyForm::on_stopButton_clicked()
 {
-    if (frequency->isActive()) {
+    if (frequency->active()) {
         frequency->stop();
     }
 }
