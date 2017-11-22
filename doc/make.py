@@ -1,5 +1,5 @@
 
 import sphinx
 
-sphinx.main(["-M", ".", "_build"])
+sphinx.main(["-M", ".", "_build/html"])
 

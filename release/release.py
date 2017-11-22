@@ -3,7 +3,7 @@
 
 import platform
 
-from os import chdir, environ, listdir, mkdir, system, walk, access, R_OK, W_OK, X_OK
+from os import chdir, environ, listdir, mkdir, system, walk, access, R_OK, W_OK, X_OK, remove
 from os.path import abspath, dirname, join, splitext
 from pathlib import Path
 from re import compile
@@ -139,6 +139,14 @@ class Doc(Config):
         assert access(self.path, R_OK), "No documentation found"
 
 
+class Firmware(Config):
+
+    firmware = Path("..", "firmware", "Release", "red_firmware.out")
+
+    def config(self):
+        assert access(self.firmware, R_OK), "No firmware found"
+
+
 def build():
     if not "build" in listdir():
         mkdir("build")
@@ -163,6 +171,10 @@ def build():
 
     lenlab = LenlabWindows()
     if lenlab.exception:
+        return
+
+    firmware = Firmware()
+    if firmware.exception:
         return
 
     doc = Doc()
@@ -208,9 +220,19 @@ def build():
         raise RuntimeError()
 
     # Firmware
+    mkdir(join("build", release_name, "firmware"))
+    copy(firmware.firmware, join("build", release_name, "firmware", "lenlab_firmware_{}-{}-{}.bin".format(version[0], version[1], version[2])))
+
+    if sys == "Windows":
+        copytree(join("..", "uniflash_windows_64"), join("build", release_name, "uniflash_windows_64"))
+        mkdir(join("build", release_name, "uniflash_windows_64", "user_files", "images"))
+        copy(firmware.firmware, join("build", release_name, "uniflash_windows_64", "user_files", "images", "red_firmware.out"))
 
     # Documentation
     copytree(doc.path, join("build", release_name, "doc"))
+    rmtree(join("build", release_name, "doc", ".doctrees"))
+    rmtree(join("build", release_name, "doc", "breathe"))
+    remove(join("build", release_name, "doc", ".buildinfo"))
 
     # Readme and License
     #copy(join("..", "manual", "readme.pdf"), join("build", release_name, "readme.pdf"))
