@@ -2,7 +2,7 @@
 Vorbereitung
 ************
 
-.. image:: _static/launchpad_usb_ports.svg
+.. image:: launchpad_usb_ports.svg
 
 Das Launchpad hat zwei USB-Anschlüsse, einen für das Programmieren und Testen
 der Firmware (DEBUG) und einen für die Kommunikation zwischen der Firmware und
