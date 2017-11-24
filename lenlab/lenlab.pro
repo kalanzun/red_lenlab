@@ -84,7 +84,8 @@ HEADERS += \
     usb/notetoself.h \
     usb/thread.h \
     usb/transfer.h \
-    model/minmaxvector.h
+    model/minmaxvector.h \
+    config.h
 
 FORMS += \
     gui/mainwindow.ui \

@@ -1,5 +1,6 @@
 #include "logger.h"
 #include "lenlab.h"
+#include "config.h"
 #include <QSaveFile>
 #include <QIODevice>
 #include <QTextStream>
@@ -250,12 +251,12 @@ Logger::_save()
 
     QTextStream stream(&file);
 
-    stream << "Lenlab Red Version 1.0 Save File\n";
+    stream << QString("Lenlab red %1.%2 Logger-Daten\n").arg(MAJOR).arg(MINOR);
 
     stream << "Zeit";
     for (size_t i = 1; i < data.size(); i++) {
         if (m_channels[i-1]) {
-            stream << ", " << "Kanal_" << i;
+            stream << DELIMITER << "Kanal_" << i;
         }
     }
     stream << "\n";
@@ -264,7 +265,7 @@ Logger::_save()
         stream << data[0][t];
         for (size_t i = 1; i < data.size(); i++) {
             if (m_channels[i-1]) {
-                stream << ", " << data[i][t];
+                stream << DELIMITER << data[i][t];
             }
         }
         stream << "\n";
