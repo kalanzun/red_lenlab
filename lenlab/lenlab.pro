@@ -96,6 +96,8 @@ FORMS += \
 
 INCLUDEPATH += $$PWD/../include
 
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT
+
 unix {
     # libusb
     CONFIG += link_pkgconfig
