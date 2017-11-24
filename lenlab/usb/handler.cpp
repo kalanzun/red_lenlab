@@ -55,6 +55,8 @@ Handler::open(libusb_device *dev)
         connect(device.data(), SIGNAL(reply(pMessage)),
                 this, SIGNAL(reply(pMessage)));
         connect(device.data(), SIGNAL(error(QString)),
+                this, SIGNAL(error(QString)));
+        connect(device.data(), SIGNAL(error(QString)),
                 this, SLOT(on_error(QString)));
         emit logMessage("USB: Lenlab board verbunden.");
         emit ready();

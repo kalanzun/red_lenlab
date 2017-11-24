@@ -31,8 +31,8 @@ Lenlab::setHandler(usb::Handler *handler)
             this, SLOT(on_reply(usb::pMessage)));
     connect(handler, SIGNAL(ready()),
             this, SLOT(on_ready()));
-    connect(handler, SIGNAL(error()),
-            this, SLOT(on_error()));
+    connect(handler, SIGNAL(error(QString)),
+            this, SLOT(on_error(QString)));
 }
 
 bool
@@ -77,7 +77,7 @@ Lenlab::on_reply(const usb::pMessage &reply)
 }
 
 void
-Lenlab::on_error()
+Lenlab::on_error(const QString &msg)
 {
     ignore = true;
 }

@@ -27,6 +27,7 @@ namespace usb {
     signals:
         void reply(const pMessage &);
         void ready();
+        void error(const QString &);
         void logMessage(const QString &);
 
         void query();
