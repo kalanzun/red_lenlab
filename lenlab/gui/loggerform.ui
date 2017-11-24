@@ -120,9 +120,27 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>151</width>
+          <width>156</width>
           <height>519</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">#ch1CheckBox {
+	color: #edd400;
+	font-weight: bold;
+}
+#ch2CheckBox {
+	color: #73d216;
+	font-weight: bold;
+}
+#ch3CheckBox {
+	color: #3465a4;
+	font-weight: bold;
+}
+#ch4CheckBox {
+	color: #cc0000;
+	font-weight: bold;
+}</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -137,14 +155,14 @@
            <item row="0" column="1">
             <widget class="QCheckBox" name="ch3CheckBox">
              <property name="text">
-              <string>3</string>
+              <string>3 (PD2)</string>
              </property>
             </widget>
            </item>
            <item row="0" column="0">
             <widget class="QCheckBox" name="ch1CheckBox">
              <property name="text">
-              <string>1</string>
+              <string>1 (PD0)</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -154,14 +172,14 @@
            <item row="1" column="0">
             <widget class="QCheckBox" name="ch2CheckBox">
              <property name="text">
-              <string>2</string>
+              <string>2 (PD1)</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
             <widget class="QCheckBox" name="ch4CheckBox">
              <property name="text">
-              <string>4</string>
+              <string>4 (PD3)</string>
              </property>
             </widget>
            </item>
