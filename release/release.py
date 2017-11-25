@@ -260,7 +260,8 @@ def build():
     remove(build / "doc" / ".buildinfo")
 
     # Readme and License
-    #copy(join("..", "manual", "readme.pdf"), join("build", release_name, "readme.pdf"))
+    copy(join("..", "README.md"), build / "README.md")
+    copy(join("..", "README.pdf"), build / "README.pdf")
     copy(Path("..", "LICENSE.md"), build / "LICENSE.md")
 
     # Package
