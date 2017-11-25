@@ -2,11 +2,12 @@
 Logger
 ******
 
-Elektrische Eigenschaften
-=========================
+Eigenschaften
+=============
 
-Spannungsbereich 0 bis 3,3 V.
-
+Spannungsbereich
+    0 bis 3,3 V.
+    
 Pin-Belegung
 ------------
 
@@ -30,3 +31,13 @@ Abtastintervall
 * 1 s
 * 2 s
 * 5 s
+
+ADC
+---
+
+ADC Samplerate
+    1 MHz
+    
+ADC Mittelung
+    1000 Samples
+

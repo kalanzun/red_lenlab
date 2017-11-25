@@ -8,8 +8,8 @@ Das Launchpad hat zwei USB-Anschlüsse, einen für das Programmieren und Testen
 der Firmware (DEBUG) und einen für die Kommunikation zwischen der Firmware und
 Lenlab auf dem Computer (DEVICE). Der POWER-Schalter wählt, von welchem
 USB-Anschluss die Versorgungsspannung bezogen wird. Wenn die Stromversorgung
-eingeschaltet ist, leuchtet die grüne POWER-LED, die sich neben dem
-POWER-Schalter befindet.
+eingeschaltet ist, leuchtet die grüne POWER-LED, welche sich ebenfalls in dem
+Bereich links oben befindet.
 
 Flashen der Firmware
 ====================
@@ -26,10 +26,12 @@ und den Power-Schalter ebenfalls auf DEBUG umstellen. Das Launchpad wird dann
 über den DEBUG-Anschluss mit Strom versorgt und die grüne Power-LED leuchtet.
 
 Das Lenlab-Softwarepaket für Windows enthält eine Kopie von Uniflash für
-64-bit Systeme, z.B. die meisten Windows 8 und 10. Die Anleitung dafür befindet
-im folgenden Abschnitt `Windows 64-bit Systeme`. Für andere Betriebssysteme oder
+64-bit Systeme (z.B. die meisten Windows 8 und 10). Die Anleitung dafür befindet
+im folgenden Abschnitt :ref:`flash_windows_64`. Für andere Betriebssysteme oder
 Windows 32-bit Systeme erhalten Sie Uniflash direkt von Texas Instruments und
-eine Anleitung zur Verwendung im Abschnitt `Andere Systeme`.
+eine Anleitung zur Verwendung im Abschnitt :ref:`flash_other_systems`.
+
+.. _flash_windows_64:
 
 Windows 64-bit Systeme
 ----------------------
@@ -47,6 +49,8 @@ die Lenlab Firmware und das LaunchPad.
   letzten Zeile für kurze Zeit "Erasing Flash." zu lesen war, dann nochmal
   neuer Text auftauchte und das Fenster dann verschwand, ist die Programmierung
   vermutlich gelungen.
+  
+.. _flash_other_systems:
 
 Andere Systeme
 --------------
