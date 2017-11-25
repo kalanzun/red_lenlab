@@ -36,6 +36,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/include/lenlab_protocol.h</locationURI>
 		</link>
 		<link>
+			<name>lenlab_version.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/include/lenlab_version.h</locationURI>
+		</link>
+		<link>
 			<name>uartstdio.c</name>
 			<type>1</type>
 			<locationURI>TIVAWARE_INSTALL/utils/uartstdio.c</locationURI>

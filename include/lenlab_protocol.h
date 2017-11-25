@@ -28,6 +28,7 @@ enum Command {
     noCommand,
     init,
     getName,
+    getVersion,
     setLoggerInterval,
     startLogger,
     stopLogger,

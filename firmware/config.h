@@ -1,5 +1,5 @@
 /*
- * reply_handler.h
+ * config.h
  *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
@@ -20,27 +20,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef REPLY_HANDLER_H_
-#define REPLY_HANDLER_H_
+#include "lenlab_version.h"
 
-// sends single USB packets
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
+#define REVISION 3
 
-#include "event_queue.h"
-
-
-typedef struct ReplyHandler {
-    tQueue reply_queue;
-} tReplyHandler;
-
-
-// Singleton
-extern tReplyHandler reply_handler;
-
-
-void ReplyHandlerInit(void);
-
-void ReplyHandlerMain(void);
-
-
-#endif /* REPLY_HANDLER_H_ */
+#endif /* CONFIG_H_ */

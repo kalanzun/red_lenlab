@@ -31,6 +31,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "reply_handler.h"
 #include "timer.h"
 #include "logger.h"
+#include "config.h"
 
 
 tCommandHandler command_handler;
@@ -49,8 +50,7 @@ on_init(tEvent *event)
     QueueWrite(&reply_handler.reply_queue);
 }
 
-
-const uint8_t name[] = "KIT Lenlab Red Firmware version 0.1 year 2017";
+const uint8_t name[] = "Lenlab red Firmware Version " STR(MAJOR) "." STR(MINOR) "." STR(REVISION);
 
 #define NAME_SIZE (sizeof(name))
 
@@ -61,13 +61,28 @@ on_getName(tEvent *event)
     tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
 
     reply->payload[0] = event->payload[0];
-    reply->payload[1] = REPLY_TYPE_STRING;
+    reply->payload[1] = String;
     ASSERT(4 + NAME_SIZE + 1 < EVENT_PAYLOAD_LENGTH);
     *((uint16_t *) (reply->payload + 2)) = NAME_SIZE;
     for (i = 0; i < NAME_SIZE; i++)
         reply->payload[4+i] = name[i];
     reply->payload[i] = 0;
     reply->length = 4 + NAME_SIZE + 1;
+
+    QueueWrite(&reply_handler.reply_queue);
+}
+
+void
+on_getVersion(tEvent *event)
+{
+    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+
+    reply->payload[0] = event->payload[0];
+    reply->payload[1] = uInt32;
+    *(uint32_t *) (reply->payload + 4) = MAJOR;
+    *(uint32_t *) (reply->payload + 8) = MINOR;
+    *(uint32_t *) (reply->payload + 12) = REVISION;
+    reply->length = 16;
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -203,6 +218,7 @@ CommandHandlerMain(void)
         if (command < NUM_COMMANDS) {
             if (command == init) on_init(event);
             else if (command == getName) on_getName(event);
+            else if (command == getVersion) on_getVersion(event);
             else if (command == setLoggerInterval) on_setLoggerInterval(event);
             else if (command == startLogger) on_startLogger(event);
             else if (command == stopLogger) on_stopLogger(event);
