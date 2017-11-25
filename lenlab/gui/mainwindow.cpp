@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->signalA->setTitle("Signalgenerator A");
     ui->signalB->hide();
     ui->signalB->setTitle("Signalgenerator B");
+    ui->logPlainTextEdit->hide();
 
 #ifdef QT_NO_DEBUG
     // Hide signal generator, oscilloscope and frequency analysis because they are not implemented, yet
