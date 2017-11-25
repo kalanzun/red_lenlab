@@ -19,6 +19,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->signalA->setTitle("Signalgenerator A");
     ui->signalB->hide();
     ui->signalB->setTitle("Signalgenerator B");
+
+#ifdef QT_NO_DEBUG
+    // Hide signal generator, oscilloscope and frequency analysis because they are not implemented, yet
+    ui->tabWidget->setTabEnabled(1, false); // oscilloscope
+    ui->tabWidget->setTabEnabled(2, false); // frequency analysis
+    ui->signalAButton->hide();
+    ui->signalBButton->hide();
+#endif
 }
 
 MainWindow::~MainWindow()
