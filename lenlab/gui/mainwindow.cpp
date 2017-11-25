@@ -214,7 +214,7 @@ const QString ABOUT(
         <h1>Lenlab 7.0</h1>
         )_"
 
-        "<p>Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) ", " DATE ", "
+        "<p>Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) ", "
 
 #ifdef QT_NO_DEBUG
         "release build"

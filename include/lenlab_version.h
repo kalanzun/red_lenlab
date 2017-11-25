@@ -18,13 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include "lenlab_version.h"
+#ifndef LENLAB_VERSION_H
+#define LENLAB_VERSION_H
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#define MAJOR 7
+#define MINOR 0
 
-#define REVISION 3
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
-#define DELIMITER ";"
-
-#endif // CONFIG_H
+#endif // LENLAB_VERSION_H
