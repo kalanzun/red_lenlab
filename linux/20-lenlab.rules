@@ -1,0 +1,2 @@
+SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", ATTR{idProduct}=="0270", GROUP="uucp"
+

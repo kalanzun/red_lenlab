@@ -247,12 +247,6 @@ def build():
     mkdir(build / "firmware")
     copy(firmware.path / firmware.firmware, build / "firmware" / firmware.firmware)
 
-    # uniflash_windows_64
-    if version.sys == "Windows":
-        copytree(join("..", "uniflash_windows_64"), join("build", release_name, "uniflash_windows_64"))
-        mkdir(join("build", release_name, "uniflash_windows_64", "user_files", "images"))
-        copy(firmware.firmware, join("build", release_name, "uniflash_windows_64", "user_files", "images", "red_firmware.out"))
-
     # Documentation
     copytree(doc.path, build / "doc")
     rmtree(build / "doc" / ".doctrees")
@@ -260,9 +254,20 @@ def build():
     remove(build / "doc" / ".buildinfo")
 
     # Readme and License
-    copy(join("..", "README.md"), build / "README.md")
-    copy(join("..", "README.pdf"), build / "README.pdf")
+    copy(Path("..", "README.md"), build / "README.md")
+    copy(Path("..", "README.pdf"), build / "README.pdf")
     copy(Path("..", "LICENSE.md"), build / "LICENSE.md")
+
+    # uniflash_windows_64
+    if version.sys == "Windows":
+        copytree(join("..", "uniflash_windows_64"), join("build", release_name, "uniflash_windows_64"))
+        mkdir(join("build", release_name, "uniflash_windows_64", "user_files", "images"))
+        copy(firmware.firmware, join("build", release_name, "uniflash_windows_64", "user_files", "images", "red_firmware.out"))
+        
+    # Linux
+    if version.sys == "Linux":
+        mkdir(build / "linux")
+        copy(Path("..", "linux", "20-lenlab.rules"), build / "linux" / "20-lenlab.rules")
 
     # Package
     with ZipFile(Path("build", "{}.zip".format(version.release_name)), "w") as package:
