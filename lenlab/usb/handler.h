@@ -53,6 +53,7 @@ namespace usb {
         void query();
 
     private slots:
+        void on_reply(const pMessage &);
         void on_error(const QString &);
         void on_query();
 

@@ -31,10 +31,6 @@ Lenlab::Lenlab(QObject *parent) :
     signal(new Signal(this))
 {
     qDebug() << "Lenlab";
-    /*
-    connect(this, SIGNAL(reply(usb::pMessage)),
-            this, SLOT(on_reply(usb::pMessage)));
-            */
 }
 
 Lenlab::~Lenlab()
@@ -51,8 +47,6 @@ Lenlab::setHandler(usb::Handler *handler)
             this, SLOT(on_reply(usb::pMessage)));
     connect(handler, SIGNAL(ready()),
             this, SLOT(on_ready()));
-    connect(handler, SIGNAL(error(QString)),
-            this, SLOT(on_error(QString)));
 }
 
 bool
@@ -86,30 +80,14 @@ Lenlab::on_reply(const usb::pMessage &reply)
     qDebug("on_reply");
     Command cmd = reply->getCommand();
 
-    if (cmd == init) {
-        ignore = false;
-    }
-
-    if (ignore) return;
-
     if (cmd == startLogger)
         logger->receive(reply);
-}
-
-void
-Lenlab::on_error(const QString &msg)
-{
-    ignore = true;
 }
 
 void
 Lenlab::on_ready()
 {
     qDebug("on_ready");
-
-    usb::pMessage cmd(new usb::Message());
-    cmd->setCommand(init);
-    send(cmd);
 
     frequency->ready();
     logger->ready();

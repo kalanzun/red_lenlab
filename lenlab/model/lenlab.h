@@ -66,12 +66,9 @@ public slots:
 private slots:
     void on_reply(const usb::pMessage &);
     void on_ready();
-    void on_error(const QString &);
 
 private:
     usb::Handler *handler;
-
-    bool ignore = true;
 };
 
 } // namespace model

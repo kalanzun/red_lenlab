@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "devicelist.h"
 #include "exception.h"
 #include "lenlab_protocol.h"
+#include "config.h"
 #include <QTimerEvent>
 #include <QDebug>
 
@@ -72,18 +73,64 @@ Handler::open(libusb_device *dev)
 {
     try {
         device.reset(new Device(dev));
+
         connect(device.data(), SIGNAL(reply(pMessage)),
-                this, SIGNAL(reply(pMessage)));
-        connect(device.data(), SIGNAL(error(QString)),
-                this, SIGNAL(error(QString)));
+                this, SLOT(on_reply(pMessage)));
         connect(device.data(), SIGNAL(error(QString)),
                 this, SLOT(on_error(QString)));
-        emit logMessage("USB: Lenlab board verbunden.");
-        emit ready();
+
+        emit logMessage("Lenlab-Board gefunden.");
+
+        //emit logMessage("Initialisierung");
+        usb::pMessage cmd(new usb::Message());
+        cmd->setCommand(init);
+        send(cmd);
     }
     catch (Exception e) {
         startTimer(2000); // slow polling due to error
-        emit logMessage(QString("USB: Fehler beim Verbindungsaufbau: %1.").arg(e.getMsg()));
+        emit logMessage(QString("Fehler beim Verbindungsaufbau: %1.").arg(e.getMsg()));
+    }
+}
+
+void
+Handler::on_reply(const pMessage &reply)
+{
+    if (reply->getCommand() == init) {
+        emit logMessage("Initialisierung abgeschlossen.");
+
+        //emit logMessage("Firmware-Name erfragen");
+        usb::pMessage cmd(new usb::Message());
+        cmd->setCommand(getName);
+        send(cmd);
+    }
+    else if (reply->getCommand() == getName) {
+        QString name((char *) reply->getPayload());//, reply->getPayloadLength());
+        //emit logMessage(QString("Firmware-Name: %1.").arg(name));
+
+        //emit logMessage("Firmware-Version erfragen");
+        usb::pMessage cmd(new usb::Message());
+        cmd->setCommand(getVersion);
+        send(cmd);
+    }
+    else if (reply->getCommand() == getVersion) {
+        uint32_t *version = (uint32_t *) reply->getPayload();
+        emit logMessage(QString("Firmware-Version %1.%2.%3.").arg(version[0]).arg(version[1]).arg(version[2]));
+        //emit logMessage(QString("Lenlab-Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) "."));
+
+        if (reply->getPayloadLength() == 12 && version[0] == MAJOR && version[1] == MINOR) {
+            disconnect(device.data(), SIGNAL(reply(pMessage)),
+                    this, SLOT(on_reply(pMessage)));
+            connect(device.data(), SIGNAL(reply(pMessage)),
+                    this, SIGNAL(reply(pMessage)));
+            emit logMessage("Lenlab-Board bereit.");
+            emit ready();
+        }
+        else {
+            emit logMessage("Ungeeignete Firmware-Version. Bitte verwenden Sie die Firmware-Version " STR(MAJOR) "." STR(MINOR) " für dieses Lenlab.");
+
+            device.clear();
+            startTimer(2000); // slow polling to try again
+        }
     }
 }
 
