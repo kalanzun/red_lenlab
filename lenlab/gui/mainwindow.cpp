@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "config.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDebug>
@@ -188,26 +189,47 @@ MainWindow::on_actionQuit_triggered()
     close();
 }
 
+const QString ABOUT(
+        R"_(
+        <h1>Lenlab 7.0</h1>
+        )_"
+
+        "<p>Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) ", " DATE ", "
+
+#ifdef QT_NO_DEBUG
+        "release build"
+#else
+        "debug build"
+#endif
+
+        "</p>"
+
+        R"_(
+        <p>Copyright 2017<br/>
+        Christoph Simon und das Lenlab-Entwicklerteam</p>
+
+        <p>Homepage: <a href=\"https://git.scc.kit.edu/vq6936/red_lenlab\">https://git.scc.kit.edu/vq6936/red_lenlab</a></p>
+
+        <p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+        <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.</p>
+
+        <p>You should have received a copy of the GNU General Public License
+        along with this program.  If not, see
+        <a href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</a>.</p>
+        )_");
+
+
 void
 MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "Über Lenlab",
-        "<h1>Lenlab 7.0</h1>"
-        "<p>Copyright 2017<br/>Karlsruher Institut für Technologie<br/>"
-        "Lichttechnisches Institut<br/>Christoph Simon<br/>"
-        "und das Lenlab-Entwicklerteam</p>"
-        "<p>This program is free software: you can redistribute it and/or modify "
-        "it under the terms of the GNU General Public License as published by "
-        "the Free Software Foundation, either version 3 of the License, or "
-        "(at your option) any later version.</p>"
-        "<p>This program is distributed in the hope that it will be useful, "
-        "but WITHOUT ANY WARRANTY; without even the implied warranty of "
-        "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
-        "GNU General Public License for more details.</p>"
-        "<p>You should have received a copy of the GNU General Public License "
-        "along with this program.  If not, see "
-        "<a href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</a>.</p>"
-        "<p><a href=\"https://git.scc.kit.edu/vq6936/red_lenlab\">https://git.scc.kit.edu/vq6936/red_lenlab</a></p>");
+    QMessageBox::about(this, "Über Lenlab", ABOUT);
 }
 
 } // namespace gui
