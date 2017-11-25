@@ -69,6 +69,8 @@ sphinx, breathe, doxygen,
 
 `conda install -c conda-forge breathe`
 
+`conda install sphinx_rtd_theme`
+
 `pip install sphinxcontrib-mermaid`
 
 doxygen.org, download and install
