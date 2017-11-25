@@ -61,11 +61,8 @@ die Lenlab Firmware und das LaunchPad.
 * Installieren Sie die Treiber durch Starten der `one_time_setup.bat`. Das ist
   pro Computer nur einmal nötig.
 * Starten Sie die Programmierung mit der Datei `dslite.bat`. Die Programmierung
-  dauert ein bisschen. Wenn das Fenster von dslite.bat sofort
-  wieder verschwindet, ist es schief gegangen. Wenn in dem Fenster in der
-  letzten Zeile für kurze Zeit "Erasing Flash." zu lesen war, dann nochmal
-  neuer Text auftauchte und das Fenster dann verschwand, ist die Programmierung
-  vermutlich gelungen.
+  dauert einen Moment. Am Ende steht in der vorletzten Zeile "Success" wenn die
+  Programmierung erfolgreich war oder "Failed" bei Misserfolg.
   
 .. _flash_other_systems:
 
@@ -90,4 +87,4 @@ Verbinden Sie den DEVICE USB-Anschluss an der Seite des Launchpad mit dem Comput
 Stellen Sie den Power-Schalter auf DEVICE. Die grüne Power-LED leuchtet.
 
 Lenlab sucht nach dem Board und verbindet sich, wenn es eines findet. Es meldet
-dann im Nachrichten-Fenster "Lenlab-Board verbunden."
+dann im Nachrichten-Fenster "Lenlab-Board bereit."
