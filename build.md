@@ -77,6 +77,46 @@ doxygen.org, download and install
 
 #### TI Code Composer Studio
 
+Download von www.ti.com/tool/CCSTUDIO
+
+Virenscanner dekativeieren, dieser verhindert unter Umständen das Kopieren einiger Dateien.
+
+Standard-Pfad c:\ti
+
+TM4C12x ARM Cortex-M4F core-based MCUs
+
+Standard-Einstellungen
+
+TI XDS Debug Probe Support
+
+Tiva/Stellaris ICDI Debug Probe
+
+http://www.ti.com/tool/SW-TM4C
+
+SW-TM4C: TivaWare for C Series Software (Complete)
+
+Im nächsten Fenster: TivaWare for TM4C Series
+
+TI Account notwendig
+
+Installieren im Standard-Pfad
+
+vars.ini in workspace
+
+TIVAWARE_INSTALL = C:\ti\TivaWare_C_Series-2.1.4.178
+
+and in code composer studio File/Import/Code Composer Studio/Build Variables
+
+Scope: Workspace
+
+Import Project
+
+red_lenlab/firmware
+
+do not tick copy
+
+The build settings use TIVAWARE_INSTALL to link files and should work right away
+
 ### Linux
 
 #### Qt 5.9
