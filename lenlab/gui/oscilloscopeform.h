@@ -23,6 +23,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+#include "model/minmaxvector.h"
+#include "qwt_plot_curve.h"
+#include "qwt_plot_grid.h"
 #include <QWidget>
 
 namespace gui {
@@ -47,15 +50,21 @@ public:
     void setModel(model::Lenlab *lenlab);
 
 private slots:
+    void on_replot();
+
     void on_startButton_clicked();
     void on_stopButton_clicked();
 
 private:
+    QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
+
     Ui::OscilloscopeForm *ui;
 
     MainWindow *main_window;
     model::Lenlab *lenlab;
     model::Oscilloscope *oscilloscope;
+
+    std::array<QwtPlotCurve *, 4> curves; // pointer, no ownership
 };
 
 

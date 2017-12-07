@@ -32,6 +32,9 @@ enum Command {
     setLoggerInterval,
     startLogger,
     stopLogger,
+    calculateSine,
+    startOscilloscope,
+    stopOscilloscope,
     NUM_COMMANDS
 };
 
@@ -40,6 +43,8 @@ enum Reply {
     Bool,
     String,
     uInt32,
+    Int16,
+    Int8,
     NUM_REPLIES
 };
 

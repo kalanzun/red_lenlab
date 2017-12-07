@@ -28,8 +28,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 
-#define ADC_QUEUE_LENGTH 8
-#define ADC_PAYLOAD_LENGTH 1024
+#define ADC_QUEUE_LENGTH 2
+#define ADC_PAYLOAD_LENGTH 1000
 
 
 typedef struct ADCEvent {
@@ -56,7 +56,7 @@ ADCQueueEmpty(tADCQueue *self)
 inline bool
 ADCQueueFull(tADCQueue *self)
 {
-    return (self->acquire+1) % ADC_QUEUE_LENGTH == self->read;
+    return self->acquire == self->read;
 }
 
 

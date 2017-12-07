@@ -117,6 +117,22 @@ do not tick copy
 
 The build settings use TIVAWARE_INSTALL to link files and should work right away
 
+Import project red_lenlab/firmware
+
+do not copy, just link
+
+If it complains about target configuration not set, 
+
+right click on target Configurations/Tiva TM4C1230H6PM.ccxml and select set as default target Configuration.
+
+UART terminal for debug messages
+
+View->Terminal
+
+In the terminal window select Open Terminal
+
+115200 baud, no parity bit, 1 stop bit
+
 ### Linux
 
 #### Qt 5.9

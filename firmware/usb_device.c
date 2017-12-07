@@ -202,7 +202,9 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
                     QueueWrite(&command_handler.command_queue);
                 }
                 else {
-                    ASSERT(0);
+                    //ASSERT(0);
+                    // TODO Command Queue Full, seems to happen because of DMA transfer???
+                    DEBUG_PRINT("command queue full\n");
                 }
             }
             return size;
@@ -358,14 +360,14 @@ USBDeviceMain()
 
     if (!usb_device.dma_pending)
     {
-        if (!QueueEmpty(&reply_handler.reply_queue)) {
+        if (!DataQueueEmpty(&data_handler.data_queue)) {
+            data_event = DataQueueRead(&data_handler.data_queue);
+            USBDeviceStartuDMA(data_event->payload);
+        }
+        else if (!QueueEmpty(&reply_handler.reply_queue)) {
             event = QueueRead(&reply_handler.reply_queue);
             USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
             QueueRelease(&reply_handler.reply_queue);
-        }
-        else if (!DataQueueEmpty(&data_handler.data_queue)) {
-            data_event = DataQueueRead(&data_handler.data_queue);
-            USBDeviceStartuDMA(data_event->payload);
         }
     }
 }

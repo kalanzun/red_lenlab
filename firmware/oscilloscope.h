@@ -1,4 +1,6 @@
 /*
+ * oscilloscope.h
+ *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -18,13 +20,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef LENLAB_VERSION_H
-#define LENLAB_VERSION_H
+#ifndef OSCILLOSCOPE_H_
+#define OSCILLOSCOPE_H_
 
-#define MAJOR 7
-#define MINOR 1
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+typedef struct Oscilloscope {
+    bool active;
+} tOscilloscope;
 
-#endif // LENLAB_VERSION_H
+
+extern tOscilloscope oscilloscope;
+
+
+void OscilloscopeStart(void);
+
+void OscilloscopeInit(void);
+
+
+#endif /* OSCILLOSCOPE_H_ */

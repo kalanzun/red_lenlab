@@ -20,6 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "oscilloscopeform.h"
 #include "ui_oscilloscopeform.h"
+#include "pointvectorseriesdata.h"
+#include "qwt_text.h"
+#include "qwt_plot_renderer.h"
 #include <QDebug>
 
 namespace gui {
@@ -49,6 +52,32 @@ OscilloscopeForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
     this->oscilloscope = lenlab->oscilloscope;
+
+    curves[0] = newCurve(&oscilloscope->data[0], &oscilloscope->data[1], QColor("#fce94f"), true); // butter 0
+    curves[1] = newCurve(&oscilloscope->data[0], &oscilloscope->data[2], QColor("#8ae234"), false); // green 0
+    curves[2] = newCurve(&oscilloscope->data[0], &oscilloscope->data[3], QColor("#729fcf"), false); // sky blue 0
+    curves[3] = newCurve(&oscilloscope->data[0], &oscilloscope->data[4], QColor("#ef2929"), false); // scarlet red 0
+
+    connect(oscilloscope, SIGNAL(replot()),
+            this, SLOT(on_replot()));
+}
+
+QwtPlotCurve *
+OscilloscopeForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible)
+{
+    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
+
+    curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    curve->setVisible(visible);
+
+    QPen pen;
+    pen.setColor(color);
+    pen.setWidth(2);
+    curve->setPen(pen);
+
+    curve->attach(ui->plot); // acquires ownership
+    return curve.release();
 }
 
 void
@@ -69,5 +98,12 @@ OscilloscopeForm::on_stopButton_clicked()
         oscilloscope->stop();
     }
 }
+
+void
+OscilloscopeForm::on_replot()
+{
+    ui->plot->replot();
+}
+
 
 } // namespace gui

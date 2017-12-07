@@ -166,9 +166,9 @@ DataHandlerMain(void)
 }
 #endif
 
-
+/*
 void
-DataHandlerMain(void)
+DataHandlerMain_for_logger(void)
 {
     tADCEvent *adc_event;
     tEvent *reply;
@@ -206,7 +206,90 @@ DataHandlerMain(void)
         ADCQueueRelease(&adc.adc_queue);
     }
 }
+*/
 
+void
+DataHandlerMain(void)
+{
+    tDataEvent *data_event;
+    //tEvent *reply;
+
+    uint8_t *buffer;
+    uint32_t i;
+    //static uint16_t a[] = {0, 0};
+    static uint8_t count = 8;
+
+    if(adc.ping_ready)
+    {
+        ASSERT(!DataQueueFull(&data_handler.data_queue));
+        data_event = DataQueueAcquire(&data_handler.data_queue);
+
+        data_event->payload[0] = startOscilloscope;
+        data_event->payload[1] = Int8;
+        data_event->payload[2] = 1; // encoding not compressed bytes starting at 4
+        data_event->payload[3] = 0;
+
+        buffer = data_event->payload + 4;
+
+        for (i = 0; i < ADC_PAYLOAD_LENGTH; i++)
+        {
+            //buffer[i] = i>>2;
+            buffer[i] = (adc.ping[i]) >> 4; //  - a[i%2]
+            //a[i%2] = adc.ping[i];
+        }
+
+        data_event->length = 4 + ADC_PAYLOAD_LENGTH;
+
+        DataQueueWrite(&data_handler.data_queue);
+        adc.ping_ready = 0;
+
+        count--;
+        if (count == 0) {
+            //DEBUG_PRINT("data handler done\n");
+            ADCStop();
+
+            data_event = DataQueueAcquire(&data_handler.data_queue);
+            data_event->payload[0] = stopOscilloscope;
+            DataQueueWrite(&data_handler.data_queue);
+        }
+    }
+    if(adc.pong_ready)
+    {
+        ASSERT(!DataQueueFull(&data_handler.data_queue));
+        data_event = DataQueueAcquire(&data_handler.data_queue);
+
+        data_event->payload[0] = startOscilloscope;
+        data_event->payload[1] = Int8;
+        data_event->payload[2] = 1; // encoding not compressed bytes starting at 4
+        data_event->payload[3] = 0;
+
+        buffer = data_event->payload + 4;
+
+        for (i = 0; i < ADC_PAYLOAD_LENGTH; i++)
+        {
+            //buffer[i] = i>>2;
+            buffer[i] = (adc.pong[i]) >> 4; //  - a[i%2]
+            //a[i%2] = adc.ping[i];
+            //buffer[i] = (adc.pong[i] - a[i%2]) >> 2;
+            //a[i%2] = adc.pong[i];
+        }
+
+        data_event->length = 4 + ADC_PAYLOAD_LENGTH;
+
+        DataQueueWrite(&data_handler.data_queue);
+        adc.pong_ready = 0;
+
+        count--;
+        if (count == 0) {
+            //DEBUG_PRINT("data handler done\n");
+            ADCStop();
+
+            data_event = DataQueueAcquire(&data_handler.data_queue);
+            data_event->payload[0] = stopOscilloscope;
+            DataQueueWrite(&data_handler.data_queue);
+        }
+    }
+}
 
 void
 DataHandlerInit(void)

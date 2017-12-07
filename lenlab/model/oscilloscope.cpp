@@ -19,6 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "oscilloscope.h"
+#include "lenlab.h"
+#include "config.h"
+#include <QDebug>
 
 namespace model {
 
@@ -37,6 +40,71 @@ QString
 Oscilloscope::getNameAccusative()
 {
     return "as Oszilloskop";
+}
+
+void
+Oscilloscope::start()
+{
+    super::start();
+
+    running = 1;
+
+    restart();
+}
+
+void
+Oscilloscope::stop()
+{
+    super::stop();
+
+    running = 0;
+}
+
+void
+Oscilloscope::restart()
+{
+    qDebug("start");
+    t = 0;
+    clear();
+    usb::pMessage cmd(new usb::Message());
+    cmd->setCommand(startOscilloscope);
+    lenlab->send(cmd);
+}
+
+void
+Oscilloscope::clear()
+{
+
+    for (auto &vector : data) vector.clear();
+
+}
+
+void
+Oscilloscope::receive(const usb::pMessage &reply)
+{
+    //qDebug("receive");
+
+    uint8_t *buffer = reply->getPayload();
+
+    //Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
+
+    // sine values
+    for (uint32_t i = 0; i < 1000; i+=2) {
+        data[0].append((double) t++); // x axis
+        //a += buffer[i];
+        data[1].append((double) buffer[i]);// / (double) 2048.0); // y axis
+        data[2].append((double) buffer[i+1]);// / (double) 2048.0); // y axis
+    }
+
+    emit replot();
+}
+
+void
+Oscilloscope::finished(const usb::pMessage &reply)
+{
+    //qDebug("finished");
+    if (running)
+        restart();
 }
 
 } // namespace model

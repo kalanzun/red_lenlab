@@ -30,7 +30,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 typedef struct ADC {
     volatile bool pingpong;
     volatile bool basic;
-    tADCQueue adc_queue;
+    volatile bool ping_ready;
+    volatile bool pong_ready;
+    uint16_t ping[ADC_PAYLOAD_LENGTH];
+    uint16_t pong[ADC_PAYLOAD_LENGTH];
 } tADC;
 
 

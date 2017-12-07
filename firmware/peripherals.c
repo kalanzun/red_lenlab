@@ -39,6 +39,8 @@ const uint32_t peripherals[] = {
 
     SYSCTL_PERIPH_TIMER0,
 
+    SYSCTL_PERIPH_SSI0,
+
     SYSCTL_PERIPH_UDMA
 };
 

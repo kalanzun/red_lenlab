@@ -1,4 +1,6 @@
 /*
+ * oscilloscope.c
+ *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -18,13 +20,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef LENLAB_VERSION_H
-#define LENLAB_VERSION_H
+#include <stdbool.h>
+#include <stdint.h>
+#include "driverlib/debug.h"
+#include "oscilloscope.h"
+#include "debug.h"
+#include "adc.h"
 
-#define MAJOR 7
-#define MINOR 1
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+tOscilloscope oscilloscope;
 
-#endif // LENLAB_VERSION_H
+
+void
+OscilloscopeStart(void)
+{
+    //DEBUG_PRINT("oscilloscope start\n");
+
+    if (oscilloscope.active)
+        return;
+
+    //oscilloscope.active = 1;
+
+    ADCStart();
+
+}
+
+void
+OscilloscopeInit(void)
+{
+}

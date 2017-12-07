@@ -57,6 +57,7 @@ extern void USBIntHandler(void);
 extern void uDMAErrorHandler(void);
 extern void ADC0IntHandler(void);
 extern void Timer0IntHandler(void);
+extern void SSI0IntHandler(void);
 
 //*****************************************************************************
 //
@@ -96,7 +97,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // UART0 Rx and Tx
 #endif
     IntDefaultHandler,                      // UART1 Rx and Tx
-    IntDefaultHandler,                      // SSI0 Rx and Tx
+    SSI0IntHandler,                         // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
     IntDefaultHandler,                      // PWM Fault
     IntDefaultHandler,                      // PWM Generator 0

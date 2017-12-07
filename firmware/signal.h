@@ -1,4 +1,6 @@
 /*
+ * signal.h
+ *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -16,15 +18,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-*/
+ */
 
-#ifndef LENLAB_VERSION_H
-#define LENLAB_VERSION_H
+#ifndef SIGNAL_H_
+#define SIGNAL_H_
 
-#define MAJOR 7
-#define MINOR 1
+void SignalCalculateSine(void);
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
-#endif // LENLAB_VERSION_H
+#endif /* SIGNAL_H_ */

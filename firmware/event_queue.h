@@ -29,7 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_protocol.h"
 
 
-#define EVENT_QUEUE_LENGTH 8
+#define EVENT_QUEUE_LENGTH 4
 #define EVENT_PAYLOAD_LENGTH 64
 
 

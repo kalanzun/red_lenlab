@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 
-#define DATA_QUEUE_LENGTH 8
+#define DATA_QUEUE_LENGTH 19
 // Caution: USB uDMA sends this size in a single transfer
 // It seems to support only values up to 1024 and should be a multiple of the packet size (64)
 #define DATA_PAYLOAD_LENGTH 1024

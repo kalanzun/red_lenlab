@@ -77,11 +77,16 @@ Lenlab::send(const usb::pMessage &cmd)
 void
 Lenlab::on_reply(const usb::pMessage &reply)
 {
-    qDebug("on_reply");
+    //qDebug("on_reply");
     Command cmd = reply->getCommand();
+    //qDebug() << cmd;
 
     if (cmd == startLogger)
         logger->receive(reply);
+    else if (cmd == startOscilloscope)
+        oscilloscope->receive(reply);
+    else if (cmd == stopOscilloscope)
+        oscilloscope->finished(reply);
 }
 
 void

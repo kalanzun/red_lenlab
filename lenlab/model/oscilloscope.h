@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define OSCILLOSCOPE_H
 
 #include "component.h"
+#include "minmaxvector.h"
 #include <QObject>
 
 namespace model {
@@ -39,11 +40,25 @@ public:
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
 
+    virtual void start();
+    virtual void stop();
+    void restart();
+
+    void clear();
+
+    void receive(const usb::pMessage &reply);
+    void finished(const usb::pMessage &reply);
+
+    std::array<MinMaxVector, 5> data;
+
 signals:
+    void replot();
 
 public slots:
 
 private:
+    uint32_t t;
+    bool running = 0;
     typedef Component super;
 };
 

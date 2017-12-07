@@ -31,6 +31,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/uart.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/udma.h"
+#include "driverlib/systick.h"
 #include "command_handler.h"
 #include "reply_handler.h"
 #include "data_handler.h"
@@ -40,6 +41,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "adc.h"
 #include "timer.h"
 #include "logger.h"
+#include "oscilloscope.h"
+#include "ssi.h"
 
 
 //*****************************************************************************
@@ -135,6 +138,12 @@ main(void) {
     SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
 
     //
+    // Enable Systick for timing
+    //
+    SysTickPeriodSet(16777216);
+    SysTickEnable();
+
+    //
     // GPIO Pin Configuration
     //
     ConfigurePins();
@@ -160,9 +169,16 @@ main(void) {
     ADCInit();
 
     //
+    // Configure SSI
+    //
+    SSIInit();
+
+    //
     // Configure Timer
     //
     TimerInit();
+    TimerSetInterval(200);
+    TimerStart(); // test signal for oscilloscope
 
     //
     // Initialize Command, Data and Reply Handler
@@ -172,6 +188,7 @@ main(void) {
     ReplyHandlerInit();
 
     LoggerInit();
+    OscilloscopeInit();
 
     //
     // Print a string.
@@ -180,6 +197,8 @@ main(void) {
     DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
 
     //ADCStart();
+    //OscilloscopeStart();
+    SSIStart();
 
     while(1)
     {
@@ -187,6 +206,7 @@ main(void) {
         DataHandlerMain();
         ReplyHandlerMain();
         USBDeviceMain();
+        ADCMain();
     }
 
 }

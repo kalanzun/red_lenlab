@@ -29,6 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/interrupt.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/debug.h"
+#include "driverlib/gpio.h"
 #include "debug.h"
 #include "timer.h"
 #include "adc.h"
@@ -40,10 +41,25 @@ tTimer timer;
 void
 Timer0IntHandler(void)
 {
-    DEBUG_PRINT("timer int\n");
+    static int tick = 0;
+    //DEBUG_PRINT("timer int\n");
     TimerIntClear(TIMER0_BASE, TIMER_A);
 
-    ADCStartSingle(timer.time);
+    //ADCStartSingle(timer.time);
+
+    if (tick) {
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_PIN_0);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3);
+        tick = 0;
+    }
+    else {
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0, 0);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0);
+        tick = 1;
+    }
+
+    //tick = ~tick;
+
     timer.time += timer.interval;
 }
 
@@ -75,7 +91,7 @@ TimerSetInterval(uint32_t interval)
 
     if (!timer.active) {
         timer.interval = interval;
-        load_value = interval * (SysCtlClockGet() / 1000);
+        load_value = interval * (SysCtlClockGet() / 1000 / 1000); // us // ms
         DEBUG_PRINT("%d\n", interval);
         TimerLoadSet(TIMER0_BASE, TIMER_A, load_value);
     }
@@ -84,6 +100,9 @@ TimerSetInterval(uint32_t interval)
 inline void
 ConfigureTimer(void)
 {
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
+
     TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
 
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
@@ -94,7 +113,7 @@ void
 TimerInit(void)
 {
     timer.active = 0;
-    timer.interval = 1000;
+    timer.interval = 200;
     timer.time = 0;
 
     ConfigureTimer();

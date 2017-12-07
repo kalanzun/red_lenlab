@@ -32,6 +32,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "timer.h"
 #include "logger.h"
 #include "config.h"
+#include "oscilloscope.h"
+#include "signal.h"
 
 
 tCommandHandler command_handler;
@@ -105,6 +107,20 @@ on_stopLogger(tEvent *event)
 {
     LoggerStop();
 }
+
+void
+on_calculateSine(tEvent *event)
+{
+    DEBUG_PRINT("on_calculateSine\n");
+    SignalCalculateSine();
+}
+
+void
+on_startOscilloscope(tEvent *event)
+{
+    OscilloscopeStart();
+}
+
 
 //#define min(a, b) (((a) < (b))? (a) : (b))
 
@@ -222,6 +238,8 @@ CommandHandlerMain(void)
             else if (command == setLoggerInterval) on_setLoggerInterval(event);
             else if (command == startLogger) on_startLogger(event);
             else if (command == stopLogger) on_stopLogger(event);
+            else if (command == calculateSine) on_calculateSine(event);
+            else if (command == startOscilloscope) on_startOscilloscope(event);
         }
         QueueRelease(&command_handler.command_queue);
     }

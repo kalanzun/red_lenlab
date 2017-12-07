@@ -1,4 +1,6 @@
 /*
+ * ssi.h
+ *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -18,13 +20,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef LENLAB_VERSION_H
-#define LENLAB_VERSION_H
+#ifndef SSI_H_
+#define SSI_H_
 
-#define MAJOR 7
-#define MINOR 1
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+#define SSI_PAYLOAD_LENGTH 496
 
-#endif // LENLAB_VERSION_H
+
+typedef struct SSI {
+    uint16_t buffer[SSI_PAYLOAD_LENGTH];
+} tSSI;
+
+
+extern tSSI ssi;
+
+
+void SSIStart(void);
+void SSIStop(void);
+
+void SSIInit(void);
+
+
+#endif /* SSI_H_ */
