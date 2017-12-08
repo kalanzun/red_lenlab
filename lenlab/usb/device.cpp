@@ -39,6 +39,8 @@ Device::Device(libusb_device *dev, QObject *parent) :
             this, SIGNAL(reply(pMessage)));
     connect(&*receiver1, SIGNAL(completed(pMessage)),
             this, SIGNAL(reply(pMessage)));
+    connect(this, SIGNAL(reply(pMessage)),
+            this, SLOT(on_reply(pMessage)));
 
     connect(&*sender, SIGNAL(completed(pMessage)),
             this, SLOT(on_send_transfer_ready()));
@@ -54,8 +56,8 @@ Device::Device(libusb_device *dev, QObject *parent) :
     connect(&*receiver1, SIGNAL(error(QString)),
             this, SIGNAL(error(QString)));
 
-    receiver0->start(pMessage(new Message()));
-    receiver1->start(pMessage(new Message()));
+    receiver0->start(newReply());
+    receiver1->start(newReply());
 
     thread->start();
 }
@@ -63,14 +65,21 @@ Device::Device(libusb_device *dev, QObject *parent) :
 void
 Device::send(const pMessage &cmd)
 {
+    qDebug() << "send" << cmd->getCommand();
     send_queue->append(cmd);
     try_to_send();
 }
 
 void
+Device::on_reply(const pMessage &reply)
+{
+    qDebug() << "reply" << reply->getCommand();
+}
+
+void
 Device::on_reply_transfer_ready()
 {
-    qobject_cast<Transfer *>(QObject::sender())->start(pMessage(new Message()));
+    qobject_cast<Transfer *>(QObject::sender())->start(newReply());
 }
 
 void

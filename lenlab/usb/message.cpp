@@ -95,16 +95,16 @@ Message::getPayloadLength()
     return length - 4;
 }
 
+void
+Message::setFullBufferLength()
+{
+    this->length = MESSAGE_BUFFER_LENGTH;
+}
+
 uint8_t *
 Message::getPayload()
 {
     return buffer + 4;
-}
-
-uint16_t
-Message::getPacketLength()
-{
-    return length;
 }
 
 void
@@ -113,8 +113,30 @@ Message::setPacketLength(uint16_t length)
     this->length = length;
 }
 
+uint16_t
+Message::getPacketLength()
+{
+    return length;
+}
+
 uint8_t *
 Message::getPacketBuffer()
 {
     return buffer;
+}
+
+pMessage
+usb::newCommand(Command command_code)
+{
+    pMessage cmd(new Message());
+    cmd->setCommand(command_code);
+    return cmd;
+}
+
+pMessage
+usb::newReply()
+{
+    pMessage reply(new Message());
+    reply->setFullBufferLength();
+    return reply;
 }

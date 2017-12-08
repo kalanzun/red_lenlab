@@ -82,9 +82,7 @@ Handler::open(libusb_device *dev)
         emit logMessage("Lenlab-Board gefunden.");
 
         //emit logMessage("Initialisierung");
-        usb::pMessage cmd(new usb::Message());
-        cmd->setCommand(init);
-        send(cmd);
+        send(newCommand(init));
     }
     catch (Exception e) {
         startTimer(2000); // slow polling due to error
@@ -99,18 +97,14 @@ Handler::on_reply(const pMessage &reply)
         emit logMessage("Initialisierung abgeschlossen.");
 
         //emit logMessage("Firmware-Name erfragen");
-        usb::pMessage cmd(new usb::Message());
-        cmd->setCommand(getName);
-        send(cmd);
+        send(newCommand(getName));
     }
     else if (reply->getCommand() == getName) {
         QString name((char *) reply->getPayload());//, reply->getPayloadLength());
         //emit logMessage(QString("Firmware-Name: %1.").arg(name));
 
         //emit logMessage("Firmware-Version erfragen");
-        usb::pMessage cmd(new usb::Message());
-        cmd->setCommand(getVersion);
-        send(cmd);
+        send(newCommand(getVersion));
     }
     else if (reply->getCommand() == getVersion) {
         uint32_t *version = (uint32_t *) reply->getPayload();

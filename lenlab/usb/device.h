@@ -57,6 +57,7 @@ namespace usb {
         void error(const QString &);
 
     private slots:
+        void on_reply(const pMessage &);
         void on_reply_transfer_ready();
         void on_send_transfer_ready();
 

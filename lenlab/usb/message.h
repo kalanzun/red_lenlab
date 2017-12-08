@@ -30,7 +30,7 @@ namespace usb {
 
     class Message
     {
-        uint16_t length = MESSAGE_BUFFER_LENGTH;
+        uint16_t length = 4;
         uint8_t buffer[MESSAGE_BUFFER_LENGTH];
 
     public:
@@ -52,14 +52,20 @@ namespace usb {
         void setPayloadLength(uint16_t length);
         uint16_t getPayloadLength();
 
+        void setFullBufferLength();
+
         uint8_t *getPayload();
 
-        void setPacketLength(uint16_t length);
         uint16_t getPacketLength();
+        void setPacketLength(uint16_t length);
+
         uint8_t *getPacketBuffer();
     };
 
     typedef QSharedPointer<Message> pMessage;
+
+    pMessage newCommand(Command command);
+    pMessage newReply();
 }
 
 Q_DECLARE_METATYPE(usb::pMessage)
