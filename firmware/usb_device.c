@@ -32,8 +32,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_protocol.h"
 #include "usb_device.h"
 #include "command_handler.h"
-#include "data_handler.h"
 #include "reply_handler.h"
+#include "oscilloscope.h"
 #include "debug.h"
 
 /*
@@ -193,6 +193,7 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         case USB_EVENT_RX_AVAILABLE:
         {
             size = USBDBulkRxPacketAvailable(&bulk_device);
+            DEBUG_PRINT("USB_EVENT_RX_AVAILABLE %d\n", size);
             if (size > EVENT_PAYLOAD_LENGTH) size = EVENT_PAYLOAD_LENGTH;
             if (size) {
                 if (!QueueFull(&command_handler.command_queue)) {
@@ -219,7 +220,6 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
 uint32_t
 YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
-
     //
     // Which event have we been sent?
     //
@@ -230,6 +230,8 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
         //
         case USB_EVENT_TX_COMPLETE:
         {
+            DEBUG_PRINT("USB_EVENT_TX_COMPLETE\n");
+
             /*
             if (g_ui32TxCount == 0)
             {
@@ -248,44 +250,13 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
 }
 
 
-//*****************************************************************************
-//
-// The interrupt handler for uDMA errors.  This interrupt will occur if the
-// uDMA encounters a bus error while trying to perform a transfer.  This
-// handler just increments a counter if an error occurs.
-//
-//*****************************************************************************
-void
-uDMAErrorHandler(void)
-{
-    uint32_t ui32Status;
-
-    //
-    // Check for uDMA error bit
-    //
-    ui32Status = uDMAErrorStatusGet();
-
-    //
-    // If there is a uDMA error, then clear the error and increment
-    // the error counter.
-    //
-    if(ui32Status)
-    {
-        uDMAErrorStatusClear();
-        while (1) {};
-    }
-}
-
-
 void USBIntHandler(void)
 {
-    if((usb_device.dma_pending) &&
-    (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
+    if ((usb_device.dma_pending) && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
     {
-    //
-    // Handle the DMA complete case.
-    //
-        DataQueueRelease(&data_handler.data_queue);
+        //
+        // Handle the DMA complete case.
+        //
         usb_device.dma_pending = 0;
     }
     else
@@ -327,7 +298,7 @@ Lorem(void)
 inline void
 USBDeviceStartuDMA(uint8_t *payload)
 {
-    ASSERT(!usb_device.dma_pending);
+    //ASSERT(!usb_device.dma_pending);
     usb_device.dma_pending = 1;
     //
     // Configure and enable DMA for the IN transfer.
@@ -335,8 +306,12 @@ USBDeviceStartuDMA(uint8_t *payload)
     //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
     USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
     // does not work if moved up into the config section
+
     uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, payload,
-                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), DATA_PAYLOAD_LENGTH);
+                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
+    // works only with multiples of 16 and up to 1024
+
+
     //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
     //                                  2048/64);
     // offenbar nicht nötig
@@ -356,18 +331,19 @@ void
 USBDeviceMain()
 {
     tEvent *event;
-    tDataEvent *data_event;
 
     if (!usb_device.dma_pending)
     {
-        if (!DataQueueEmpty(&data_handler.data_queue)) {
-            data_event = DataQueueRead(&data_handler.data_queue);
-            USBDeviceStartuDMA(data_event->payload);
-        }
-        else if (!QueueEmpty(&reply_handler.reply_queue)) {
+        if (!QueueEmpty(&reply_handler.reply_queue)) {
             event = QueueRead(&reply_handler.reply_queue);
             USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
             QueueRelease(&reply_handler.reply_queue);
+        }
+        else if (oscilloscope.send) {
+            USBDeviceStartuDMA(oscilloscope.queue[oscilloscope.read]);
+            oscilloscope.read = (oscilloscope.read + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
+            if (oscilloscope.read == 0)
+                oscilloscope.send = 0;
         }
     }
 }

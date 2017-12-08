@@ -34,7 +34,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/systick.h"
 #include "command_handler.h"
 #include "reply_handler.h"
-#include "data_handler.h"
 #include "debug.h"
 #include "usb_device.h"
 #include "peripherals.h"
@@ -166,7 +165,7 @@ main(void) {
     //
     // Configure ADC
     //
-    ADCInit();
+    ADCInit(&adc0);
 
     //
     // Configure SSI
@@ -176,19 +175,18 @@ main(void) {
     //
     // Configure Timer
     //
-    TimerInit();
-    TimerSetInterval(200);
-    TimerStart(); // test signal for oscilloscope
+    //TimerInit();
+    //TimerSetInterval(200);
+    //TimerStart(); // test signal for oscilloscope
 
     //
     // Initialize Command, Data and Reply Handler
     //
     CommandHandlerInit();
-    DataHandlerInit();
     ReplyHandlerInit();
 
     LoggerInit();
-    OscilloscopeInit();
+    OscilloscopeInit(&oscilloscope);
 
     //
     // Print a string.
@@ -196,17 +194,16 @@ main(void) {
     DEBUG_PRINT("Red Firmware\n");
     DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
 
-    //ADCStart();
-    //OscilloscopeStart();
-    SSIStart();
+    ADCStart(&adc0);
+    //OscilloscopeStart(&oscilloscope);
+    //SSIStart();
 
     while(1)
     {
         CommandHandlerMain();
-        DataHandlerMain();
+        OscilloscopeMain(&oscilloscope);
         ReplyHandlerMain();
         USBDeviceMain();
-        ADCMain();
     }
 
 }

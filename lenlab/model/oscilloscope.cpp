@@ -63,19 +63,16 @@ Oscilloscope::stop()
 void
 Oscilloscope::restart()
 {
-    qDebug("start");
+    qDebug("restart");
     t = 0;
-    clear();
-    usb::pMessage cmd(new usb::Message());
-    cmd->setCommand(startOscilloscope);
-    lenlab->send(cmd);
+    for (auto &vector : data[write]) vector.clear();
+    lenlab->send(usb::newCommand(startOscilloscope));
 }
 
 void
 Oscilloscope::clear()
 {
 
-    for (auto &vector : data) vector.clear();
 
 }
 
@@ -90,13 +87,20 @@ Oscilloscope::receive(const usb::pMessage &reply)
 
     // sine values
     for (uint32_t i = 0; i < 1000; i+=2) {
-        data[0].append((double) t++); // x axis
+        data[write][0].append((double) t++); // x axis
         //a += buffer[i];
-        data[1].append((double) buffer[i]);// / (double) 2048.0); // y axis
-        data[2].append((double) buffer[i+1]);// / (double) 2048.0); // y axis
+        data[write][1].append((double) buffer[i]);// / (double) 2048.0); // y axis
+        data[write][2].append((double) buffer[i+1]);// / (double) 2048.0); // y axis
     }
 
-    emit replot();
+    if (reply->getHeader1()) { // last package
+        read = write; // gui reads from this one
+        write = (write + 1) % 2;
+        emit replot();
+        if (running)
+            restart();
+    }
+
 }
 
 void
@@ -105,6 +109,18 @@ Oscilloscope::finished(const usb::pMessage &reply)
     //qDebug("finished");
     if (running)
         restart();
+}
+
+MinMaxVector *
+Oscilloscope::getTime()
+{
+    return &data[read][0];
+}
+
+MinMaxVector *
+Oscilloscope::getChannel(uint32_t channel)
+{
+    return &data[read][1+channel];
 }
 
 } // namespace model

@@ -44,6 +44,8 @@ on_init(tEvent *event)
 {
     tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
 
+    DEBUG_PRINT("init\n");
+
     LoggerStop();
 
     EventSetCommand(reply, init);
@@ -62,6 +64,8 @@ on_getName(tEvent *event)
     int i;
     tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
 
+    DEBUG_PRINT("getName\n");
+
     reply->payload[0] = event->payload[0];
     reply->payload[1] = String;
     ASSERT(4 + NAME_SIZE + 1 < EVENT_PAYLOAD_LENGTH);
@@ -79,6 +83,8 @@ on_getVersion(tEvent *event)
 {
     tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
 
+    DEBUG_PRINT("getVersion\n");
+
     reply->payload[0] = event->payload[0];
     reply->payload[1] = uInt32;
     *(uint32_t *) (reply->payload + 4) = MAJOR;
@@ -93,18 +99,25 @@ void
 on_setLoggerInterval(tEvent *event)
 {
     uint32_t value = *(uint32_t *) (event->payload + 4);
+
+    DEBUG_PRINT("setLoggerInterval\n");
+
     LoggerSetInterval(value);
 }
 
 void
 on_startLogger(tEvent *event)
 {
+    DEBUG_PRINT("startLogger\n");
+
     LoggerStart();
 }
 
 void
 on_stopLogger(tEvent *event)
 {
+    DEBUG_PRINT("stopLogger\n");
+
     LoggerStop();
 }
 
@@ -118,7 +131,9 @@ on_calculateSine(tEvent *event)
 void
 on_startOscilloscope(tEvent *event)
 {
-    OscilloscopeStart();
+    DEBUG_PRINT("startOscilloscope\n");
+
+    OscilloscopeStart(&oscilloscope);
 }
 
 
@@ -231,6 +246,7 @@ CommandHandlerMain(void)
     if (!QueueEmpty(&command_handler.command_queue)) {
         event = QueueRead(&command_handler.command_queue);
         command = EventGetCommand(event);
+        DEBUG_PRINT("%d\n", command);
         if (command < NUM_COMMANDS) {
             if (command == init) on_init(event);
             else if (command == getName) on_getName(event);

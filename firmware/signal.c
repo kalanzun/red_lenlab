@@ -20,8 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "signal.h"
-#include "data_handler.h"
 #include "lenlab_protocol.h"
 #include "debug.h"
 #include "driverlib/systick.h"
@@ -46,6 +47,7 @@ taylor(int32_t x)
 void
 SignalCalculateSine(void)
 {
+    /*
     // 1.2 ms mit 4 mal taylor
     // 0.5 ms mit 1 mal taylor und kopieren
     uint32_t i;
@@ -60,14 +62,14 @@ SignalCalculateSine(void)
     // so 124 steps for pi/2
     for (i = 0; i < 124; i++)
         buffer[i] = taylor(i*26);
-    /*
+
     for (i = 0; i < 124; i++)
         buffer[124+i] = taylor((124-i)*26);
     for (i = 0; i < 124; i++)
         buffer[248+i] = -taylor(i*26);
     for (i = 0; i < 124; i++)
         buffer[248+124+i] = -taylor((124-i)*26);
-    */
+
     for (i = 0; i < 124; i++)
         buffer[124+i] = buffer[123-i];
     for (i = 0; i < 124; i++)
@@ -82,4 +84,5 @@ SignalCalculateSine(void)
     *((uint32_t *) (event->payload + 4)) = start - time; // der timer zählt runter!
     DEBUG_PRINT("done %u", time);
     DataQueueWrite(&data_handler.data_queue);
+    */
 }

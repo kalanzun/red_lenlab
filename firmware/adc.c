@@ -39,14 +39,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/debug.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
-
 #include "adc.h"
 #include "usb_device.h"
-#include "adc_queue.h"
 #include "debug.h"
 
 
-tADC adc;
+tADC adc0;
+tADC adc1;
 
 /*
 inline void
@@ -87,24 +86,29 @@ StartBasicADCuDMAChannel(uint32_t ui32ChannelStructIndex, uint32_t time)
 //
 //*****************************************************************************
 void
-ADC0IntHandler(void)
+ADCIntHandler(tADC *self)
 {
     //
     // Clear the ADC interrupt
     //
-    ADCIntClear(ADC0_BASE, 0);
+    ADCIntClear(self->adc_base, 0);
 
-    if (adc.pingpong)
+    if (self->pingpong)
     {
-        if(!uDMAChannelSizeGet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT))
+        if(!uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
         {
-            //DEBUG_PRINT("PRI\n");
-            ASSERT(!adc.pong_ready); // adc writes into this one at the moment
-            adc.ping_ready = 1;
-            uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT,
+            //DEBUG_PRINT("adc ping %d\n", self->count);
+            //ASSERT(!self->pong_ready); // adc writes into this one at the moment
+            //self->ping_ready = 1;
+            if (self->enable) {
+                ASSERT(!self->lock);
+                self->read = 0;
+                ADCLock(self);
+            }
+            uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
                     UDMA_MODE_PINGPONG,
-                    (void *)(ADC0_BASE + ADC_O_SSFIFO0),
-                    adc.ping, ADC_PAYLOAD_LENGTH);
+                    (void *)(self->adc_base + ADC_O_SSFIFO0),
+                    self->ping, ADC_BUFFER_LENGTH);
             //ADCQueueWrite(&adc.adc_queue);
             //adc.pri_ready = 1;
             // Achtung: Beim Beenden leaken wir hier adc_queue.acquire
@@ -113,15 +117,23 @@ ADC0IntHandler(void)
             // damit der interrupt das nächste Mal nach UDMA_ALT_SELECT springt muss das DMA hier neu konfiguriert werden, auch wenn dann nach ALT angehalten werden soll.
             //uDMAChannelEnable(UDMA_CHANNEL_ADC0); // TODO event. nicht nötig, bitte probieren
         }
-        else if(!uDMAChannelSizeGet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT))
+        else if(!uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
         {
-            //DEBUG_PRINT("ALT\n");
-            ASSERT(!adc.ping_ready); // adc writes into this one at the moment
-            adc.pong_ready = 1;
-            uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT,
+            //DEBUG_PRINT("adc pong %d\n", self->count);
+            //ASSERT(!self->ping_ready); // adc writes into this one at the moment
+            //self->pong_ready = 1;
+            if (self->enable) {
+                ASSERT(!self->lock);
+                self->read = 1;
+                ADCLock(self);
+            }
+            uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
                     UDMA_MODE_PINGPONG,
-                    (void *)(ADC0_BASE + ADC_O_SSFIFO0),
-                    adc.pong, ADC_PAYLOAD_LENGTH);
+                    (void *)(self->adc_base + ADC_O_SSFIFO0),
+                    self->pong, ADC_BUFFER_LENGTH);
+            //if (self->count == 0) {
+            //    ADCSequenceDisable(self->adc_base, 0);
+            //}
             //ASSERT(!adc.pri_ready); // this one should be active now
             //ADCQueueWrite(&adc.adc_queue);
             //adc.alt_ready = 1;
@@ -136,14 +148,14 @@ ADC0IntHandler(void)
             //ASSERT(0);
         //}
     }
-    else if (adc.basic) // single shot
+    else if (self->basic) // single shot
     {
-        if(!uDMAChannelSizeGet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT))
+        if(!uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
         {
-            DEBUG_PRINT("SGN\n");
+            //DEBUG_PRINT("SGN\n");
             //ADCQueueWrite(&adc.adc_queue);
-            ADCSequenceDisable(ADC0_BASE, 0);
-            adc.basic = 0;
+            ADCSequenceDisable(self->adc_base, 0);
+            self->basic = 0;
         }
         //else
         //{
@@ -154,57 +166,105 @@ ADC0IntHandler(void)
     }
 }
 
+void
+ADC0IntHandler(void)
+{
+    ADCIntHandler(&adc0);
+}
 
 void
-ADCStart(void)
+ADC1IntHandler(void)
 {
-    if (adc.basic || adc.pingpong)
+    ADCIntHandler(&adc1);
+}
+
+
+
+void
+ADCStart(tADC *self)
+{
+    if (self->basic || self->pingpong)
         return;
 
-    adc.pingpong = 1;
-    adc.ping_ready = 0;
-    adc.pong_ready = 0;
+    DEBUG_PRINT("ADCStart\n");
 
-    uDMAChannelAttributeDisable(UDMA_CHANNEL_ADC0,
+    self->pingpong = 1;
+
+    uDMAChannelAttributeDisable(self->udma_channel,
         UDMA_ATTR_ALTSELECT | UDMA_ATTR_USEBURST |
         UDMA_ATTR_HIGH_PRIORITY |
         UDMA_ATTR_REQMASK);
 
-    uDMAChannelControlSet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT,
+    uDMAChannelControlSet(self->udma_channel | UDMA_PRI_SELECT,
         UDMA_SIZE_16 | UDMA_SRC_INC_NONE |
         UDMA_DST_INC_16 | UDMA_ARB_4);
 
-    uDMAChannelControlSet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT,
+    uDMAChannelControlSet(self->udma_channel | UDMA_ALT_SELECT,
         UDMA_SIZE_16 | UDMA_SRC_INC_NONE |
         UDMA_DST_INC_16 | UDMA_ARB_4);
 
-    uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_PRI_SELECT,
+    uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_PINGPONG,
-            (void *)(ADC0_BASE + ADC_O_SSFIFO0),
-            adc.ping, ADC_PAYLOAD_LENGTH);
-    uDMAChannelTransferSet(UDMA_CHANNEL_ADC0 | UDMA_ALT_SELECT,
+            (void *)(self->adc_base + ADC_O_SSFIFO0),
+            self->ping, ADC_BUFFER_LENGTH);
+    uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
             UDMA_MODE_PINGPONG,
-            (void *)(ADC0_BASE + ADC_O_SSFIFO0),
-            adc.pong, ADC_PAYLOAD_LENGTH);
+            (void *)(self->adc_base + ADC_O_SSFIFO0),
+            self->pong, ADC_BUFFER_LENGTH);
 
-    uDMAChannelEnable(UDMA_CHANNEL_ADC0);
-    ADCSequenceEnable(ADC0_BASE, 0);
+    uDMAChannelEnable(self->udma_channel);
+    ADCSequenceEnable(self->adc_base, 0);
 
-    IntEnable(INT_ADC0SS0);
+    IntEnable(self->adc_int);
 }
 
-
 void
-ADCStop(void)
+ADCStop(tADC *self)
 {
-    //DEBUG_PRINT("stop\n");
-    if (adc.pingpong) {
-        ADCSequenceDisable(ADC0_BASE, 0);
-        adc.pingpong = 0;
+    DEBUG_PRINT("ADCStop\n");
+
+    if (self->pingpong) {
+        // ADCStop cancels the current sequencer run, it will not deliver anymore data
+        ADCSequenceDisable(self->adc_base, 0);
+        self->pingpong = 0;
     }
 }
 
+void
+ADCEnable(tADC *self)
+{
+    ADCUnlock(self);
+    self->enable = 1;
+}
 
+void
+ADCDisable(tADC *self)
+{
+    self->enable = 0;
+}
+
+void
+ADCLock(tADC *self)
+{
+    self->lock = 1;
+}
+
+void
+ADCUnlock(tADC *self)
+{
+    self->lock = 0;
+}
+
+uint16_t *
+ADCGetBuffer(tADC *self)
+{
+    if (self->read)
+        return self->pong;
+    else
+        return self->ping;
+}
+
+/*
 void
 ADCStartSingle(uint32_t time)
 {
@@ -229,10 +289,10 @@ ADCStartSingle(uint32_t time)
 
     IntEnable(INT_ADC0SS0);
 }
-
+*/
 
 inline void
-ConfigureADC()
+ConfigureADC(void)
 {
     //
     // Configure Pins
@@ -284,16 +344,18 @@ ConfigureADC()
 
 
 void
-ADCInit(void)
+ADCInit(tADC *self)
 {
-    adc.pingpong = 0;
-    adc.basic = 0;
-    //ADCQueueInit(&adc.adc_queue);
+    self->adc_base = ADC0_BASE;
+    self->adc_int = INT_ADC0SS0;
+    self->udma_channel = UDMA_CHANNEL_ADC0;
+    self->pingpong = 0;
+    self->basic = 0;
+    self->ping_ready = 0;
+    self->pong_ready = 0;
+    self->enable = 0;
+    self->lock = 0;
+    self->read = 0;
 
     ConfigureADC();
-}
-
-
-void ADCMain(void)
-{
 }

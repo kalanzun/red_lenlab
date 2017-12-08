@@ -56,7 +56,7 @@ private slots:
     void on_stopButton_clicked();
 
 private:
-    QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
+    QwtPlotCurve *newCurve(const QColor &color, bool visible);
 
     Ui::OscilloscopeForm *ui;
 

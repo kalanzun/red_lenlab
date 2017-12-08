@@ -24,17 +24,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define OSCILLOSCOPE_H_
 
 
+#define OSCILLOSCOPE_PACKET_LENGTH 1024
+#define OSCILLOSCOPE_QUEUE_LENGTH 16
+
+
 typedef struct Oscilloscope {
     bool active;
+    bool send;
+    uint8_t queue[OSCILLOSCOPE_QUEUE_LENGTH][OSCILLOSCOPE_PACKET_LENGTH];
+    uint32_t read;
+    uint32_t write;
 } tOscilloscope;
 
 
 extern tOscilloscope oscilloscope;
 
 
-void OscilloscopeStart(void);
+void OscilloscopeStart(tOscilloscope *self);
 
-void OscilloscopeInit(void);
+void OscilloscopeMain(tOscilloscope *self);
+
+void OscilloscopeInit(tOscilloscope *self);
 
 
 #endif /* OSCILLOSCOPE_H_ */

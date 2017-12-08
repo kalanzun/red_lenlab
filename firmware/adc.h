@@ -24,30 +24,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define ADC_H_
 
 
-#include "adc_queue.h"
+#define ADC_BUFFER_LENGTH 1000
 
 
 typedef struct ADC {
+    uint32_t adc_base;
+    uint32_t adc_int;
+    uint32_t udma_channel;
     volatile bool pingpong;
     volatile bool basic;
     volatile bool ping_ready;
     volatile bool pong_ready;
-    uint16_t ping[ADC_PAYLOAD_LENGTH];
-    uint16_t pong[ADC_PAYLOAD_LENGTH];
+    volatile bool enable;
+    volatile bool lock;
+    volatile bool read;
+    uint16_t ping[ADC_BUFFER_LENGTH];
+    uint16_t pong[ADC_BUFFER_LENGTH];
 } tADC;
 
 
-extern tADC adc;
+extern tADC adc0;
+extern tADC adc1;
 
 
-void ADCStart(void);
-void ADCStop(void);
+void ADCEnable(tADC *self);
+void ADCDisable(tADC *self);
 
-void ADCStartSingle(uint32_t time);
+void ADCLock(tADC *self);
+void ADCUnlock(tADC *self);
 
-void ADCMain(void);
+uint16_t *ADCGetBuffer();
 
-void ADCInit(void);
+
+void ADCStart(tADC *self);
+void ADCStop(tADC *self);
+
+void ADCInit(tADC *self);
 
 
 #endif /* ADC_H_ */

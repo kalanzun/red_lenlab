@@ -92,7 +92,6 @@ TimerSetInterval(uint32_t interval)
     if (!timer.active) {
         timer.interval = interval;
         load_value = interval * (SysCtlClockGet() / 1000 / 1000); // us // ms
-        DEBUG_PRINT("%d\n", interval);
         TimerLoadSet(TIMER0_BASE, TIMER_A, load_value);
     }
 }

@@ -49,7 +49,8 @@ public:
     void receive(const usb::pMessage &reply);
     void finished(const usb::pMessage &reply);
 
-    std::array<MinMaxVector, 5> data;
+    MinMaxVector *getTime();
+    MinMaxVector *getChannel(uint32_t channel);
 
 signals:
     void replot();
@@ -59,6 +60,10 @@ public slots:
 private:
     uint32_t t;
     bool running = 0;
+    std::array<std::array<MinMaxVector, 5>, 2> data;
+    uint32_t read = 0;
+    uint32_t write = 0;
+
     typedef Component super;
 };
 
