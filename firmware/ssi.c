@@ -88,7 +88,7 @@ SSIStart(void)
             SysCtlClockGet(),
             SSI_FRF_MOTO_MODE_0,
             SSI_MODE_MASTER,
-            16000000,
+            1600000,
             16);
 
     SSIEnable(SSI0_BASE);
@@ -170,19 +170,47 @@ SSIInit(void)
 
     ConfigureSSI();
 
-    // Rampe
     /*
-    for (i = 0; i < SSI_PAYLOAD_LENGTH; i++)
-        ssi.buffer[i] = (8*i) | 0x3000;
-    */
-
     // Rampe steigend auf Ausgang A
     // Rampe fallend auf Ausgang B
-    // Vollausschlag ist 4096 (12 bit)
+    // Vollausschlag ist 4096 (12 bit), i läuft bis 512
+    // SSI_PAYLOAD_LENGTH == 1024
     for (i = 0; i < (SSI_PAYLOAD_LENGTH >> 1); i++)
     {
         ssi.buffer[2*i] = (8*i) | 0x3000; // channel A
-        ssi.buffer[2*i+1] = (8*(512-i)) | 0xB000; // channel B
+        ssi.buffer[2*i+1] = (8*((SSI_PAYLOAD_LENGTH >> 1)-i)) | 0xB000; // channel B
+    }
+    */
+
+    // Sinus
+    // SSI_PAYLOAD_LENGTH == 2*4*119
+    for (i = 0; i < (SSI_PAYLOAD_LENGTH >> 1); i++)
+    {
+        ssi.buffer[2*i] = 0x3000; // channel A
+        ssi.buffer[2*i+1] = 0xB000; // channel B
+    }
+#define OFFSET 2047
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+    for (i = 0; i < 120; i++)
+    {
+        ssi.buffer[2*i] = ((uint16_t) MIN(OFFSET + taylor(27*i), 4095)) | 0x3000; // channel A
+        ssi.buffer[2*i+1] = ((uint16_t) MIN(OFFSET + taylor(27*(119-i)), 4095)) | 0xB000; // channel B
+    }
+    for (i = 0; i < 120; i++)
+    {
+        ssi.buffer[2*(120+i)] = ((uint16_t) MIN(OFFSET + taylor(27*(119-i)), 4095)) | 0x3000; // channel A
+        ssi.buffer[2*(120+i)+1] = ((uint16_t) MAX(OFFSET - taylor(27*i), 0)) | 0xB000; // channel B
+    }
+    for (i = 0; i < 120; i++)
+    {
+        ssi.buffer[2*(2*120+i)] = ((uint16_t) MAX(OFFSET - taylor(27*i), 0)) | 0x3000; // channel A
+        ssi.buffer[2*(2*120+i)+1] = ((uint16_t) MAX(OFFSET - taylor(27*(119-i)), 0)) | 0xB000; // channel B
+    }
+    for (i = 0; i < 120; i++)
+    {
+        ssi.buffer[2*(3*120+i)] = ((uint16_t) MAX(OFFSET - taylor(27*(119-i)), 0)) | 0x3000; // channel A
+        ssi.buffer[2*(3*120+i)+1] = ((uint16_t) MIN(OFFSET + taylor(27*i), 4095)) | 0xB000; // channel B
     }
 
     /*
