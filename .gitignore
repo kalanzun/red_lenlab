@@ -1,3 +1,5 @@
 build-lenlab-*/
-
 libusb/
+*.wp[ru]
+.ipynb_checkpoints/
+
