@@ -196,7 +196,7 @@ main(void) {
 
     ADCStart(&adc0);
     //OscilloscopeStart(&oscilloscope);
-    //SSIStart();
+    SSIStart();
 
     while(1)
     {

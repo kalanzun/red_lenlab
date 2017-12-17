@@ -171,8 +171,19 @@ SSIInit(void)
     ConfigureSSI();
 
     // Rampe
+    /*
     for (i = 0; i < SSI_PAYLOAD_LENGTH; i++)
         ssi.buffer[i] = (8*i) | 0x3000;
+    */
+
+    // Rampe steigend auf Ausgang A
+    // Rampe fallend auf Ausgang B
+    // Vollausschlag ist 4096 (12 bit)
+    for (i = 0; i < (SSI_PAYLOAD_LENGTH >> 1); i++)
+    {
+        ssi.buffer[2*i] = (8*i) | 0x3000; // channel A
+        ssi.buffer[2*i+1] = (8*(512-i)) | 0xB000; // channel B
+    }
 
     /*
     // Konstante 1/2

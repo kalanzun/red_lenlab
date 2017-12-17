@@ -89,16 +89,16 @@ Oscilloscope::receive(const usb::pMessage &reply)
     for (uint32_t i = 0; i < 1000; i+=2) {
         data[write][0].append((double) t++); // x axis
         //a += buffer[i];
-        data[write][1].append((double) buffer[i]);// / (double) 2048.0); // y axis
-        data[write][2].append((double) buffer[i+1]);// / (double) 2048.0); // y axis
+        data[write][1].append((double) buffer[4+i]);// / (double) 2048.0); // y axis
+        data[write][2].append((double) buffer[4+i+1]);// / (double) 2048.0); // y axis
     }
 
     if (reply->getHeader1()) { // last package
         read = write; // gui reads from this one
         write = (write + 1) % 2;
         emit replot();
-        if (running)
-            restart();
+        //if (running)
+        //    restart();
     }
 
 }

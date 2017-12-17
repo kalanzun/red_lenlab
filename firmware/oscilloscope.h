@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define OSCILLOSCOPE_H_
 
 
+#define OSCILLOSCOPE_HEADER_LENGTH 8
 #define OSCILLOSCOPE_PACKET_LENGTH 1024
 #define OSCILLOSCOPE_QUEUE_LENGTH 16
 

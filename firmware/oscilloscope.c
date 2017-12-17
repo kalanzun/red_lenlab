@@ -63,9 +63,11 @@ OscilloscopeMain(tOscilloscope *self)
 
         buffer = ADCGetBuffer(&adc0);
 
+        ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
+
         for (i = 0; i < ADC_BUFFER_LENGTH; i++)
         {
-            self->queue[self->write][4+i] = buffer[i] >> 4;
+            self->queue[self->write][OSCILLOSCOPE_HEADER_LENGTH + i] = buffer[i] >> 4;
         }
 
         ADCUnlock(&adc0);
