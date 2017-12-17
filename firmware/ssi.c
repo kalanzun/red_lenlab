@@ -48,6 +48,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 tSSI ssi;
 
 
+inline void
+SSIStartuDMAChannel(void)
+{
+    uDMAChannelTransferSet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT,
+            UDMA_MODE_BASIC,
+            ssi.buffer,
+            (void *)(SSI0_BASE + SSI_O_DR),
+            ssi.length);
+
+    uDMAChannelEnable(UDMA_CHANNEL_SSI0TX);
+}
+
+
 //*****************************************************************************
 //
 // The interrupt handler for ADC0, sequence 0.  This interrupt will occur when
@@ -66,42 +79,66 @@ SSI0IntHandler(void)
 
     if(!uDMAChannelIsEnabled(UDMA_CHANNEL_SSI0TX))
     {
-
-        uDMAChannelTransferSet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT,
-                UDMA_MODE_BASIC,
-                ssi.buffer,
-                (void *)(SSI0_BASE + SSI_O_DR),
-                SSI_PAYLOAD_LENGTH);
-
-        uDMAChannelEnable(UDMA_CHANNEL_SSI0TX);
+        SSIStartuDMAChannel();
     }
 
+}
+
+
+uint32_t
+SSIGetLength(void)
+{
+    return ssi.length;
+}
+
+
+void
+SSISetLength(uint32_t length)
+{
+    ASSERT(length < SSI_BUFFER_LENGTH);
+    ssi.length = length;
+}
+
+
+uint16_t *
+SSIGetBuffer(void)
+{
+    return ssi.buffer;
+}
+
+
+uint32_t
+SSIGetFrequency(void)
+{
+    return ssi.frequency;
+}
+
+
+void
+SSISetFrequency(uint32_t frequency)
+{
+    // 16 bits per channel (>> 4)
+    // 2 channels (>> 1)
+    uint32_t bitrate = frequency << 5;
+
+    SSIConfigSetExpClk(
+            SSI0_BASE,
+            SysCtlClockGet(),
+            SSI_FRF_MOTO_MODE_0,
+            SSI_MODE_MASTER,
+            bitrate,
+            16);
+
+    ssi.frequency = frequency;
 }
 
 
 void
 SSIStart(void)
 {
-    //Enable SSI with desired frequency
-    SSIConfigSetExpClk(
-            SSI0_BASE,
-            SysCtlClockGet(),
-            SSI_FRF_MOTO_MODE_0,
-            SSI_MODE_MASTER,
-            1600000,
-            16);
-
     SSIEnable(SSI0_BASE);
 
-    //Enable DMA Transfer
-    uDMAChannelTransferSet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT,
-            UDMA_MODE_BASIC,
-            ssi.buffer,
-            (void *)(SSI0_BASE + SSI_O_DR),
-            SSI_PAYLOAD_LENGTH);
-
-    uDMAChannelEnable(UDMA_CHANNEL_SSI0TX);
-
+    SSIStartuDMAChannel();
 }
 
 
@@ -111,8 +148,9 @@ SSIStop(void)
     uDMAChannelDisable(UDMA_CHANNEL_SSI0TX);
 }
 
+
 inline void
-ConfigureSSI()
+SSIConfigure()
 {
     //
     // Configure Pins
@@ -121,6 +159,9 @@ ConfigureSSI()
     GPIOPinConfigure(GPIO_PA3_SSI0FSS);
     GPIOPinConfigure(GPIO_PA5_SSI0TX);
     GPIOPinTypeSSI(GPIO_PORTA_BASE,GPIO_PIN_5|GPIO_PIN_3|GPIO_PIN_2);
+
+    // SSI
+    SSISetFrequency(500000); // 500 kHz maximum Frequency
 
     // Set DAC Output to zero. Needed after reset of µC
     SSIDataPut(SSI0_BASE, 0x3800);
@@ -145,7 +186,7 @@ ConfigureSSI()
             UDMA_SIZE_16 | UDMA_SRC_INC_16 | UDMA_DST_INC_NONE |
             UDMA_ARB_4);
 }
-
+/*
 inline int32_t
 f_mul(int32_t a, int32_t b)
 {
@@ -162,13 +203,13 @@ taylor(int32_t x)
 
     return (x) - (x3 / 6) + (x5 / 120) - (x7 / 5040);
 }
-
+*/
 void
 SSIInit(void)
 {
-    uint32_t i;
+    //uint32_t i;
 
-    ConfigureSSI();
+    SSIConfigure();
 
     /*
     // Rampe steigend auf Ausgang A
@@ -182,7 +223,8 @@ SSIInit(void)
     }
     */
 
-    // Sinus
+    /*
+    // Sinus und Cosinus
     // SSI_PAYLOAD_LENGTH == 2*4*119
     for (i = 0; i < (SSI_PAYLOAD_LENGTH >> 1); i++)
     {
@@ -211,39 +253,6 @@ SSIInit(void)
     {
         ssi.buffer[2*(3*120+i)] = ((uint16_t) MAX(OFFSET - taylor(27*(119-i)), 0)) | 0x3000; // channel A
         ssi.buffer[2*(3*120+i)+1] = ((uint16_t) MIN(OFFSET + taylor(27*i), 4095)) | 0xB000; // channel B
-    }
-
-    /*
-    // Konstante 1/2
-    for (i = 0; i < SSI_PAYLOAD_LENGTH/2; i++)
-        ssi.buffer[i] = 0 | 0x3000;
-    for (i = 0; i < SSI_PAYLOAD_LENGTH/2; i++)
-        ssi.buffer[512+i] = 4095 | 0x3000;
-    */
-
-    /*
-    // Konstante 0x55 010101
-    for (i = 0; i < SSI_PAYLOAD_LENGTH; i++)
-        ssi.buffer[i] = 0x3555;
-    */
-
-    /*
-    for (i = 0; i < 124; i++)
-        ssi.buffer[i] = ((uint16_t) (2048 + taylor(i*26))) & 0xFFF | 0x3000;
-    for (i = 0; i < 124; i++)
-        ssi.buffer[124+i] = ((uint16_t) (2048 + taylor((123-i)*26))) & 0xFFF | 0x3000;
-        //ssi.buffer[124+i] = ssi.buffer[123-i];
-    for (i = 0; i < 124; i++)
-        ssi.buffer[124+124+i] = ((uint16_t) (2048 - taylor(i*26))) & 0xFFF | 0x3000;
-        //ssi.buffer[248+i] = (uint32_t) 4096 - (uint32_t) ssi.buffer[i];
-    for (i = 0; i < 124; i++)
-        ssi.buffer[i] = ((uint16_t) (2048 - taylor((123-i)*26))) & 0xFFF | 0x3000;
-        //ssi.buffer[248+124+i] = (uint32_t) 4096 - (uint32_t) ssi.buffer[123-i];
-    */
-
-    /*
-    for (i = 0; i < SSI_PAYLOAD_LENGTH; i++) {
-        ssi.buffer[i] = (((uint16_t) (2048 + taylor(14 * i))) & 0xFFF) | 0x3000;
     }
     */
 }

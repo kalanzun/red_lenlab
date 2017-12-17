@@ -42,6 +42,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "logger.h"
 #include "oscilloscope.h"
 #include "ssi.h"
+#include "signal.h"
 
 
 //*****************************************************************************
@@ -196,7 +197,8 @@ main(void) {
 
     ADCStart(&adc0);
     //OscilloscopeStart(&oscilloscope);
-    SSIStart();
+    //SSIStart();
+    SignalStart();
 
     while(1)
     {

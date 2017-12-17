@@ -25,4 +25,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 void SignalCalculateSine(void);
 
+
+void SignalStart(void);
+
+void SignalInit(void);
+
+
 #endif /* SIGNAL_H_ */

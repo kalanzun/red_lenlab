@@ -24,16 +24,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SSI_H_
 
 
-#define SSI_PAYLOAD_LENGTH (120<<3)
+#define SSI_BUFFER_LENGTH 1024
 
 
 typedef struct SSI {
-    uint16_t buffer[SSI_PAYLOAD_LENGTH];
+    uint16_t buffer[SSI_BUFFER_LENGTH];
+    uint32_t length;
+    uint32_t frequency;
 } tSSI;
 
 
 extern tSSI ssi;
 
+
+uint32_t SSIGetLength(void);
+void SSISetLength(uint32_t length);
+
+uint16_t *SSIGetBuffer(void);
+
+uint32_t SSIGetFrequency(void);
+void SSISetFrequency(uint32_t frequency);
 
 void SSIStart(void);
 void SSIStop(void);

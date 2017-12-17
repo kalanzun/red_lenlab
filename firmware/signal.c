@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_protocol.h"
 #include "debug.h"
 #include "driverlib/systick.h"
+#include "ssi.h"
 
 inline int32_t
 f_mul(int32_t a, int32_t b)
@@ -85,4 +86,59 @@ SignalCalculateSine(void)
     DEBUG_PRINT("done %u", time);
     DataQueueWrite(&data_handler.data_queue);
     */
+}
+
+#define SIGNAL_OFFSET 2048
+#define SIGNAL_MIN 0
+#define SIGNAL_MAX 4095
+
+inline uint16_t
+SignalDACFormat(int32_t value, bool channel)
+{
+    value += SIGNAL_OFFSET;
+    value = value > 0 ? value : 0;
+    value = value < SIGNAL_MAX ? value : SIGNAL_MAX;
+    value |= channel ? 0x3000 : 0xB000;
+    return (uint16_t) value;
+}
+
+void
+SignalWriteSine400(uint16_t *buffer)
+{
+    int32_t value;
+    int32_t i;
+
+    for (i = 0; i < 100; i++)
+    {
+        value = taylor((32942 * i) >> 10);
+
+        buffer[2*(      i)  ] = SignalDACFormat( value, 0);
+        buffer[2*(200-1-i)  ] = SignalDACFormat( value, 0);
+        buffer[2*(200  +i)  ] = SignalDACFormat(-value, 0);
+        buffer[2*(400-1-i)  ] = SignalDACFormat(-value, 0);
+
+        buffer[2*(100-1-i)+1] = SignalDACFormat(-value, 1);
+        buffer[2*(100  +i)+1] = SignalDACFormat( value, 1);
+        buffer[2*(300-1-i)+1] = SignalDACFormat( value, 1);
+        buffer[2*(300  +i)+1] = SignalDACFormat(-value, 1);
+    }
+}
+
+void
+SignalStart(void)
+{
+    uint16_t *buffer;
+
+    buffer = SSIGetBuffer();
+    SignalWriteSine400(buffer);
+    SSISetLength(800);
+
+    SSISetFrequency(100000);
+    SSIStart();
+}
+
+void
+SignalInit(void)
+{
+
 }
