@@ -42,6 +42,7 @@ OscilloscopeStart(tOscilloscope *self)
 
     self->active = 1;
     self->count = 0;
+    MemoryAllocate(&memory); // TODO MemoryFree call
     ADCEnable(&adc0);
 }
 
@@ -86,6 +87,7 @@ OscilloscopeMain(tOscilloscope *self)
             ADCDisable(&adc0);
             //DEBUG_PRINT("10th packet\n");
             //self->send = 1; // tell USB to deliver data
+            MemoryStartSending(&memory, 0);
             self->active = 0;
         }
 

@@ -343,7 +343,7 @@ USBDeviceMain()
             USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
             QueueRelease(&reply_handler.reply_queue);
         }
-        else if (!MemoryEmpty(&memory)) {
+        else if (MemorySend(&memory)) {
             page = MemoryRead(&memory);
             USBDeviceStartuDMA(page->buffer);
         }

@@ -37,10 +37,34 @@ typedef struct Memory {
     tPage pages[MEMORY_LENGTH];
     uint32_t read;
     uint32_t write;
+    bool send;
 } tMemory;
 
 
 extern tMemory memory;
+
+
+inline void
+MemoryAllocate(tMemory *self)
+{
+    self->read = 0;
+    self->write = 0;
+    self->send = false;
+}
+
+
+inline void
+MemoryFree(tMemory *self)
+{
+
+}
+
+
+inline bool
+MemorySend(tMemory *self)
+{
+    return self->send;
+}
 
 
 inline bool
@@ -71,6 +95,14 @@ MemoryWrite(tMemory *self)
 }
 
 
+inline void
+MemoryStartSending(tMemory *self, uint32_t start)
+{
+    self->read = start;
+    self->send = true;
+}
+
+
 inline tPage*
 MemoryRead(tMemory *self)
 {
@@ -82,14 +114,13 @@ inline void
 MemoryRelease(tMemory *self)
 {
     self->read = (self->read + 1) % MEMORY_LENGTH;
+    if (MemoryEmpty(self)) self->send = false;
 }
 
 
 inline void
 MemoryInit(tMemory *self)
 {
-    self->read = 0;
-    self->write = 0;
 }
 
 
