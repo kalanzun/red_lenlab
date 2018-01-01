@@ -33,8 +33,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "usb_device.h"
 #include "command_handler.h"
 #include "reply_handler.h"
-#include "oscilloscope.h"
+//#include "oscilloscope.h"
 #include "debug.h"
+#include "memory.h"
 
 /*
 #include "inc/hw_ints.h"
@@ -258,6 +259,8 @@ void USBIntHandler(void)
         // Handle the DMA complete case.
         //
         usb_device.dma_pending = 0;
+
+        MemoryRelease(&memory);
     }
     else
     {
@@ -331,6 +334,7 @@ void
 USBDeviceMain()
 {
     tEvent *event;
+    tPage *page;
 
     if (!usb_device.dma_pending)
     {
@@ -339,12 +343,18 @@ USBDeviceMain()
             USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
             QueueRelease(&reply_handler.reply_queue);
         }
+        else if (!MemoryEmpty(&memory)) {
+            page = MemoryRead(&memory);
+            USBDeviceStartuDMA(page->buffer);
+        }
+        /*
         else if (oscilloscope.send) {
             USBDeviceStartuDMA(oscilloscope.queue[oscilloscope.read]);
             oscilloscope.read = (oscilloscope.read + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
             if (oscilloscope.read == 0)
                 oscilloscope.send = 0;
         }
+        */
     }
 }
 

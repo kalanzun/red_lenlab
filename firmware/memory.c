@@ -1,5 +1,5 @@
 /*
- * oscilloscope.h
+ * memory.c
  *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
@@ -20,27 +20,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef OSCILLOSCOPE_H_
-#define OSCILLOSCOPE_H_
+#include <stdint.h>
+#include <stdbool.h>
+#include "driverlib/debug.h"
+#include "memory.h"
+#include "debug.h"
 
 
-#define OSCILLOSCOPE_HEADER_LENGTH 8
+tMemory memory;
 
-
-typedef struct Oscilloscope {
-    bool active;
-    uint8_t count;
-} tOscilloscope;
-
-
-extern tOscilloscope oscilloscope;
-
-
-void OscilloscopeStart(tOscilloscope *self);
-
-void OscilloscopeMain(tOscilloscope *self);
-
-void OscilloscopeInit(tOscilloscope *self);
-
-
-#endif /* OSCILLOSCOPE_H_ */

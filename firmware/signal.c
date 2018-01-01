@@ -251,7 +251,7 @@ SignalStart(void)
     //SignalWriteSine(buffer, 500, 1, 0); SignalWriteSine(buffer, 500, 1, 1);
     SSISetLength(1000);
 
-    SignalSetFrequency(50000, 1);
+    SignalSetFrequency(128, 1);
 
     //SSISetFrequency(2 * SysCtlClockGet() / signal.frequency_divisor);
     SSISetFrequency(2500000 / signal.frequency_divisor);

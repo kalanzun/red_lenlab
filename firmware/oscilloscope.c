@@ -27,6 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "debug.h"
 #include "adc.h"
 #include "lenlab_protocol.h"
+#include "memory.h"
 
 
 tOscilloscope oscilloscope;
@@ -36,10 +37,11 @@ void
 OscilloscopeStart(tOscilloscope *self)
 {
     //DEBUG_PRINT("oscilloscope start\n");
-    if (self->active || self->send)
+    if (self->active)// || self->send)
         return;
 
     self->active = 1;
+    self->count = 0;
     ADCEnable(&adc0);
 }
 
@@ -49,37 +51,46 @@ OscilloscopeMain(tOscilloscope *self)
 {
     uint32_t i;
     uint16_t *buffer;
+    tPage *page;
 
     if (!self->active) return;
 
     if (adc0.lock)
     {
-        self->queue[self->write][0] = startOscilloscope;
-        self->queue[self->write][1] = Int8;
-        self->queue[self->write][2] = 1;
-        self->queue[self->write][3] = 0;
+        buffer = ADCGetBuffer(&adc0);
+
+        ASSERT(!MemoryFull(&memory));
+        page = MemoryAcquire(&memory);
+
+        page->buffer[0] = startOscilloscope;
+        page->buffer[1] = Int8;
+        page->buffer[2] = 1;
+        page->buffer[3] = 0;
 
         //DEBUG_PRINT("adc ready %d\n", self->write);
 
-        buffer = ADCGetBuffer(&adc0);
-
-        ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
+        //ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
 
         for (i = 0; i < ADC_BUFFER_LENGTH; i++)
         {
-            self->queue[self->write][OSCILLOSCOPE_HEADER_LENGTH + i] = buffer[i] >> 4;
+            page->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer[i] >> 4;
         }
 
         ADCUnlock(&adc0);
 
-        if (self->write + 1 == OSCILLOSCOPE_QUEUE_LENGTH)
+        self->count++;
+
+        if (self->count == 10)
         {
-            self->queue[self->write][3] = 1; // mark this the last package
+            page->buffer[3] = 1; // mark this the last package
             ADCDisable(&adc0);
-            self->send = 1; // tell USB to deliver data
+            //DEBUG_PRINT("10th packet\n");
+            //self->send = 1; // tell USB to deliver data
             self->active = 0;
         }
-        self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
+
+        MemoryWrite(&memory);
+        //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
     }
 }
 
@@ -88,7 +99,4 @@ void
 OscilloscopeInit(tOscilloscope *self)
 {
     self->active = 0;
-    self->send = 0;
-    self->read = 0;
-    self->write = 0;
 }
