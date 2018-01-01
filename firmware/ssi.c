@@ -95,7 +95,7 @@ SSIGetLength(void)
 void
 SSISetLength(uint32_t length)
 {
-    ASSERT(length < SSI_BUFFER_LENGTH);
+    ASSERT(length <= SSI_BUFFER_LENGTH);
     ssi.length = length;
 }
 
@@ -117,9 +117,8 @@ SSIGetFrequency(void)
 void
 SSISetFrequency(uint32_t frequency)
 {
-    // 16 bits per channel (>> 4)
-    // 2 channels (>> 1)
-    uint32_t bitrate = frequency << 5;
+    // 16 bits per channel (<< 4)
+    uint32_t bitrate = frequency << 4;
 
     SSIConfigSetExpClk(
             SSI0_BASE,

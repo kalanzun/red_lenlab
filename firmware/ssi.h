@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SSI_H_
 
 
-#define SSI_BUFFER_LENGTH 1024
+#define SSI_BUFFER_LENGTH 1000
 
 
 typedef struct SSI {

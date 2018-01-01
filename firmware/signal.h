@@ -23,6 +23,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef SIGNAL_H_
 #define SIGNAL_H_
 
+
+typedef struct Signal {
+    uint16_t frequency_divisor;
+    uint16_t memory_multiplier;
+} tSignal;
+
+
+extern tSignal signal;
+
+
+
 void SignalCalculateSine(void);
 
 

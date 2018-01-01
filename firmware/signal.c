@@ -22,17 +22,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "driverlib/debug.h"
 #include "signal.h"
 #include "lenlab_protocol.h"
 #include "debug.h"
 #include "driverlib/systick.h"
+#include "driverlib/sysctl.h"
 #include "ssi.h"
+
+tSignal signal;
+
+inline int32_t
+fixed(int32_t value)
+{
+    return value << 11;
+}
+
+inline int32_t
+f_div(int32_t a, int32_t b)
+{
+    return (a << 11) / b;
+}
 
 inline int32_t
 f_mul(int32_t a, int32_t b)
 {
     return (a * b) >> 11;
 }
+
+// in fixed point 11 bit
+#define f_PI (6434)
+#define f_PI2 (3217)
 
 inline int32_t
 taylor(int32_t x)
@@ -108,32 +128,133 @@ SignalWriteSine400(uint16_t *buffer)
     int32_t value;
     int32_t i;
 
-    for (i = 0; i < 100; i++)
+    for (i = 0; i < 200; i++)
     {
-        value = taylor((32942 * i) >> 10);
+        //value = taylor(f_div(f_mul(fixed(i), f_PI), length / 2) - f_PI2);
+        value = taylor(i * f_PI / 200 - f_PI2);
 
-        buffer[2*(      i)  ] = SignalDACFormat( value, 0);
-        buffer[2*(200-1-i)  ] = SignalDACFormat( value, 0);
-        buffer[2*(200  +i)  ] = SignalDACFormat(-value, 0);
-        buffer[2*(400-1-i)  ] = SignalDACFormat(-value, 0);
+        //value = taylor((32942 * i) >> 10);
 
-        buffer[2*(100-1-i)+1] = SignalDACFormat(-value, 1);
-        buffer[2*(100  +i)+1] = SignalDACFormat( value, 1);
-        buffer[2*(300-1-i)+1] = SignalDACFormat( value, 1);
-        buffer[2*(300  +i)+1] = SignalDACFormat(-value, 1);
+        buffer[2*(      i)  ] = SignalDACFormat(value, 0);
+        buffer[2*(400-1-i)  ] = SignalDACFormat(value, 0);
+
+        buffer[2*(      i)+1] = SignalDACFormat(value, 1);
+        buffer[2*(400-1-i)+1] = SignalDACFormat(value, 1);
+
+        //buffer[2*(100-1-i)+1] = SignalDACFormat(-value, 1);
+        //buffer[2*(100  +i)+1] = SignalDACFormat( value, 1);
+        //buffer[2*(300-1-i)+1] = SignalDACFormat( value, 1);
+        //buffer[2*(300  +i)+1] = SignalDACFormat(-value, 1);
     }
 }
+
+
+void
+SignalWriteSine(uint16_t *buffer, uint32_t length, uint32_t interleaved, uint32_t channel)
+{
+    int32_t value;
+    int32_t i;
+    int32_t index;
+
+    // if interleaved is true, buffer needs twice the length
+
+    for (i = 0; i < length / 2; i++)
+    {
+        value = taylor(2 * i * f_PI / length - f_PI2);
+
+        //i = interleaved ? 2*x + channel : x;
+        index = 2*i + channel;
+        buffer[index] = SignalDACFormat(value, channel);
+
+        //i = interleaved ? 2*(length-1 - x) + channel : (length-1 - x);
+        index = 2*(length-1 - i) + channel;
+        buffer[index] = SignalDACFormat(value, channel);
+    }
+}
+#define SIGNAL_BASE_FREQUENCY (2500)
+
+void
+SignalUpdate(uint16_t frequency)
+{
+    uint16_t base, c, d;
+    uint16_t a, b;
+    uint32_t delta;
+
+    for (b = 1 + ((frequency-1) / SIGNAL_BASE_FREQUENCY);
+            b <= 20;
+            b++)
+    {
+        base = SIGNAL_BASE_FREQUENCY * b;
+        a = base / frequency; // abgerundet
+        c = frequency - (base / a); // aufgerundet
+        d = (base / (a+1)) - frequency; // abgerundet
+        // ist c oder d näher?
+        if (d < c) // d
+        {
+            delta = (d << 16) / frequency;
+            a += 1;
+        }
+        else // c
+        {
+            delta = (c << 16) / frequency;
+        }
+        // ist delta kleiner als 10%?
+        if (delta < 6554)
+        {
+            signal.frequency_divisor = a;
+            signal.memory_multiplier = b;
+            return;
+        }
+    }
+    ASSERT(0);
+}
+
+
+void
+SignalSetFrequency(uint16_t frequency, uint16_t divisor)
+{
+    uint32_t delta, offset;
+    uint16_t *buffer = SSIGetBuffer();
+    uint16_t i;
+    uint16_t a;
+    uint16_t b;
+    uint16_t length;
+
+    SignalUpdate(frequency);
+
+    a = signal.frequency_divisor;
+    b = signal.memory_multiplier;
+
+    DEBUG_PRINT("a = %u; b = %u;\n", a, b);
+
+    //delta = (SSI_BUFFER_LENGTH << 16) / 2 / b;
+    delta = SSI_BUFFER_LENGTH / 2 / b;
+    offset = 0;
+
+    for (i = 0; i < b; i++)
+    {
+        SignalWriteSine(buffer + 2*i*delta, delta, 1, 0);
+        SignalWriteSine(buffer + 2*i*delta, delta, 1, 1);
+    }
+
+}
+
 
 void
 SignalStart(void)
 {
-    uint16_t *buffer;
 
-    buffer = SSIGetBuffer();
-    SignalWriteSine400(buffer);
-    SSISetLength(800);
+    //uint16_t *buffer;
 
-    SSISetFrequency(100000);
+    //buffer = SSIGetBuffer();
+    //SignalWriteSine400(buffer);
+    //SignalWriteSine(buffer, 500, 1, 0); SignalWriteSine(buffer, 500, 1, 1);
+    SSISetLength(1000);
+
+    SignalSetFrequency(50000, 1);
+
+    //SSISetFrequency(2 * SysCtlClockGet() / signal.frequency_divisor);
+    SSISetFrequency(2500000 / signal.frequency_divisor);
     SSIStart();
 }
 
