@@ -18,34 +18,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef FREQUENCY_H
-#define FREQUENCY_H
-
-#include "component.h"
-#include <QObject>
+#include "frequencysweep.h"
 
 namespace model {
 
-/**
- * @brief Lenlab Frequency Analysis component.
- */
-class Frequency : public Component
+Frequencysweep::Frequencysweep(Lenlab *parent) : Component(parent)
 {
-    Q_OBJECT
-public:
-    explicit Frequency(Lenlab *parent);
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+}
 
-signals:
+QString
+Frequencysweep::getNameNominative()
+{
+    return "ie Frequenzanalyse";
+}
 
-public slots:
-
-private:
-    typedef Component super;
-};
+QString
+Frequencysweep::getNameAccusative()
+{
+    return "ie Frequenzanalyse";
+}
 
 } // namespace model
-
-#endif // FREQUENCY_H

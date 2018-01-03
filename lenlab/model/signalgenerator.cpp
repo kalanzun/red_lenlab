@@ -18,32 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef SIGNAL_H
-#define SIGNAL_H
-
-#include "component.h"
-#include <QObject>
+#include "signalgenerator.h"
 
 namespace model {
 
-/**
- * @brief Lenlab Signal Generator Component.
- */
-
-class Signal : public Component
+Signalgenerator::Signalgenerator(Lenlab *parent) : Component(parent)
 {
-    Q_OBJECT
-public:
-    explicit Signal(Lenlab *parent);
 
-signals:
-
-public slots:
-
-private:
-    typedef Component super;
-};
+}
 
 } // namespace model
-
-#endif // SIGNAL_H

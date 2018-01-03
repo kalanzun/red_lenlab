@@ -54,7 +54,7 @@ private:
 
     MainWindow *main_window;
     model::Lenlab *lenlab;
-    model::Signal *signal;
+    model::Signalgenerator *signalgenerator;
 };
 
 } // namespace gui

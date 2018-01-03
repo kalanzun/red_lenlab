@@ -21,10 +21,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef LENLAB_H
 #define LENLAB_H
 
-#include "frequency.h"
-#include "logger.h"
+#include "frequencysweep.h"
+#include "voltmeter.h"
 #include "oscilloscope.h"
-#include "signal.h"
+#include "signalgenerator.h"
 #include "usb/handler.h"
 #include "usb/message.h"
 #include <QObject>
@@ -49,10 +49,10 @@ public:
 
     void send(const usb::pMessage &cmd);
 
-    Frequency *frequency;
-    Logger *logger;
+    Frequencysweep *frequencysweep;
+    Voltmeter *voltmeter;
     Oscilloscope *oscilloscope;
-    Signal *signal;
+    Signalgenerator *signalgenerator;
 
 signals:
     void reply(const usb::pMessage &);

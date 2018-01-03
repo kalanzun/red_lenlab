@@ -48,25 +48,25 @@ void
 FrequencyForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
-    this->frequency = lenlab->frequency;
+    this->frequencysweep = lenlab->frequencysweep;
 }
 
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!frequency->active()) {
+    if (!frequencysweep->active()) {
         if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(frequency)) return;
+            if (!main_window->askToCancelActiveComponent(frequencysweep)) return;
         }
-        frequency->start();
+        frequencysweep->start();
     }
 }
 
 void
 FrequencyForm::on_stopButton_clicked()
 {
-    if (frequency->active()) {
-        frequency->stop();
+    if (frequencysweep->active()) {
+        frequencysweep->stop();
     }
 }
 

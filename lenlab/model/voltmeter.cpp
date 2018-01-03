@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include "logger.h"
+#include "voltmeter.h"
 #include "lenlab.h"
 #include "config.h"
 #include <QSaveFile>
@@ -31,37 +31,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Logger::Logger(Lenlab *parent) : Component(parent)
+Voltmeter::Voltmeter(Lenlab *parent) : Component(parent)
 {
 
 }
 
 QString
-Logger::getNameNominative()
+Voltmeter::getNameNominative()
 {
-    return "er Logger";
+    return "as Spannungsmessgerät";
 }
 
 QString
-Logger::getNameAccusative()
+Voltmeter::getNameAccusative()
 {
-    return "en Logger";
+    return "as Spannungsmessgerät";
 }
 
 uint32_t
-Logger::getInterval() const
+Voltmeter::getInterval() const
 {
     return interval;
 }
 
 void
-Logger::setInterval(uint32_t interval)
+Voltmeter::setInterval(uint32_t interval)
 {
     this->interval = interval;
 }
 
 void
-Logger::start()
+Voltmeter::start()
 {
     super::start();
 
@@ -69,7 +69,7 @@ Logger::start()
 }
 
 void
-Logger::restart()
+Voltmeter::restart()
 {
     if (data[0].isEmpty())
         time_offset = 0;
@@ -90,7 +90,7 @@ Logger::restart()
 }
 
 void
-Logger::stop()
+Voltmeter::stop()
 {
     qDebug("stop");
     usb::pMessage cmd(new usb::Message());
@@ -101,7 +101,7 @@ Logger::stop()
 }
 
 void
-Logger::clear()
+Voltmeter::clear()
 {
     if (m_active)
         stop();
@@ -117,7 +117,7 @@ Logger::clear()
 }
 
 void
-Logger::receive(const usb::pMessage &reply)
+Voltmeter::receive(const usb::pMessage &reply)
 {
     qDebug("receive");
 
@@ -140,14 +140,14 @@ Logger::receive(const usb::pMessage &reply)
 }
 
 void
-Logger::ready()
+Voltmeter::ready()
 {
     if (m_active)
         restart();
 }
 
 void
-Logger::setMeasurementData(bool measurementData)
+Voltmeter::setMeasurementData(bool measurementData)
 {
     if (m_measurementData != measurementData)
     {
@@ -157,13 +157,13 @@ Logger::setMeasurementData(bool measurementData)
 }
 
 bool
-Logger::measurementData() const
+Voltmeter::measurementData() const
 {
     return m_measurementData;
 }
 
 void
-Logger::setUnsavedData(bool unsavedData)
+Voltmeter::setUnsavedData(bool unsavedData)
 {
     if (m_unsavedData != unsavedData)
     {
@@ -173,18 +173,18 @@ Logger::setUnsavedData(bool unsavedData)
 }
 
 bool
-Logger::unsavedData() const
+Voltmeter::unsavedData() const
 {
     return m_unsavedData;
 }
 
 void
-Logger::setAutoSave(bool autoSave)
+Voltmeter::setAutoSave(bool autoSave)
 {
     if (m_autoSave != autoSave) {
         m_autoSave = autoSave;
         if (m_autoSave) {
-            Q_ASSERT_X(!m_fileName.isEmpty(), "Logger::setAutoSave()", "No fileName set");
+            Q_ASSERT_X(!m_fileName.isEmpty(), "Voltmeter::setAutoSave()", "No fileName set");
             timer_id = startTimer(3000);
         }
         else {
@@ -195,13 +195,13 @@ Logger::setAutoSave(bool autoSave)
 }
 
 bool
-Logger::autoSave() const
+Voltmeter::autoSave() const
 {
     return m_autoSave;
 }
 
 void
-Logger::setFileName(const QString &fileName)
+Voltmeter::setFileName(const QString &fileName)
 {
     if (m_fileName != fileName) {
         m_fileName = fileName;
@@ -210,13 +210,13 @@ Logger::setFileName(const QString &fileName)
 }
 
 const QString &
-Logger::fileName() const
+Voltmeter::fileName() const
 {
     return m_fileName;
 }
 
 void
-Logger::setChannels(const std::bitset<4> &channels)
+Voltmeter::setChannels(const std::bitset<4> &channels)
 {
     if (m_channels != channels) {
         m_channels = channels;
@@ -225,13 +225,13 @@ Logger::setChannels(const std::bitset<4> &channels)
 }
 
 const std::bitset<4> &
-Logger::channels() const
+Voltmeter::channels() const
 {
     return m_channels;
 }
 
 void
-Logger::timerEvent(QTimerEvent *event)
+Voltmeter::timerEvent(QTimerEvent *event)
 {
     if (m_autoSave) {
         if (m_unsavedData) {
@@ -242,17 +242,17 @@ Logger::timerEvent(QTimerEvent *event)
             }
             catch (std::exception) {
                 setAutoSave(false);
-                emit lenlab->logMessage("Logger: Fehler beim automatischen Speichern."); // TODO include reason
+                emit lenlab->logMessage("Voltmeter: Fehler beim automatischen Speichern."); // TODO include reason
             }
         }
     }
     else {
-        qDebug("Logger timer event misfired.");
+        qDebug("Voltmeter timer event misfired.");
     }
 }
 
 void
-Logger::save(const QString &fileName)
+Voltmeter::save(const QString &fileName)
 {
     setAutoSave(false);
     setFileName(fileName);
@@ -260,7 +260,7 @@ Logger::save(const QString &fileName)
 }
 
 void
-Logger::_save()
+Voltmeter::_save()
 {
     QSaveFile file(m_fileName);
     qDebug("save");
@@ -271,7 +271,7 @@ Logger::_save()
 
     QTextStream stream(&file);
 
-    stream << QString("Lenlab red %1.%2 Logger-Daten\n").arg(MAJOR).arg(MINOR);
+    stream << QString("Lenlab red %1.%2 Voltmeter-Daten\n").arg(MAJOR).arg(MINOR);
 
     stream << "Zeit";
     for (size_t i = 1; i < data.size(); i++) {

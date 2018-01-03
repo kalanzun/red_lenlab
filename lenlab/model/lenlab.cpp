@@ -25,10 +25,10 @@ namespace model {
 
 Lenlab::Lenlab(QObject *parent) :
     QObject(parent),
-    frequency(new Frequency(this)),
-    logger(new Logger(this)),
+    frequencysweep(new Frequencysweep(this)),
+    voltmeter(new Voltmeter(this)),
     oscilloscope(new Oscilloscope(this)),
-    signal(new Signal(this))
+    signalgenerator(new Signalgenerator(this))
 {
     qDebug() << "Lenlab";
 }
@@ -52,16 +52,16 @@ Lenlab::setHandler(usb::Handler *handler)
 bool
 Lenlab::isActive()
 {
-    return frequency->active() || logger->active() || oscilloscope->active();
+    return frequencysweep->active() || voltmeter->active() || oscilloscope->active();
 }
 
 Component *
 Lenlab::getActiveComponent()
 {
-    if (frequency->active())
-        return frequency;
-    if (logger->active())
-        return logger;
+    if (frequencysweep->active())
+        return frequencysweep;
+    if (voltmeter->active())
+        return voltmeter;
     if (oscilloscope->active())
         return oscilloscope;
 
@@ -82,7 +82,7 @@ Lenlab::on_reply(const usb::pMessage &reply)
     //qDebug() << cmd;
 
     if (cmd == startLogger)
-        logger->receive(reply);
+        voltmeter->receive(reply);
     else if (cmd == startOscilloscope)
         oscilloscope->receive(reply);
     else if (cmd == stopOscilloscope)
@@ -94,10 +94,10 @@ Lenlab::on_ready()
 {
     qDebug("on_ready");
 
-    frequency->ready();
-    logger->ready();
+    frequencysweep->ready();
+    voltmeter->ready();
     oscilloscope->ready();
-    signal->ready();
+    signalgenerator->ready();
 }
 
 } // namespace model

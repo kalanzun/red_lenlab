@@ -84,30 +84,30 @@ void
 LoggerForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
-    this->logger = lenlab->logger;
+    this->voltmeter = lenlab->voltmeter;
 /*
-    curves[0] = newCurve(&logger->data[0], &logger->data[1], QColor("#edd400"), 2, true); // butter 1
-    curves[1] = newCurve(&logger->data[0], &logger->data[2], QColor("#73d216"), 2, false); // green 1
-    curves[2] = newCurve(&logger->data[0], &logger->data[3], QColor("#3465a4"), 2, false); // sky blue 1
-    curves[3] = newCurve(&logger->data[0], &logger->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
+    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#edd400"), 2, true); // butter 1
+    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#73d216"), 2, false); // green 1
+    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#3465a4"), 2, false); // sky blue 1
+    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
 */
-    curves[0] = newCurve(&logger->data[0], &logger->data[1], QColor("#fce94f"), true); // butter 0
-    curves[1] = newCurve(&logger->data[0], &logger->data[2], QColor("#8ae234"), false); // green 0
-    curves[2] = newCurve(&logger->data[0], &logger->data[3], QColor("#729fcf"), false); // sky blue 0
-    curves[3] = newCurve(&logger->data[0], &logger->data[4], QColor("#ef2929"), false); // scarlet red 0
+    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#fce94f"), true); // butter 0
+    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#8ae234"), false); // green 0
+    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#729fcf"), false); // sky blue 0
+    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#ef2929"), false); // scarlet red 0
 
-    connect(logger, SIGNAL(measurementDataChanged(bool)),
+    connect(voltmeter, SIGNAL(measurementDataChanged(bool)),
             this, SLOT(on_measurementDataChanged(bool)));
-    connect(logger, SIGNAL(unsavedDataChanged(bool)),
+    connect(voltmeter, SIGNAL(unsavedDataChanged(bool)),
             this, SLOT(on_unsavedDataChanged(bool)));
-    connect(logger, SIGNAL(autoSaveChanged(bool)),
+    connect(voltmeter, SIGNAL(autoSaveChanged(bool)),
             this, SLOT(on_autoSaveChanged(bool)));
-    connect(logger, SIGNAL(fileNameChanged(QString)),
+    connect(voltmeter, SIGNAL(fileNameChanged(QString)),
             this, SLOT(on_fileNameChanged(QString)));
-    connect(logger, SIGNAL(channelsChanged(std::bitset<4>)),
+    connect(voltmeter, SIGNAL(channelsChanged(std::bitset<4>)),
             this, SLOT(on_channelsChanged(std::bitset<4>)));
 
-    connect(logger, SIGNAL(replot()),
+    connect(voltmeter, SIGNAL(replot()),
             this, SLOT(on_replot()));
 }
 
@@ -146,52 +146,52 @@ LoggerForm::newGrid()
 void
 LoggerForm::on_startButton_clicked()
 {
-    if (!logger->active()) {
+    if (!voltmeter->active()) {
         if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(logger)) return;
+            if (!main_window->askToCancelActiveComponent(voltmeter)) return;
         }
-        logger->start();
+        voltmeter->start();
     }
 }
 
 void
 LoggerForm::on_stopButton_clicked()
 {
-    if (logger->active()) {
-        logger->stop();
+    if (voltmeter->active()) {
+        voltmeter->stop();
     }
 }
 
 void
 LoggerForm::on_ch1CheckBox_stateChanged(int state)
 {
-    auto channels = logger->channels();
+    auto channels = voltmeter->channels();
     channels[0] = (state == Qt::Checked);
-    logger->setChannels(channels);
+    voltmeter->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch2CheckBox_stateChanged(int state)
 {
-    auto channels = logger->channels();
+    auto channels = voltmeter->channels();
     channels[1] = (state == Qt::Checked);
-    logger->setChannels(channels);
+    voltmeter->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch3CheckBox_stateChanged(int state)
 {
-    auto channels = logger->channels();
+    auto channels = voltmeter->channels();
     channels[2] = (state == Qt::Checked);
-    logger->setChannels(channels);
+    voltmeter->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch4CheckBox_stateChanged(int state)
 {
-    auto channels = logger->channels();
+    auto channels = voltmeter->channels();
     channels[3] = (state == Qt::Checked);
-    logger->setChannels(channels);
+    voltmeter->setChannels(channels);
 }
 
 void
@@ -205,7 +205,7 @@ LoggerForm::save()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
-        logger->save(fileName);
+        voltmeter->save(fileName);
     }
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
@@ -215,16 +215,16 @@ LoggerForm::save()
 void
 LoggerForm::on_clearButton_clicked()
 {
-    logger->clear();
+    voltmeter->clear();
 }
 
 void
 LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
 {
     if (state == Qt::Unchecked)
-        logger->setAutoSave(false);
+        voltmeter->setAutoSave(false);
     else if (state == Qt::Checked)
-        logger->setAutoSave(true);
+        voltmeter->setAutoSave(true);
 }
 
 void
@@ -285,7 +285,7 @@ void
 LoggerForm::on_intervalComboBox_activated(int index)
 {
     static const int interval[] = {100, 200, 500, 1000, 2000, 5000};
-    logger->setInterval(interval[index]);
+    voltmeter->setInterval(interval[index]);
 }
 
 void

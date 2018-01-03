@@ -1,5 +1,7 @@
+#include "usb/handler.h"
 #include <QString>
 #include <QtTest>
+#include <QCoreApplication>
 
 class FirmwareTest : public QObject
 {
@@ -13,18 +15,30 @@ private Q_SLOTS:
     void cleanupTestCase();
     void testCase1_data();
     void testCase1();
+
+private:
+    QSharedPointer<usb::Handler> handler;
 };
 
 FirmwareTest::FirmwareTest()
 {
 }
 
+
 void FirmwareTest::initTestCase()
 {
+    handler.reset(new usb::Handler());
+
+    QSignalSpy spy(handler.data(), SIGNAL(ready()));
+
+    QVERIFY(spy.isValid());
+
+    QVERIFY(spy.wait(500));
 }
 
 void FirmwareTest::cleanupTestCase()
 {
+    handler.clear();
 }
 
 void FirmwareTest::testCase1_data()
@@ -39,6 +53,6 @@ void FirmwareTest::testCase1()
     QVERIFY2(true, "Failure");
 }
 
-QTEST_APPLESS_MAIN(FirmwareTest)
+QTEST_MAIN(FirmwareTest)
 
 #include "tst_firmwaretest.moc"

@@ -55,7 +55,7 @@ private:
 
     MainWindow *main_window;
     model::Lenlab *lenlab;
-    model::Frequency *frequency;
+    model::Frequencysweep *frequencysweep;
 };
 
 

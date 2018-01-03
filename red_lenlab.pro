@@ -2,4 +2,6 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     lenlab \
-    test
+    test \
+
+test.depends = lenlab

@@ -1,17 +1,14 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-01-03T19:38:54
+# Project created by QtCreator 2018-01-03T19:40:25
 #
 #-------------------------------------------------
 
-QT       += testlib
+QT       += core gui
 
-QT       -= gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = tst_firmwaretest
-CONFIG   += console
-CONFIG   -= app_bundle
-
+TARGET = lenlab
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -26,8 +23,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        tst_firmwaretest.cpp \
-
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
+        main.cpp \
 
 include(../../red_lenlab.pri)

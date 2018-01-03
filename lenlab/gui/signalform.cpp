@@ -50,7 +50,7 @@ void
 SignalForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
-    this->signal = lenlab->signal;
+    this->signalgenerator = lenlab->signalgenerator;
 }
 
 void

@@ -18,8 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef VOLTMETER_H
+#define VOLTMETER_H
 
 #include "component.h"
 #include "minmaxvector.h"
@@ -29,10 +29,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace model {
 
 /**
- * @brief Lenlab Logger component.
+ * @brief Lenlab Voltmeter component.
  */
 
-class Logger : public Component
+class Voltmeter : public Component
 {
     Q_OBJECT
     Q_PROPERTY(bool measurementData READ measurementData WRITE setMeasurementData NOTIFY measurementDataChanged)
@@ -42,7 +42,7 @@ class Logger : public Component
     Q_PROPERTY(std::bitset<4> channels READ channels WRITE setChannels NOTIFY channelsChanged)
 
 public:
-    explicit Logger(Lenlab *parent);
+    explicit Voltmeter(Lenlab *parent);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
@@ -109,4 +109,4 @@ private:
 
 } // namespace model
 
-#endif // LOGGER_H
+#endif // VOLTMETER_H

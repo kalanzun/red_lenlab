@@ -79,7 +79,7 @@ private:
 
     MainWindow *main_window;
     model::Lenlab *lenlab;
-    model::Logger *logger;
+    model::Voltmeter *voltmeter;
 
     std::array<QwtPlotCurve *, 4> curves; // pointer, no ownership
 };
