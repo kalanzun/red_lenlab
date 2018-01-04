@@ -29,6 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/systick.h"
 #include "driverlib/sysctl.h"
 #include "ssi.h"
+#include "reply_handler.h"
 
 tSignal signal;
 
@@ -186,8 +187,8 @@ SignalUpdate(uint16_t frequency)
     {
         base = SIGNAL_BASE_FREQUENCY * b;
         a = base / frequency; // abgerundet
-        c = frequency - (base / a); // aufgerundet
-        d = (base / (a+1)) - frequency; // abgerundet
+        c = (base / a) - frequency; // aufgerundet
+        d = frequency - (base / (a+1)); // abgerundet
         // ist c oder d näher?
         if (d < c) // d
         {
@@ -209,16 +210,72 @@ SignalUpdate(uint16_t frequency)
     ASSERT(0);
 }
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
+void
+SignalTestSineFrequency(tEvent *cmd)
+{
+    uint16_t base, c, d;
+    tEvent *reply;
+    uint16_t frequency;
+    uint16_t a, b;
+    uint32_t delta;
+    uint32_t signal_base_frequency;
+
+    signal_base_frequency = SysCtlClockGet() / 16 / 500 / 2;
+
+    reply = QueueAcquire(&reply_handler.reply_queue);
+    frequency = *((uint16_t *) (cmd->payload + 4));
+
+    ASSERT(cmd->length == 6);
+
+    for (b = 1 + ((frequency-1) / (4*signal_base_frequency));
+            b <= 20;
+            b++)
+    {
+        base = signal_base_frequency * b;
+        a = max(base / frequency, 4); // abgerundet
+        c = (base / a) - frequency; // aufgerundet
+        d = frequency - (base / (a+1)); // abgerundet
+        // ist c oder d näher?
+        if (d < c) // d
+        {
+            delta = (d << 16) / frequency;
+            a += 1;
+        }
+        else // c
+        {
+            delta = (c << 16) / frequency;
+        }
+        // ist delta kleiner als 3%?
+        if (delta < 1966)
+        {
+            DEBUG_PRINT("f = %u; a = %u; b = %u;\n", frequency, a, b);
+            *(uint32_t *) (reply->payload + 4) = a;
+            *(uint32_t *) (reply->payload + 8) = b;
+            reply->length = 12;
+            QueueWrite(&reply_handler.reply_queue);
+            return;
+        }
+    }
+
+    // send error code 0 0
+    *(uint32_t *) (reply->payload + 4) = 0;
+    *(uint32_t *) (reply->payload + 8) = 0;
+    reply->length = 12;
+    QueueWrite(&reply_handler.reply_queue);
+
+}
+
 
 void
 SignalSetFrequency(uint16_t frequency, uint16_t divisor)
 {
-    uint32_t delta, offset;
+    uint32_t delta;
     uint16_t *buffer = SSIGetBuffer();
     uint16_t i;
     uint16_t a;
     uint16_t b;
-    uint16_t length;
 
     SignalUpdate(frequency);
 
@@ -229,7 +286,6 @@ SignalSetFrequency(uint16_t frequency, uint16_t divisor)
 
     //delta = (SSI_BUFFER_LENGTH << 16) / 2 / b;
     delta = SSI_BUFFER_LENGTH / 2 / b;
-    offset = 0;
 
     for (i = 0; i < b; i++)
     {

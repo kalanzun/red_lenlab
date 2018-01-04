@@ -7,9 +7,17 @@ CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT
 
 INCLUDEPATH += ../../lenlab ../../include
 
-LIBS += -L../../lenlab/gui/debug -lgui
-LIBS += -L../../lenlab/model/debug -lmodel
-LIBS += -L../../lenlab/usb/debug -lusb
+debug {
+    LIBS += -L../../lenlab/gui/debug -lgui
+    LIBS += -L../../lenlab/model/debug -lmodel
+    LIBS += -L../../lenlab/usb/debug -lusb
+}
+
+release {
+    LIBS += -L../../lenlab/gui/release -lgui
+    LIBS += -L../../lenlab/model/release -lmodel
+    LIBS += -L../../lenlab/usb/release -lusb
+}
 
 unix {
     # libusb

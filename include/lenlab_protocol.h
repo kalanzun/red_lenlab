@@ -35,6 +35,7 @@ enum Command {
     calculateSine,
     startOscilloscope,
     stopOscilloscope,
+    testSignalgeneratorSineFrequency,
     NUM_COMMANDS
 };
 

@@ -23,6 +23,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef SIGNAL_H_
 #define SIGNAL_H_
 
+#include "event_queue.h"
+
 
 typedef struct Signal {
     uint16_t frequency_divisor;
@@ -35,6 +37,9 @@ extern tSignal signal;
 
 
 void SignalCalculateSine(void);
+
+
+void SignalTestSineFrequency(tEvent *command);
 
 
 void SignalStart(void);

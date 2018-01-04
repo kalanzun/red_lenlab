@@ -136,6 +136,12 @@ on_startOscilloscope(tEvent *event)
     OscilloscopeStart(&oscilloscope);
 }
 
+void
+on_testSignalgeneratorSineFrequency(tEvent *event)
+{
+    SignalTestSineFrequency(event);
+}
+
 
 //#define min(a, b) (((a) < (b))? (a) : (b))
 
@@ -256,6 +262,7 @@ CommandHandlerMain(void)
             else if (command == stopLogger) on_stopLogger(event);
             else if (command == calculateSine) on_calculateSine(event);
             else if (command == startOscilloscope) on_startOscilloscope(event);
+            else if (command == testSignalgeneratorSineFrequency) on_testSignalgeneratorSineFrequency(event);
         }
         QueueRelease(&command_handler.command_queue);
     }
