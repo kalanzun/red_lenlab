@@ -64,7 +64,7 @@ OscilloscopeMain(tOscilloscope *self)
         page = MemoryAcquire(&memory);
 
         page->buffer[0] = startOscilloscope;
-        page->buffer[1] = Int8;
+        page->buffer[1] = ByteArray;
         page->buffer[2] = 1;
         page->buffer[3] = 0;
 

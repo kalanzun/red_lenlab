@@ -1,5 +1,6 @@
 #include "usb/handler.h"
 #include "usb/message.h"
+#include "lenlab_version.h"
 #include <QString>
 #include <QtTest>
 #include <QCoreApplication>
@@ -14,8 +15,8 @@ public:
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
-    void testSignalGeneratorFrequency_data();
-    void testSignalGeneratorFrequency();
+    void testStringLength();
+    void testName();
 
 private:
     QSharedPointer<usb::Handler> handler;
@@ -24,7 +25,6 @@ private:
 FirmwareTest::FirmwareTest()
 {
 }
-
 
 void FirmwareTest::initTestCase()
 {
@@ -42,6 +42,7 @@ void FirmwareTest::cleanupTestCase()
     handler.clear();
 }
 
+/*
 void FirmwareTest::testSignalGeneratorFrequency_data()
 {
     QTest::addColumn<uint32_t>("frequency");
@@ -57,6 +58,7 @@ void FirmwareTest::testSignalGeneratorFrequency_data()
 void FirmwareTest::testSignalGeneratorFrequency()
 {
     QFETCH(uint32_t, frequency);
+
     auto cmd = usb::newCommand(testSignalgeneratorSineFrequency);
     *((uint16_t *) (cmd->getPayload())) = frequency;
     cmd->setPayloadLength(2);
@@ -84,6 +86,42 @@ void FirmwareTest::testSignalGeneratorFrequency()
     QVERIFY2(a >= 4, "DAC frequency limit of 20 MHz exceeded");
 
     QVERIFY2(relative_frequency_error < 0.03, QString("f = %1; f_sg = %2; a = %3; b = %4;").arg(frequency).arg(sg_frequency).arg(a).arg(b).toUtf8().constData());
+}
+*/
+
+void FirmwareTest::testName()
+{
+    QSignalSpy spy(handler.data(), SIGNAL(reply(pMessage)));
+
+    QVERIFY(spy.isValid());
+
+    auto cmd = usb::newCommand(getName);
+    handler->send(cmd);
+
+    QVERIFY(spy.wait(500));
+
+    auto reply = qvariant_cast<usb::pMessage>(spy.at(0).at(0));
+
+    QString reply_name(reply->getString());
+    auto name = QString("Lenlab red Firmware Version %1.%2.").arg(MAJOR).arg(MINOR);
+    QVERIFY(reply_name.startsWith(name));
+}
+
+void FirmwareTest::testStringLength()
+{
+    QSignalSpy spy(handler.data(), SIGNAL(reply(pMessage)));
+
+    QVERIFY(spy.isValid());
+
+    auto cmd = usb::newCommand(getName);
+    handler->send(cmd);
+
+    QVERIFY(spy.wait(500));
+
+    auto reply = qvariant_cast<usb::pMessage>(spy.at(0).at(0));
+
+    QString reply_name(reply->getString());
+    QCOMPARE(reply_name.size() + 1, (int) reply->getBodyLength());
 }
 
 QTEST_MAIN(FirmwareTest)

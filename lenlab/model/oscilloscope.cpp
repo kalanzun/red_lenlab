@@ -81,7 +81,7 @@ Oscilloscope::receive(const usb::pMessage &reply)
 {
     //qDebug("receive");
 
-    uint8_t *buffer = reply->getPayload();
+    uint8_t *buffer = reply->getBody();
 
     //Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
 
@@ -89,11 +89,11 @@ Oscilloscope::receive(const usb::pMessage &reply)
     for (uint32_t i = 0; i < 1000; i+=2) {
         data[write][0].append((double) t++); // x axis
         //a += buffer[i];
-        data[write][1].append((double) buffer[4+i]);// / (double) 2048.0); // y axis
-        data[write][2].append((double) buffer[4+i+1]);// / (double) 2048.0); // y axis
+        data[write][1].append((double) buffer[6+i]);// / (double) 2048.0); // y axis
+        data[write][2].append((double) buffer[6+i+1]);// / (double) 2048.0); // y axis
     }
 
-    if (reply->getHeader1()) { // last package
+    if (reply->getBody()[1]) { // last package
         read = write; // gui reads from this one
         write = (write + 1) % 2;
         emit replot();

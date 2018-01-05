@@ -26,15 +26,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "driverlib/debug.h"
 #include "lenlab_protocol.h"
+#include "debug.h"
+#include "utils.h"
 
 
 #define EVENT_QUEUE_LENGTH 4
-#define EVENT_PAYLOAD_LENGTH 64
 
 
 typedef struct Event {
-    uint8_t payload[EVENT_PAYLOAD_LENGTH];
+    uint8_t payload[LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH];
     uint32_t length;
 } tEvent;
 
@@ -44,7 +46,6 @@ typedef struct Queue {
     uint32_t read;
     uint32_t write;
 } tQueue;
-
 
 
 inline bool
@@ -100,24 +101,79 @@ inline void
 EventSetCommand(tEvent *self, enum Command cmd)
 {
     self->payload[0] = cmd;
+    self->payload[1] = noType;
 }
 
 inline enum Command
 EventGetCommand(tEvent *self)
 {
+    ASSERT((enum Command) self->payload[0] < NUM_COMMANDS);
     return (enum Command) self->payload[0];
 }
 
 inline void
 EventSetReply(tEvent *self, enum Reply reply)
 {
-    self->payload[1] = reply;
+    self->payload[0] = reply;
+    self->payload[1] = noType;
 }
 
 inline enum Reply
 EventGetReply(tEvent *self)
 {
-    return (enum Reply) self->payload[1];
+    ASSERT((enum Reply) self->payload[0] < NUM_REPLIES);
+    return (enum Reply) self->payload[0];
+}
+
+inline void
+EventSetType(tEvent *self, enum Type type)
+{
+    self->payload[1] = type;
+}
+
+inline enum Type
+EventGetType(tEvent *self)
+{
+    ASSERT((enum Type) self->payload[1] < NUM_TYPES);
+    return (enum Type) self->payload[1];
+}
+
+inline void
+EventSetBodyLength(tEvent *self, uint32_t length)
+{
+    ASSERT(length <= LENLAB_PACKET_BODY_LENGTH);
+    self->length = LENLAB_PACKET_HEAD_LENGTH + length;
+}
+
+inline uint8_t*
+EventGetBody(tEvent *self)
+{
+    return self->payload + LENLAB_PACKET_HEAD_LENGTH;
+}
+
+inline void
+EventSetString(tEvent *self, const uint8_t *string, uint32_t length)
+{
+    uint32_t i, len;
+
+    EventSetType(self, String);
+    len = min(length + 1, LENLAB_PACKET_BODY_LENGTH);
+    EventSetBodyLength(self, len);
+    for (i = 0; i < (len - 1); i++)
+        EventGetBody(self)[i] = string[i];
+    EventGetBody(self)[i] = 0;
+}
+
+inline void
+EventSetIntArray(tEvent *self, const uint32_t array[], uint32_t length)
+{
+    uint32_t i, len;
+
+    EventSetType(self, IntArray);
+    len = min(length, LENLAB_PACKET_BODY_LENGTH / 4);
+    EventSetBodyLength(self, 4*len);
+    for (i = 0; i < len; i++)
+        *(uint32_t *) (EventGetBody(self) + 4*i) = array[i];
 }
 
 #endif /* EVENT_QUEUE_H_ */

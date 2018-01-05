@@ -24,6 +24,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define LENLAB_VID 0x1CBE
 #define LENLAB_PID 0x0270
 
+/*
+
+command packets, up to 64 bytes, from host to device
+reply packets, up to 64 bytes, from device to host
+data packets, 1024 bytes, from device to host only
+
+packet header, 2 bytes
+- one byte packet id (command name or reply name)
+- one byte argument type (this is a helper for checking of programming errors during encoding and decoding)
+
+ */
+
+#define LENLAB_PACKET_HEAD_LENGTH 2
+#define LENLAB_PACKET_BODY_LENGTH 62
+
 enum Command {
     noCommand,
     init,
@@ -32,21 +47,25 @@ enum Command {
     setLoggerInterval,
     startLogger,
     stopLogger,
-    calculateSine,
     startOscilloscope,
     stopOscilloscope,
-    testSignalgeneratorSineFrequency,
     NUM_COMMANDS
 };
 
 enum Reply {
-    None,
-    Bool,
-    String,
-    uInt32,
-    Int16,
-    Int8,
+    noReply,
+    Init,
+    Name,
+    Version,
     NUM_REPLIES
+};
+
+enum Type {
+    noType,
+    String,
+    ByteArray,
+    IntArray,
+    NUM_TYPES
 };
 
 #endif // LENLAB_PROTOCOL_H

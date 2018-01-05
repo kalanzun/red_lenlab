@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "message.h"
+#include <QDebug>
 
 using namespace usb;
 
@@ -30,69 +31,50 @@ Message::setCommand(Command command)
     buffer[0] = command;
 }
 
-Command Message::getCommand()
+Command
+Message::getCommand()
 {
+    Q_ASSERT(buffer[0] < NUM_COMMANDS);
     return (Command) buffer[0];
 }
 
 void
 Message::setReply(Reply reply)
 {
-    buffer[1] = reply;
+    buffer[0] = reply;
 }
 
 Reply
 Message::getReply()
 {
-    return (Reply) buffer[1];
+    Q_ASSERT(buffer[0] < NUM_REPLIES);
+    return (Reply) buffer[0];
 }
 
 void
-Message::setHeader(uint16_t header)
+Message::setType(Type type)
 {
-    *((uint16_t *) (buffer + 2)) = header;
+    buffer[1] = type;
 }
 
-uint16_t
-Message::getHeader()
+Type
+Message::getType()
 {
-    return *((uint16_t *) (buffer + 2));
-}
-
-void
-Message::setHeader0(uint8_t header0)
-{
-    buffer[2] = header0;
-}
-
-uint8_t
-Message::getHeader0()
-{
-    return buffer[2];
+    Q_ASSERT(buffer[1] < NUM_TYPES);
+    return (Type) buffer[1];
 }
 
 void
-Message::setHeader1(uint8_t header1)
+Message::setBodyLength(uint32_t length)
 {
-    buffer[3] = header1;
+    Q_ASSERT(length <= LENLAB_PACKET_BODY_LENGTH);
+    this->length = LENLAB_PACKET_HEAD_LENGTH + length;
 }
 
-uint8_t
-Message::getHeader1()
+uint32_t
+Message::getBodyLength()
 {
-    return buffer[3];
-}
-
-void
-Message::setPayloadLength(uint16_t length)
-{
-    this->length = length + 4;
-}
-
-uint16_t
-Message::getPayloadLength()
-{
-    return length - 4;
+    return length - LENLAB_PACKET_HEAD_LENGTH;
 }
 
 void
@@ -102,18 +84,19 @@ Message::setFullBufferLength()
 }
 
 uint8_t *
-Message::getPayload()
+Message::getBody()
 {
-    return buffer + 4;
+    return buffer + LENLAB_PACKET_HEAD_LENGTH;
 }
 
 void
-Message::setPacketLength(uint16_t length)
+Message::setPacketLength(uint32_t length)
 {
+    Q_ASSERT(length <= MESSAGE_BUFFER_LENGTH);
     this->length = length;
 }
 
-uint16_t
+uint32_t
 Message::getPacketLength()
 {
     return length;
@@ -123,6 +106,22 @@ uint8_t *
 Message::getPacketBuffer()
 {
     return buffer;
+}
+
+const char *
+Message::getString()
+{
+    Q_ASSERT(getType() == String);
+    Q_ASSERT(getBody()[getBodyLength()-1] == 0);
+    return (const char *) getBody();
+}
+
+uint32_t *
+Message::getIntArray(uint32_t length)
+{
+    Q_ASSERT(getType() == IntArray);
+    Q_ASSERT(getBodyLength() == 4*length);
+    return (uint32_t *) getBody();
 }
 
 pMessage

@@ -194,8 +194,8 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         case USB_EVENT_RX_AVAILABLE:
         {
             size = USBDBulkRxPacketAvailable(&bulk_device);
-            DEBUG_PRINT("USB_EVENT_RX_AVAILABLE %d\n", size);
-            if (size > EVENT_PAYLOAD_LENGTH) size = EVENT_PAYLOAD_LENGTH;
+            //DEBUG_PRINT("USB_EVENT_RX_AVAILABLE %d\n", size);
+            if (size > LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH) size = LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH;
             if (size) {
                 if (!QueueFull(&command_handler.command_queue)) {
                     event = QueueAcquire(&command_handler.command_queue);
@@ -231,7 +231,7 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
         //
         case USB_EVENT_TX_COMPLETE:
         {
-            DEBUG_PRINT("USB_EVENT_TX_COMPLETE\n");
+            //DEBUG_PRINT("USB_EVENT_TX_COMPLETE\n");
 
             /*
             if (g_ui32TxCount == 0)

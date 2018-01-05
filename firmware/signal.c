@@ -210,8 +210,6 @@ SignalUpdate(uint16_t frequency)
     ASSERT(0);
 }
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-
 void
 SignalTestSineFrequency(tEvent *cmd)
 {

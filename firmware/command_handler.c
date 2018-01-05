@@ -42,38 +42,35 @@ tCommandHandler command_handler;
 void
 on_init(tEvent *event)
 {
-    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+    tEvent *reply;
 
     DEBUG_PRINT("init\n");
 
-    LoggerStop();
+    reply = QueueAcquire(&reply_handler.reply_queue);
 
-    EventSetCommand(reply, init);
-    reply->length = 4;
+    //LoggerStop();
+
+    EventSetReply(reply, Init);
+    EventSetBodyLength(reply, 0);
 
     QueueWrite(&reply_handler.reply_queue);
 }
 
 const uint8_t name[] = "Lenlab red Firmware Version " STR(MAJOR) "." STR(MINOR) "." STR(REVISION);
 
-#define NAME_SIZE (sizeof(name))
+#define NAME_LENGTH (sizeof(name)-1)
 
 void
 on_getName(tEvent *event)
 {
-    int i;
-    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+    tEvent *reply;
 
     DEBUG_PRINT("getName\n");
 
-    reply->payload[0] = event->payload[0];
-    reply->payload[1] = String;
-    ASSERT(4 + NAME_SIZE + 1 < EVENT_PAYLOAD_LENGTH);
-    *((uint16_t *) (reply->payload + 2)) = NAME_SIZE;
-    for (i = 0; i < NAME_SIZE; i++)
-        reply->payload[4+i] = name[i];
-    reply->payload[i] = 0;
-    reply->length = 4 + NAME_SIZE + 1;
+    reply = QueueAcquire(&reply_handler.reply_queue);
+
+    EventSetReply(reply, Name);
+    EventSetString(reply, name, NAME_LENGTH);
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -81,20 +78,20 @@ on_getName(tEvent *event)
 void
 on_getVersion(tEvent *event)
 {
-    tEvent *reply = QueueAcquire(&reply_handler.reply_queue);
+    tEvent *reply;
+    uint32_t array[3] = {MAJOR, MINOR, REVISION};
 
     DEBUG_PRINT("getVersion\n");
 
-    reply->payload[0] = event->payload[0];
-    reply->payload[1] = uInt32;
-    *(uint32_t *) (reply->payload + 4) = MAJOR;
-    *(uint32_t *) (reply->payload + 8) = MINOR;
-    *(uint32_t *) (reply->payload + 12) = REVISION;
-    reply->length = 16;
+    reply = QueueAcquire(&reply_handler.reply_queue);
+
+    EventSetReply(reply, Version);
+    EventSetIntArray(reply, array, 3);
 
     QueueWrite(&reply_handler.reply_queue);
 }
 
+/*
 void
 on_setLoggerInterval(tEvent *event)
 {
@@ -127,7 +124,7 @@ on_calculateSine(tEvent *event)
     DEBUG_PRINT("on_calculateSine\n");
     SignalCalculateSine();
 }
-
+*/
 void
 on_startOscilloscope(tEvent *event)
 {
@@ -135,13 +132,13 @@ on_startOscilloscope(tEvent *event)
 
     OscilloscopeStart(&oscilloscope);
 }
-
+/*
 void
 on_testSignalgeneratorSineFrequency(tEvent *event)
 {
     SignalTestSineFrequency(event);
 }
-
+*/
 
 //#define min(a, b) (((a) < (b))? (a) : (b))
 
@@ -252,18 +249,17 @@ CommandHandlerMain(void)
     if (!QueueEmpty(&command_handler.command_queue)) {
         event = QueueRead(&command_handler.command_queue);
         command = EventGetCommand(event);
-        DEBUG_PRINT("%d\n", command);
-        if (command < NUM_COMMANDS) {
-            if (command == init) on_init(event);
-            else if (command == getName) on_getName(event);
-            else if (command == getVersion) on_getVersion(event);
-            else if (command == setLoggerInterval) on_setLoggerInterval(event);
-            else if (command == startLogger) on_startLogger(event);
-            else if (command == stopLogger) on_stopLogger(event);
-            else if (command == calculateSine) on_calculateSine(event);
-            else if (command == startOscilloscope) on_startOscilloscope(event);
-            else if (command == testSignalgeneratorSineFrequency) on_testSignalgeneratorSineFrequency(event);
-        }
+        if (command == init) on_init(event);
+        else if (command == getName) on_getName(event);
+        else if (command == getVersion) on_getVersion(event);
+        else if (command == startOscilloscope) on_startOscilloscope(event);
+        /*
+        else if (command == setLoggerInterval) on_setLoggerInterval(event);
+        else if (command == startLogger) on_startLogger(event);
+        else if (command == stopLogger) on_stopLogger(event);
+        else if (command == calculateSine) on_calculateSine(event);
+        else if (command == testSignalgeneratorSineFrequency) on_testSignalgeneratorSineFrequency(event);
+        */
         QueueRelease(&command_handler.command_queue);
     }
 }

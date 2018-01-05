@@ -30,7 +30,7 @@ namespace usb {
 
     class Message
     {
-        uint16_t length = 4;
+        uint16_t length = LENLAB_PACKET_HEAD_LENGTH;
         uint8_t buffer[MESSAGE_BUFFER_LENGTH];
 
     public:
@@ -40,26 +40,23 @@ namespace usb {
         void setReply(Reply reply);
         Reply getReply();
 
-        void setHeader(uint16_t header);
-        uint16_t getHeader();
+        void setType(Type type);
+        Type getType();
 
-        void setHeader0(uint8_t header0);
-        uint8_t getHeader0();
-
-        void setHeader1(uint8_t header1);
-        uint8_t getHeader1();
-
-        void setPayloadLength(uint16_t length);
-        uint16_t getPayloadLength();
+        void setBodyLength(uint32_t length);
+        uint32_t getBodyLength();
 
         void setFullBufferLength();
 
-        uint8_t *getPayload();
+        uint8_t *getBody();
 
-        uint16_t getPacketLength();
-        void setPacketLength(uint16_t length);
+        uint32_t getPacketLength();
+        void setPacketLength(uint32_t length);
 
         uint8_t *getPacketBuffer();
+
+        const char *getString();
+        uint32_t *getIntArray(uint32_t length);
     };
 
     typedef QSharedPointer<Message> pMessage;

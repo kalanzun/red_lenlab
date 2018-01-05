@@ -79,8 +79,8 @@ Voltmeter::restart()
     qDebug("set intervall");
     usb::pMessage cmdSetInterval(new usb::Message());
     cmdSetInterval->setCommand(setLoggerInterval);
-    *((uint32_t *) cmdSetInterval->getPayload()) = interval;
-    cmdSetInterval->setPayloadLength(4);
+    *((uint32_t *) cmdSetInterval->getBody()) = interval;
+    cmdSetInterval->setBodyLength(4);
     lenlab->send(cmdSetInterval);
 
     qDebug("start");
@@ -121,16 +121,16 @@ Voltmeter::receive(const usb::pMessage &reply)
 {
     qDebug("receive");
 
-    uint32_t *buffer = (uint32_t *) reply->getPayload();
+    uint32_t *buffer = (uint32_t *) reply->getBody();
 
-    Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
+    Q_ASSERT(reply->getBodyLength() == 4 * data.size());
 
     // 4 bytes timestamp
     data[0].append(time_offset + (double) *buffer / MSEC);
 
     // 4 channels, 4 bytes each
     for (size_t i = 1; i < data.size(); i++) {
-        data[i].append((double) buffer[i] / (double) reply->getHeader() / VOLT);
+        data[i].append((double) buffer[i] / (double) reply->getBody()[0] / VOLT); // TODO Fix for new communictaion
     }
 
     setMeasurementData(true);

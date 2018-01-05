@@ -93,25 +93,24 @@ Handler::open(libusb_device *dev)
 void
 Handler::on_reply(const pMessage &reply)
 {
-    if (reply->getCommand() == init) {
+    if (reply->getReply() == Init) {
         emit logMessage("Initialisierung abgeschlossen.");
 
         //emit logMessage("Firmware-Name erfragen");
         send(newCommand(getName));
     }
-    else if (reply->getCommand() == getName) {
-        QString name((char *) reply->getPayload());//, reply->getPayloadLength());
+    else if (reply->getReply() == Name) {
+        //QString name(reply->getString());
         //emit logMessage(QString("Firmware-Name: %1.").arg(name));
 
         //emit logMessage("Firmware-Version erfragen");
         send(newCommand(getVersion));
     }
-    else if (reply->getCommand() == getVersion) {
-        uint32_t *version = (uint32_t *) reply->getPayload();
+    else if (reply->getReply() == Version) {
+        uint32_t *version = reply->getIntArray(3);
         emit logMessage(QString("Firmware-Version %1.%2.%3.").arg(version[0]).arg(version[1]).arg(version[2]));
-        //emit logMessage(QString("Lenlab-Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) "."));
 
-        if (reply->getPayloadLength() == 12 && version[0] == MAJOR && version[1] == MINOR) {
+        if (version[0] == MAJOR && version[1] == MINOR) {
             disconnect(device.data(), SIGNAL(reply(pMessage)),
                     this, SLOT(on_reply(pMessage)));
             connect(device.data(), SIGNAL(reply(pMessage)),
