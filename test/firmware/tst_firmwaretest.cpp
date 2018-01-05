@@ -2,8 +2,10 @@
 #include "usb/message.h"
 #include "lenlab_version.h"
 #include <QString>
+#include <QDebug>
 #include <QtTest>
 #include <QCoreApplication>
+#include <complex>
 
 class FirmwareTest : public QObject
 {
@@ -17,6 +19,8 @@ private Q_SLOTS:
     void cleanupTestCase();
     void testStringLength();
     void testName();
+    void testSineMeasurement_data();
+    void testSineMeasurement();
 
 private:
     QSharedPointer<usb::Handler> handler;
@@ -122,6 +126,59 @@ void FirmwareTest::testStringLength()
 
     QString reply_name(reply->getString());
     QCOMPARE(reply_name.size() + 1, (int) reply->getBodyLength());
+}
+
+void FirmwareTest::testSineMeasurement_data()
+{
+    QTest::addColumn<uint32_t>("data");
+    for (uint32_t i = 0; i < 10; i++)
+        QTest::newRow(QString("%1.").arg(i+1).toUtf8().constData()) << i;
+}
+
+void FirmwareTest::testSineMeasurement()
+{
+    std::complex<double> result;
+    double value;
+    std::complex<double> reference[5000];
+
+    double pi = std::acos(-1);
+
+    for (uint32_t i = 0; i < 5000; i++) {
+        double x = 2 * pi * ((double) i) / 5000.0;
+        reference[i] = std::cos(x) - 1i * std::sin(x);
+    }
+
+    QSignalSpy spy(handler.data(), SIGNAL(reply(pMessage)));
+
+    QVERIFY(spy.isValid());
+
+    auto cmd = usb::newCommand(startOscilloscope);
+    handler->send(cmd);
+
+    do {
+    QVERIFY(spy.wait(500));
+    } while(spy.count() < 10);
+
+    result = 0;
+
+    for (uint32_t b = 0; b < 10; b++) {
+        auto reply = qvariant_cast<usb::pMessage>(spy.at(b).at(0));
+
+        QCOMPARE(reply->getCommand(), startOscilloscope);
+
+        uint8_t *buffer = reply->getBody() + 6;
+
+        for (uint32_t i = 0; i < 500; i++) {
+            result += (((double) buffer[2*i]) / 128.0 - 1.0) * reference[500*b+i];
+        }
+    }
+
+    value = 2.0 * std::abs(result) / 5000.0;
+
+    qDebug() << value;
+
+    QVERIFY(value > 0.8);
+
 }
 
 QTEST_MAIN(FirmwareTest)
