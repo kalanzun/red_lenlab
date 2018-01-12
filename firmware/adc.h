@@ -27,39 +27,40 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define ADC_BUFFER_LENGTH 1000
 
 
-typedef struct ADC {
+typedef struct ADCx {
     uint32_t adc_base;
     uint32_t adc_int;
+    uint32_t adc_channel;
+    uint32_t gpio_base;
+    uint32_t gpio_pin;
     uint32_t udma_channel;
-    volatile bool pingpong;
-    volatile bool basic;
+
     volatile bool ping_ready;
     volatile bool pong_ready;
-    volatile bool enable;
-    volatile bool lock;
-    volatile bool read;
     uint16_t ping[ADC_BUFFER_LENGTH];
     uint16_t pong[ADC_BUFFER_LENGTH];
+} tADCx;
+
+
+typedef struct ADC {
+    volatile bool pingpong;
+    volatile bool ready;
+    volatile bool enable;
+
+    tADCx adc0;
+    tADCx adc1;
 } tADC;
 
 
-extern tADC adc0;
-extern tADC adc1;
+void ADCEnable();
+void ADCDisable();
 
+bool ADCReady();
+void ADCRelease();
 
-void ADCEnable(tADC *self);
-void ADCDisable(tADC *self);
+uint16_t *ADCGetBuffer(bool channel);
 
-void ADCLock(tADC *self);
-void ADCUnlock(tADC *self);
-
-uint16_t *ADCGetBuffer();
-
-
-void ADCStart(tADC *self);
-void ADCStop(tADC *self);
-
-void ADCInit(tADC *self);
-
+void ADCInit();
+void ADCMain();
 
 #endif /* ADC_H_ */

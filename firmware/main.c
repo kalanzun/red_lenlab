@@ -166,7 +166,7 @@ main(void) {
     //
     // Configure ADC
     //
-    ADCInit(&adc0);
+    ADCInit();
 
     //
     // Configure SSI
@@ -195,13 +195,13 @@ main(void) {
     DEBUG_PRINT("Red Firmware\n");
     DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
 
-    ADCStart(&adc0);
     //OscilloscopeStart(&oscilloscope);
     //SSIStart();
     SignalStart();
 
     while(1)
     {
+        ADCMain();
         CommandHandlerMain();
         OscilloscopeMain(&oscilloscope);
         ReplyHandlerMain();

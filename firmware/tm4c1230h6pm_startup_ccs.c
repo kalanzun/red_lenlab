@@ -56,6 +56,7 @@ extern void UARTStdioIntHandler(void);
 extern void USBIntHandler(void);
 //extern void uDMAErrorHandler(void);
 extern void ADC0IntHandler(void);
+extern void ADC1IntHandler(void);
 extern void Timer0IntHandler(void);
 extern void SSI0IntHandler(void);
 
@@ -138,7 +139,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
     IntDefaultHandler,                      // uDMA Error
-    IntDefaultHandler,                      // ADC1 Sequence 0
+    ADC1IntHandler,                         // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
     IntDefaultHandler,                      // ADC1 Sequence 3

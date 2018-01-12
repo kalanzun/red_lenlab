@@ -43,7 +43,7 @@ OscilloscopeStart(tOscilloscope *self)
     self->active = 1;
     self->count = 0;
     MemoryAllocate(&memory); // TODO MemoryFree call
-    ADCEnable(&adc0);
+    ADCEnable();
 }
 
 
@@ -51,47 +51,62 @@ void
 OscilloscopeMain(tOscilloscope *self)
 {
     uint32_t i;
-    uint16_t *buffer;
-    tPage *page;
+    uint16_t *buffer0;
+    uint16_t *buffer1;
+    tPage *page0;
+    tPage *page1;
 
     if (!self->active) return;
 
-    if (adc0.lock)
+    if (ADCReady())
     {
-        buffer = ADCGetBuffer(&adc0);
+        buffer0 = ADCGetBuffer(0);
+        buffer1 = ADCGetBuffer(0);
 
         ASSERT(!MemoryFull(&memory));
-        page = MemoryAcquire(&memory);
+        page0 = MemoryAcquire(&memory);
+        MemoryWrite(&memory);
+        page1 = MemoryAcquire(&memory);
+        MemoryWrite(&memory);
 
-        page->buffer[0] = startOscilloscope;
-        page->buffer[1] = ByteArray;
-        page->buffer[2] = 1;
-        page->buffer[3] = 0;
+        page0->buffer[0] = startOscilloscope;
+        page0->buffer[1] = ByteArray;
+        page0->buffer[2] = 0;
+        page0->buffer[3] = 0;
 
-        //DEBUG_PRINT("adc ready %d\n", self->write);
+        page1->buffer[0] = startOscilloscope;
+        page1->buffer[1] = ByteArray;
+        page1->buffer[2] = 1;
+        page1->buffer[3] = 0;
+
+        DEBUG_PRINT("adc ready %d\n", self->count);
 
         //ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
 
         for (i = 0; i < ADC_BUFFER_LENGTH; i++)
         {
-            page->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer[i] >> 4;
+            page0->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer0[i] >> 4;
         }
 
-        ADCUnlock(&adc0);
+        for (i = 0; i < ADC_BUFFER_LENGTH; i++)
+        {
+            page1->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer1[i] >> 4;
+        }
+
+        ADCRelease();
 
         self->count++;
 
-        if (self->count == 10)
+        if (self->count == MEMORY_LENGTH / 2)
         {
-            page->buffer[3] = 1; // mark this the last package
-            ADCDisable(&adc0);
+            page1->buffer[3] = 1; // mark this the last package
+            ADCDisable();
             //DEBUG_PRINT("10th packet\n");
             //self->send = 1; // tell USB to deliver data
             MemoryStartSending(&memory, 0);
             self->active = 0;
         }
 
-        MemoryWrite(&memory);
         //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
     }
 }
