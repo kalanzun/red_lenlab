@@ -58,10 +58,12 @@ OscilloscopeMain(tOscilloscope *self)
 
     if (!self->active) return;
 
+    //while (self->active) {
+
     if (ADCReady())
     {
         buffer0 = ADCGetBuffer(0);
-        buffer1 = ADCGetBuffer(0);
+        buffer1 = ADCGetBuffer(1);
 
         ASSERT(!MemoryFull(&memory));
         page0 = MemoryAcquire(&memory);
@@ -79,17 +81,11 @@ OscilloscopeMain(tOscilloscope *self)
         page1->buffer[2] = 1;
         page1->buffer[3] = 0;
 
-        DEBUG_PRINT("adc ready %d\n", self->count);
-
         //ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
 
         for (i = 0; i < ADC_BUFFER_LENGTH; i++)
         {
             page0->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer0[i] >> 4;
-        }
-
-        for (i = 0; i < ADC_BUFFER_LENGTH; i++)
-        {
             page1->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer1[i] >> 4;
         }
 
@@ -109,6 +105,8 @@ OscilloscopeMain(tOscilloscope *self)
 
         //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
     }
+
+    //}
 }
 
 

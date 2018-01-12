@@ -201,7 +201,6 @@ main(void) {
 
     while(1)
     {
-        ADCMain();
         CommandHandlerMain();
         OscilloscopeMain(&oscilloscope);
         ReplyHandlerMain();

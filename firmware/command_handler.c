@@ -128,7 +128,7 @@ on_calculateSine(tEvent *event)
 void
 on_startOscilloscope(tEvent *event)
 {
-    DEBUG_PRINT("startOscilloscope\n");
+    //DEBUG_PRINT("startOscilloscope\n");
 
     OscilloscopeStart(&oscilloscope);
 }

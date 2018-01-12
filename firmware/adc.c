@@ -62,35 +62,64 @@ ADCxIntHandler(tADCx *self)
     if(!uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
     {
         self->ping_ready = 1;
-        //ASSERT(!self->pong_ready);
+        if (self->pong_ready) {
+            DEBUG_PRINT("Timing error: The firmware is too slow reading ADC data\n");
+            adc.enable = 0;
+            adc.error = 1;
+        }
         uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
                 UDMA_MODE_PINGPONG,
                 (void *)(self->adc_base + ADC_O_SSFIFO0),
                 self->ping, ADC_BUFFER_LENGTH);
+
+        if (adc.adc0.ping_ready && adc.adc1.ping_ready) {
+            if (adc.enable) {
+                adc.pingpong = 0;
+                adc.ready = 1;
+            }
+            else {
+                adc.adc0.ping_ready = 0;
+                adc.adc1.ping_ready = 0;
+                if (adc.prepare) {
+                    adc.enable = 1;
+                    adc.prepare = 0;
+                }
+            }
+        }
     }
     else if(!uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
     {
         self->pong_ready = 1;
-        //ASSERT(!self->ping_ready);
+        if (self->ping_ready) {
+            DEBUG_PRINT("Timing error: The firmware is too slow reading ADC data\n");
+            adc.enable = 0;
+            adc.error = 1;
+        }
         uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
                 UDMA_MODE_PINGPONG,
                 (void *)(self->adc_base + ADC_O_SSFIFO0),
                 self->pong, ADC_BUFFER_LENGTH);
+
+        if (adc.adc0.pong_ready && adc.adc1.pong_ready) {
+            if (adc.enable) {
+                adc.pingpong = 1;
+                adc.ready = 1;
+            }
+            else {
+                adc.adc0.pong_ready = 0;
+                adc.adc1.pong_ready = 0;
+                if (adc.prepare) {
+                    adc.enable = 1;
+                    adc.prepare = 0;
+                }
+            }
+        }
     }
     else
     {
         // normal ADC interrupt, not uDMA interrupt / what???
         // does happen if IntEnable is with ADCStart instead of ADCInit.
         //ASSERT(0);
-    }
-
-    if (adc.adc0.ping_ready && adc.adc1.ping_ready) {
-        adc.pingpong = 0;
-        adc.ready = 1;
-    }
-    if (adc.adc0.pong_ready && adc.adc1.pong_ready) {
-        adc.pingpong = 1;
-        adc.ready = 1;
     }
 }
 
@@ -109,24 +138,20 @@ ADC1IntHandler(void)
 void
 ADCEnable()
 {
-    DEBUG_PRINT("ADCEnable\n");
-    ASSERT(!adc.enable);
-    adc.enable = 1;
-    adc.ready = 0;
+    if (!adc.prepare && !adc.enable && !adc.error)
+        adc.prepare = 1;
 }
 
 void
 ADCDisable()
 {
-    DEBUG_PRINT("ADCDisable\n");
-    ASSERT(adc.enable);
     adc.enable = 0;
 }
 
 bool
 ADCReady()
 {
-    return adc.enable && adc.ready;
+    return adc.ready;
 }
 
 void
@@ -168,7 +193,7 @@ ConfigureADCx(tADCx* self)
     //
     GPIOPinTypeADC(self->gpio_base, self->gpio_pin);
 
-    ADCHardwareOversampleConfigure(self->adc_base, 64);
+    ADCHardwareOversampleConfigure(self->adc_base, 2); // 1 is too fast for the oscilloscope module
 
     // Set the ADC Sequence to trigger always (that is 1 MHz)
     // and to generate an interrupt every 4 samples.
@@ -231,6 +256,8 @@ ADCInit()
     adc.pingpong = 0;
     adc.ready = 0;
     adc.enable = 0;
+    adc.prepare = 0;
+    adc.error = 0;
 
     adc.adc0.adc_base = ADC0_BASE;
     adc.adc0.adc_int = INT_ADC0SS0;
@@ -259,13 +286,4 @@ ADCInit()
 
     StartADCx(&adc.adc0);
     StartADCx(&adc.adc1);
-}
-
-void
-ADCMain()
-{
-    if (!adc.enable) {
-        //if (adc.ready)
-        //    ADCRelease();
-    }
 }

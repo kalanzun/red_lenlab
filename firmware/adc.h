@@ -46,6 +46,8 @@ typedef struct ADC {
     volatile bool pingpong;
     volatile bool ready;
     volatile bool enable;
+    volatile bool prepare;
+    volatile bool error;
 
     tADCx adc0;
     tADCx adc1;
@@ -61,6 +63,5 @@ void ADCRelease();
 uint16_t *ADCGetBuffer(bool channel);
 
 void ADCInit();
-void ADCMain();
 
 #endif /* ADC_H_ */

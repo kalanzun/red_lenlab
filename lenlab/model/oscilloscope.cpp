@@ -100,8 +100,8 @@ Oscilloscope::receive(const usb::pMessage &reply)
         read = write; // gui reads from this one
         write = (write + 1) % 2;
         emit replot();
-        //if (running)
-        //    restart();
+        if (running)
+            restart();
     }
 
 }
