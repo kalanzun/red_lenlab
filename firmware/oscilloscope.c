@@ -47,6 +47,19 @@ OscilloscopeStart(tOscilloscope *self)
 }
 
 
+inline int8_t
+delta(uint16_t previous, uint16_t next)
+{
+    int16_t delta = next - previous;
+    if (delta > 127)
+        return 127;
+    else if (delta < -127)
+        return -127;
+    else
+        return (int8_t) delta;
+}
+
+
 void
 OscilloscopeMain(tOscilloscope *self)
 {
@@ -55,6 +68,9 @@ OscilloscopeMain(tOscilloscope *self)
     uint16_t *buffer1;
     tPage *page0;
     tPage *page1;
+    uint16_t state0, state1;
+    int8_t *data0;
+    int8_t *data1;
 
     if (!self->active) return;
 
@@ -76,17 +92,29 @@ OscilloscopeMain(tOscilloscope *self)
         page0->buffer[2] = 0;
         page0->buffer[3] = 0;
 
+        state0 = buffer0[0] >> 2;
+        *(uint16_t *) (page0->buffer + 4) = state0;
+
+        data0 = (int8_t *) (page0->buffer + OSCILLOSCOPE_HEADER_LENGTH);
+
         page1->buffer[0] = startOscilloscope;
         page1->buffer[1] = ByteArray;
         page1->buffer[2] = 1;
         page1->buffer[3] = 0;
 
+        state1 = buffer1[0] >> 2;
+        *(uint16_t *) (page1->buffer + 4) = state1;
+
+        data1 = (int8_t *) (page1->buffer + OSCILLOSCOPE_HEADER_LENGTH);
+
         //ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
 
-        for (i = 0; i < ADC_BUFFER_LENGTH; i++)
+        for (i = 1; i < ADC_BUFFER_LENGTH; i++)
         {
-            page0->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer0[i] >> 4;
-            page1->buffer[OSCILLOSCOPE_HEADER_LENGTH + i] = buffer1[i] >> 4;
+            data0[i] = delta(state0, buffer0[i] >> 2);
+            state0 += data0[i];
+            data1[i] = delta(state1, buffer1[i] >> 2);
+            state1 += data1[i];
         }
 
         ADCRelease();

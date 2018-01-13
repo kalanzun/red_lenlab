@@ -82,17 +82,27 @@ Oscilloscope::receive(const usb::pMessage &reply)
     //qDebug("receive");
 
     uint8_t *buffer = reply->getBody();
+    int8_t *payload = (int8_t *) (reply->getBody() + 6);
 
     uint8_t channel = buffer[0];
+
+    uint16_t state = *(uint16_t *) (buffer + 2);
+    if (channel == 0)
+        data[write][0].append((double) t++); // x axis
+    data[write][1+channel].append((double) state);
 
     //Q_ASSERT(reply->getPayloadLength() == 4 * data.size());
 
     // sine values
-    for (uint32_t i = 0; i < 1000; i+=1) {
+    for (uint32_t i = 1; i < 1000; i+=1) {
         if (channel == 0)
             data[write][0].append((double) t++); // x axis
         //a += buffer[i];
-        data[write][1+channel].append((double) buffer[6+i]);// / (double) 2048.0); // y axis
+        //data[write][1+channel].append((double) payload[i]);// / (double) 2048.0); // y axis
+        state += payload[i];
+        data[write][1+channel].append((double) state);
+        //data[write][1+channel].append((double) (state + *(int8_t *) (buffer+6+i)));// / (double) 2048.0); // y axis
+        //state = state + *(int8_t *) (buffer+6+i);
         //data[write][2].append((double) buffer[6+i+1]);// / (double) 2048.0); // y axis
     }
 
