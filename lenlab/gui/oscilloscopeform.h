@@ -23,7 +23,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "model/minmaxvector.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 #include <QWidget>
@@ -65,7 +64,7 @@ private:
     model::Lenlab *lenlab;
     model::Oscilloscope *oscilloscope;
 
-    std::array<QwtPlotCurve *, 4> curves; // pointer, no ownership
+    std::array<QwtPlotCurve *, 2> curves; // pointer, no ownership
 };
 
 

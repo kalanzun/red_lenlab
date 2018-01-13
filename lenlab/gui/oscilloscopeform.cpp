@@ -57,8 +57,8 @@ OscilloscopeForm::setModel(model::Lenlab *lenlab)
 
     curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
     curves[1] = newCurve(QColor("#8ae234"), true); // green 0
-    curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
-    curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+    //curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
+    //curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
 
     connect(oscilloscope, SIGNAL(replot()),
             this, SLOT(on_replot()));
@@ -118,8 +118,8 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::on_replot()
 {
-    for (auto i = 0; i < curves.size(); i++) {
-        curves[i]->setSamples(new PointVectorSeriesData(oscilloscope->getTime(), oscilloscope->getChannel(i))); // acquires ownership
+    for (uint32_t i = 0; i < curves.size(); i++) {
+        curves[i]->setSamples(new PointVectorSeriesData(oscilloscope->getWaveform(), i)); // acquires ownership
     }
     ui->plot->replot();
 }

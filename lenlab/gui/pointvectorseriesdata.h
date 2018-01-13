@@ -21,7 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef POINTVECTORSERIESDATA_H
 #define POINTVECTORSERIESDATA_H
 
-#include "model/minmaxvector.h"
+#include "model/waveform.h"
 #include "qwt_series_data.h"
 
 
@@ -30,19 +30,16 @@ namespace gui {
 class PointVectorSeriesData : public QwtSeriesData<QPointF>
 {
 public:
-    PointVectorSeriesData(model::MinMaxVector *time, model::MinMaxVector *value);
+    PointVectorSeriesData(QSharedPointer<model::Waveform> waveform, uint32_t channel);
 
     virtual QRectF boundingRect() const;
 
     virtual size_t size() const;
     virtual QPointF sample( size_t i ) const;
 
-    const QVector<double> &xData() const;
-    const QVector<double> &yData() const;
-
 private:
-    model::MinMaxVector *time;
-    model::MinMaxVector *value;
+    QSharedPointer<model::Waveform> waveform;
+    uint32_t channel;
 };
 
 } // namespace gui

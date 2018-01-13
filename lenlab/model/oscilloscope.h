@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define OSCILLOSCOPE_H
 
 #include "component.h"
-#include "minmaxvector.h"
+#include "waveform.h"
 #include <QObject>
 
 namespace model {
@@ -47,10 +47,9 @@ public:
     void clear();
 
     void receive(const usb::pMessage &reply);
-    void finished(const usb::pMessage &reply);
+    //void finished(const usb::pMessage &reply);
 
-    MinMaxVector *getTime();
-    MinMaxVector *getChannel(uint32_t channel);
+    QSharedPointer<Waveform> getWaveform();
 
 signals:
     void replot();
@@ -58,12 +57,10 @@ signals:
 public slots:
 
 private:
-    uint32_t t;
     bool running = 0;
-    std::array<std::array<MinMaxVector, 5>, 2> data;
-    uint32_t read = 0;
-    uint32_t write = 0;
-    uint16_t trigger = 0;
+
+    QSharedPointer<Waveform> incoming;
+    QSharedPointer<Waveform> current;
 
     typedef Component super;
 };

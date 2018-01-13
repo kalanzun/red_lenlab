@@ -23,7 +23,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "model/minmaxvector.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 #include <QWidget>
@@ -72,7 +71,7 @@ private slots:
     void on_channelsChanged(const std::bitset<4> &);
 
 private:
-    QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
+    //QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
     QwtPlotGrid *newGrid();
 
     Ui::LoggerForm *ui;

@@ -85,8 +85,8 @@ Lenlab::on_reply(const usb::pMessage &reply)
         voltmeter->receive(reply);
     else if (cmd == startOscilloscope)
         oscilloscope->receive(reply);
-    else if (cmd == stopOscilloscope)
-        oscilloscope->finished(reply);
+    //else if (cmd == stopOscilloscope)
+    //    oscilloscope->finished(reply);
 }
 
 void

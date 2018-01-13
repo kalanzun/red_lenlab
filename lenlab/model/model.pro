@@ -25,19 +25,19 @@ SOURCES += \
     component.cpp \
     frequencysweep.cpp \
     lenlab.cpp \
-    minmaxvector.cpp \
     oscilloscope.cpp \
     signalgenerator.cpp \
     voltmeter.cpp \
+    waveform.cpp
 
 HEADERS += \
     component.h \
     frequencysweep.h \
     lenlab.h \
-    minmaxvector.h \
     oscilloscope.h \
     signalgenerator.h \
     voltmeter.h \
+    waveform.h
 
 include(../../red_lenlab.pri)
 

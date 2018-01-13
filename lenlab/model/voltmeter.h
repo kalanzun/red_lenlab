@@ -22,7 +22,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define VOLTMETER_H
 
 #include "component.h"
-#include "minmaxvector.h"
 #include <QObject>
 #include <bitset>
 
@@ -76,7 +75,7 @@ public:
 
     void save(const QString &fileName);
 
-    std::array<MinMaxVector, 5> data;
+    //std::array<MinMaxVector, 5> data;
 
 signals:
     void replot();

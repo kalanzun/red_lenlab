@@ -71,10 +71,12 @@ Voltmeter::start()
 void
 Voltmeter::restart()
 {
+    /*
     if (data[0].isEmpty())
         time_offset = 0;
     else
         time_offset = data[0].last() + interval / MSEC;
+    */
 
     qDebug("set intervall");
     usb::pMessage cmdSetInterval(new usb::Message());
@@ -106,7 +108,7 @@ Voltmeter::clear()
     if (m_active)
         stop();
 
-    for (auto &vector : data) vector.clear();
+    //for (auto &vector : data) vector.clear();
 
     setAutoSave(false);
     setFileName(QString());
@@ -123,15 +125,17 @@ Voltmeter::receive(const usb::pMessage &reply)
 
     uint32_t *buffer = (uint32_t *) reply->getBody();
 
-    Q_ASSERT(reply->getBodyLength() == 4 * data.size());
+    //Q_ASSERT(reply->getBodyLength() == 4 * data.size());
 
     // 4 bytes timestamp
-    data[0].append(time_offset + (double) *buffer / MSEC);
+    //data[0].append(time_offset + (double) *buffer / MSEC);
 
+    /*
     // 4 channels, 4 bytes each
     for (size_t i = 1; i < data.size(); i++) {
         data[i].append((double) buffer[i] / (double) reply->getBody()[0] / VOLT); // TODO Fix for new communictaion
     }
+    */
 
     setMeasurementData(true);
     setUnsavedData(true);
@@ -274,13 +278,16 @@ Voltmeter::_save()
     stream << QString("Lenlab red %1.%2 Voltmeter-Daten\n").arg(MAJOR).arg(MINOR);
 
     stream << "Zeit";
+    /*
     for (size_t i = 1; i < data.size(); i++) {
         if (m_channels[i-1]) {
             stream << DELIMITER << "Kanal_" << i;
         }
     }
+    */
     stream << "\n";
 
+    /*
     for (int t = 0; t < data[0].size(); t++) {
         stream << data[0][t];
         for (size_t i = 1; i < data.size(); i++) {
@@ -290,6 +297,7 @@ Voltmeter::_save()
         }
         stream << "\n";
     }
+    */
 
     file.commit();
 }

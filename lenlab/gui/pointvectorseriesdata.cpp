@@ -19,44 +19,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "pointvectorseriesdata.h"
+#include <QDebug>
 
 namespace gui {
 
-PointVectorSeriesData::PointVectorSeriesData(model::MinMaxVector *time, model::MinMaxVector *value) :
-    time(time),
-    value(value)
+PointVectorSeriesData::PointVectorSeriesData(QSharedPointer<model::Waveform> waveform, uint32_t channel) :
+    waveform(waveform),
+    channel(channel)
 {
-
 }
 
 QRectF
 PointVectorSeriesData::boundingRect() const
 {
-    return QRectF(QPointF(time->getMin(), value->getMin()), QPointF(time->getMax(), value->getMax()));
+    return QRectF(QPointF(waveform->getMinTime(), waveform->getMinValue()), QPointF(waveform->getMaxTime(), waveform->getMaxValue()));
 }
 
 size_t
 PointVectorSeriesData::size() const
 {
-    return time->size();
+    return waveform->getViewLength();
 }
 
 QPointF
 PointVectorSeriesData::sample( size_t i ) const
 {
-    return QPointF((*time)[i], (*value)[i]);
-}
-
-const QVector<double> &
-PointVectorSeriesData::xData() const
-{
-    return *time;
-}
-
-const QVector<double> &
-PointVectorSeriesData::yData() const
-{
-    return *value;
+    return QPointF(waveform->getTime(i), waveform->getValue(channel, i));
 }
 
 } // namespace gui
