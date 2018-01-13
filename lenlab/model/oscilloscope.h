@@ -63,6 +63,7 @@ private:
     std::array<std::array<MinMaxVector, 5>, 2> data;
     uint32_t read = 0;
     uint32_t write = 0;
+    uint16_t trigger = 0;
 
     typedef Component super;
 };

@@ -33,6 +33,8 @@ OscilloscopeForm::OscilloscopeForm(QWidget *parent) :
 {
     qDebug() << "OscilloscopeForm";
     ui->setupUi(this);
+
+    newGrid();
 }
 
 OscilloscopeForm::~OscilloscopeForm()
@@ -78,6 +80,20 @@ OscilloscopeForm::newCurve(const QColor &color, bool visible)
 
     curve->attach(ui->plot); // acquires ownership
     return curve.release();
+}
+
+QwtPlotGrid *
+OscilloscopeForm::newGrid()
+{
+    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
+
+    QPen pen;
+    pen.setStyle(Qt::DotLine);
+    pen.setColor("#555753"); // aluminium 4
+    grid->setPen(pen);
+
+    grid->attach(ui->plot); // acquires ownership
+    return grid.release();
 }
 
 void

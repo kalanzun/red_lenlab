@@ -65,7 +65,7 @@ Device::Device(libusb_device *dev, QObject *parent) :
 void
 Device::send(const pMessage &cmd)
 {
-    qDebug() << "send" << cmd->getCommand();
+    //qDebug() << "send" << cmd->getCommand();
     send_queue->append(cmd);
     try_to_send();
 }
@@ -73,7 +73,7 @@ Device::send(const pMessage &cmd)
 void
 Device::on_reply(const pMessage &reply)
 {
-    qDebug() << "reply" << reply->getCommand();
+    //qDebug() << "reply" << reply->getCommand();
 }
 
 void

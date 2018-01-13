@@ -57,6 +57,7 @@ private slots:
 
 private:
     QwtPlotCurve *newCurve(const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
 
     Ui::OscilloscopeForm *ui;
 

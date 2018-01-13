@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MEMORY_H_
 
 
-#define MEMORY_LENGTH 16
+#define MEMORY_LENGTH 14
 #define MEMORY_PAGE_LENGTH 1024
 
 
@@ -96,9 +96,9 @@ MemoryWrite(tMemory *self)
 
 
 inline void
-MemoryStartSending(tMemory *self, uint32_t start)
+MemoryStartSending(tMemory *self)
 {
-    self->read = start;
+    self->read = self->write;
     self->send = true;
 }
 

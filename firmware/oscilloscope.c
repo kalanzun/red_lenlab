@@ -36,9 +36,20 @@ tOscilloscope oscilloscope;
 void
 OscilloscopeStart(tOscilloscope *self)
 {
+    uint32_t i;
+
     //DEBUG_PRINT("oscilloscope start\n");
     if (self->active)// || self->send)
         return;
+
+    self->filter_state = 0;
+    self->filter_index = 0;
+    for (i = 0; i < OSCILLOSCOPE_FILTER_LENGTH; i++) self->filter[i] = 0;
+
+    self->trigger_wait = 0;
+    self->trigger_active = 0;
+    self->trigger_save = 0;
+    self->trigger_post_count = 0;
 
     self->active = 1;
     self->count = 0;
@@ -94,6 +105,7 @@ OscilloscopeMain(tOscilloscope *self)
 
         state0 = buffer0[0] >> 2;
         *(uint16_t *) (page0->buffer + 4) = state0;
+        *(uint16_t *) (page0->buffer + 6) = 0;
 
         data0 = (int8_t *) (page0->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
@@ -107,12 +119,33 @@ OscilloscopeMain(tOscilloscope *self)
 
         data1 = (int8_t *) (page1->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
-        //ASSERT(OSCILLOSCOPE_PACKET_LENGTH >= OSCILLOSCOPE_HEADER_LENGTH + ADC_BUFFER_LENGTH);
+        if (self->count == 3) {
+            self->trigger_wait = 1;
+        }
 
         for (i = 1; i < ADC_BUFFER_LENGTH; i++)
         {
             data0[i] = delta(state0, buffer0[i] >> 2);
             state0 += data0[i];
+
+            if (self->count == 2 || self->trigger_wait || self->trigger_active) {
+                self->filter_state -= self->filter[self->filter_index];
+                self->filter_state += state0;
+                self->filter[self->filter_index] = state0;
+                self->filter_index = (self->filter_index + 1) % OSCILLOSCOPE_FILTER_LENGTH;
+            }
+
+            if (self->trigger_wait && (self->filter_state < (8*512))) {
+                self->trigger_wait = 0;
+                self->trigger_active = 1;
+            }
+
+            if (self->trigger_active && (self->filter_state > (8*512))) {
+                self->trigger_active = 0;
+                self->trigger_save = 1;
+                *(uint16_t *) (page0->buffer + 6) = i;
+            }
+
             data1[i] = delta(state1, buffer1[i] >> 2);
             state1 += data1[i];
         }
@@ -121,14 +154,15 @@ OscilloscopeMain(tOscilloscope *self)
 
         self->count++;
 
-        if (self->count == MEMORY_LENGTH / 2)
-        {
-            page1->buffer[3] = 1; // mark this the last package
-            ADCDisable();
-            //DEBUG_PRINT("10th packet\n");
-            //self->send = 1; // tell USB to deliver data
-            MemoryStartSending(&memory, 0);
-            self->active = 0;
+        if (self->trigger_save) {
+            self->trigger_post_count++;
+            if (self->trigger_post_count == 4) {
+                self->trigger_save = 0;
+                page1->buffer[3] = 1; // mark this the last package
+                ADCDisable();
+                MemoryStartSending(&memory);
+                self->active = 0;
+            }
         }
 
         //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;

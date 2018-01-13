@@ -25,11 +25,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 #define OSCILLOSCOPE_HEADER_LENGTH 8
+#define OSCILLOSCOPE_FILTER_LENGTH 8
 
 
 typedef struct Oscilloscope {
     bool active;
     uint8_t count;
+    uint16_t filter[OSCILLOSCOPE_FILTER_LENGTH];
+    uint16_t filter_index;
+    uint16_t filter_state;
+    bool trigger_wait;
+    bool trigger_active;
+    bool trigger_save;
+    uint8_t trigger_post_count;
 } tOscilloscope;
 
 
