@@ -139,11 +139,11 @@ void FirmwareTest::testSineMeasurement()
 {
     std::complex<double> result;
     double value;
-    std::complex<double> reference[5000];
+    std::complex<double> reference[8000];
 
     double pi = std::acos(-1);
 
-    for (uint32_t i = 0; i < 5000; i++) {
+    for (uint32_t i = 0; i < 8000; i++) {
         double x = 2 * pi * ((double) i) / 5000.0;
         reference[i] = std::cos(x) - 1i * std::sin(x);
     }
@@ -157,23 +157,23 @@ void FirmwareTest::testSineMeasurement()
 
     do {
     QVERIFY(spy.wait(500));
-    } while(spy.count() < 10);
+    } while(spy.count() < 16);
 
     result = 0;
 
-    for (uint32_t b = 0; b < 10; b++) {
+    for (uint32_t b = 0; b < 16; b+=2) {
         auto reply = qvariant_cast<usb::pMessage>(spy.at(b).at(0));
 
         QCOMPARE(reply->getCommand(), startOscilloscope);
 
         uint8_t *buffer = reply->getBody() + 6;
 
-        for (uint32_t i = 0; i < 500; i++) {
-            result += (((double) buffer[2*i]) / 128.0 - 1.0) * reference[500*b+i];
+        for (uint32_t i = 0; i < 1000; i++) {
+            result += (((double) buffer[i]) / 128.0 - 1.0) * reference[1000*b/2+i];
         }
     }
 
-    value = 2.0 * std::abs(result) / 5000.0;
+    value = 2.0 * std::abs(result) / 8000.0;
 
     qDebug() << value;
 

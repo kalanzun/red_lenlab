@@ -45,6 +45,8 @@ FORMS += \
     oscilloscopeform.ui \
     signalform.ui \
 
+PRE_TARGETDEPS += ../model/debug/libmodel.a ../usb/debug/libusb.a
+
 include(../../red_lenlab.pri)
 
 unix {
