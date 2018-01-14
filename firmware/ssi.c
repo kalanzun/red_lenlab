@@ -107,28 +107,22 @@ SSIGetBuffer(void)
 }
 
 
-uint32_t
-SSIGetFrequency(void)
-{
-    return ssi.frequency;
-}
-
-
 void
-SSISetFrequency(uint32_t frequency)
+SSISetDivider(uint8_t predivider, uint8_t divider)
 {
-    // 16 bits per channel (<< 4)
-    uint32_t bitrate = frequency << 4;
+    // SSInClk = SysClk / (CPSDVSR * (1 + SCR))
+    // SSInClk = SysClk / predivider / divider
+    // SSISetDivider takes care of the +1
 
-    SSIConfigSetExpClk(
-            SSI0_BASE,
-            SysCtlClockGet(),
-            SSI_FRF_MOTO_MODE_0,
-            SSI_MODE_MASTER,
-            bitrate,
-            16);
+    //
+    // Set the clock predivider.
+    //
+    HWREG(SSI0_BASE + SSI_O_CPSR) = predivider;
 
-    ssi.frequency = frequency;
+    //
+    // Set protocol and clock rate.
+    //
+    HWREG(SSI0_BASE + SSI_O_CR0) = ((divider-1) << 8) | (16 - 1); // protocol 0 and 16 bits
 }
 
 
@@ -159,8 +153,10 @@ SSIConfigure()
     GPIOPinConfigure(GPIO_PA5_SSI0TX);
     GPIOPinTypeSSI(GPIO_PORTA_BASE,GPIO_PIN_5|GPIO_PIN_3|GPIO_PIN_2);
 
-    // SSI
-    SSISetFrequency(500000); // 500 kHz maximum Frequency
+    //
+    // Set the mode.
+    //
+    HWREG(SSI0_BASE + SSI_O_CR1) = 0; // master mode
 
     // Set DAC Output to zero. Needed after reset of µC
     SSIDataPut(SSI0_BASE, 0x3800);

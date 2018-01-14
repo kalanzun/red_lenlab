@@ -30,7 +30,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 typedef struct SSI {
     uint16_t buffer[SSI_BUFFER_LENGTH];
     uint32_t length;
-    uint32_t frequency;
 } tSSI;
 
 
@@ -42,8 +41,7 @@ void SSISetLength(uint32_t length);
 
 uint16_t *SSIGetBuffer(void);
 
-uint32_t SSIGetFrequency(void);
-void SSISetFrequency(uint32_t frequency);
+void SSISetDivider(uint8_t predivider, uint8_t divider);
 
 void SSIStart(void);
 void SSIStop(void);

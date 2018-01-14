@@ -267,7 +267,7 @@ SignalTestSineFrequency(tEvent *cmd)
 
 
 void
-SignalSetFrequency(uint16_t frequency, uint16_t divisor)
+SignalSetFrequency(uint8_t multiplier, uint8_t predivisor, uint8_t divisor)
 {
     uint32_t delta;
     uint16_t *buffer = SSIGetBuffer();
@@ -275,21 +275,23 @@ SignalSetFrequency(uint16_t frequency, uint16_t divisor)
     uint16_t a;
     uint16_t b;
 
-    SignalUpdate(frequency);
+    //SignalUpdate(frequency);
 
-    a = signal.frequency_divisor;
-    b = signal.memory_multiplier;
+    //a = signal.frequency_divisor;
+    //b = signal.memory_multiplier;
 
-    DEBUG_PRINT("a = %u; b = %u;\n", a, b);
+    //DEBUG_PRINT("a = %u; b = %u;\n", a, b);
 
     //delta = (SSI_BUFFER_LENGTH << 16) / 2 / b;
-    delta = SSI_BUFFER_LENGTH / 2 / b;
+    //delta = SSI_BUFFER_LENGTH / 2 / b;
 
-    for (i = 0; i < b; i++)
-    {
-        SignalWriteSine(buffer + 2*i*delta, delta, 1, 0);
-        SignalWriteSine(buffer + 2*i*delta, delta, 1, 1);
-    }
+    //for (i = 0; i < b; i++)
+    //{
+        SignalWriteSine(buffer, 500, 1, 0);
+        SignalWriteSine(buffer, 500, 1, 1);
+    //}
+
+    SSISetDivider(predivisor, divisor);
 
 }
 
@@ -305,10 +307,10 @@ SignalStart(void)
     //SignalWriteSine(buffer, 500, 1, 0); SignalWriteSine(buffer, 500, 1, 1);
     SSISetLength(1000);
 
-    SignalSetFrequency(128, 1);
+    SignalSetFrequency(1, 60, 1);
 
     //SSISetFrequency(2 * SysCtlClockGet() / signal.frequency_divisor);
-    SSISetFrequency(2500000 / signal.frequency_divisor);
+    //SSISetFrequency(2500000 / signal.frequency_divisor);
     SSIStart();
 }
 

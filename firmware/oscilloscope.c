@@ -38,7 +38,8 @@ OscilloscopeStart(tOscilloscope *self)
 {
     uint32_t i;
 
-    //DEBUG_PRINT("oscilloscope start\n");
+    //DEBUG_PRINT("OscilloscopeStart\n");
+
     if (self->active)// || self->send)
         return;
 
@@ -135,12 +136,16 @@ OscilloscopeMain(tOscilloscope *self)
                 self->filter_index = (self->filter_index + 1) % OSCILLOSCOPE_FILTER_LENGTH;
             }
 
-            if (self->trigger_wait && (self->filter_state < (8*512))) {
+            if (self->trigger_wait
+                    && (self->filter_state < (8*512))
+                    ) {
                 self->trigger_wait = 0;
                 self->trigger_active = 1;
             }
 
-            if (self->trigger_active && (self->filter_state > (8*512))) {
+            if (self->trigger_active
+                    && (self->filter_state > (8*512))
+                    ) {
                 self->trigger_active = 0;
                 self->trigger_save = 1;
                 *(uint16_t *) (page0->buffer + 6) = i;

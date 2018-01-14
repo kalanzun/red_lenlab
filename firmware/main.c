@@ -196,7 +196,6 @@ main(void) {
     DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
 
     //OscilloscopeStart(&oscilloscope);
-    //SSIStart();
     SignalStart();
 
     while(1)
