@@ -99,7 +99,7 @@ OscilloscopeMain(tOscilloscope *self)
         page1 = MemoryAcquire(&memory);
         MemoryWrite(&memory);
 
-        page0->buffer[0] = startOscilloscope;
+        page0->buffer[0] = OscilloscopeData;
         page0->buffer[1] = ByteArray;
         page0->buffer[2] = 0;
         page0->buffer[3] = 0;
@@ -110,7 +110,7 @@ OscilloscopeMain(tOscilloscope *self)
 
         data0 = (int8_t *) (page0->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
-        page1->buffer[0] = startOscilloscope;
+        page1->buffer[0] = OscilloscopeData;
         page1->buffer[1] = ByteArray;
         page1->buffer[2] = 1;
         page1->buffer[3] = 0;

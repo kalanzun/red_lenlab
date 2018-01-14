@@ -78,12 +78,13 @@ void
 Lenlab::on_reply(const usb::pMessage &reply)
 {
     //qDebug("on_reply");
-    Command cmd = reply->getCommand();
+    Reply rpl = reply->getReply();
     //qDebug() << cmd;
 
-    if (cmd == startLogger)
-        voltmeter->receive(reply);
-    else if (cmd == startOscilloscope)
+    //if (cmd == startLogger)
+    //    voltmeter->receive(reply);
+    //else
+    if (rpl == OscilloscopeData)
         oscilloscope->receive(reply);
     //else if (cmd == stopOscilloscope)
     //    oscilloscope->finished(reply);

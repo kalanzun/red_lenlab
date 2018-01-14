@@ -58,6 +58,8 @@ enum Reply {
     Init,
     Name,
     Version,
+    SignalSine,
+    OscilloscopeData,
     NUM_REPLIES
 };
 

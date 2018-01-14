@@ -89,49 +89,39 @@ void FirmwareTest::testStringLength()
 
 void FirmwareTest::testSineMeasurement_data()
 {
-    uint8_t multiplier, predivider, divider;
     double f;
 
-    QTest::addColumn<uint8_t>("multiplier");
-    QTest::addColumn<uint8_t>("predivider");
-    QTest::addColumn<uint8_t>("divider");
-    QTest::addColumn<double>("frequency");
+    QTest::addColumn<uint8_t>("index");
 
-    multiplier = 1;
-    divider = 1;
-
-    for (uint32_t i = 0; i < 10; i++) {
-        predivider = 10 * (i+1);
-        f = 5000 / predivider;
-        QTest::newRow(qUtf8Printable(QString("%1 Hz").arg(f))) << multiplier << predivider << divider << f;
+    for (uint8_t i = 0; i < 100; i++) {
+        f = lenlab->signalgenerator->getFrequency(i);
+        QTest::newRow(qUtf8Printable(QString("%1 Hz").arg(f))) << i;
     }
 }
 
 void FirmwareTest::testSineMeasurement()
 {
-    QFETCH(uint8_t, multiplier);
-    QFETCH(uint8_t, predivider);
-    QFETCH(uint8_t, divider);
-    QFETCH(double, frequency);
+    QFETCH(uint8_t, index);
 
-    QSignalSpy spy(lenlab->oscilloscope, SIGNAL(replot()));
-    QVERIFY2(spy.isValid(), "Invalid Signal replot on lenlab->oscilloscope.");
+    QSignalSpy reply_spy(handler.data(), SIGNAL(reply(pMessage)));
+    QVERIFY2(reply_spy.isValid(), "Invalid Signal reply on handler.");
+
+    QSignalSpy replot_spy(lenlab->oscilloscope, SIGNAL(replot()));
+    QVERIFY2(replot_spy.isValid(), "Invalid Signal replot on lenlab->oscilloscope.");
 
     // SSI outputs one period in 2 channels * 500 samples * 16 bits per sample = 16000 bits
     // A 0.5 kHz sine needs a bit rate of 8 MHz
     // SysClk is 80 MHz, 80 / 8 = 10
 
-    auto cmd = usb::newCommand(setSignalSine);
-    cmd->setType(ByteArray);
-    cmd->setBodyLength(3);
-    cmd->getBody()[0] = multiplier; // multiplier
-    cmd->getBody()[1] = predivider; // predivider
-    cmd->getBody()[2] = divider; // divider
-    handler->send(cmd);
+    lenlab->signalgenerator->setSine(index);
+    QVERIFY2(reply_spy.wait(500), "No confirmation for setSignalSine arrived.");
+    usb::pMessage reply = qvariant_cast<usb::pMessage>(reply_spy.at(reply_spy.count()-1).at(0));
+
+    QVERIFY(reply->getReply() == SignalSine);
 
     lenlab->oscilloscope->start();
     lenlab->oscilloscope->stop(); // single shot
-    QVERIFY2(spy.wait(500), "Signal replot was not fired, the oscilloscope measurement did not complete.");
+    QVERIFY2(replot_spy.wait(500), "Signal replot was not fired, the oscilloscope measurement did not complete.");
 
     auto waveform = lenlab->oscilloscope->getWaveform();
 
@@ -140,7 +130,13 @@ void FirmwareTest::testSineMeasurement()
 
     // sample rate is 250 kHz, so one sample is 4 us
 
-    double f = 0.9 * frequency;
+    int abweichung = 0;
+    double result = 0;
+
+    for (int j = 0; j < 60; j++) {
+
+    double f = lenlab->signalgenerator->getFrequency(index);
+    f = f * (1 + ((double) (j - 30) / 100));
     // for some reason, the frequency is 10% off
 
     std::complex<double> sum, y;
@@ -158,7 +154,21 @@ void FirmwareTest::testSineMeasurement()
 
     value = std::abs(sum) / 6000;
 
-    QVERIFY2(value > 0.7, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(value)));
+    if (value > result) {
+        abweichung = j - 30;
+        result = value;
+    }
+
+    }
+
+    qDebug() << index << lenlab->signalgenerator->getFrequency(index) << abweichung << result;
+
+    QVERIFY2(result > 0.7, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(result)));
+
+
+
+
+
 }
 
 QTEST_MAIN(FirmwareTest)

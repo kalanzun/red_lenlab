@@ -136,11 +136,24 @@ on_startOscilloscope(tEvent *event)
 void
 on_setSignalSine(tEvent *event)
 {
+    tEvent *reply;
+
     uint8_t multiplier = EventGetByte(event, 0);
     uint8_t predivider = EventGetByte(event, 1);
     uint8_t divider    = EventGetByte(event, 2);
 
+    // this may need a long time
     SignalSetSine(multiplier, predivider, divider);
+
+    // send a reply
+    reply = QueueAcquire(&reply_handler.reply_queue);
+
+    EventSetReply(reply, SignalSine);
+    EventSetBodyLength(reply, 0);
+
+    QueueWrite(&reply_handler.reply_queue);
+
+    DEBUG_PRINT("SignalSetSine(%d, %d, %d);\n", multiplier, predivider, divider);
 }
 
 /*

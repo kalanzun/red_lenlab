@@ -47,7 +47,9 @@ Message::setReply(Reply reply)
 Reply
 Message::getReply()
 {
-    Q_ASSERT(buffer[0] < NUM_REPLIES);
+    if (!(buffer[0] < NUM_REPLIES))
+        return noReply;
+
     return (Reply) buffer[0];
 }
 
@@ -122,6 +124,15 @@ Message::getIntArray(uint32_t length)
     Q_ASSERT(getType() == IntArray);
     Q_ASSERT(getBodyLength() == 4*length);
     return (uint32_t *) getBody();
+}
+
+void
+Message::setByteArray(uint8_t array[], uint32_t length)
+{
+    for (uint32_t i = 0; i < length; i++)
+        getBody()[i] = array[i];
+    setType(ByteArray);
+    setBodyLength(length);
 }
 
 pMessage

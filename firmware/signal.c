@@ -80,31 +80,34 @@ DACFormat(int32_t value, bool channel)
 }
 
 void
-WriteSine(uint16_t *buffer, uint32_t length, uint32_t interleaved, uint32_t channel)
+WriteSine(uint16_t *buffer, uint32_t periods)
 {
     int32_t value;
     int32_t i;
-    int32_t index;
+    int32_t x;
 
-    // if interleaved is true, buffer needs twice the length
+    bool sign;
 
-    for (i = 0; i < length / 2; i++)
+    for (i = 0; i < 500; i++)
     {
-        value = taylor(2 * i * f_PI / length - f_PI2);
+        x = periods * i * f_PI / 250;
+        sign = 0;
+        while (x > f_PI) {
+            x -= f_PI;
+            sign = !sign;
+        }
 
-        //i = interleaved ? 2*x + channel : x;
-        index = 2*i + channel;
-        buffer[index] = DACFormat(value, channel);
+        value = (sign ? -1 : 1) * taylor(x - f_PI2);
 
-        //i = interleaved ? 2*(length-1 - x) + channel : (length-1 - x);
-        index = 2*(length-1 - i) + channel;
-        buffer[index] = DACFormat(value, channel);
+        buffer[2*i] = DACFormat(value, 0);
+        buffer[2*i + 1] = DACFormat(value, 1);
     }
 }
 
 void
 SignalSetSine(uint8_t multiplier, uint8_t predivisor, uint8_t divisor)
 {
+    WriteSine(SSIGetBuffer(), multiplier);
     SSISetDivider(predivisor, divisor);
 }
 
@@ -117,14 +120,6 @@ SignalStart(void)
 void
 SignalInit(void)
 {
-    uint16_t *buffer;
-
     SSISetLength(1000);
-
-    buffer = SSIGetBuffer();
-
-    WriteSine(buffer, 500, 1, 0);
-    WriteSine(buffer, 500, 1, 1);
-
-    SignalSetSine(1, 10, 1);
+    SignalSetSine(8, 2, 2);
 }

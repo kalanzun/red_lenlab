@@ -57,6 +57,8 @@ namespace usb {
 
         const char *getString();
         uint32_t *getIntArray(uint32_t length);
+
+        void setByteArray(uint8_t array[], uint32_t length);
     };
 
     typedef QSharedPointer<Message> pMessage;

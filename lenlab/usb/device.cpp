@@ -73,7 +73,7 @@ Device::send(const pMessage &cmd)
 void
 Device::on_reply(const pMessage &reply)
 {
-    //qDebug() << "reply" << reply->getCommand();
+    //qDebug() << "reply" << reply->getReply() << reply->getPacketLength();
 }
 
 void
