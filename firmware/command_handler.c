@@ -132,6 +132,17 @@ on_startOscilloscope(tEvent *event)
 
     OscilloscopeStart(&oscilloscope);
 }
+
+void
+on_setSignalSine(tEvent *event)
+{
+    uint8_t multiplier = EventGetByte(event, 0);
+    uint8_t predivider = EventGetByte(event, 1);
+    uint8_t divider    = EventGetByte(event, 2);
+
+    SignalSetSine(multiplier, predivider, divider);
+}
+
 /*
 void
 on_testSignalgeneratorSineFrequency(tEvent *event)
@@ -253,6 +264,7 @@ CommandHandlerMain(void)
         else if (command == getName) on_getName(event);
         else if (command == getVersion) on_getVersion(event);
         else if (command == startOscilloscope) on_startOscilloscope(event);
+        else if (command == setSignalSine) on_setSignalSine(event);
         /*
         else if (command == setLoggerInterval) on_setLoggerInterval(event);
         else if (command == startLogger) on_startLogger(event);

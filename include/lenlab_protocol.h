@@ -49,6 +49,7 @@ enum Command {
     stopLogger,
     startOscilloscope,
     stopOscilloscope,
+    setSignalSine,
     NUM_COMMANDS
 };
 

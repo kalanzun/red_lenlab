@@ -35,11 +35,7 @@ typedef struct Signal {
 extern tSignal signal;
 
 
-
-void SignalCalculateSine(void);
-
-
-void SignalTestSineFrequency(tEvent *command);
+void SignalSetSine(uint8_t multiplier, uint8_t predivisor, uint8_t divisor);
 
 
 void SignalStart(void);

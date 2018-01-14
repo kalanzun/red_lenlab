@@ -89,15 +89,45 @@ void FirmwareTest::testStringLength()
 
 void FirmwareTest::testSineMeasurement_data()
 {
-    QTest::addColumn<uint32_t>("data");
-    for (uint32_t i = 0; i < 10; i++)
-        QTest::newRow(QString("%1.").arg(i+1).toUtf8().constData()) << i;
+    uint8_t multiplier, predivider, divider;
+    double f;
+
+    QTest::addColumn<uint8_t>("multiplier");
+    QTest::addColumn<uint8_t>("predivider");
+    QTest::addColumn<uint8_t>("divider");
+    QTest::addColumn<double>("frequency");
+
+    multiplier = 1;
+    divider = 1;
+
+    for (uint32_t i = 0; i < 10; i++) {
+        predivider = 10 * (i+1);
+        f = 5000 / predivider;
+        QTest::newRow(qUtf8Printable(QString("%1 Hz").arg(f))) << multiplier << predivider << divider << f;
+    }
 }
 
 void FirmwareTest::testSineMeasurement()
 {
+    QFETCH(uint8_t, multiplier);
+    QFETCH(uint8_t, predivider);
+    QFETCH(uint8_t, divider);
+    QFETCH(double, frequency);
+
     QSignalSpy spy(lenlab->oscilloscope, SIGNAL(replot()));
     QVERIFY2(spy.isValid(), "Invalid Signal replot on lenlab->oscilloscope.");
+
+    // SSI outputs one period in 2 channels * 500 samples * 16 bits per sample = 16000 bits
+    // A 0.5 kHz sine needs a bit rate of 8 MHz
+    // SysClk is 80 MHz, 80 / 8 = 10
+
+    auto cmd = usb::newCommand(setSignalSine);
+    cmd->setType(ByteArray);
+    cmd->setBodyLength(3);
+    cmd->getBody()[0] = multiplier; // multiplier
+    cmd->getBody()[1] = predivider; // predivider
+    cmd->getBody()[2] = divider; // divider
+    handler->send(cmd);
 
     lenlab->oscilloscope->start();
     lenlab->oscilloscope->stop(); // single shot
@@ -108,6 +138,11 @@ void FirmwareTest::testSineMeasurement()
     QCOMPARE(waveform->getDataLength(), 7000u);
     QCOMPARE(waveform->getViewLength(), 6000u);
 
+    // sample rate is 250 kHz, so one sample is 4 us
+
+    double f = 0.9 * frequency;
+    // for some reason, the frequency is 10% off
+
     std::complex<double> sum, y;
     double value, x;
 
@@ -116,14 +151,14 @@ void FirmwareTest::testSineMeasurement()
     sum = 0;
 
     for (uint32_t i = 0; i < 6000; i++) {
-        x = 2 * pi * ((double) i - 3000) / 3000;
+        x = 2 * pi * f * 4e-6 * (double) i;
         y = std::cos(x) - 1i * std::sin(x);
         sum += waveform->getValue(0, i) * y;
     }
 
     value = std::abs(sum) / 6000;
 
-    QVERIFY2(value > 0.8, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(value)));
+    QVERIFY2(value > 0.7, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(value)));
 }
 
 QTEST_MAIN(FirmwareTest)

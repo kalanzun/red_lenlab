@@ -185,7 +185,7 @@ main(void) {
     //
     CommandHandlerInit();
     ReplyHandlerInit();
-
+    SignalInit();
     LoggerInit();
     OscilloscopeInit(&oscilloscope);
 

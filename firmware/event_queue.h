@@ -145,6 +145,12 @@ EventSetBodyLength(tEvent *self, uint32_t length)
     self->length = LENLAB_PACKET_HEAD_LENGTH + length;
 }
 
+inline uint32_t
+EventGetBodyLength(tEvent *self)
+{
+    return self->length - LENLAB_PACKET_HEAD_LENGTH;
+}
+
 inline uint8_t*
 EventGetBody(tEvent *self)
 {
@@ -174,6 +180,14 @@ EventSetIntArray(tEvent *self, const uint32_t array[], uint32_t length)
     EventSetBodyLength(self, 4*len);
     for (i = 0; i < len; i++)
         *(uint32_t *) (EventGetBody(self) + 4*i) = array[i];
+}
+
+inline uint8_t
+EventGetByte(tEvent *self, uint32_t i)
+{
+    ASSERT(EventGetType(self) == ByteArray);
+    ASSERT(i < EventGetBodyLength(self));
+    return EventGetBody(self)[i];
 }
 
 #endif /* EVENT_QUEUE_H_ */

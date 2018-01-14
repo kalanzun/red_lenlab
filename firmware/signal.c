@@ -66,55 +66,11 @@ taylor(int32_t x)
     return (x) - (x3 / 6) + (x5 / 120) - (x7 / 5040);
 }
 
-void
-SignalCalculateSine(void)
-{
-    /*
-    // 1.2 ms mit 4 mal taylor
-    // 0.5 ms mit 1 mal taylor und kopieren
-    uint32_t i;
-    tDataEvent *event = DataQueueAcquire(&data_handler.data_queue);
-    int16_t *buffer = (int16_t *) (event->payload + 8);
-    volatile uint32_t start = SysTickValueGet();
-    volatile uint32_t time;
-    DEBUG_PRINT("start %u", start);
-    // fixed point arithmetic (2^11)F = 1
-    // -> pi/2 = (3217)F
-    // about 512 steps for one period, 128 for pi/2, (26)F per step
-    // so 124 steps for pi/2
-    for (i = 0; i < 124; i++)
-        buffer[i] = taylor(i*26);
-
-    for (i = 0; i < 124; i++)
-        buffer[124+i] = taylor((124-i)*26);
-    for (i = 0; i < 124; i++)
-        buffer[248+i] = -taylor(i*26);
-    for (i = 0; i < 124; i++)
-        buffer[248+124+i] = -taylor((124-i)*26);
-
-    for (i = 0; i < 124; i++)
-        buffer[124+i] = buffer[123-i];
-    for (i = 0; i < 124; i++)
-        buffer[248+i] = -buffer[i];
-    for (i = 0; i < 124; i++)
-        buffer[248+124+i] = -buffer[123-i];
-
-    event->payload[0] = calculateSine;
-    event->payload[1] = Int16;
-    event->length = 4+4+2*495;
-    time = SysTickValueGet();
-    *((uint32_t *) (event->payload + 4)) = start - time; // der timer zählt runter!
-    DEBUG_PRINT("done %u", time);
-    DataQueueWrite(&data_handler.data_queue);
-    */
-}
-
 #define SIGNAL_OFFSET 2048
-#define SIGNAL_MIN 0
 #define SIGNAL_MAX 4095
 
 inline uint16_t
-SignalDACFormat(int32_t value, bool channel)
+DACFormat(int32_t value, bool channel)
 {
     value += SIGNAL_OFFSET;
     value = value > 0 ? value : 0;
@@ -124,34 +80,7 @@ SignalDACFormat(int32_t value, bool channel)
 }
 
 void
-SignalWriteSine400(uint16_t *buffer)
-{
-    int32_t value;
-    int32_t i;
-
-    for (i = 0; i < 200; i++)
-    {
-        //value = taylor(f_div(f_mul(fixed(i), f_PI), length / 2) - f_PI2);
-        value = taylor(i * f_PI / 200 - f_PI2);
-
-        //value = taylor((32942 * i) >> 10);
-
-        buffer[2*(      i)  ] = SignalDACFormat(value, 0);
-        buffer[2*(400-1-i)  ] = SignalDACFormat(value, 0);
-
-        buffer[2*(      i)+1] = SignalDACFormat(value, 1);
-        buffer[2*(400-1-i)+1] = SignalDACFormat(value, 1);
-
-        //buffer[2*(100-1-i)+1] = SignalDACFormat(-value, 1);
-        //buffer[2*(100  +i)+1] = SignalDACFormat( value, 1);
-        //buffer[2*(300-1-i)+1] = SignalDACFormat( value, 1);
-        //buffer[2*(300  +i)+1] = SignalDACFormat(-value, 1);
-    }
-}
-
-
-void
-SignalWriteSine(uint16_t *buffer, uint32_t length, uint32_t interleaved, uint32_t channel)
+WriteSine(uint16_t *buffer, uint32_t length, uint32_t interleaved, uint32_t channel)
 {
     int32_t value;
     int32_t i;
@@ -165,157 +94,37 @@ SignalWriteSine(uint16_t *buffer, uint32_t length, uint32_t interleaved, uint32_
 
         //i = interleaved ? 2*x + channel : x;
         index = 2*i + channel;
-        buffer[index] = SignalDACFormat(value, channel);
+        buffer[index] = DACFormat(value, channel);
 
         //i = interleaved ? 2*(length-1 - x) + channel : (length-1 - x);
         index = 2*(length-1 - i) + channel;
-        buffer[index] = SignalDACFormat(value, channel);
+        buffer[index] = DACFormat(value, channel);
     }
-}
-#define SIGNAL_BASE_FREQUENCY (2500)
-
-void
-SignalUpdate(uint16_t frequency)
-{
-    uint16_t base, c, d;
-    uint16_t a, b;
-    uint32_t delta;
-
-    for (b = 1 + ((frequency-1) / SIGNAL_BASE_FREQUENCY);
-            b <= 20;
-            b++)
-    {
-        base = SIGNAL_BASE_FREQUENCY * b;
-        a = base / frequency; // abgerundet
-        c = (base / a) - frequency; // aufgerundet
-        d = frequency - (base / (a+1)); // abgerundet
-        // ist c oder d näher?
-        if (d < c) // d
-        {
-            delta = (d << 16) / frequency;
-            a += 1;
-        }
-        else // c
-        {
-            delta = (c << 16) / frequency;
-        }
-        // ist delta kleiner als 10%?
-        if (delta < 6554)
-        {
-            signal.frequency_divisor = a;
-            signal.memory_multiplier = b;
-            return;
-        }
-    }
-    ASSERT(0);
 }
 
 void
-SignalTestSineFrequency(tEvent *cmd)
+SignalSetSine(uint8_t multiplier, uint8_t predivisor, uint8_t divisor)
 {
-    uint16_t base, c, d;
-    tEvent *reply;
-    uint16_t frequency;
-    uint16_t a, b;
-    uint32_t delta;
-    uint32_t signal_base_frequency;
-
-    signal_base_frequency = SysCtlClockGet() / 16 / 500 / 2;
-
-    reply = QueueAcquire(&reply_handler.reply_queue);
-    frequency = *((uint16_t *) (cmd->payload + 4));
-
-    ASSERT(cmd->length == 6);
-
-    for (b = 1 + ((frequency-1) / (4*signal_base_frequency));
-            b <= 20;
-            b++)
-    {
-        base = signal_base_frequency * b;
-        a = max(base / frequency, 4); // abgerundet
-        c = (base / a) - frequency; // aufgerundet
-        d = frequency - (base / (a+1)); // abgerundet
-        // ist c oder d näher?
-        if (d < c) // d
-        {
-            delta = (d << 16) / frequency;
-            a += 1;
-        }
-        else // c
-        {
-            delta = (c << 16) / frequency;
-        }
-        // ist delta kleiner als 3%?
-        if (delta < 1966)
-        {
-            DEBUG_PRINT("f = %u; a = %u; b = %u;\n", frequency, a, b);
-            *(uint32_t *) (reply->payload + 4) = a;
-            *(uint32_t *) (reply->payload + 8) = b;
-            reply->length = 12;
-            QueueWrite(&reply_handler.reply_queue);
-            return;
-        }
-    }
-
-    // send error code 0 0
-    *(uint32_t *) (reply->payload + 4) = 0;
-    *(uint32_t *) (reply->payload + 8) = 0;
-    reply->length = 12;
-    QueueWrite(&reply_handler.reply_queue);
-
-}
-
-
-void
-SignalSetFrequency(uint8_t multiplier, uint8_t predivisor, uint8_t divisor)
-{
-    uint32_t delta;
-    uint16_t *buffer = SSIGetBuffer();
-    uint16_t i;
-    uint16_t a;
-    uint16_t b;
-
-    //SignalUpdate(frequency);
-
-    //a = signal.frequency_divisor;
-    //b = signal.memory_multiplier;
-
-    //DEBUG_PRINT("a = %u; b = %u;\n", a, b);
-
-    //delta = (SSI_BUFFER_LENGTH << 16) / 2 / b;
-    //delta = SSI_BUFFER_LENGTH / 2 / b;
-
-    //for (i = 0; i < b; i++)
-    //{
-        SignalWriteSine(buffer, 500, 1, 0);
-        SignalWriteSine(buffer, 500, 1, 1);
-    //}
-
     SSISetDivider(predivisor, divisor);
-
 }
-
 
 void
 SignalStart(void)
 {
-
-    //uint16_t *buffer;
-
-    //buffer = SSIGetBuffer();
-    //SignalWriteSine400(buffer);
-    //SignalWriteSine(buffer, 500, 1, 0); SignalWriteSine(buffer, 500, 1, 1);
-    SSISetLength(1000);
-
-    SignalSetFrequency(1, 60, 1);
-
-    //SSISetFrequency(2 * SysCtlClockGet() / signal.frequency_divisor);
-    //SSISetFrequency(2500000 / signal.frequency_divisor);
     SSIStart();
 }
 
 void
 SignalInit(void)
 {
+    uint16_t *buffer;
 
+    SSISetLength(1000);
+
+    buffer = SSIGetBuffer();
+
+    WriteSine(buffer, 500, 1, 0);
+    WriteSine(buffer, 500, 1, 1);
+
+    SignalSetSine(1, 10, 1);
 }
