@@ -46,6 +46,8 @@ public:
 
     void clear();
 
+    void setSamplerateDivider(uint8_t divider);
+
     void receive(const usb::pMessage &reply);
     //void finished(const usb::pMessage &reply);
 

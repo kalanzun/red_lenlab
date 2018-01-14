@@ -62,6 +62,8 @@ void ADCRelease();
 
 uint16_t *ADCGetBuffer(bool channel);
 
+void ADCSetDivider(uint8_t divider);
+
 void ADCInit();
 
 #endif /* ADC_H_ */

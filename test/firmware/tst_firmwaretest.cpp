@@ -113,6 +113,18 @@ void FirmwareTest::testSineMeasurement()
     // A 0.5 kHz sine needs a bit rate of 8 MHz
     // SysClk is 80 MHz, 80 / 8 = 10
 
+    uint8_t divider;
+
+    if (index >= 66)
+        divider = 1;
+    else if (index >= 33)
+        divider = 2;
+    else
+        divider = 3;
+
+    lenlab->oscilloscope->setSamplerateDivider(divider);
+    QTest::qWait(100);
+
     lenlab->signalgenerator->setSine(index);
     QVERIFY2(reply_spy.wait(500), "No confirmation for setSignalSine arrived.");
     usb::pMessage reply = qvariant_cast<usb::pMessage>(reply_spy.at(reply_spy.count()-1).at(0));
@@ -133,10 +145,10 @@ void FirmwareTest::testSineMeasurement()
     int abweichung = 0;
     double result = 0;
 
-    for (int j = 0; j < 60; j++) {
+    for (int j = 0; j < 200; j++) {
 
     double f = lenlab->signalgenerator->getFrequency(index);
-    f = f * (1 + ((double) (j - 30) / 100));
+    f = f * (1 + ((double) (j - 100) / 1000));
     // for some reason, the frequency is 10% off
 
     std::complex<double> sum, y;
@@ -147,15 +159,15 @@ void FirmwareTest::testSineMeasurement()
     sum = 0;
 
     for (uint32_t i = 0; i < 6000; i++) {
-        x = 2 * pi * f * 4e-6 * (double) i;
-        y = std::cos(x) - 1i * std::sin(x);
+        x = 2 * pi * f * 1e-6 * (1<<divider) * ((double) i - 3000);
+        y = std::sin(x) + 1i * std::cos(x);
         sum += waveform->getValue(0, i) * y;
     }
 
     value = std::abs(sum) / 6000;
 
     if (value > result) {
-        abweichung = j - 30;
+        abweichung = j - 100;
         result = value;
     }
 

@@ -43,6 +43,7 @@ typedef struct Oscilloscope {
 
 extern tOscilloscope oscilloscope;
 
+void OscilloscopeSetSamplerateDivider(tOscilloscope *self, uint8_t divider);
 
 void OscilloscopeStart(tOscilloscope *self);
 

@@ -135,6 +135,12 @@ Message::setByteArray(uint8_t array[], uint32_t length)
     setBodyLength(length);
 }
 
+void
+Message::setByte(uint8_t value)
+{
+    setByteArray(&value, 1);
+}
+
 pMessage
 usb::newCommand(Command command_code)
 {

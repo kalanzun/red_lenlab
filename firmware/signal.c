@@ -121,5 +121,5 @@ void
 SignalInit(void)
 {
     SSISetLength(1000);
-    SignalSetSine(8, 2, 2);
+    SignalSetSine(1, 2, 5);
 }

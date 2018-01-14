@@ -76,6 +76,15 @@ Oscilloscope::clear()
 }
 
 void
+Oscilloscope::setSamplerateDivider(uint8_t divider)
+{
+    auto cmd = usb::newCommand(setOscilloscopeSamplerateDivider);
+    cmd->setByte(divider);
+    lenlab->send(cmd);
+}
+
+
+void
 Oscilloscope::receive(const usb::pMessage &reply)
 {
     //qDebug("receive");

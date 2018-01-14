@@ -34,6 +34,13 @@ tOscilloscope oscilloscope;
 
 
 void
+OscilloscopeSetSamplerateDivider(tOscilloscope *self, uint8_t divider)
+{
+    ADCSetDivider(divider);
+}
+
+
+void
 OscilloscopeStart(tOscilloscope *self)
 {
     uint32_t i;
@@ -120,15 +127,18 @@ OscilloscopeMain(tOscilloscope *self)
 
         data1 = (int8_t *) (page1->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
+        /*
         if (self->count == 3) {
             self->trigger_wait = 1;
         }
+        */
 
         for (i = 1; i < ADC_BUFFER_LENGTH; i++)
         {
             data0[i] = delta(state0, buffer0[i] >> 2);
             state0 += data0[i];
 
+            /*
             if (self->count == 2 || self->trigger_wait || self->trigger_active) {
                 self->filter_state -= self->filter[self->filter_index];
                 self->filter_state += state0;
@@ -150,6 +160,7 @@ OscilloscopeMain(tOscilloscope *self)
                 self->trigger_save = 1;
                 *(uint16_t *) (page0->buffer + 6) = i;
             }
+            */
 
             data1[i] = delta(state1, buffer1[i] >> 2);
             state1 += data1[i];
@@ -159,6 +170,13 @@ OscilloscopeMain(tOscilloscope *self)
 
         self->count++;
 
+        if (self->count == 7) {
+            page1->buffer[3] = 1; // mark this the last package
+            ADCDisable();
+            MemoryStartSending(&memory);
+            self->active = 0;
+        }
+        /*
         if (self->trigger_save) {
             self->trigger_post_count++;
             if (self->trigger_post_count == 4) {
@@ -169,6 +187,7 @@ OscilloscopeMain(tOscilloscope *self)
                 self->active = 0;
             }
         }
+        */
 
         //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
     }
