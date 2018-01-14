@@ -1,9 +1,11 @@
 #include "usb/handler.h"
 #include "usb/message.h"
+#include "model/lenlab.h"
 #include "lenlab_version.h"
 #include <QString>
 #include <QDebug>
 #include <QtTest>
+#include <QTest>
 #include <QCoreApplication>
 #include <complex>
 
@@ -24,6 +26,7 @@ private Q_SLOTS:
 
 private:
     QSharedPointer<usb::Handler> handler;
+    QSharedPointer<model::Lenlab> lenlab;
 };
 
 FirmwareTest::FirmwareTest()
@@ -33,6 +36,9 @@ FirmwareTest::FirmwareTest()
 void FirmwareTest::initTestCase()
 {
     handler.reset(new usb::Handler());
+
+    lenlab.reset(new model::Lenlab());
+    lenlab->setHandler(handler.data());
 
     QSignalSpy spy(handler.data(), SIGNAL(ready()));
 
@@ -45,53 +51,6 @@ void FirmwareTest::cleanupTestCase()
 {
     handler.clear();
 }
-
-/*
-void FirmwareTest::testSignalGeneratorFrequency_data()
-{
-    QTest::addColumn<uint32_t>("frequency");
-    for (uint32_t i = 1; i < 10; i++)
-        QTest::newRow(QString("%1 Hz").arg(10*i).toUtf8().constData()) << 10*i;
-    for (uint32_t i = 1; i < 10; i++)
-        QTest::newRow(QString("%1 Hz").arg(100*i).toUtf8().constData()) << 100*i;
-    for (uint32_t i = 1; i < 10; i++)
-        QTest::newRow(QString("%1 kHz").arg(1*i).toUtf8().constData()) << 1000*i;
-    QTest::newRow(QString("10 kHz").toUtf8().constData()) << 10000u;
-}
-
-void FirmwareTest::testSignalGeneratorFrequency()
-{
-    QFETCH(uint32_t, frequency);
-
-    auto cmd = usb::newCommand(testSignalgeneratorSineFrequency);
-    *((uint16_t *) (cmd->getPayload())) = frequency;
-    cmd->setPayloadLength(2);
-    handler->send(cmd);
-    //QFETCH(QString, data);
-    //QVERIFY2(true, "Failure");
-
-    QSignalSpy spy(handler.data(), SIGNAL(reply(pMessage)));
-
-    QVERIFY(spy.isValid());
-
-    QVERIFY(spy.wait(500));
-
-    usb::pMessage reply = qvariant_cast<usb::pMessage>(spy.at(0).at(0));
-
-    uint32_t a = *((uint32_t *) (reply->getPayload() + 0));
-    uint32_t b = *((uint32_t *) (reply->getPayload() + 4));
-
-    uint32_t sg_frequency = b * 80000000 / 16 / 500 / 2 / a;
-
-    double relative_frequency_error = (((double) abs(sg_frequency - frequency)) / ((double) (frequency)));
-
-    //qDebug() << a << b << result;
-
-    QVERIFY2(a >= 4, "DAC frequency limit of 20 MHz exceeded");
-
-    QVERIFY2(relative_frequency_error < 0.03, QString("f = %1; f_sg = %2; a = %3; b = %4;").arg(frequency).arg(sg_frequency).arg(a).arg(b).toUtf8().constData());
-}
-*/
 
 void FirmwareTest::testName()
 {
@@ -137,48 +96,34 @@ void FirmwareTest::testSineMeasurement_data()
 
 void FirmwareTest::testSineMeasurement()
 {
-    std::complex<double> result;
-    double value;
-    std::complex<double> reference[8000];
+    QSignalSpy spy(lenlab->oscilloscope, SIGNAL(replot()));
+    QVERIFY2(spy.isValid(), "Invalid Signal replot on lenlab->oscilloscope.");
+
+    lenlab->oscilloscope->start();
+    lenlab->oscilloscope->stop(); // single shot
+    QVERIFY2(spy.wait(500), "Signal replot was not fired, the oscilloscope measurement did not complete.");
+
+    auto waveform = lenlab->oscilloscope->getWaveform();
+
+    QCOMPARE(waveform->getDataLength(), 7000u);
+    QCOMPARE(waveform->getViewLength(), 6000u);
+
+    std::complex<double> sum, y;
+    double value, x;
 
     double pi = std::acos(-1);
 
-    for (uint32_t i = 0; i < 8000; i++) {
-        double x = 2 * pi * ((double) i) / 5000.0;
-        reference[i] = std::cos(x) - 1i * std::sin(x);
+    sum = 0;
+
+    for (uint32_t i = 0; i < 6000; i++) {
+        x = 2 * pi * ((double) i - 3000) / 3000;
+        y = std::cos(x) - 1i * std::sin(x);
+        sum += waveform->getValue(0, i) * y;
     }
 
-    QSignalSpy spy(handler.data(), SIGNAL(reply(pMessage)));
+    value = std::abs(sum) / 6000;
 
-    QVERIFY(spy.isValid());
-
-    auto cmd = usb::newCommand(startOscilloscope);
-    handler->send(cmd);
-
-    do {
-    QVERIFY(spy.wait(500));
-    } while(spy.count() < 16);
-
-    result = 0;
-
-    for (uint32_t b = 0; b < 16; b+=2) {
-        auto reply = qvariant_cast<usb::pMessage>(spy.at(b).at(0));
-
-        QCOMPARE(reply->getCommand(), startOscilloscope);
-
-        uint8_t *buffer = reply->getBody() + 6;
-
-        for (uint32_t i = 0; i < 1000; i++) {
-            result += (((double) buffer[i]) / 128.0 - 1.0) * reference[1000*b/2+i];
-        }
-    }
-
-    value = 2.0 * std::abs(result) / 8000.0;
-
-    qDebug() << value;
-
-    QVERIFY(value > 0.8);
-
+    QVERIFY2(value > 0.8, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(value)));
 }
 
 QTEST_MAIN(FirmwareTest)
