@@ -38,7 +38,7 @@ PointVectorSeriesData::boundingRect() const
 size_t
 PointVectorSeriesData::size() const
 {
-    return waveform->getViewLength();
+    return waveform->view();
 }
 
 QPointF

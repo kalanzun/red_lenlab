@@ -23,18 +23,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Waveform::Waveform(QObject *parent) : QObject(parent)
+Waveform::Waveform(uint32_t channels, QObject *parent) : QObject(parent), data(QVector< QVector < double >>(channels))
 {
-    i[0] = 0;
-    i[1] = 0;
 }
 
 void
-Waveform::append(uint32_t channel, uint16_t value)
+Waveform::append(uint32_t channel, double value)
 {
-    //Q_ASSERT(channel < data.size());
-    //Q_ASSERT(i[channel] < 7000);
-    data[channel][i[channel]++] = ((((double) value) / 1024.0 - 0.5) * 3.3);
+    data[channel].append(value);
 }
 
 void
@@ -61,22 +57,28 @@ Waveform::trigger()
     return m_trigger;
 }
 
-uint32_t
-Waveform::getDataLength()
+void
+Waveform::setView(uint32_t view)
 {
-    return data[0].size();
+    m_view = view;
 }
 
 uint32_t
-Waveform::getViewLength()
+Waveform::view()
 {
-    return 6000;
+    return m_view ? m_view : getLength();
+}
+
+uint32_t
+Waveform::getLength()
+{
+    return data[0].size();
 }
 
 double
 Waveform::getTime(uint32_t i)
 {
-    return (double) i - 3000.0;
+    return m_view ? getMinTime() + i : i;
 }
 
 double
@@ -90,13 +92,13 @@ Waveform::getValue(uint32_t channel, uint32_t i)
 double
 Waveform::getMinTime()
 {
-    return -3000;
+    return m_view ? (double) m_view / -2 : 0;
 }
 
 double
 Waveform::getMaxTime()
 {
-    return 3000;
+    return m_view ? (double) m_view / 2 : getLength();
 }
 
 double

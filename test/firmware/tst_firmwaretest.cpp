@@ -123,7 +123,7 @@ void FirmwareTest::testSineMeasurement()
         divider = 3;
 
     lenlab->oscilloscope->setSamplerateDivider(divider);
-    QTest::qWait(100);
+    QTest::qWait(10);
 
     lenlab->signalgenerator->setSine(index);
     QVERIFY2(reply_spy.wait(500), "No confirmation for setSignalSine arrived.");
@@ -137,8 +137,8 @@ void FirmwareTest::testSineMeasurement()
 
     auto waveform = lenlab->oscilloscope->getWaveform();
 
-    QCOMPARE(waveform->getDataLength(), 7000u);
-    QCOMPARE(waveform->getViewLength(), 6000u);
+    QCOMPARE(waveform->getLength(), 7000u);
+    QCOMPARE(waveform->view(), 6000u);
 
     // sample rate is 250 kHz, so one sample is 4 us
 

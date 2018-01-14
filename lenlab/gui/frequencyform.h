@@ -23,6 +23,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+#include "qwt_plot_curve.h"
+#include "qwt_plot_grid.h"
 #include <QWidget>
 
 namespace gui {
@@ -47,15 +49,22 @@ public:
     void setModel(model::Lenlab *lenlab);
 
 private slots:
+    void on_replot();
+
     void on_startButton_clicked();
     void on_stopButton_clicked();
 
 private:
+    QwtPlotCurve *newCurve(const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
+
     Ui::FrequencyForm *ui;
 
     MainWindow *main_window;
     model::Lenlab *lenlab;
     model::Frequencysweep *frequencysweep;
+
+    std::array<QwtPlotCurve *, 1> curves; // pointer, no ownership
 };
 
 

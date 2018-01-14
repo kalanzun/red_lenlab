@@ -31,6 +31,9 @@ Lenlab::Lenlab(QObject *parent) :
     signalgenerator(new Signalgenerator(this))
 {
     qDebug() << "Lenlab";
+
+    connect(oscilloscope, SIGNAL(replot()),
+            frequencysweep, SLOT(on_replot()));
 }
 
 Lenlab::~Lenlab()
@@ -86,8 +89,8 @@ Lenlab::on_reply(const usb::pMessage &reply)
     //else
     if (rpl == OscilloscopeData)
         oscilloscope->receive(reply);
-    //else if (cmd == stopOscilloscope)
-    //    oscilloscope->finished(reply);
+    else if (rpl == SignalSine)
+        frequencysweep->receive(reply);
 }
 
 void

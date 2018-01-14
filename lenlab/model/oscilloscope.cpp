@@ -64,7 +64,7 @@ void
 Oscilloscope::restart()
 {
     //qDebug() << "start";
-    incoming.reset(new Waveform());
+    incoming.reset(new Waveform(2));
     lenlab->send(usb::newCommand(startOscilloscope));
 }
 
@@ -103,15 +103,17 @@ Oscilloscope::receive(const usb::pMessage &reply)
         incoming->setTrigger(trigger);
     }
 
-    incoming->append(channel, state);
+    incoming->append(channel, (((double) state) / 1024.0 - 0.5) * 3.3);
 
     for (uint32_t i = 1; i < 1000; i++) {
         state += data[i];
-        incoming->append(channel, state);
+        incoming->append(channel, (((double) state) / 1024.0 - 0.5) * 3.3);
     }
 
     if (last_package) {
         //qDebug() << "last package" << incoming->getDataLength();
+
+        incoming->setView(6000);
 
         current.swap(incoming);
         incoming.clear();

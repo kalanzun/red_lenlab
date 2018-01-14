@@ -22,10 +22,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define WAVEFORM_H
 
 #include <QObject>
-#include <array>
-#include <vector>
+#include <QVector>
 
 namespace model {
+
+// TODO: 2 Klassen: IncrementalWaveform und SingleshotWaveform
+// std::array ist für das Oszi viel schneller als QVector
 
 class Waveform : public QObject
 {
@@ -33,15 +35,16 @@ class Waveform : public QObject
 
     Q_PROPERTY(uint32_t samplerate READ samplerate WRITE setSamplerate)
     Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger)
+    Q_PROPERTY(uint32_t view READ view WRITE setView)
 
-    uint32_t m_samplerate;
-    uint32_t m_trigger;
+    uint32_t m_samplerate = 0;
+    uint32_t m_trigger = 0;
+    uint32_t m_view = 0;
 
-    std::array<uint32_t, 2> i;
-    std::array<std::array<double, 7000>, 2> data;
+    QVector< QVector< double >> data;
 
 public:
-    explicit Waveform(QObject *parent = nullptr);
+    explicit Waveform(uint32_t channels, QObject *parent = nullptr);
 
     void setSamplerate(uint32_t samplerate);
     uint32_t samplerate();
@@ -49,10 +52,13 @@ public:
     void setTrigger(uint32_t trigger);
     uint32_t trigger();
 
-    void append(uint32_t channel, uint16_t value);
+    void setView(uint32_t view);
+    uint32_t view();
 
-    uint32_t getDataLength();
-    uint32_t getViewLength();
+    void append(uint32_t channel, double value);
+
+    uint32_t getLength();
+
     double getTime(uint32_t i);
     double getValue(uint32_t channel, uint32_t i);
 

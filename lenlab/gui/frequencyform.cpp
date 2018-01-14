@@ -20,6 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "frequencyform.h"
 #include "ui_frequencyform.h"
+#include "pointvectorseriesdata.h"
+#include "qwt_text.h"
+#include "qwt_plot_renderer.h"
 #include <QDebug>
 
 namespace gui {
@@ -49,6 +52,47 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
     this->frequencysweep = lenlab->frequencysweep;
+
+    curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
+    curves[0]->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), 0)); // acquires ownership
+    //curves[1] = newCurve(QColor("#8ae234"), true); // green 0
+    //curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
+    //curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+
+    connect(frequencysweep, SIGNAL(replot()),
+            this, SLOT(on_replot()));
+}
+
+QwtPlotCurve *
+FrequencyForm::newCurve(const QColor &color, bool visible)
+{
+    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
+
+    //curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    curve->setVisible(visible);
+
+    QPen pen;
+    pen.setColor(color);
+    pen.setWidth(2);
+    curve->setPen(pen);
+
+    curve->attach(ui->plot); // acquires ownership
+    return curve.release();
+}
+
+QwtPlotGrid *
+FrequencyForm::newGrid()
+{
+    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
+
+    QPen pen;
+    pen.setStyle(Qt::DotLine);
+    pen.setColor("#555753"); // aluminium 4
+    grid->setPen(pen);
+
+    grid->attach(ui->plot); // acquires ownership
+    return grid.release();
 }
 
 void
@@ -69,5 +113,12 @@ FrequencyForm::on_stopButton_clicked()
         frequencysweep->stop();
     }
 }
+
+void
+FrequencyForm::on_replot()
+{
+    ui->plot->replot();
+}
+
 
 } // namespace gui

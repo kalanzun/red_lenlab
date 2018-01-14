@@ -100,7 +100,7 @@ WriteSine(uint16_t *buffer, uint32_t periods)
         value = (sign ? -1 : 1) * taylor(x - f_PI2);
 
         buffer[2*i] = DACFormat(value, 0);
-        buffer[2*i + 1] = DACFormat(value, 1);
+        buffer[2*i + 1] = DACFormat(value / 2, 1);
     }
 }
 

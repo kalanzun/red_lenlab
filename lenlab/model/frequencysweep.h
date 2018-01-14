@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define FREQUENCYSWEEP_H
 
 #include "component.h"
+#include "waveform.h"
 #include <QObject>
 
 namespace model {
@@ -32,15 +33,35 @@ namespace model {
 class Frequencysweep : public Component
 {
     Q_OBJECT
+
+    uint8_t index, divider;
+
+    QSharedPointer<Waveform> current;
+
+    bool running;
+
 public:
     explicit Frequencysweep(Lenlab *parent);
 
     virtual QString getNameNominative();
     virtual QString getNameAccusative();
 
+    virtual void start();
+    virtual void stop();
+
+    virtual void timerEvent(QTimerEvent *event);
+
+    void restart();
+
+    void receive(const usb::pMessage &reply);
+
+    QSharedPointer<Waveform> getWaveform();
+
 signals:
+    void replot();
 
 public slots:
+    void on_replot();
 
 private:
     typedef Component super;
