@@ -260,7 +260,9 @@ void USBIntHandler(void)
         //
         usb_device.dma_pending = 0;
 
-        MemoryRelease(&memory);
+        USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
+
+        //MemoryRelease(&memory);
     }
     else
     {
@@ -299,7 +301,7 @@ Lorem(void)
 */
 
 inline void
-USBDeviceStartuDMA(uint8_t *payload)
+USBDeviceStartuDMA(uint8_t *payload, uint32_t length)
 {
     //ASSERT(!usb_device.dma_pending);
     usb_device.dma_pending = 1;
@@ -311,7 +313,7 @@ USBDeviceStartuDMA(uint8_t *payload)
     // does not work if moved up into the config section
 
     uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, payload,
-                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
+                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), length);
     // works only with multiples of 16 and up to 1024
 
 
@@ -336,16 +338,21 @@ USBDeviceMain()
     tEvent *event;
     tPage *page;
 
-    if (!usb_device.dma_pending)
+    if (!usb_device.dma_pending)// && USBDBulkTxPacketAvailable(&bulk_device) == 64)
     {
         if (!QueueEmpty(&reply_handler.reply_queue)) {
             event = QueueRead(&reply_handler.reply_queue);
-            USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true);
+            USBDeviceStartuDMA(event->payload, event->length);
+            //ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
             QueueRelease(&reply_handler.reply_queue);
+            //DEBUG_PRINT("send reply\n");
         }
         else if (MemorySend(&memory)) {
             page = MemoryRead(&memory);
-            USBDeviceStartuDMA(page->buffer);
+            USBDeviceStartuDMA(page->buffer, 1024);
+            //ASSERT(USBDBulkPacketWrite(&bulk_device, page->buffer, 64, true));
+            MemoryRelease(&memory);
+            //DEBUG_PRINT("send memory page %d\n", page->buffer[0]);
         }
         /*
         else if (oscilloscope.send) {
