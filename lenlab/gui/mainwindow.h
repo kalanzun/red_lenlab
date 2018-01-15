@@ -50,8 +50,7 @@ public:
 
 private slots:
     void on_replot();
-    void on_signalAButton_toggled(bool);
-    void on_signalBButton_toggled(bool);
+    void on_signalButton_toggled(bool);
     void on_logButton_toggled(bool);
     void on_tabWidget_currentChanged(int);
     void on_logMessage(const QString &);
@@ -65,8 +64,7 @@ private:
     model::Lenlab *lenlab;
     usb::Handler *handler;
 
-    bool signalA_checked = false;
-    bool signalB_checked = false;
+    bool signal_checked = false;
 };
 
 } // namespace gui

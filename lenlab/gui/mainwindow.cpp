@@ -36,18 +36,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle("Lenlab");
 
-    ui->signalA->hide();
-    ui->signalA->setTitle("Signalgenerator A");
-    ui->signalB->hide();
-    ui->signalB->setTitle("Signalgenerator B");
+    ui->signal->hide();
     ui->logPlainTextEdit->hide();
 
 #ifdef QT_NO_DEBUG
-    // Hide signal generator, oscilloscope and frequency analysis because they are not implemented, yet
-    ui->tabWidget->setTabEnabled(1, false); // oscilloscope
-    ui->tabWidget->setTabEnabled(2, false); // frequency analysis
-    ui->signalAButton->hide();
-    ui->signalBButton->hide();
+    // Hide logger because it is not implemented, yet
+    ui->tabWidget->setTabEnabled(0, false); // logger
 #endif
 }
 
@@ -75,10 +69,8 @@ MainWindow::setModel(model::Lenlab *lenlab)
     ui->oscilloscopeTab->setModel(lenlab);
     ui->FrequencyTab->setMainWindow(this);
     ui->FrequencyTab->setModel(lenlab);
-    ui->signalA->setMainWindow(this);
-    ui->signalA->setModel(lenlab);
-    ui->signalB->setMainWindow(this);
-    ui->signalB->setModel(lenlab);
+    ui->signal->setMainWindow(this);
+    ui->signal->setModel(lenlab);
 
     connect(lenlab, SIGNAL(logMessage(QString)),
             this, SLOT(on_logMessage(QString)));
@@ -124,23 +116,13 @@ MainWindow::on_replot()
 }
 
 void
-MainWindow::on_signalAButton_toggled(bool checked)
+MainWindow::on_signalButton_toggled(bool checked)
 {
-    signalA_checked = checked;
+    signal_checked = checked;
     if (checked)
-        ui->signalA->show();
+        ui->signal->show();
     else
-        ui->signalA->hide();
-}
-
-void
-MainWindow::on_signalBButton_toggled(bool checked)
-{
-    signalB_checked = checked;
-    if (checked)
-        ui->signalB->show();
-    else
-        ui->signalB->hide();
+        ui->signal->hide();
 }
 
 void
@@ -161,20 +143,14 @@ MainWindow::on_tabWidget_currentChanged(int index)
     // diaglog to ask whether to cancel another measurement.
 
     if (index == 2) {
-        bool _signalA_checked = ui->signalAButton->isChecked();
-        bool _signalB_checked = ui->signalBButton->isChecked();
-        ui->signalAButton->setChecked(false);
-        ui->signalBButton->setChecked(false);
-        signalA_checked = _signalA_checked;
-        signalB_checked = _signalB_checked;
-        ui->signalAButton->setEnabled(false);
-        ui->signalBButton->setEnabled(false);
+        bool _signal_checked = ui->signalButton->isChecked();
+        ui->signalButton->setChecked(false);
+        signal_checked = _signal_checked;
+        ui->signalButton->setEnabled(false);
     }
     else {
-        ui->signalAButton->setChecked(signalA_checked);
-        ui->signalBButton->setChecked(signalB_checked);
-        ui->signalAButton->setEnabled(true);
-        ui->signalBButton->setEnabled(true);
+        ui->signalButton->setChecked(signal_checked);
+        ui->signalButton->setEnabled(true);
     }    
 }
 

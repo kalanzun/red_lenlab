@@ -45,7 +45,6 @@ public:
 
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab *lenlab);
-    void setTitle(QString title);
 
 private:
     void setUIConfiguration(bool amplitude, bool frequency, bool dutycycle);

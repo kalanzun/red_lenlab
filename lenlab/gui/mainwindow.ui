@@ -42,16 +42,31 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="gui::SignalForm" name="signalA" native="true">
+         <widget class="gui::SignalForm" name="signal" native="true">
           <property name="enabled">
            <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="gui::SignalForm" name="signalB" native="true">
-          <property name="enabled">
-           <bool>true</bool>
+         <widget class="QPlainTextEdit" name="logPlainTextEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>100</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -60,19 +75,9 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QToolButton" name="signalAButton">
+         <widget class="QToolButton" name="signalButton">
           <property name="text">
-           <string>Signalgenerator A</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="signalBButton">
-          <property name="text">
-           <string>Signalgenerator B</string>
+           <string>Signalgenerator</string>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -97,28 +102,6 @@
         </item>
        </layout>
       </item>
-      <item>
-       <widget class="QPlainTextEdit" name="logPlainTextEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>100</height>
-         </size>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -129,7 +112,7 @@
      <x>0</x>
      <y>0</y>
      <width>628</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLenlab">

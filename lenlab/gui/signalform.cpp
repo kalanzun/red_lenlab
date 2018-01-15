@@ -54,12 +54,6 @@ SignalForm::setModel(model::Lenlab *lenlab)
 }
 
 void
-SignalForm::setTitle(QString title)
-{
-    ui->title->setText(title);
-}
-
-void
 SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool dutycycle)
 {
     if (amplitude) {
