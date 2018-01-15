@@ -25,6 +25,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define REVISION 3
+#define REVISION 0
 
 #endif /* CONFIG_H_ */
