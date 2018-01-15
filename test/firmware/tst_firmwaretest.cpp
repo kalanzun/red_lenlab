@@ -137,7 +137,8 @@ void FirmwareTest::testSineMeasurement()
 
     auto waveform = lenlab->oscilloscope->getWaveform();
 
-    QCOMPARE(waveform->getLength(), 7000u);
+    QCOMPARE(waveform->getLength(0), 7000u);
+    QCOMPARE(waveform->getLength(1), 7000u);
     QCOMPARE(waveform->view(), 6000u);
 
     // sample rate is 250 kHz, so one sample is 4 us
@@ -161,7 +162,7 @@ void FirmwareTest::testSineMeasurement()
     for (uint32_t i = 0; i < 6000; i++) {
         x = 2 * pi * f * 1e-6 * (1<<divider) * ((double) i - 3000);
         y = std::sin(x) + 1i * std::cos(x);
-        sum += waveform->getValue(0, i) * y;
+        sum += waveform->getY(i, 0) * y;
     }
 
     value = std::abs(sum) / 6000;

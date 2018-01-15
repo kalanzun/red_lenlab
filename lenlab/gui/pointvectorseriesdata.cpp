@@ -23,8 +23,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-PointVectorSeriesData::PointVectorSeriesData(QSharedPointer<model::Waveform> waveform, uint32_t channel) :
-    waveform(waveform),
+PointVectorSeriesData::PointVectorSeriesData(QSharedPointer<model::Series> series, uint32_t channel) :
+    series(series),
     channel(channel)
 {
 }
@@ -32,19 +32,19 @@ PointVectorSeriesData::PointVectorSeriesData(QSharedPointer<model::Waveform> wav
 QRectF
 PointVectorSeriesData::boundingRect() const
 {
-    return QRectF(QPointF(waveform->getMinTime(), waveform->getMinValue()), QPointF(waveform->getMaxTime(), waveform->getMaxValue()));
+    return QRectF(QPointF(series->getMinX(), series->getMinY(channel)), QPointF(series->getMaxX(), series->getMaxY(channel)));
 }
 
 size_t
 PointVectorSeriesData::size() const
 {
-    return waveform->view();
+    return series->getLength(channel);
 }
 
 QPointF
 PointVectorSeriesData::sample( size_t i ) const
 {
-    return QPointF(waveform->getTime(i), waveform->getValue(channel, i));
+    return QPointF(series->getX(i), series->getY(i, channel));
 }
 
 } // namespace gui

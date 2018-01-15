@@ -64,7 +64,7 @@ void
 Oscilloscope::restart()
 {
     //qDebug() << "start";
-    incoming.reset(new Waveform(2));
+    incoming.reset(new Waveform());
     lenlab->send(usb::newCommand(startOscilloscope));
 }
 

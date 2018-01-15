@@ -18,30 +18,44 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef POINTVECTORSERIESDATA_H
-#define POINTVECTORSERIESDATA_H
+#ifndef FREQUENCYSERIES_H
+#define FREQUENCYSERIES_H
 
-#include "model/series.h"
-#include "qwt_series_data.h"
+#include "series.h"
+#include <QObject>
 
+namespace model {
 
-namespace gui {
-
-class PointVectorSeriesData : public QwtSeriesData<QPointF>
+class FrequencySeries : public Series
 {
+    Q_OBJECT
+
 public:
-    PointVectorSeriesData(QSharedPointer<model::Series> series, uint32_t channel);
+    FrequencySeries();
 
-    virtual QRectF boundingRect() const;
+    void append(uint32_t channel, double value);
+    void clear();
 
-    virtual size_t size() const;
-    virtual QPointF sample( size_t i ) const;
+    uint32_t getLength(uint32_t channel);
+
+    double getX(uint32_t i);
+    double getY(uint32_t i, uint32_t channel);
+
+    double getMinX();
+    double getMaxX();
+    double getMinY(uint32_t channel);
+    double getMaxY(uint32_t channel);
 
 private:
-    QSharedPointer<model::Series> series;
-    uint32_t channel;
+    typedef Series super;
+
+    std::array< uint32_t, 2 > index{{0, 0}};
+    std::array< double, 2 > MinY{{0.1, -90}};
+    std::array< double, 2 > MaxY{{10.0, 90}};
+    std::array< std::array< double, 100 >, 2 > data;
+
 };
 
-} // namespace gui
+} // namespace model
 
-#endif // POINTVECTORSERIESDATA_H
+#endif // FREQUENCYSERIES_H

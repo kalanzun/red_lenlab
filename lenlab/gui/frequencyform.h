@@ -55,7 +55,7 @@ private slots:
     void on_stopButton_clicked();
 
 private:
-    QwtPlotCurve *newCurve(const QColor &color, bool visible);
+    QwtPlotCurve *newCurve(uint32_t channel, const QColor &color, bool visible);
     QwtPlotGrid *newGrid();
 
     Ui::FrequencyForm *ui;
@@ -64,7 +64,7 @@ private:
     model::Lenlab *lenlab;
     model::Frequencysweep *frequencysweep;
 
-    std::array<QwtPlotCurve *, 1> curves; // pointer, no ownership
+    std::array<QwtPlotCurve *, 2> curves; // pointer, no ownership
 };
 
 

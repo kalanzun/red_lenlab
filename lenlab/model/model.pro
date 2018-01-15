@@ -28,7 +28,9 @@ SOURCES += \
     oscilloscope.cpp \
     signalgenerator.cpp \
     voltmeter.cpp \
-    waveform.cpp
+    waveform.cpp \
+    series.cpp \
+    frequencyseries.cpp
 
 HEADERS += \
     component.h \
@@ -37,7 +39,9 @@ HEADERS += \
     oscilloscope.h \
     signalgenerator.h \
     voltmeter.h \
-    waveform.h
+    waveform.h \
+    series.h \
+    frequencyseries.h
 
 include(../../red_lenlab.pri)
 

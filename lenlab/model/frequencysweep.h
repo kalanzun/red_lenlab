@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define FREQUENCYSWEEP_H
 
 #include "component.h"
-#include "waveform.h"
+#include "frequencyseries.h"
 #include <QObject>
 
 namespace model {
@@ -36,7 +36,7 @@ class Frequencysweep : public Component
 
     uint8_t index, divider;
 
-    QSharedPointer<Waveform> current;
+    QSharedPointer<FrequencySeries> current;
 
     bool running;
 
@@ -55,7 +55,9 @@ public:
 
     void receive(const usb::pMessage &reply);
 
-    QSharedPointer<Waveform> getWaveform();
+    QSharedPointer<FrequencySeries> getWaveform();
+
+    void save(const QString &fileName);
 
 signals:
     void replot();

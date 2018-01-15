@@ -18,30 +18,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef POINTVECTORSERIESDATA_H
-#define POINTVECTORSERIESDATA_H
+#ifndef SERIES_H
+#define SERIES_H
 
-#include "model/series.h"
-#include "qwt_series_data.h"
+#include <QObject>
 
+namespace model {
 
-namespace gui {
-
-class PointVectorSeriesData : public QwtSeriesData<QPointF>
+class Series : public QObject
 {
+    Q_OBJECT
+
 public:
-    PointVectorSeriesData(QSharedPointer<model::Series> series, uint32_t channel);
+    explicit Series(QObject *parent = nullptr);
 
-    virtual QRectF boundingRect() const;
+    virtual void append(uint32_t channel, double value) = 0;
 
-    virtual size_t size() const;
-    virtual QPointF sample( size_t i ) const;
+    virtual uint32_t getLength(uint32_t channel) = 0;
 
-private:
-    QSharedPointer<model::Series> series;
-    uint32_t channel;
+    virtual double getX(uint32_t i) = 0;
+    virtual double getY(uint32_t i, uint32_t channel) = 0;
+
+    virtual double getMinX() = 0;
+    virtual double getMaxX() = 0;
+    virtual double getMinY(uint32_t channel) = 0;
+    virtual double getMaxY(uint32_t channel) = 0;
+
+signals:
+
+public slots:
 };
 
-} // namespace gui
+} // namespace model
 
-#endif // POINTVECTORSERIESDATA_H
+#endif // SERIES_H

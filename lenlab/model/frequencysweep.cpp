@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Frequencysweep::Frequencysweep(Lenlab *parent) : Component(parent), current(new Waveform(1))
+Frequencysweep::Frequencysweep(Lenlab *parent) : Component(parent), current(new FrequencySeries())
 {
 
 }
@@ -49,6 +49,7 @@ Frequencysweep::start()
     super::start();
 
     index = 0;
+    current->clear();
 
     restart();
 }
@@ -108,12 +109,15 @@ Frequencysweep::on_replot()
     if (index < 100) {
         restart();
     }
+    else {
+        stop();
+    }
 
     double f = lenlab->signalgenerator->getFrequency(current_index) * (1 - 0.089);
     // for some reason, the frequency is 8.9% off
 
     std::complex<double> sum0, sum1, y;
-    double value, x;
+    double value, angle, x;
 
     double pi = std::acos(-1);
 
@@ -125,23 +129,50 @@ Frequencysweep::on_replot()
     for (uint32_t i = 0; i < 6000; i++) {
         x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) i - 3000);
         y = std::sin(x) + 1i * std::cos(x);
-        sum0 += waveform->getValue(0, i) * y;
-        sum1 += waveform->getValue(1, i) * y;
+        sum0 += waveform->getY(i, 0) * y;
+        sum1 += waveform->getY(i, 1) * y;
     }
 
     value = std::abs(sum1) / std::abs(sum0);
+    angle = (std::arg(sum1) - std::arg(sum0)) / pi * 180;
+    if (angle > 180) angle = 360 - angle;
+    if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / 6000 << std::abs(sum0) / 6000;
+    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / 6000 << std::abs(sum0) / 6000 << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
 
     current->append(0, value);
+    current->append(1, angle);
     emit replot();
 }
 
-QSharedPointer<Waveform>
-Frequencysweep::getWaveform()
+QSharedPointer<FrequencySeries> Frequencysweep::getWaveform()
 {
     return current;
 }
 
+/*
+void
+Frequencysweep::save(const QString &fileName)
+{
+    QSaveFile file(fileName);
+    qDebug("save");
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        throw std::exception();
+    }
+
+    QTextStream stream(&file);
+
+    stream << QString("Lenlab red %1.%2 Frequenzanalyse-Daten\n").arg(MAJOR).arg(MINOR);
+
+    stream << "Frequenz" << DELIMITER << "Betrag" << DELIMITER << "Winkel" << "\n";
+
+    for (uint8_t i = 0; i < current->getLength(); i++) {
+        stream << lenlab->signalgenerator->getFrequency(i) << DELIMITER << current->getValue(0, i) << DELIMITER << current->getValue(1, i) << "\n";
+    }
+
+    file.commit();
+}
+*/
 
 } // namespace model

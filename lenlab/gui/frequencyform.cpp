@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "pointvectorseriesdata.h"
 #include "qwt_text.h"
 #include "qwt_plot_renderer.h"
+#include "qwt_scale_engine.h"
 #include <QDebug>
 
 namespace gui {
@@ -33,6 +34,14 @@ FrequencyForm::FrequencyForm(QWidget *parent) :
 {
     qDebug() << "FrequencyForm";
     ui->setupUi(this);
+
+    ui->plot->enableAxis(QwtPlot::yRight);
+
+    QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
+    ui->plot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine);
+
+    QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
+    ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
 }
 
 FrequencyForm::~FrequencyForm()
@@ -53,22 +62,20 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     this->lenlab = lenlab;
     this->frequencysweep = lenlab->frequencysweep;
 
-    curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
-    curves[0]->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), 0)); // acquires ownership
-    //curves[1] = newCurve(QColor("#8ae234"), true); // green 0
-    //curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
-    //curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+    curves[0] = newCurve(0, QColor("#729fcf"), true); // sky blue 0
+    curves[1] = newCurve(1, QColor("#ef2929"), true); // scarlet red 0
+    curves[1]->setYAxis(QwtPlot::yRight);
 
     connect(frequencysweep, SIGNAL(replot()),
             this, SLOT(on_replot()));
 }
 
 QwtPlotCurve *
-FrequencyForm::newCurve(const QColor &color, bool visible)
+FrequencyForm::newCurve(uint32_t channel, const QColor &color, bool visible)
 {
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
 
-    //curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
+    curve->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), channel)); // acquires ownership
     curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     curve->setVisible(visible);
 

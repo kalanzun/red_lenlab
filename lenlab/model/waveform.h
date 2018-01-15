@@ -21,15 +21,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef WAVEFORM_H
 #define WAVEFORM_H
 
+#include "series.h"
 #include <QObject>
 #include <QVector>
 
 namespace model {
 
-// TODO: 2 Klassen: IncrementalWaveform und SingleshotWaveform
-// std::array ist für das Oszi viel schneller als QVector
-
-class Waveform : public QObject
+class Waveform : public Series
 {
     Q_OBJECT
 
@@ -41,10 +39,8 @@ class Waveform : public QObject
     uint32_t m_trigger = 0;
     uint32_t m_view = 0;
 
-    QVector< QVector< double >> data;
-
 public:
-    explicit Waveform(uint32_t channels, QObject *parent = nullptr);
+    explicit Waveform();
 
     void setSamplerate(uint32_t samplerate);
     uint32_t samplerate();
@@ -57,19 +53,26 @@ public:
 
     void append(uint32_t channel, double value);
 
-    uint32_t getLength();
+    uint32_t getLength(uint32_t channel);
 
-    double getTime(uint32_t i);
-    double getValue(uint32_t channel, uint32_t i);
+    double getX(uint32_t i);
+    double getY(uint32_t i, uint32_t channel);
 
-    double getMinTime();
-    double getMaxTime();
-    double getMinValue();
-    double getMaxValue();
+    double getMinX();
+    double getMaxX();
+    double getMinY(uint32_t channel);
+    double getMaxY(uint32_t channel);
 
 signals:
 
 public slots:
+
+private:
+    typedef Series super;
+
+    std::array< uint32_t, 2 > index{{0, 0}};
+    std::array< std::array< double, 7000 >, 2 > data;
+
 };
 
 } // namespace model

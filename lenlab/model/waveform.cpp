@@ -23,14 +23,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Waveform::Waveform(uint32_t channels, QObject *parent) : QObject(parent), data(QVector< QVector < double >>(channels))
+Waveform::Waveform() : Series()
 {
+
 }
 
 void
 Waveform::append(uint32_t channel, double value)
 {
-    data[channel].append(value);
+    Q_ASSERT(channel < 2);
+    Q_ASSERT(index[channel] < 7000);
+    data[channel][index[channel]++] = value;
 }
 
 void
@@ -66,52 +69,52 @@ Waveform::setView(uint32_t view)
 uint32_t
 Waveform::view()
 {
-    return m_view ? m_view : getLength();
+    return m_view;
 }
 
 uint32_t
-Waveform::getLength()
+Waveform::getLength(uint32_t channel)
 {
-    return data[0].size();
+    Q_ASSERT(channel < 2);
+    return index[channel];
 }
 
 double
-Waveform::getTime(uint32_t i)
+Waveform::getX(uint32_t i)
 {
-    return m_view ? getMinTime() + i : i;
+    return getMinX() + i;
 }
 
 double
-Waveform::getValue(uint32_t channel, uint32_t i)
+Waveform::getY(uint32_t i, uint32_t channel)
 {
-    Q_ASSERT(channel < data.size());
-    Q_ASSERT((m_trigger + i) < data[channel].size());
+    Q_ASSERT(channel < 2);
+    Q_ASSERT((m_trigger + i) < 7000);
     return data[channel][m_trigger+i];
 }
 
 double
-Waveform::getMinTime()
+Waveform::getMinX()
 {
-    return m_view ? (double) m_view / -2 : 0;
+    return (double) m_view / -2;
 }
 
 double
-Waveform::getMaxTime()
+Waveform::getMaxX()
 {
-    return m_view ? (double) m_view / 2 : getLength();
+    return (double) m_view / 2;
 }
 
 double
-Waveform::getMinValue()
+Waveform::getMinY(uint32_t channel)
 {
     return -2;
 }
 
 double
-Waveform::getMaxValue()
+Waveform::getMaxY(uint32_t channel)
 {
     return 2;
 }
-
 
 } // namespace model
