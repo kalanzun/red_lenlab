@@ -36,10 +36,17 @@ Signalgenerator::setSine(uint32_t index)
     lenlab->send(cmd);
 }
 
+#define OVERHEAD (16.0/17.5)
+#define CHANNELS (2)
+#define SAMPLES (500)
+#define BITS_PER_SAMPLE (16)
+#define SYSCLK (80000000.0)
+#define BASE_FREQUENCY (SYSCLK / CHANNELS / SAMPLES / BITS_PER_SAMPLE * OVERHEAD)
+
 double
 Signalgenerator::getFrequency(uint32_t index)
 {
-    return 80000000.0 / (double) (sine[index][1] * sine[index][2]) / 16000.0 * sine[index][0];
+    return BASE_FREQUENCY  * (double) sine[index][0] / (double) (sine[index][1] * sine[index][2]);
 }
 
 } // namespace model

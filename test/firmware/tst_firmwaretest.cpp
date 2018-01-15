@@ -109,10 +109,6 @@ void FirmwareTest::testSineMeasurement()
     QSignalSpy replot_spy(lenlab->oscilloscope, SIGNAL(replot()));
     QVERIFY2(replot_spy.isValid(), "Invalid Signal replot on lenlab->oscilloscope.");
 
-    // SSI outputs one period in 2 channels * 500 samples * 16 bits per sample = 16000 bits
-    // A 0.5 kHz sine needs a bit rate of 8 MHz
-    // SysClk is 80 MHz, 80 / 8 = 10
-
     uint8_t divider;
 
     if (index >= 66)
@@ -131,8 +127,7 @@ void FirmwareTest::testSineMeasurement()
 
     QVERIFY(reply->getReply() == SignalSine);
 
-    lenlab->oscilloscope->start();
-    lenlab->oscilloscope->stop(); // single shot
+    lenlab->oscilloscope->restart(); // single shot
     QVERIFY2(replot_spy.wait(500), "Signal replot was not fired, the oscilloscope measurement did not complete.");
 
     auto waveform = lenlab->oscilloscope->getWaveform();
@@ -141,16 +136,7 @@ void FirmwareTest::testSineMeasurement()
     QCOMPARE(waveform->getLength(1), 7000u);
     QCOMPARE(waveform->view(), 6000u);
 
-    // sample rate is 250 kHz, so one sample is 4 us
-
-    int abweichung = 0;
-    double result = 0;
-
-    for (int j = 0; j < 200; j++) {
-
     double f = lenlab->signalgenerator->getFrequency(index);
-    f = f * (1 + ((double) (j - 100) / 1000));
-    // for some reason, the frequency is 10% off
 
     std::complex<double> sum, y;
     double value, x;
@@ -158,6 +144,8 @@ void FirmwareTest::testSineMeasurement()
     double pi = std::acos(-1);
 
     sum = 0;
+
+    // sample rate is 1 MHz / (1<<divider), so one sample is 1 us * (1<<divider)
 
     for (uint32_t i = 0; i < 6000; i++) {
         x = 2 * pi * f * 1e-6 * (1<<divider) * ((double) i - 3000);
@@ -167,16 +155,7 @@ void FirmwareTest::testSineMeasurement()
 
     value = std::abs(sum) / 6000;
 
-    if (value > result) {
-        abweichung = j - 100;
-        result = value;
-    }
-
-    }
-
-    qDebug() << index << lenlab->signalgenerator->getFrequency(index) << abweichung << result;
-
-    QVERIFY2(result > 0.7, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(result)));
+    QVERIFY2(value > 0.7, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(value)));
 
 
 

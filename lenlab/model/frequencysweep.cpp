@@ -113,8 +113,7 @@ Frequencysweep::on_replot()
         stop();
     }
 
-    double f = lenlab->signalgenerator->getFrequency(current_index) * (1 - 0.089);
-    // for some reason, the frequency is 8.9% off
+    double f = lenlab->signalgenerator->getFrequency(current_index);
 
     std::complex<double> sum0, sum1, y;
     double value, angle, x;
