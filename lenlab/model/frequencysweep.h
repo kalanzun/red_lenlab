@@ -39,6 +39,7 @@ class Frequencysweep : public Component
     QSharedPointer<FrequencySeries> current;
 
     bool running;
+    bool toggle;
 
 public:
     explicit Frequencysweep(Lenlab *parent);

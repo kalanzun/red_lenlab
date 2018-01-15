@@ -71,9 +71,10 @@ Frequencysweep::restart()
     else if (index >= 33)
         divider = 2;
     else
-        divider = 3;
+        divider = 4;
 
     lenlab->oscilloscope->setSamplerateDivider(divider);
+    toggle = 0;
     startTimer(10);
 }
 
@@ -82,14 +83,20 @@ Frequencysweep::timerEvent(QTimerEvent *event)
 {
     killTimer(event->timerId());
 
-    lenlab->signalgenerator->setSine(index);
+    if (toggle) {
+        lenlab->oscilloscope->restart();
+    }
+    else {
+        lenlab->signalgenerator->setSine(index);
+    }
 }
 
 void
 Frequencysweep::receive(const usb::pMessage &reply)
 {
     if (reply->getReply() == SignalSine) {
-        lenlab->oscilloscope->restart();
+        toggle = 1;
+        startTimer(100);
     }
 }
 
@@ -129,6 +136,8 @@ Frequencysweep::on_replot()
         x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) i - 3000);
         y = std::sin(x) + 1i * std::cos(x);
         sum0 += waveform->getY(i, 0) * y;
+        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) i - 3000 + 0.5);
+        y = std::sin(x) + 1i * std::cos(x);
         sum1 += waveform->getY(i, 1) * y;
     }
 

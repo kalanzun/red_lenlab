@@ -155,6 +155,8 @@ void FirmwareTest::testSineMeasurement()
 
     value = std::abs(sum) / 6000;
 
+    qDebug() << value;
+
     QVERIFY2(value > 0.7, qPrintable(QString("Comparison to reference sine failed, value is %1").arg(value)));
 
 
