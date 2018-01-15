@@ -30,7 +30,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox"/>
+      <widget class="QComboBox" name="signalTypeBox"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -49,6 +49,16 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="2" column="0">
+      <widget class="QLabel" name="dividerLabel">
+       <property name="text">
+        <string>Teiler</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="frequencyBox"/>
+     </item>
      <item row="1" column="2">
       <widget class="QSlider" name="frequencySlider">
        <property name="orientation">
@@ -56,22 +66,25 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="frequencyEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="1" column="0">
+      <widget class="QLabel" name="frequencyLabel">
+       <property name="text">
+        <string>Frequenz</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QPushButton" name="amplitudeButton">
-       <property name="text">
-        <string>Amplitude [V]</string>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="dividerBox"/>
+     </item>
+     <item row="2" column="2">
+      <widget class="QSlider" name="dividerSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="amplitudeBox"/>
      </item>
      <item row="0" column="2">
       <widget class="QSlider" name="amplitudeSlider">
@@ -80,44 +93,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="amplitudeEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="frequencyButton">
+     <item row="0" column="0">
+      <widget class="QLabel" name="amplitudeLabel">
        <property name="text">
-        <string>Frequenz [kHz]</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QPushButton" name="dutycycleButton">
-       <property name="text">
-        <string>Tastverhältnis [1]</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="dutycycleEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QSlider" name="dutycycleSlider">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <string>Amplitude</string>
        </property>
       </widget>
      </item>

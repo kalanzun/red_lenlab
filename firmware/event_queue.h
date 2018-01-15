@@ -190,4 +190,12 @@ EventGetByte(tEvent *self, uint32_t i)
     return EventGetBody(self)[i];
 }
 
+inline uint32_t
+EventGetInt(tEvent *self, uint32_t i)
+{
+    ASSERT(EventGetType(self) == IntArray);
+    ASSERT(4*i < EventGetBodyLength(self));
+    return ((uint32_t *) EventGetBody(self))[i];
+}
+
 #endif /* EVENT_QUEUE_H_ */

@@ -146,12 +146,13 @@ on_setSignalSine(tEvent *event)
 {
     tEvent *reply;
 
-    uint8_t multiplier = EventGetByte(event, 0);
-    uint8_t predivider = EventGetByte(event, 1);
-    uint8_t divider    = EventGetByte(event, 2);
+    uint32_t multiplier = EventGetInt(event, 0);
+    uint32_t divider    = EventGetInt(event, 1);
+    uint32_t amplitude  = EventGetInt(event, 2);
+    uint32_t second     = EventGetInt(event, 3);
 
     // this may need a long time
-    SignalSetSine(multiplier, predivider, divider);
+    SignalSetSine(multiplier, divider, amplitude, second);
 
     // send a reply
     reply = QueueAcquire(&reply_handler.reply_queue);

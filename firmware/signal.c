@@ -80,7 +80,7 @@ DACFormat(int32_t value, bool channel)
 }
 
 void
-WriteSine(uint16_t *buffer, uint32_t periods)
+WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t second)
 {
     int32_t value;
     int32_t i;
@@ -90,25 +90,38 @@ WriteSine(uint16_t *buffer, uint32_t periods)
 
     for (i = 0; i < 500; i++)
     {
-        x = periods * i * f_PI / 250;
+        x = multiplier * i * f_PI / 250;
         sign = 0;
         while (x > f_PI) {
             x -= f_PI;
             sign = !sign;
         }
 
-        value = (sign ? -1 : 1) * f_mul(taylor(x - f_PI2), 1843);
+        value = (sign ? -1 : 1) * f_mul(taylor(x - f_PI2), amplitude);
 
         buffer[2*i] = DACFormat(value, 0);
+    }
+
+    for (i = 0; i < 500; i++)
+    {
+        x = multiplier * second * i * f_PI / 250;
+        sign = 0;
+        while (x > f_PI) {
+            x -= f_PI;
+            sign = !sign;
+        }
+
+        value = (sign ? -1 : 1) * f_mul(taylor(x - f_PI2), amplitude);
+
         buffer[2*i + 1] = DACFormat(value, 1);
     }
 }
 
 void
-SignalSetSine(uint8_t multiplier, uint8_t predivisor, uint8_t divisor)
+SignalSetSine(uint32_t multiplier, uint32_t divider, uint32_t amplitude, uint32_t second)
 {
-    WriteSine(SSIGetBuffer(), multiplier);
-    SSISetDivider(predivisor, divisor);
+    WriteSine(SSIGetBuffer(), multiplier, amplitude, second);
+    SSISetDivider(2, divider);
 }
 
 void
@@ -121,5 +134,5 @@ void
 SignalInit(void)
 {
     SSISetLength(1000);
-    SignalSetSine(1, 2, 5);
+    SignalSetSine(1, 5, 1241, 1);
 }

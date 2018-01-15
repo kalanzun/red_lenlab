@@ -46,8 +46,17 @@ public:
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab *lenlab);
 
+private slots:
+    void on_signalTypeBox_activated(int index);
+    void on_amplitudeBox_activated(int index);
+    void on_amplitudeSlider_valueChanged(int index);
+    void on_frequencyBox_activated(int index);
+    void on_frequencySlider_valueChanged(int index);
+    void on_dividerBox_activated(int index);
+    void on_dividerSlider_valueChanged(int index);
+
 private:
-    void setUIConfiguration(bool amplitude, bool frequency, bool dutycycle);
+    void setUIConfiguration(bool amplitude, bool frequency, bool divider);
 
     Ui::SignalForm *ui;
 

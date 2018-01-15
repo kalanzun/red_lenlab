@@ -141,6 +141,14 @@ Message::setByte(uint8_t value)
     setByteArray(&value, 1);
 }
 
+void
+Message::setInt(uint32_t value)
+{
+    Q_ASSERT(getType() == IntArray);
+    *(uint32_t *) (getBody() + getBodyLength()) = value;
+    setBodyLength(getBodyLength() + 4);
+}
+
 pMessage
 usb::newCommand(Command command_code)
 {

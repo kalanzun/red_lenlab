@@ -31,7 +31,7 @@ SignalForm::SignalForm(QWidget *parent) :
     qDebug() << "SignalForm";
     ui->setupUi(this);
 
-    setUIConfiguration(true, false, false);
+    setUIConfiguration(false, false, false);
 }
 
 SignalForm::~SignalForm()
@@ -51,43 +51,113 @@ SignalForm::setModel(model::Lenlab *lenlab)
 {
     this->lenlab = lenlab;
     this->signalgenerator = lenlab->signalgenerator;
+
+    ui->signalTypeBox->insertItem(0, "Aus");
+    ui->signalTypeBox->insertItem(1, "Sinus");
+
+    ui->amplitudeBox->insertItems(0, signalgenerator->amplitudeIndex.labels);
+    ui->amplitudeSlider->setMaximum(signalgenerator->amplitudeIndex.length - 1);
+    ui->amplitudeBox->setCurrentIndex(14);
+    ui->amplitudeSlider->setValue(14);
+
+    ui->frequencyBox->insertItems(0, signalgenerator->frequencyIndex.labels);
+    ui->frequencySlider->setMaximum(signalgenerator->frequencyIndex.length - 1);
+
+    ui->dividerBox->insertItems(0, signalgenerator->dividerIndex.labels);
+    ui->dividerSlider->setMaximum(signalgenerator->dividerIndex.length - 1);
 }
 
 void
-SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool dutycycle)
+SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool divider)
 {
     if (amplitude) {
-        ui->amplitudeButton->show();
-        ui->amplitudeEdit->show();
+        ui->amplitudeLabel->show();
+        ui->amplitudeBox->show();
         ui->amplitudeSlider->show();
     }
     else {
-        ui->amplitudeButton->hide();
-        ui->amplitudeEdit->hide();
+        ui->amplitudeLabel->hide();
+        ui->amplitudeBox->hide();
         ui->amplitudeSlider->hide();
     }
 
     if (frequency) {
-        ui->frequencyButton->show();
-        ui->frequencyEdit->show();
+        ui->frequencyLabel->show();
+        ui->frequencyBox->show();
         ui->frequencySlider->show();
     }
     else {
-        ui->frequencyButton->hide();
-        ui->frequencyEdit->hide();
+        ui->frequencyLabel->hide();
+        ui->frequencyBox->hide();
         ui->frequencySlider->hide();
     }
 
-    if (dutycycle) {
-        ui->dutycycleButton->show();
-        ui->dutycycleEdit->show();
-        ui->dutycycleSlider->show();
+    if (divider) {
+        ui->dividerLabel->show();
+        ui->dividerBox->show();
+        ui->dividerSlider->show();
     }
     else {
-        ui->dutycycleButton->hide();
-        ui->dutycycleEdit->hide();
-        ui->dutycycleSlider->hide();
+        ui->dividerLabel->hide();
+        ui->dividerBox->hide();
+        ui->dividerSlider->hide();
     }
 }
+
+void
+SignalForm::on_signalTypeBox_activated(int index)
+{
+    if (index == 1) { // Sinus
+        //signalgenerator->start();
+        setUIConfiguration(true, true, true);
+    }
+    else {
+        //signalgenerator->stop();
+        setUIConfiguration(false, false, false);
+    }
+}
+
+void
+SignalForm::on_amplitudeBox_activated(int index)
+{
+    // this will call valueChanged, which updates the model
+    ui->amplitudeSlider->setValue(index);
+}
+
+void
+SignalForm::on_amplitudeSlider_valueChanged(int index)
+{
+    ui->amplitudeBox->setCurrentIndex(index);
+    signalgenerator->setAmplitude(index);
+}
+
+void
+SignalForm::on_frequencyBox_activated(int index)
+{
+    // this will call valueChanged, which updates the model
+    ui->frequencySlider->setValue(index);
+}
+
+void
+SignalForm::on_frequencySlider_valueChanged(int index)
+{
+    ui->frequencyBox->setCurrentIndex(index);
+    signalgenerator->setFrequency(index);
+}
+
+void
+SignalForm::on_dividerBox_activated(int index)
+{
+    // this will call valueChanged, which updates the model
+    ui->dividerSlider->setValue(index);
+}
+
+void
+SignalForm::on_dividerSlider_valueChanged(int index)
+{
+    ui->dividerBox->setCurrentIndex(index);
+    signalgenerator->setDivider(index);
+}
+
 
 } // namespace gui

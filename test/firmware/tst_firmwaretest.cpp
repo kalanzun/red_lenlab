@@ -121,7 +121,7 @@ void FirmwareTest::testSineMeasurement()
     lenlab->oscilloscope->setSamplerateDivider(divider);
     QTest::qWait(10);
 
-    lenlab->signalgenerator->setSine(index);
+    lenlab->signalgenerator->setFrequency(index);
     QVERIFY2(reply_spy.wait(500), "No confirmation for setSignalSine arrived.");
     usb::pMessage reply = qvariant_cast<usb::pMessage>(reply_spy.at(reply_spy.count()-1).at(0));
 

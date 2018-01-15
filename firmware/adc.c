@@ -200,7 +200,7 @@ ConfigureADCx(tADCx* self)
     //
     GPIOPinTypeADC(self->gpio_base, self->gpio_pin);
 
-    ADCHardwareOversampleConfigure(self->adc_base, 2); // 1 is too fast for the oscilloscope module
+    ADCHardwareOversampleConfigure(self->adc_base, 4); // 1 is too fast for the oscilloscope module
 
     // Set the ADC Sequence to trigger always (that is 1 MHz)
     // and to generate an interrupt every 4 samples.

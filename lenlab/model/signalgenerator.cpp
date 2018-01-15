@@ -20,20 +20,34 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "lenlab.h"
 #include "signalgenerator.h"
+#include <cmath>
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab *parent) : Component(parent)
+Signalgenerator::Signalgenerator(Lenlab *parent) : Component(parent), amplitudeIndex(18), frequencyIndex(100), dividerIndex(20)
 {
+    double value;
 
-}
+    for (uint32_t i = 0; i < amplitudeIndex.length; i++) {
+        value = 0.8 + 0.05 * i;
+        amplitudeIndex.labels << QString("%1 V").arg(value);
+    }
 
-void
-Signalgenerator::setSine(uint32_t index)
-{
-    auto cmd = usb::newCommand(setSignalSine);
-    cmd->setByteArray(sine[index], 3); // multiplier, predivider, divider
-    lenlab->send(cmd);
+    for (uint32_t i = 0; i < frequencyIndex.length; i++) {
+        value = getFrequency(i);
+        if (value < 100)
+            frequencyIndex.labels << QString("%1 Hz").arg(std::round(10*value)/10);
+        else if (value < 1000)
+            frequencyIndex.labels << QString("%1 Hz").arg(std::round(value));
+        else if (value < 10000)
+            frequencyIndex.labels << QString("%1 kHz").arg(std::round(value/10)/100);
+        else
+            frequencyIndex.labels << QString("%1 kHz").arg(std::round(value/100)/10);
+    }
+
+    for (uint32_t i = 0; i < dividerIndex.length; i++) {
+        dividerIndex.labels << QString("%1").arg(i+1);
+    }
 }
 
 #define OVERHEAD (16.0/17.5)
@@ -47,6 +61,43 @@ double
 Signalgenerator::getFrequency(uint32_t index)
 {
     return BASE_FREQUENCY  * (double) sine[index][0] / (double) (sine[index][1] * sine[index][2]);
+}
+
+void
+Signalgenerator::setSine()
+{
+    auto cmd = usb::newCommand(setSignalSine);
+    cmd->setBodyLength(0);
+    cmd->setType(IntArray);
+    cmd->setInt(sine[frequency][0]); // multiplier
+    cmd->setInt(sine[frequency][2]); // divider
+    cmd->setInt(std::round((1<<11) * (0.8 + 0.05 * amplitude) / 1.65)); // amplitude
+    cmd->setInt(second); // second
+    lenlab->send(cmd);
+}
+
+void
+Signalgenerator::setAmplitude(uint32_t index)
+{
+    Q_ASSERT(index < amplitudeIndex.length);
+    amplitude = index;
+    setSine();
+}
+
+void
+Signalgenerator::setFrequency(uint32_t index)
+{
+    Q_ASSERT(index < frequencyIndex.length);
+    frequency = index;
+    setSine();
+}
+
+void
+Signalgenerator::setDivider(uint32_t index)
+{
+    Q_ASSERT(index < dividerIndex.length);
+    second = index;
+    setSine();
 }
 
 } // namespace model

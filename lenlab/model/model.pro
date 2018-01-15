@@ -30,7 +30,8 @@ SOURCES += \
     voltmeter.cpp \
     waveform.cpp \
     series.cpp \
-    frequencyseries.cpp
+    frequencyseries.cpp \
+    indexparameter.cpp
 
 HEADERS += \
     component.h \
@@ -41,7 +42,8 @@ HEADERS += \
     voltmeter.h \
     waveform.h \
     series.h \
-    frequencyseries.h
+    frequencyseries.h \
+    indexparameter.h
 
 include(../../red_lenlab.pri)
 

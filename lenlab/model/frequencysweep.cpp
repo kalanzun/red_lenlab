@@ -87,7 +87,7 @@ Frequencysweep::timerEvent(QTimerEvent *event)
         lenlab->oscilloscope->restart();
     }
     else {
-        lenlab->signalgenerator->setSine(index);
+        lenlab->signalgenerator->setFrequency(index);
     }
 }
 

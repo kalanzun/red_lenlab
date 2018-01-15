@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SIGNALGENERATOR_H
 
 #include "component.h"
+#include "indexparameter.h"
 #include <QObject>
 
 namespace model {
@@ -140,9 +141,17 @@ class Signalgenerator : public Component
 public:
     explicit Signalgenerator(Lenlab *parent);
 
-    void setSine(uint32_t index);
-
     double getFrequency(uint32_t index);
+
+    void setSine();
+
+    void setAmplitude(uint32_t index);
+    void setFrequency(uint32_t index);
+    void setDivider(uint32_t index);
+
+    IndexParameter amplitudeIndex;
+    IndexParameter frequencyIndex;
+    IndexParameter dividerIndex;
 
 signals:
 
@@ -150,6 +159,10 @@ public slots:
 
 private:
     typedef Component super;
+
+    uint32_t amplitude;
+    uint32_t frequency;
+    uint32_t second;
 };
 
 } // namespace model

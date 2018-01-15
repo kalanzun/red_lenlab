@@ -1,6 +1,4 @@
 /*
- * signal.h
- *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -18,29 +16,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
- */
+*/
 
-#ifndef SIGNAL_H_
-#define SIGNAL_H_
+#include "indexparameter.h"
 
-#include "event_queue.h"
+namespace model {
 
+IndexParameter::IndexParameter(uint32_t length, QObject *parent) : QObject(parent), length(length)
+{
 
-typedef struct Signal {
-    uint16_t frequency_divisor;
-    uint16_t memory_multiplier;
-} tSignal;
+}
 
-
-extern tSignal signal;
-
-
-void SignalSetSine(uint32_t multiplier, uint32_t divider, uint32_t amplitude, uint32_t second);
-
-
-void SignalStart(void);
-
-void SignalInit(void);
-
-
-#endif /* SIGNAL_H_ */
+} // namespace model
