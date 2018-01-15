@@ -49,15 +49,13 @@ tSSI ssi;
 
 
 inline void
-SSIStartuDMAChannel(void)
+SSIStartuDMAChannel(uint32_t select)
 {
-    uDMAChannelTransferSet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT,
-            UDMA_MODE_BASIC,
+    uDMAChannelTransferSet(UDMA_CHANNEL_SSI0TX | select,
+            UDMA_MODE_PINGPONG,
             ssi.buffer,
             (void *)(SSI0_BASE + SSI_O_DR),
             ssi.length);
-
-    uDMAChannelEnable(UDMA_CHANNEL_SSI0TX);
 }
 
 
@@ -77,11 +75,14 @@ SSI0IntHandler(void)
 
     SSIIntClear(SSI0_BASE, ui32Status);
 
-    if(!uDMAChannelIsEnabled(UDMA_CHANNEL_SSI0TX))
+    if(uDMAChannelModeGet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT) == UDMA_MODE_STOP)
     {
-        SSIStartuDMAChannel();
+        SSIStartuDMAChannel(UDMA_PRI_SELECT);
     }
-
+    else if(uDMAChannelModeGet(UDMA_CHANNEL_SSI0TX | UDMA_ALT_SELECT) == UDMA_MODE_STOP)
+    {
+        SSIStartuDMAChannel(UDMA_ALT_SELECT);
+    }
 }
 
 
@@ -114,6 +115,10 @@ SSISetDivider(uint8_t predivider, uint8_t divider)
     // SSInClk = SysClk / predivider / divider
     // SSISetDivider takes care of the +1
 
+    // SSI überträgt 16 bit Daten und dann ein Frame End Singnal (FSS)
+    // Das Frame End dauert 1,5 Clock-Schritte, so dass die Datenrate
+    // um den Faktor 16/17,5 verlangsamt ist
+
     //
     // Set the clock predivider.
     //
@@ -131,7 +136,10 @@ SSIStart(void)
 {
     SSIEnable(SSI0_BASE);
 
-    SSIStartuDMAChannel();
+    SSIStartuDMAChannel(UDMA_PRI_SELECT);
+    SSIStartuDMAChannel(UDMA_ALT_SELECT);
+
+    uDMAChannelEnable(UDMA_CHANNEL_SSI0TX);
 }
 
 
@@ -178,6 +186,9 @@ SSIConfigure()
     uDMAChannelAttributeEnable(UDMA_CHANNEL_SSI0TX, UDMA_ATTR_USEBURST);
 
     uDMAChannelControlSet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT,
+            UDMA_SIZE_16 | UDMA_SRC_INC_16 | UDMA_DST_INC_NONE |
+            UDMA_ARB_4);
+    uDMAChannelControlSet(UDMA_CHANNEL_SSI0TX | UDMA_ALT_SELECT,
             UDMA_SIZE_16 | UDMA_SRC_INC_16 | UDMA_DST_INC_NONE |
             UDMA_ARB_4);
 }
