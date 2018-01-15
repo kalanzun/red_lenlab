@@ -142,15 +142,16 @@ void FirmwareTest::testSineMeasurement()
     double value, x;
 
     double pi = std::acos(-1);
+    std::complex<double> i(0, 1);
 
     sum = 0;
 
     // sample rate is 1 MHz / (1<<divider), so one sample is 1 us * (1<<divider)
 
-    for (uint32_t i = 0; i < 6000; i++) {
-        x = 2 * pi * f * 1e-6 * (1<<divider) * ((double) i - 3000);
-        y = std::sin(x) + 1i * std::cos(x);
-        sum += waveform->getY(i, 0) * y;
+    for (uint32_t idx = 0; idx < 6000; idx++) {
+        x = 2 * pi * f * 1e-6 * (1<<divider) * ((double) idx - 3000);
+        y = std::sin(x) + i * std::cos(x);
+        sum += waveform->getY(idx, 0) * y;
     }
 
     value = std::abs(sum) / 6000;

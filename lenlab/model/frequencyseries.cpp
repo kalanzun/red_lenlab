@@ -1,4 +1,5 @@
 #include "frequencyseries.h"
+#include <cmath>
 
 namespace model {
 
@@ -38,7 +39,7 @@ FrequencySeries::getLength(uint32_t channel)
 double
 FrequencySeries::getX(uint32_t i)
 {
-    return 20.0 * pow(pow(10.0, i), 1.0/33.0);
+    return 20.0 * std::pow(std::pow(10.0, i), 1.0/33.0);
 }
 
 double

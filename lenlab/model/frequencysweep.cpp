@@ -126,19 +126,18 @@ Frequencysweep::on_replot()
     double value, angle, x;
 
     double pi = std::acos(-1);
+    std::complex<double> i(0, 1);
 
     sum0 = 0;
     sum1 = 0;
 
     waveform->setTrigger(1000);
 
-    for (uint32_t i = 0; i < 6000; i++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) i - 3000);
-        y = std::sin(x) + 1i * std::cos(x);
-        sum0 += waveform->getY(i, 0) * y;
-        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) i - 3000 + 0.5);
-        y = std::sin(x) + 1i * std::cos(x);
-        sum1 += waveform->getY(i, 1) * y;
+    for (uint32_t idx = 0; idx < 6000; idx++) {
+        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) idx - 3000);
+        y = std::sin(x) + i * std::cos(x);
+        sum0 += waveform->getY(idx, 0) * y;
+        sum1 += waveform->getY(idx, 1) * y;
     }
 
     value = std::abs(sum1) / std::abs(sum0);
