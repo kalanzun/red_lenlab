@@ -97,7 +97,7 @@ WriteSine(uint16_t *buffer, uint32_t periods)
             sign = !sign;
         }
 
-        value = (sign ? -1 : 1) * taylor(x - f_PI2);
+        value = (sign ? -1 : 1) * f_mul(taylor(x - f_PI2), 1843);
 
         buffer[2*i] = DACFormat(value, 0);
         buffer[2*i + 1] = DACFormat(value, 1);
