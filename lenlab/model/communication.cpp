@@ -18,54 +18,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef OSCILLOSCOPE_H
-#define OSCILLOSCOPE_H
-
-#include "component.h"
 #include "communication.h"
-#include "waveform.h"
-#include <QObject>
+#include <QDebug>
 
 namespace model {
 
-/**
- * @brief Lenlab oscilloscope component.
- */
-
-class Oscilloscope : public Component
+Communication::Communication(usb::Handler *handler, QObject *parent) : QObject(parent), handler(handler)
 {
-    Q_OBJECT
-public:
-    explicit Oscilloscope(Lenlab *parent);
+    connect(handler, SIGNAL(reply(usb::pMessage)),
+            this, SLOT(on_reply(usb::pMessage)));
+}
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+void
+Communication::send(const usb::pMessage &cmd)
+{
+    qDebug() << "send" << cmd;
+    handler->send(cmd);
+}
 
-    virtual void start();
-    virtual void stop();
-
-    void try_to_start();
-    void restart();
-
-    void setSamplerateDivider(uint8_t divider);
-
-    QSharedPointer<Waveform> getWaveform();
-
-signals:
-    void replot();
-
-public slots:
-    void on_reply(const pCommunication &com, const usb::pMessage &reply);
-
-private:
-    bool pending = 0;
-
-    QSharedPointer<Waveform> incoming;
-    QSharedPointer<Waveform> current;
-
-    typedef Component super;
-};
+void
+Communication::on_reply(const usb::pMessage &rpl)
+{
+    qDebug() << "reply" << rpl;
+    emit reply(pCommunication(this), rpl);
+}
 
 } // namespace model
-
-#endif // OSCILLOSCOPE_H

@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab *parent) : Component(parent), amplitudeIndex(18), frequencyIndex(100), dividerIndex(20)
+Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(100), dividerIndex(20), lenlab(parent)
 {
     double value;
 
@@ -66,6 +66,9 @@ Signalgenerator::getFrequency(uint32_t index)
 void
 Signalgenerator::setSine()
 {
+    auto com = lenlab->initCommunication();
+    connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
+            this, SLOT(on_reply(pCommunication, usb::pMessage)));
     auto cmd = usb::newCommand(setSignalSine);
     cmd->setBodyLength(0);
     cmd->setType(IntArray);
@@ -73,7 +76,22 @@ Signalgenerator::setSine()
     cmd->setInt(sine[frequency][2]); // divider
     cmd->setInt(std::round((1<<11) * (0.8 + 0.05 * amplitude) / 1.65)); // amplitude
     cmd->setInt(second); // second
-    lenlab->send(cmd);
+    com->send(cmd);
+}
+
+void
+Signalgenerator::try_to_setSine() {
+    if (pending && lenlab->available()) {
+        setSine();
+        pending = 0;
+    }
+}
+
+void
+Signalgenerator::on_reply(const pCommunication &com, const usb::pMessage &reply)
+{
+    Q_UNUSED(reply);
+    com->deleteLater();
 }
 
 void
@@ -81,7 +99,8 @@ Signalgenerator::setAmplitude(uint32_t index)
 {
     Q_ASSERT(index < amplitudeIndex.length);
     amplitude = index;
-    setSine();
+    pending = 1;
+    try_to_setSine();
 }
 
 void
@@ -89,7 +108,8 @@ Signalgenerator::setFrequency(uint32_t index)
 {
     Q_ASSERT(index < frequencyIndex.length);
     frequency = index;
-    setSine();
+    pending = 1;
+    try_to_setSine();
 }
 
 void
@@ -97,7 +117,8 @@ Signalgenerator::setDivider(uint32_t index)
 {
     Q_ASSERT(index < dividerIndex.length);
     second = index;
-    setSine();
+    pending = 1;
+    try_to_setSine();
 }
 
 } // namespace model

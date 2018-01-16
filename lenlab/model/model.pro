@@ -31,7 +31,8 @@ SOURCES += \
     waveform.cpp \
     series.cpp \
     frequencyseries.cpp \
-    indexparameter.cpp
+    indexparameter.cpp \
+    communication.cpp
 
 HEADERS += \
     component.h \
@@ -43,7 +44,8 @@ HEADERS += \
     waveform.h \
     series.h \
     frequencyseries.h \
-    indexparameter.h
+    indexparameter.h \
+    communication.h
 
 include(../../red_lenlab.pri)
 

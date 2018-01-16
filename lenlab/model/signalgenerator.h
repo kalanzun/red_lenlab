@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "component.h"
 #include "indexparameter.h"
+#include "communication.h"
 #include <QObject>
 
 namespace model {
@@ -31,7 +32,7 @@ namespace model {
  * @brief Lenlab Signal Generator Component.
  */
 
-class Signalgenerator : public Component
+class Signalgenerator : public QObject
 {
     Q_OBJECT
 
@@ -144,6 +145,7 @@ public:
     double getFrequency(uint32_t index);
 
     void setSine();
+    void try_to_setSine();
 
     void setAmplitude(uint32_t index);
     void setFrequency(uint32_t index);
@@ -156,13 +158,16 @@ public:
 signals:
 
 public slots:
+    void on_reply(const pCommunication &com, const usb::pMessage &reply);
 
 private:
-    typedef Component super;
+    Lenlab *lenlab;
 
-    uint32_t amplitude;
-    uint32_t frequency;
-    uint32_t second;
+    uint32_t amplitude = 0;
+    uint32_t frequency = 0;
+    uint32_t second = 0;
+
+    bool pending = 0;
 };
 
 } // namespace model

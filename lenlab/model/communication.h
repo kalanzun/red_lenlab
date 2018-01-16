@@ -18,54 +18,40 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef OSCILLOSCOPE_H
-#define OSCILLOSCOPE_H
+#ifndef COMMUNICATION_H
+#define COMMUNICATION_H
 
-#include "component.h"
-#include "communication.h"
-#include "waveform.h"
+#include "usb/handler.h"
+#include "usb/message.h"
 #include <QObject>
+#include <QPointer>
 
 namespace model {
 
-/**
- * @brief Lenlab oscilloscope component.
- */
+class Communication;
 
-class Oscilloscope : public Component
+typedef QPointer<Communication> pCommunication;
+
+class Communication : public QObject
 {
     Q_OBJECT
+
 public:
-    explicit Oscilloscope(Lenlab *parent);
+    explicit Communication(usb::Handler *handler, QObject *parent = nullptr);
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
-
-    virtual void start();
-    virtual void stop();
-
-    void try_to_start();
-    void restart();
-
-    void setSamplerateDivider(uint8_t divider);
-
-    QSharedPointer<Waveform> getWaveform();
+    void send(const usb::pMessage &cmd);
 
 signals:
-    void replot();
+    void reply(const pCommunication &, const usb::pMessage &);
 
 public slots:
-    void on_reply(const pCommunication &com, const usb::pMessage &reply);
+    void on_reply(const usb::pMessage &rpl);
 
 private:
-    bool pending = 0;
+    usb::Handler *handler;
 
-    QSharedPointer<Waveform> incoming;
-    QSharedPointer<Waveform> current;
-
-    typedef Component super;
 };
 
 } // namespace model
 
-#endif // OSCILLOSCOPE_H
+#endif // COMMUNICATION_H

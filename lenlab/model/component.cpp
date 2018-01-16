@@ -77,12 +77,6 @@ Component::stop()
 }
 
 void
-Component::receive(const usb::pMessage &reply)
-{
-
-}
-
-void
 Component::ready()
 {
 

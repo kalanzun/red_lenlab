@@ -47,9 +47,8 @@ Oscilloscope::start()
 {
     super::start();
 
-    running = 1;
-
-    restart();
+    pending = 1;
+    try_to_start();
 }
 
 void
@@ -57,22 +56,27 @@ Oscilloscope::stop()
 {
     super::stop();
 
-    running = 0;
+    pending = 0;
+}
+
+void
+Oscilloscope::try_to_start()
+{
+    if (pending && lenlab->available()) {
+        restart();
+        pending = 0;
+    }
 }
 
 void
 Oscilloscope::restart()
 {
-    //qDebug() << "start";
     incoming.reset(new Waveform());
-    lenlab->send(usb::newCommand(startOscilloscope));
-}
 
-void
-Oscilloscope::clear()
-{
-
-
+    auto com = lenlab->initCommunication();
+    connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
+            this, SLOT(on_reply(pCommunication, usb::pMessage)));
+    com->send(usb::newCommand(startOscilloscope));
 }
 
 void
@@ -80,12 +84,11 @@ Oscilloscope::setSamplerateDivider(uint8_t divider)
 {
     auto cmd = usb::newCommand(setOscilloscopeSamplerateDivider);
     cmd->setByte(divider);
-    lenlab->send(cmd);
+    //lenlab->send(cmd);
 }
 
-
 void
-Oscilloscope::receive(const usb::pMessage &reply)
+Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
 {
     //qDebug("receive");
 
@@ -119,9 +122,12 @@ Oscilloscope::receive(const usb::pMessage &reply)
         incoming.clear();
         emit replot();
 
-        if (running)
-            //stop();
-            restart();
+        if (m_active) {
+            com->deleteLater();
+
+            pending = 1;
+            // try_to_start(); // does not succeed because of deleteLater()
+        }
     }
 }
 
@@ -131,26 +137,4 @@ Oscilloscope::getWaveform()
     return current;
 }
 
-/*
-void
-Oscilloscope::finished(const usb::pMessage &reply)
-{
-    //qDebug("finished");
-    if (running)
-        restart();
-}
-*/
-/*
-MinMaxVector *
-Oscilloscope::getTime()
-{
-    return &data[read][0];
-}
-
-MinMaxVector *
-Oscilloscope::getChannel(uint32_t channel)
-{
-    return &data[read][1+channel];
-}
-*/
 } // namespace model

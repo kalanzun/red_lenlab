@@ -46,8 +46,6 @@ Lenlab::setHandler(usb::Handler *handler)
 {
     this->handler = handler;
 
-    connect(handler, SIGNAL(reply(usb::pMessage)),
-            this, SLOT(on_reply(usb::pMessage)));
     connect(handler, SIGNAL(ready()),
             this, SLOT(on_ready()));
 }
@@ -71,37 +69,42 @@ Lenlab::getActiveComponent()
     throw std::exception();
 }
 
-void
-Lenlab::send(const usb::pMessage &cmd)
+bool
+Lenlab::available()
 {
-    handler->send(cmd);
+    return m_ready && current_com.isNull();
+}
+
+QPointer<Communication>
+Lenlab::initCommunication()
+{
+    if (!current_com.isNull())
+        throw std::exception();
+
+    current_com = new Communication(handler);
+    connect(current_com, SIGNAL(destroyed(QObject *)),
+            this, SLOT(on_comDestroyed(QObject *)));
+
+    return current_com;
 }
 
 void
-Lenlab::on_reply(const usb::pMessage &reply)
+Lenlab::on_comDestroyed(QObject *obj)
 {
-    //qDebug("on_reply");
-    Reply rpl = reply->getReply();
-    //qDebug() << cmd;
-
-    //if (cmd == startLogger)
-    //    voltmeter->receive(reply);
-    //else
-    if (rpl == OscilloscopeData)
-        oscilloscope->receive(reply);
-    else if (rpl == SignalSine)
-        frequencysweep->receive(reply);
+    Q_UNUSED(obj);
+    signalgenerator->try_to_setSine();
+    oscilloscope->try_to_start();
 }
 
 void
 Lenlab::on_ready()
 {
-    qDebug("on_ready");
-
     frequencysweep->ready();
     voltmeter->ready();
     oscilloscope->ready();
-    signalgenerator->ready();
+    //signalgenerator->ready();
+
+    m_ready = 1;
 }
 
 } // namespace model

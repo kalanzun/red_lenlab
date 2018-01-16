@@ -25,9 +25,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "voltmeter.h"
 #include "oscilloscope.h"
 #include "signalgenerator.h"
+#include "communication.h"
 #include "usb/handler.h"
 #include "usb/message.h"
 #include <QObject>
+#include <QPointer>
 
 namespace model {
 
@@ -47,7 +49,8 @@ public:
     bool isActive();
     Component *getActiveComponent();
 
-    void send(const usb::pMessage &cmd);
+    bool available();
+    QPointer<Communication> initCommunication();
 
     Frequencysweep *frequencysweep;
     Voltmeter *voltmeter;
@@ -55,7 +58,7 @@ public:
     Signalgenerator *signalgenerator;
 
 signals:
-    void reply(const usb::pMessage &);
+    void receive(const usb::pMessage &);
 
     void logMessage(const QString &);
 
@@ -64,11 +67,13 @@ signals:
 public slots:
 
 private slots:
-    void on_reply(const usb::pMessage &);
+    void on_comDestroyed(QObject *obj = nullptr);
     void on_ready();
 
 private:
     usb::Handler *handler;
+    QPointer<Communication> current_com;
+    bool m_ready = 0;
 };
 
 } // namespace model

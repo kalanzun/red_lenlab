@@ -108,12 +108,14 @@ Waveform::getMaxX()
 double
 Waveform::getMinY(uint32_t channel)
 {
+    Q_UNUSED(channel);
     return -2;
 }
 
 double
 Waveform::getMaxY(uint32_t channel)
 {
+    Q_UNUSED(channel);
     return 2;
 }
 

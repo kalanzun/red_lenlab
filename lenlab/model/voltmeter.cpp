@@ -83,12 +83,12 @@ Voltmeter::restart()
     cmdSetInterval->setCommand(setLoggerInterval);
     *((uint32_t *) cmdSetInterval->getBody()) = interval;
     cmdSetInterval->setBodyLength(4);
-    lenlab->send(cmdSetInterval);
+    //lenlab->send(cmdSetInterval);
 
     qDebug("start");
     usb::pMessage cmdStart(new usb::Message());
     cmdStart->setCommand(startLogger);
-    lenlab->send(cmdStart);
+    //lenlab->send(cmdStart);
 }
 
 void
@@ -97,7 +97,7 @@ Voltmeter::stop()
     qDebug("stop");
     usb::pMessage cmd(new usb::Message());
     cmd->setCommand(stopLogger);
-    lenlab->send(cmd);
+    //lenlab->send(cmd);
 
     super::stop();
 }
@@ -121,9 +121,11 @@ Voltmeter::clear()
 void
 Voltmeter::receive(const usb::pMessage &reply)
 {
+    Q_UNUSED(reply);
+
     qDebug("receive");
 
-    uint32_t *buffer = (uint32_t *) reply->getBody();
+    //uint32_t *buffer = (uint32_t *) reply->getBody();
 
     //Q_ASSERT(reply->getBodyLength() == 4 * data.size());
 
@@ -237,12 +239,13 @@ Voltmeter::channels() const
 void
 Voltmeter::timerEvent(QTimerEvent *event)
 {
+    Q_UNUSED(event);
+
     if (m_autoSave) {
         if (m_unsavedData) {
             try {
                 _save();
                 setUnsavedData(false);
-                //throw std::exception();
             }
             catch (std::exception) {
                 setAutoSave(false);

@@ -51,7 +51,6 @@ public:
     virtual void start();
     virtual void stop();
 
-    virtual void receive(const usb::pMessage &reply);
     virtual void ready();
 
 signals:
