@@ -118,7 +118,7 @@ void FirmwareTest::testSineMeasurement()
     else
         divider = 3;
 
-    lenlab->oscilloscope->setSamplerateDivider(divider);
+    //lenlab->oscilloscope->setSamplerateDivider(divider);
     QTest::qWait(10);
 
     lenlab->signalgenerator->setFrequency(index);

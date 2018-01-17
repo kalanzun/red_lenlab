@@ -168,16 +168,12 @@ ADCGetRing(bool channel)
         return &adc.adc0.ring;
 }
 
-void
-ADCSetDivider(uint8_t divider)
-{
-    ADCHardwareOversampleConfigure(adc.adc0.adc_base, 1 << divider);
-    ADCHardwareOversampleConfigure(adc.adc1.adc_base, 1 << divider);
-}
 
 void
-StartADCx(tADCx *self, tPage *ping, tPage *pong)
+StartADCx(tADCx *self, tPage *ping, tPage *pong, uint32_t samplerate)
 {
+    ADCHardwareOversampleConfigure(self->adc_base, (1<<samplerate));
+
     uDMAChannelAttributeDisable(self->udma_channel,
         UDMA_ATTR_ALTSELECT | UDMA_ATTR_USEBURST |
         UDMA_ATTR_HIGH_PRIORITY |
@@ -211,7 +207,7 @@ StartADCx(tADCx *self, tPage *ping, tPage *pong)
 }
 
 void
-ADCStart(uint32_t length, bool single)
+ADCStart(uint32_t length, bool single, uint32_t samplerate)
 {
     tPage *ping0;
     tPage *pong0;
@@ -244,8 +240,8 @@ ADCStart(uint32_t length, bool single)
     // - The sequencer and interrupts are disabled, too.
     //   DMA does not start in sync if spurious interrupts are around
 
-    StartADCx(&adc.adc0, ping0, pong0);
-    StartADCx(&adc.adc1, ping1, pong1);
+    StartADCx(&adc.adc0, ping0, pong0, samplerate);
+    StartADCx(&adc.adc1, ping1, pong1, samplerate);
 
     TimerEnable(TIMER1_BASE, TIMER_A);
 
@@ -265,20 +261,31 @@ ADCStart(uint32_t length, bool single)
 }
 
 void
-ADCSingle(uint32_t length)
+ADCSingle(uint32_t length, uint32_t samplerate)
 {
-    ADCStart(length, 1);
+    ADCStart(length, 1, samplerate);
 }
 
 void
-ADCPingPong()
+ADCPingPong(uint32_t samplerate)
 {
-    ADCStart(2, 0);
+    ADCStart(2, 0, samplerate);
+}
+
+void
+StopADCx(tADCx *self)
+{
+    uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
+    ADCSequenceDisable(self->adc_base, 0);
+    ADCIntDisable(self->adc_base, 0);
 }
 
 void
 ADCStop()
 {
+    TimerDisable(TIMER1_BASE, TIMER_A);
+    StopADCx(&adc.adc0);
+    StopADCx(&adc.adc1);
 }
 
 void

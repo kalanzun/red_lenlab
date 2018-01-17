@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "component.h"
 #include "communication.h"
 #include "waveform.h"
+#include "indexparameter.h"
 #include <QObject>
 
 namespace model {
@@ -48,9 +49,11 @@ public:
     void try_to_start();
     void restart();
 
-    void setSamplerateDivider(uint8_t divider);
-
     QSharedPointer<Waveform> getWaveform();
+
+    void setSamplerate(uint32_t index);
+
+    IndexParameter samplerateIndex;
 
 signals:
     void replot();
@@ -63,6 +66,8 @@ private:
 
     QSharedPointer<Waveform> incoming;
     QSharedPointer<Waveform> current;
+
+    uint32_t samplerate = 0;
 
     typedef Component super;
 };

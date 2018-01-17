@@ -51,6 +51,7 @@ enum Command {
     stopOscilloscope,
     setSignalSine,
     setOscilloscopeSamplerateDivider,
+    startOscilloscopeTrigger,
     NUM_COMMANDS
 };
 

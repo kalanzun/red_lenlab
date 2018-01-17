@@ -34,17 +34,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 tOscilloscope oscilloscope;
 
 
-void
-OscilloscopeSetSamplerateDivider(tOscilloscope *self, uint8_t divider)
-{
-    ADCSetDivider(divider);
-}
-
 
 void
-OscilloscopeStart(tOscilloscope *self)
+OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
-    //DEBUG_PRINT("OscilloscopeStart\n");
+    DEBUG_PRINT("OscilloscopeStart %d\n", samplerate);
 
     if (self->active)// || self->send)
         return;
@@ -54,16 +48,16 @@ OscilloscopeStart(tOscilloscope *self)
     self->count = 0;
 
     MemoryInit(&memory);
-    ADCSingle(8);
+    ADCSingle(8, samplerate);
 }
 
 
 void
-OscilloscopeStartTrigger(tOscilloscope *self)
+OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate)
 {
     uint32_t i;
 
-    DEBUG_PRINT("OscilloscopeStartTrigger\n");
+    DEBUG_PRINT("OscilloscopeStartTrigger %d\n", samplerate);
 
     if (self->active)// || self->send)
         return;
@@ -82,8 +76,8 @@ OscilloscopeStartTrigger(tOscilloscope *self)
     self->count = 0;
 
     MemoryInit(&memory);
-    ADCPingPong(); // Allocates 4
     RingAllocate(&self->ring, 12);
+    ADCPingPong(samplerate); // Allocates 4
 }
 
 inline int8_t
@@ -152,91 +146,96 @@ OscilloscopeMain(tOscilloscope *self)
         USBDeviceSendInterleaved(ring0, ring1);
         self->active = 0;
     }
-
-    else if (self->trigger && ADCReady())
+    else
     {
         ring0 = ADCGetRing(0);
         ring1 = ADCGetRing(1);
 
-        adc_page0 = RingRead(ring0);
-        adc_page1 = RingRead(ring1);
-
-        buffer0 = (uint16_t *) (adc_page0->buffer + 24);
-        buffer1 = (uint16_t *) (adc_page1->buffer + 24);
-
-        page = RingAcquire(&self->ring);
-
-        page->buffer[0] = OscilloscopeData;
-        page->buffer[1] = ByteArray;
-        page->buffer[2] = 0;
-        page->buffer[3] = 0;
-
-        state0 = buffer0[0] >> 2;
-        state1 = buffer1[0] >> 2;
-        *(uint16_t *) (page->buffer + 4) = state0;
-        *(uint16_t *) (page->buffer + 6) = state1;
-        *(uint16_t *) (page->buffer + 8) = 0; // trigger value
-
-        data = (int8_t *) (page->buffer + OSCILLOSCOPE_HEADER_LENGTH);
-
-        if (self->count == 3) {
-            self->trigger_wait = 1;
-        }
-
-        for (i = 1; i < ADC_SAMPLES; i++)
+        if (RingContent(ring0) && RingContent(ring1))
         {
-            data[2*i] = delta(state0, buffer0[i] >> 2);
-            state0 += data[2*i];
-            data[2*i+1] = delta(state1, buffer1[i] >> 2);
-            state1 += data[2*i+1];
+            adc_page0 = RingRead(ring0);
+            adc_page1 = RingRead(ring1);
 
-            if (self->count == 2 || self->trigger_wait || self->trigger_active) {
-                self->filter_state -= self->filter[self->filter_index];
-                self->filter_state += state0;
-                self->filter[self->filter_index] = state0;
-                self->filter_index = (self->filter_index + 1) % OSCILLOSCOPE_FILTER_LENGTH;
+            buffer0 = (uint16_t *) (adc_page0->buffer + 24);
+            buffer1 = (uint16_t *) (adc_page1->buffer + 24);
+
+            page = RingAcquire(&self->ring);
+
+            page->buffer[0] = OscilloscopeData;
+            page->buffer[1] = ByteArray;
+            page->buffer[2] = 0;
+            page->buffer[3] = 0;
+
+            state0 = buffer0[0] >> 2;
+            state1 = buffer1[0] >> 2;
+            *(uint16_t *) (page->buffer + 4) = state0;
+            *(uint16_t *) (page->buffer + 6) = state1;
+            *(uint16_t *) (page->buffer + 8) = 0; // trigger value
+
+            data = (int8_t *) (page->buffer + OSCILLOSCOPE_HEADER_LENGTH);
+
+            if (self->count == 3) {
+                self->trigger_wait = 1;
             }
 
-            if (self->trigger_wait
-                    && (self->filter_state < (8*512))
-                    ) {
-                self->trigger_wait = 0;
-                self->trigger_active = 1;
+            for (i = 1; i < ADC_SAMPLES; i++)
+            {
+                data[2*i] = delta(state0, buffer0[i] >> 2);
+                state0 += data[2*i];
+                data[2*i+1] = delta(state1, buffer1[i] >> 2);
+                state1 += data[2*i+1];
+
+                if (self->count == 2 || self->trigger_wait || self->trigger_active) {
+                    self->filter_state -= self->filter[self->filter_index];
+                    self->filter_state += state0;
+                    self->filter[self->filter_index] = state0;
+                    self->filter_index = (self->filter_index + 1) % OSCILLOSCOPE_FILTER_LENGTH;
+                }
+
+                if (self->trigger_wait
+                        && (self->filter_state < (8*512))
+                        ) {
+                    self->trigger_wait = 0;
+                    self->trigger_active = 1;
+                }
+
+                if (self->trigger_active
+                        && (self->filter_state > (8*512))
+                        ) {
+                    self->trigger_active = 0;
+                    self->trigger_save = 1;
+                    *(uint16_t *) (page->buffer + 8) = i;
+                }
+
             }
 
-            if (self->trigger_active
-                    && (self->filter_state > (8*512))
-                    ) {
-                self->trigger_active = 0;
-                self->trigger_save = 1;
-                *(uint16_t *) (page->buffer + 8) = i;
-            }
-        }
+            RingRelease(ring0);
+            RingRelease(ring1);
 
-        RingRelease(ring0);
-        RingRelease(ring1);
+            self->count++;
 
-        self->count++;
-
-        if (self->count == 12) {
-            page->buffer[3] = 1; // mark this the last package
-            ADCStop();
-            USBDeviceSend(&self->ring);
-            self->active = 0;
-        }
-
-        /*
-        if (self->trigger_save) {
-            self->trigger_post_count++;
-            if (self->trigger_post_count == 4) {
-                self->trigger_save = 0;
+            if (self->count == 12) {
                 page->buffer[3] = 1; // mark this the last package
-                ADCDisable();
-                MemoryStartSending(&memory);
+                ADCStop();
+                USBDeviceSend(&self->ring);
                 self->active = 0;
             }
+
+            /*
+            if (self->trigger_save) {
+                self->trigger_post_count++;
+                if (self->trigger_post_count == 4) {
+                    self->trigger_save = 0;
+                    page->buffer[3] = 1; // mark this the last package
+                    ADCDisable();
+                    MemoryStartSending(&memory);
+                    self->active = 0;
+                }
+            }
+            */
+
         }
-        */
+
     }
 }
 

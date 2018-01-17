@@ -36,7 +36,8 @@ class Frequencysweep : public Component
 {
     Q_OBJECT
 
-    uint8_t index, divider;
+    uint8_t index;
+    uint32_t samplerate;
 
     QSharedPointer<FrequencySeries> current;
 

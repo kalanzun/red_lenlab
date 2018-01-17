@@ -128,17 +128,19 @@ on_calculateSine(tEvent *event)
 void
 on_startOscilloscope(tEvent *event)
 {
+    uint32_t samplerate = EventGetInt(event, 0);
     //DEBUG_PRINT("startOscilloscope\n");
 
-    OscilloscopeStart(&oscilloscope);
+    OscilloscopeStart(&oscilloscope, samplerate);
 }
 
 void
-on_setOscilloscopeSamplerateDivider(tEvent *event)
+on_startOscilloscopeTrigger(tEvent *event)
 {
-    uint8_t divider = EventGetByte(event, 0);
+    uint32_t samplerate = EventGetInt(event, 0);
+    //DEBUG_PRINT("startOscilloscope\n");
 
-    OscilloscopeSetSamplerateDivider(&oscilloscope, divider);
+    OscilloscopeStartTrigger(&oscilloscope, samplerate);
 }
 
 void
@@ -287,7 +289,7 @@ CommandHandlerMain(void)
         else if (command == getVersion) on_getVersion(event);
         else if (command == startOscilloscope) on_startOscilloscope(event);
         else if (command == setSignalSine) on_setSignalSine(event);
-        else if (command == setOscilloscopeSamplerateDivider) on_setOscilloscopeSamplerateDivider(event);
+        else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
         /*
         else if (command == setLoggerInterval) on_setLoggerInterval(event);
         else if (command == startLogger) on_startLogger(event);

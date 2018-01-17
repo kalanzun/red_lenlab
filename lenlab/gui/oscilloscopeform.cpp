@@ -60,6 +60,8 @@ OscilloscopeForm::setModel(model::Lenlab *lenlab)
     //curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
     //curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
 
+    ui->samplerateBox->insertItems(0, oscilloscope->samplerateIndex.labels);
+
     connect(oscilloscope, SIGNAL(replot()),
             this, SLOT(on_replot()));
 }
@@ -122,6 +124,24 @@ OscilloscopeForm::on_replot()
         curves[i]->setSamples(new PointVectorSeriesData(oscilloscope->getWaveform(), i)); // acquires ownership
     }
     ui->plot->replot();
+}
+
+void
+OscilloscopeForm::on_samplerateBox_activated(int index)
+{
+    oscilloscope->setSamplerate(index);
+}
+
+void
+OscilloscopeForm::on_ch1CheckBox_stateChanged(int state)
+{
+    curves[0]->setVisible(state == Qt::Checked);
+}
+
+void
+OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
+{
+    curves[1]->setVisible(state == Qt::Checked);
 }
 
 

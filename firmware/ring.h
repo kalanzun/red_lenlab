@@ -19,8 +19,9 @@ typedef struct Ring {
     uint32_t write;
     uint32_t read;
     uint32_t release;
-    bool empty;
-    bool full;
+    volatile bool empty;
+    volatile bool full;
+    volatile bool content;
 } tRing;
 
 
@@ -34,12 +35,19 @@ RingAllocate(tRing *self, uint32_t length)
     self->read = 0;
     self->release = 0;
     self->empty = 1;
+    self->content = 0;
 }
 
 inline bool
 RingEmpty(tRing *self)
 {
     return self->empty;
+}
+
+inline bool
+RingContent(tRing *self)
+{
+    return self->content;
 }
 
 
@@ -65,6 +73,7 @@ inline void
 RingWrite(tRing *self)
 {
     self->write = (self->write + 1) % self->length;
+    self->content = 1;
 }
 
 
@@ -73,6 +82,7 @@ RingRead(tRing *self)
 {
     tPage *page = self->pages + self->read;
     self->read = (self->read + 1) % self->length;
+    if (self->read == self->write) self->content = 0;
     return page;
 }
 

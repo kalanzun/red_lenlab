@@ -55,15 +55,13 @@ typedef struct ADC {
 } tADC;
 
 
-void ADCSetDivider(uint8_t divider);
-
-void ADCStart(uint32_t length, bool single);
+void ADCStart(uint32_t length, bool single, uint32_t samplerate);
 void ADCStop();
 bool ADCReady();
 void ADCRelease();
 
-void ADCSingle(uint32_t length);
-void ADCPingPong();
+void ADCSingle(uint32_t length, uint32_t samplerate);
+void ADCPingPong(uint32_t samplerate);
 tRing *ADCGetRing(bool channel);
 
 void ADCInit();

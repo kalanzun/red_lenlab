@@ -25,8 +25,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Oscilloscope::Oscilloscope(Lenlab *parent) : Component(parent)
+Oscilloscope::Oscilloscope(Lenlab *parent) : Component(parent), samplerateIndex(3)
 {
+    double value;
+
+    for (uint32_t i = 0; i < samplerateIndex.length; i++) {
+        value = 1000 / (1<<(i+2));
+        samplerateIndex.labels << QString("%1 kHz").arg(value);
+    }
 
 }
 
@@ -62,12 +68,6 @@ Oscilloscope::stop()
 }
 
 void
-Oscilloscope::single()
-{
-    pending = 1;
-}
-
-void
 Oscilloscope::try_to_start()
 {
     if (pending && lenlab->available()) {
@@ -86,78 +86,54 @@ Oscilloscope::restart()
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
             this, SLOT(on_reply(pCommunication, usb::pMessage)));
-    com->send(usb::newCommand(startOscilloscope));
+    auto cmd = usb::newCommand(startOscilloscopeTrigger);
+    cmd->setBodyLength(0);
+    cmd->setType(IntArray);
+    cmd->setInt(samplerate+2);
+    com->send(cmd);
 }
 
 void
-Oscilloscope::setSamplerateDivider(uint8_t divider)
+Oscilloscope::setSamplerate(uint32_t index)
 {
-    auto cmd = usb::newCommand(setOscilloscopeSamplerateDivider);
-    cmd->setByte(divider);
-    //lenlab->send(cmd);
+    samplerate = index;
 }
 
 void
 Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
 {
-    //qDebug("receive");
-    uint8_t *buffer = reply->getBody();
-    int16_t *data = (int16_t *) (reply->getBody() + 22);
-
-    uint8_t channel = buffer[0];
-    uint8_t last_package = buffer[1];
-    uint8_t count = buffer[2];
-    //qDebug() << "receive" << count << channel << last_package;
-
-    for (uint32_t i = 1; i < 500; i++) {
-        incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
-    }
-
-    if (last_package) {
-        //qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
-
-        incoming->setView(incoming->getLength(0));
-
-        current.swap(incoming);
-        incoming.clear();
-        emit replot();
-
-        com->deleteLater();
-
-        if (m_active) {
-            pending = 1;
-            // try_to_start(); // does not succeed because of deleteLater()
-        }
-    }
-
-    /*
     // ByteArray Code
+    qDebug("on_reply");
 
     uint8_t *buffer = reply->getBody();
-    int8_t *data = (int8_t *) (reply->getBody() + 6);
+    int8_t *data = (int8_t *) (reply->getBody() + 10);
 
-    uint8_t channel = buffer[0];
+    //uint8_t channel = buffer[0];
     uint8_t last_package = buffer[1];
 
-    uint16_t state = *(uint16_t *) (buffer + 2);
-    uint16_t trigger = *(uint16_t *) (buffer + 4);
+    uint16_t state0 = *(uint16_t *) (buffer + 2);
+    uint16_t state1 = *(uint16_t *) (buffer + 4);
+    uint16_t trigger = *(uint16_t *) (buffer + 6);
 
-    if (channel == 0 && trigger) {
-        //qDebug() << "trigger" << trigger;
+    if (trigger) {
+        qDebug() << "trigger" << trigger;
         incoming->setTrigger(trigger);
     }
 
-    incoming->append(channel, (((double) state) / 1024.0 - 0.5) * 3.3);
+    incoming->append(0, (((double) state0) / 1024.0 - 0.5) * 3.3);
+    incoming->append(1, (((double) state1) / 1024.0 - 0.5) * 3.3);
 
-    for (uint32_t i = 1; i < 1000; i++) {
-        state += data[i];
-        incoming->append(channel, (((double) state) / 1024.0 - 0.5) * 3.3);
+    for (uint32_t i = 1; i < 500; i++) {
+        state0 += data[2*i];
+        state1 += data[2*i+1];
+        incoming->append(0, (((double) state0) / 1024.0 - 0.5) * 3.3);
+        incoming->append(1, (((double) state1) / 1024.0 - 0.5) * 3.3);
     }
 
     if (last_package) {
-        //qDebug() << "last package" << incoming->getDataLength();
+        qDebug() << "last package" << incoming->getLength(0);
 
-        incoming->setView(6000);
+        incoming->setView(incoming->getLength(0));
 
         current.swap(incoming);
         incoming.clear();
@@ -170,7 +146,6 @@ Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
             // try_to_start(); // does not succeed because of deleteLater()
         }
     }
-    */
 }
 
 QSharedPointer<Waveform>

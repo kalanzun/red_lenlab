@@ -79,18 +79,6 @@ Frequencysweep::step()
 
     qDebug() << "step";
 
-    divider = 0;
-    /*
-    if (index >= 66)
-        divider = 1;
-    else if (index >= 33)
-        divider = 2;
-    else
-        divider = 4;
-
-    lenlab->oscilloscope->setSamplerateDivider(divider);
-    */
-
     wait_for_update = 1;
     lenlab->signalgenerator->setFrequency(index);
 }
@@ -121,10 +109,21 @@ Frequencysweep::restart()
 
     incoming.reset(new Waveform());
 
+    if (index >= 66)
+        samplerate = 0;
+    else if (index >= 33)
+        samplerate = 2;
+    else
+        samplerate = 4;
+
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
             this, SLOT(on_reply(pCommunication, usb::pMessage)));
-    com->send(usb::newCommand(startOscilloscope));
+    auto cmd = usb::newCommand(startOscilloscope);
+    cmd->setBodyLength(0);
+    cmd->setType(IntArray);
+    cmd->setInt(samplerate);
+    com->send(cmd);
 }
 
 void
@@ -162,7 +161,7 @@ Frequencysweep::on_calculate()
     if (!m_active)
         return;
 
-    auto current_divider = divider;
+    auto current_samplerate = samplerate;
     auto current_index = index;
 
     index++;
@@ -187,7 +186,7 @@ Frequencysweep::on_calculate()
     incoming->setTrigger(0);
 
     for (uint32_t idx = 0; idx < incoming->getLength(0); idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) idx - (incoming->getLength(0) / 2));
+        x = 2 * pi * f * 1e-6 * (1<<current_samplerate) * ((double) idx - (incoming->getLength(0) / 2));
         y = std::sin(x) + i * std::cos(x);
         sum0 += incoming->getY(idx, 0) * y;
         sum1 += incoming->getY(idx, 1) * y;

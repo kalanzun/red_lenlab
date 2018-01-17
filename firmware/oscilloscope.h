@@ -51,7 +51,9 @@ extern tOscilloscope oscilloscope;
 
 void OscilloscopeSetSamplerateDivider(tOscilloscope *self, uint8_t divider);
 
-void OscilloscopeStart(tOscilloscope *self);
+void OscilloscopeStart(tOscilloscope *self, uint32_t samplerate);
+
+void OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate);
 
 void OscilloscopeMain(tOscilloscope *self);
 

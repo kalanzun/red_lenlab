@@ -54,6 +54,11 @@ private slots:
     void on_startButton_clicked();
     void on_stopButton_clicked();
 
+    void on_samplerateBox_activated(int index);
+
+    void on_ch1CheckBox_stateChanged(int state);
+    void on_ch2CheckBox_stateChanged(int state);
+
 private:
     QwtPlotCurve *newCurve(const QColor &color, bool visible);
     QwtPlotGrid *newGrid();
