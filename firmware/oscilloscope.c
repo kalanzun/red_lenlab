@@ -28,6 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "adc.h"
 #include "lenlab_protocol.h"
 #include "memory.h"
+#include "usb_device.h"
 
 
 tOscilloscope oscilloscope;
@@ -45,7 +46,7 @@ OscilloscopeStart(tOscilloscope *self)
 {
     uint32_t i;
 
-    //DEBUG_PRINT("OscilloscopeStart\n");
+    DEBUG_PRINT("OscilloscopeStart\n");
 
     if (self->active)// || self->send)
         return;
@@ -61,8 +62,11 @@ OscilloscopeStart(tOscilloscope *self)
 
     self->active = 1;
     self->count = 0;
-    MemoryAllocate(&memory); // TODO MemoryFree call
-    ADCEnable();
+    //MemoryAllocate(&memory); // TODO MemoryFree call
+    //ADCEnable();
+    MemoryInit(&memory);
+    ADCInit();
+    ADCSingle();
 }
 
 
@@ -83,6 +87,9 @@ void
 OscilloscopeMain(tOscilloscope *self)
 {
     uint32_t i;
+    tRing *ring;
+    tPage *page;
+    /*
     uint16_t *buffer0;
     uint16_t *buffer1;
     tPage *page0;
@@ -90,6 +97,7 @@ OscilloscopeMain(tOscilloscope *self)
     uint16_t state0, state1;
     int8_t *data0;
     int8_t *data1;
+    */
 
     if (!self->active) return;
 
@@ -97,6 +105,27 @@ OscilloscopeMain(tOscilloscope *self)
 
     if (ADCReady())
     {
+        DEBUG_PRINT("OscilloscopeReady\n");
+
+        ring = ADCGetRing();
+        ADCRelease();
+
+        for (i = 0; i < ring->length; i++)
+        {
+            page = RingGet(ring, i);
+
+            page->buffer[0] = OscilloscopeData; // reply
+            page->buffer[1] = ShortArray; // type
+            page->buffer[2] = i&1; // channel
+            page->buffer[3] = 0; // last
+            page->buffer[4] = i;
+        }
+        page->buffer[3] = 1;
+
+        USBDeviceSend(ring);
+        self->active = 0;
+
+        /*
         buffer0 = ADCGetBuffer(0);
         buffer1 = ADCGetBuffer(1);
 
@@ -127,18 +156,15 @@ OscilloscopeMain(tOscilloscope *self)
 
         data1 = (int8_t *) (page1->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
-        /*
         if (self->count == 3) {
             self->trigger_wait = 1;
         }
-        */
 
         for (i = 1; i < ADC_BUFFER_LENGTH; i++)
         {
             data0[i] = delta(state0, buffer0[i] >> 2);
             state0 += data0[i];
 
-            /*
             if (self->count == 2 || self->trigger_wait || self->trigger_active) {
                 self->filter_state -= self->filter[self->filter_index];
                 self->filter_state += state0;
@@ -160,7 +186,6 @@ OscilloscopeMain(tOscilloscope *self)
                 self->trigger_save = 1;
                 *(uint16_t *) (page0->buffer + 6) = i;
             }
-            */
 
             data1[i] = delta(state1, buffer1[i] >> 2);
             state1 += data1[i];
@@ -176,7 +201,7 @@ OscilloscopeMain(tOscilloscope *self)
             MemoryStartSending(&memory);
             self->active = 0;
         }
-        /*
+
         if (self->trigger_save) {
             self->trigger_post_count++;
             if (self->trigger_post_count == 4) {
@@ -187,9 +212,10 @@ OscilloscopeMain(tOscilloscope *self)
                 self->active = 0;
             }
         }
-        */
 
         //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
+        */
+
     }
 
     //}

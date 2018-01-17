@@ -54,11 +54,58 @@ tADC adc;
 void
 ADCxIntHandler(tADCx *self)
 {
+    tPage *page;
+
     //
     // Clear the ADC interrupt
     //
     ADCIntClear(self->adc_base, 0);
 
+    if (self->single) {
+        if(self->ping_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
+        {
+            DEBUG_PRINT("ADCInt PRI\n");
+            // pri is done, alt is working right now
+            RingWrite(&adc.ring);
+            if (RingFull(&adc.ring)) {
+                // done
+                self->ping_ready = 0;
+            }
+            else {
+                // continue
+                page = RingAcquire(&adc.ring);
+
+                uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
+                        UDMA_MODE_PINGPONG,
+                        (void *)(self->adc_base + ADC_O_SSFIFO0),
+                        page->buffer+24, ADC_SAMPLES);
+            }
+        }
+        else if(self->pong_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
+        {
+            DEBUG_PRINT("ADCInt ALT\n");
+            // alt is done, pri is working right now
+            RingWrite(&adc.ring);
+            if (RingFull(&adc.ring)) {
+                // done
+                self->pong_ready = 0;
+                uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
+                self->single = 0;
+                if (!adc.adc0.single && !adc.adc1.single) adc.ready = 1;
+            }
+            else {
+                // continue
+                page = RingAcquire(&adc.ring);
+
+                uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
+                        UDMA_MODE_PINGPONG,
+                        (void *)(self->adc_base + ADC_O_SSFIFO0),
+                        page->buffer+24, ADC_SAMPLES);
+            }
+        }
+    }
+
+    /*
     if(!uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
     {
         self->ping_ready = 1;
@@ -121,6 +168,7 @@ ADCxIntHandler(tADCx *self)
         // does happen if IntEnable is with ADCStart instead of ADCInit.
         //ASSERT(0);
     }
+    */
 }
 
 void
@@ -171,6 +219,8 @@ ADCRelease()
 uint16_t *
 ADCGetBuffer(bool channel)
 {
+    return 0;
+    /*
     if (adc.pingpong) {
         if (channel)
             return adc.adc1.pong;
@@ -183,6 +233,13 @@ ADCGetBuffer(bool channel)
         else
             return adc.adc0.ping;
     }
+    */
+}
+
+tRing *
+ADCGetRing()
+{
+    return &adc.ring;
 }
 
 void
@@ -227,7 +284,7 @@ ConfigureADCx(tADCx* self)
 }
 
 void
-StartADCx(tADCx* self)
+StartADCx(tADCx* self, tPage* ping, tPage* pong)
 {
     uDMAChannelAttributeDisable(self->udma_channel,
         UDMA_ATTR_ALTSELECT | UDMA_ATTR_USEBURST |
@@ -245,12 +302,12 @@ StartADCx(tADCx* self)
     uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_PINGPONG,
             (void *)(self->adc_base + ADC_O_SSFIFO0),
-            self->ping, ADC_BUFFER_LENGTH);
+            ping->buffer+24, ADC_SAMPLES);
 
     uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
             UDMA_MODE_PINGPONG,
             (void *)(self->adc_base + ADC_O_SSFIFO0),
-            self->pong, ADC_BUFFER_LENGTH);
+            pong->buffer+24, ADC_SAMPLES);
 
     uDMAChannelEnable(self->udma_channel);
 
@@ -291,6 +348,38 @@ ADCInit()
     ConfigureADCx(&adc.adc0);
     ConfigureADCx(&adc.adc1);
 
-    StartADCx(&adc.adc0);
-    StartADCx(&adc.adc1);
+    //StartADCx(&adc.adc0);
+    //StartADCx(&adc.adc1);
+}
+
+void
+ADCSingle()
+{
+    tPage *ping0;
+    tPage *pong0;
+    tPage *ping1;
+    tPage *pong1;
+
+    ADCInit();
+
+    RingAllocate(&adc.ring, MEMORY_LENGTH);
+
+    ping0 = RingAcquire(&adc.ring);
+    ping1 = RingAcquire(&adc.ring);
+
+    pong0 = RingAcquire(&adc.ring);
+    pong1 = RingAcquire(&adc.ring);
+
+    adc.adc0.single = 1;
+    adc.adc1.single = 1;
+
+    adc.adc0.ping_ready = 1;
+    adc.adc0.pong_ready = 1;
+
+    adc.adc1.ping_ready = 1;
+    adc.adc1.pong_ready = 1;
+
+    StartADCx(&adc.adc0, ping0, pong0);
+    StartADCx(&adc.adc1, ping1, pong1);
+
 }

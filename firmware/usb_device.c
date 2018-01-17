@@ -35,7 +35,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "reply_handler.h"
 //#include "oscilloscope.h"
 #include "debug.h"
-#include "memory.h"
 
 /*
 #include "inc/hw_ints.h"
@@ -260,7 +259,15 @@ void USBIntHandler(void)
         //
         usb_device.dma_pending = 0;
 
-        USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
+        if (usb_device.send_ring_buffer)
+        {
+            RingRelease(usb_device.ring);
+            if (RingEmpty(usb_device.ring)) usb_device.send_ring_buffer = 0;
+        }
+        else
+        {
+            USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
+        }
 
         //MemoryRelease(&memory);
     }
@@ -333,6 +340,15 @@ USBDeviceStartuDMA(uint8_t *payload, uint32_t length)
 
 
 void
+USBDeviceSend(tRing *ring)
+{
+    DEBUG_PRINT("USBDeviceSend\n");
+
+    usb_device.ring = ring;
+    usb_device.send_ring_buffer = 1;
+}
+
+void
 USBDeviceMain()
 {
     tEvent *event;
@@ -347,6 +363,12 @@ USBDeviceMain()
             QueueRelease(&reply_handler.reply_queue);
             //DEBUG_PRINT("send reply\n");
         }
+        else if (usb_device.send_ring_buffer)
+        {
+            page = RingRead(usb_device.ring);
+            USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
+        }
+        /*
         else if (MemorySend(&memory)) {
             page = MemoryRead(&memory);
             USBDeviceStartuDMA(page->buffer, 1024);
@@ -354,6 +376,7 @@ USBDeviceMain()
             MemoryRelease(&memory);
             //DEBUG_PRINT("send memory page %d\n", page->buffer[0]);
         }
+        */
         /*
         else if (oscilloscope.send) {
             USBDeviceStartuDMA(oscilloscope.queue[oscilloscope.read]);

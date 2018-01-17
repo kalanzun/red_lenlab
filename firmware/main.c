@@ -166,7 +166,7 @@ main(void) {
     //
     // Configure ADC
     //
-    ADCInit();
+    //ADCInit();
 
     //
     // Configure SSI

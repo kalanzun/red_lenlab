@@ -27,10 +27,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdbulk.h"
 #include "event_queue.h"
+#include "ring.h"
 
 
 typedef struct {
     volatile uint8_t dma_pending;
+    volatile bool send_ring_buffer;
+
+    tRing *ring;
 } tUSBDevice;
 
 
@@ -38,6 +42,7 @@ extern tUSBDevice USBDevice;
 
 
 //void SendBuffer(uint8_t *buffer);
+void USBDeviceSend(tRing *ring);
 
 void USBDeviceMain(void);
 

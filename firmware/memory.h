@@ -24,103 +24,39 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MEMORY_H_
 
 
-#define MEMORY_LENGTH 14
-#define MEMORY_PAGE_LENGTH 1024
+#define MEMORY_LENGTH 16
+#define PAGE_LENGTH 1024
 
 
 typedef struct Page {
-    uint8_t buffer[MEMORY_PAGE_LENGTH];
+    uint8_t buffer[PAGE_LENGTH];
 } tPage;
 
 
 typedef struct Memory {
-    tPage pages[MEMORY_LENGTH];
-    uint32_t read;
-    uint32_t write;
-    bool send;
+    tPage memory[MEMORY_LENGTH];
+    uint32_t allocated;
 } tMemory;
 
 
 extern tMemory memory;
 
 
-inline void
-MemoryAllocate(tMemory *self)
-{
-    self->read = 0;
-    self->write = 0;
-    self->send = false;
-}
-
-
-inline void
-MemoryFree(tMemory *self)
-{
-
-}
-
-
-inline bool
-MemorySend(tMemory *self)
-{
-    return self->send;
-}
-
-
-inline bool
-MemoryEmpty(tMemory *self)
-{
-    return self->read == self->write;
-}
-
-
-inline bool
-MemoryFull(tMemory *self)
-{
-    return (self->write+1) % MEMORY_LENGTH == self->read;
-}
-
-
 inline tPage*
-MemoryAcquire(tMemory *self)
+MemoryAllocate(tMemory *self, uint32_t pages)
 {
-    return self->pages + self->write;
-}
-
-
-inline void
-MemoryWrite(tMemory *self)
-{
-    self->write = (self->write + 1) % MEMORY_LENGTH;
-}
-
-
-inline void
-MemoryStartSending(tMemory *self)
-{
-    self->read = self->write;
-    self->send = true;
-}
-
-
-inline tPage*
-MemoryRead(tMemory *self)
-{
-    return self->pages + self->read;
-}
-
-
-inline void
-MemoryRelease(tMemory *self)
-{
-    self->read = (self->read + 1) % MEMORY_LENGTH;
-    if (MemoryEmpty(self)) self->send = false;
+    tPage *page;
+    ASSERT(self->allocated + pages <= MEMORY_LENGTH);
+    page = self->memory + self->allocated;
+    self->allocated = self->allocated + pages;
+    return page;
 }
 
 
 inline void
 MemoryInit(tMemory *self)
 {
+    self->allocated = 0;
 }
 
 

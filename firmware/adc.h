@@ -24,7 +24,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define ADC_H_
 
 
-#define ADC_BUFFER_LENGTH 1000
+#include "ring.h"
+
+
+#define ADC_SAMPLES 500
 
 
 typedef struct ADCx {
@@ -37,8 +40,10 @@ typedef struct ADCx {
 
     volatile bool ping_ready;
     volatile bool pong_ready;
-    uint16_t ping[ADC_BUFFER_LENGTH];
-    uint16_t pong[ADC_BUFFER_LENGTH];
+    volatile bool single;
+
+    tPage *ping;
+    tPage *pong;
 } tADCx;
 
 
@@ -51,18 +56,21 @@ typedef struct ADC {
 
     tADCx adc0;
     tADCx adc1;
+
+    tRing ring;
 } tADC;
 
 
-void ADCEnable();
-void ADCDisable();
+void ADCSetDivider(uint8_t divider);
 
+void ADCStart();
+void ADCStop();
 bool ADCReady();
+uint16_t *ADCGetBuffer(bool channel);
 void ADCRelease();
 
-uint16_t *ADCGetBuffer(bool channel);
-
-void ADCSetDivider(uint8_t divider);
+void ADCSingle();
+tRing *ADCGetRing();
 
 void ADCInit();
 

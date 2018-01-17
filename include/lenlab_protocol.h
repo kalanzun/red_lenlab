@@ -68,6 +68,7 @@ enum Type {
     noType,
     String,
     ByteArray,
+    ShortArray,
     IntArray,
     NUM_TYPES
 };
