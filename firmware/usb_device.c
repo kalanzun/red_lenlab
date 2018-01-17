@@ -349,7 +349,7 @@ USBDeviceStartuDMA(uint8_t *payload, uint32_t length)
 void
 USBDeviceSend(tRing *ring)
 {
-    DEBUG_PRINT("USBDeviceSend\n");
+    //DEBUG_PRINT("USBDeviceSend\n");
 
     usb_device.ring = ring;
     usb_device.send_ring_buffer = 1;
@@ -358,7 +358,7 @@ USBDeviceSend(tRing *ring)
 void
 USBDeviceSendInterleaved(tRing *ring0, tRing *ring1)
 {
-    DEBUG_PRINT("USBDeviceSendInterleaved\n");
+    //DEBUG_PRINT("USBDeviceSendInterleaved\n");
 
     usb_device.pingpong = 0;
     usb_device.pingpong_ring[0] = ring0;

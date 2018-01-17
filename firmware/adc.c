@@ -388,4 +388,18 @@ ADCSingle(uint32_t length0, uint32_t length1)
     StartADCx(&adc.adc0, ping0, pong0);
     StartADCx(&adc.adc1, ping1, pong1);
 
+    // drop the first two pages
+
+    ping0 = RingRead(&adc.adc0.ring);
+    pong0 = RingRead(&adc.adc0.ring);
+
+    ping1 = RingRead(&adc.adc1.ring);
+    pong1 = RingRead(&adc.adc1.ring);
+
+    RingRelease(&adc.adc0.ring);
+    RingRelease(&adc.adc0.ring);
+
+    RingRelease(&adc.adc1.ring);
+    RingRelease(&adc.adc1.ring);
+
 }

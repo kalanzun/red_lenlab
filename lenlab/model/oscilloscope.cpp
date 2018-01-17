@@ -101,7 +101,7 @@ Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
     uint8_t channel = buffer[0];
     uint8_t last_package = buffer[1];
     uint8_t count = buffer[2];
-    //qDebug() << count << channel << last_package;
+    //qDebug() << "receive" << count << channel << last_package;
 
     for (uint32_t i = 1; i < 500; i++) {
         incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);

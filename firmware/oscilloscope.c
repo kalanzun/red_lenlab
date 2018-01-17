@@ -46,7 +46,7 @@ OscilloscopeStart(tOscilloscope *self)
 {
     uint32_t i;
 
-    DEBUG_PRINT("OscilloscopeStart\n");
+    //DEBUG_PRINT("OscilloscopeStart\n");
 
     if (self->active)// || self->send)
         return;
@@ -105,7 +105,7 @@ OscilloscopeMain(tOscilloscope *self)
 
     if (ADCReady())
     {
-        DEBUG_PRINT("OscilloscopeReady\n");
+        //DEBUG_PRINT("OscilloscopeReady\n");
 
         ring0 = ADCGetRing(0);
         ring1 = ADCGetRing(1);
@@ -113,7 +113,7 @@ OscilloscopeMain(tOscilloscope *self)
 
         for (i = 0; i < ring0->length; i++)
         {
-            page = RingGet(ring0, i);
+            page = RingRead(ring0);
 
             page->buffer[0] = OscilloscopeData; // reply
             page->buffer[1] = ShortArray; // type
@@ -124,7 +124,7 @@ OscilloscopeMain(tOscilloscope *self)
 
         for (i = 0; i < ring1->length; i++)
         {
-            page = RingGet(ring1, i);
+            page = RingRead(ring1);
 
             page->buffer[0] = OscilloscopeData; // reply
             page->buffer[1] = ShortArray; // type
