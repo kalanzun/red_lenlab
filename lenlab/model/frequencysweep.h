@@ -23,6 +23,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "component.h"
 #include "frequencyseries.h"
+#include "waveform.h"
+#include "communication.h"
 #include <QObject>
 
 namespace model {
@@ -38,8 +40,8 @@ class Frequencysweep : public Component
 
     QSharedPointer<FrequencySeries> current;
 
-    bool running;
-    bool toggle;
+    bool pending;
+    bool wait_for_update;
 
 public:
     explicit Frequencysweep(Lenlab *parent);
@@ -50,25 +52,27 @@ public:
     virtual void start();
     virtual void stop();
 
-    virtual void timerEvent(QTimerEvent *event);
-
+    void try_to_start();
     void restart();
-
-    void receive(const usb::pMessage &reply);
+    void step();
 
     QSharedPointer<FrequencySeries> getWaveform();
 
     void save(const QString &fileName);
 
 signals:
+    void calculate();
     void replot();
 
 public slots:
-    void on_replot();
+    void on_reply(const pCommunication &com, const usb::pMessage &reply);
+    void on_calculate();
     void on_updated();
 
 private:
     typedef Component super;
+
+    QSharedPointer<Waveform> incoming;
 };
 
 } // namespace model

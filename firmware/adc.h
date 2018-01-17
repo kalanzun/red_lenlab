@@ -41,20 +41,13 @@ typedef struct ADCx {
     volatile bool ping_enable;
     volatile bool pong_enable;
     volatile bool single;
-    volatile bool pingpong;
-
-    tPage *ping;
-    tPage *pong;
 
     tRing ring;
 } tADCx;
 
 
 typedef struct ADC {
-    volatile bool pingpong;
     volatile bool ready;
-    volatile bool enable;
-    volatile bool prepare;
     volatile bool error;
 
     tADCx adc0;
@@ -70,6 +63,7 @@ bool ADCReady();
 void ADCRelease();
 
 void ADCSingle(uint32_t length);
+void ADCPingPong();
 tRing *ADCGetRing(bool channel);
 
 void ADCInit();

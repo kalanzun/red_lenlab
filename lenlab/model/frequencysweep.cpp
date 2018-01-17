@@ -28,6 +28,9 @@ namespace model {
 
 Frequencysweep::Frequencysweep(Lenlab *parent) : Component(parent), current(new FrequencySeries())
 {
+    connect(this, SIGNAL(calculate()),
+            this, SLOT(on_calculate()),
+            Qt::QueuedConnection);
 
 }
 
@@ -48,25 +51,33 @@ Frequencysweep::start()
 {
     super::start();
 
+    pending = 0;
+    wait_for_update = 0;
+
     index = 0;
     current->clear();
     lenlab->signalgenerator->setAmplitude(14);
     lenlab->signalgenerator->setDivider(1);
 
-    restart();
+    step();
 }
 
 void
 Frequencysweep::stop()
 {
     super::stop();
+
+    pending = 0;
+    wait_for_update = 0;
 }
 
 void
-Frequencysweep::restart()
+Frequencysweep::step()
 {
     if (!m_active)
         return;
+
+    qDebug() << "step";
 
     divider = 0;
     /*
@@ -79,58 +90,84 @@ Frequencysweep::restart()
 
     lenlab->oscilloscope->setSamplerateDivider(divider);
     */
-    toggle = 0;
-    //startTimer(10);
+
+    wait_for_update = 1;
     lenlab->signalgenerator->setFrequency(index);
 }
 
 void
 Frequencysweep::on_updated()
 {
-    if (!m_active)
+    if (!wait_for_update)
         return;
 
-    lenlab->oscilloscope->single();
+    pending = 1;
+    wait_for_update = 0;
 }
 
-
 void
-Frequencysweep::timerEvent(QTimerEvent *event)
+Frequencysweep::try_to_start()
 {
-    killTimer(event->timerId());
+    if (pending && lenlab->available()) {
+        restart();
+        pending = 0;
+    }
+}
 
-    if (toggle) {
-        lenlab->oscilloscope->restart();
-    }
-    else {
-        lenlab->signalgenerator->setFrequency(index);
-    }
-}
-/*
 void
-Frequencysweep::receive(const usb::pMessage &reply)
+Frequencysweep::restart()
 {
-    if (reply->getReply() == SignalSine) {
-        toggle = 1;
-        startTimer(100);
-    }
+    qDebug() << "restart";
+
+    incoming.reset(new Waveform());
+
+    auto com = lenlab->initCommunication();
+    connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
+            this, SLOT(on_reply(pCommunication, usb::pMessage)));
+    com->send(usb::newCommand(startOscilloscope));
 }
-*/
+
 void
-Frequencysweep::on_replot()
+Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
+{
+    //qDebug("receive");
+    uint8_t *buffer = reply->getBody();
+    int16_t *data = (int16_t *) (reply->getBody() + 22);
+
+    uint8_t channel = buffer[0];
+    uint8_t last_package = buffer[1];
+    uint8_t count = buffer[2];
+    //qDebug() << "receive" << count << channel << last_package;
+
+    for (uint32_t i = 1; i < 500; i++) {
+        incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
+    }
+
+    if (last_package) {
+        //qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
+
+        incoming->setView(incoming->getLength(0));
+
+        com->deleteLater();
+        emit calculate();
+
+    }
+
+}
+
+void
+Frequencysweep::on_calculate()
 {
     // Ignore normal oscilloscope events
     if (!m_active)
         return;
-
-    auto waveform = lenlab->oscilloscope->getWaveform();
 
     auto current_divider = divider;
     auto current_index = index;
 
     index++;
     if (index < 100) {
-        restart();
+        step();
     }
     else {
         stop();
@@ -147,13 +184,13 @@ Frequencysweep::on_replot()
     sum0 = 0;
     sum1 = 0;
 
-    waveform->setTrigger(0);
+    incoming->setTrigger(0);
 
-    for (uint32_t idx = 0; idx < waveform->getLength(0); idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) idx - (waveform->getLength(0) / 2));
+    for (uint32_t idx = 0; idx < incoming->getLength(0); idx++) {
+        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) idx - (incoming->getLength(0) / 2));
         y = std::sin(x) + i * std::cos(x);
-        sum0 += waveform->getY(idx, 0) * y;
-        sum1 += waveform->getY(idx, 1) * y;
+        sum0 += incoming->getY(idx, 0) * y;
+        sum1 += incoming->getY(idx, 1) * y;
     }
 
     value = std::abs(sum1) / std::abs(sum0);
@@ -161,10 +198,11 @@ Frequencysweep::on_replot()
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / waveform->getLength(0) << std::abs(sum0) / waveform->getLength(0) << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
+    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / incoming->getLength(0) << std::abs(sum0) / incoming->getLength(0) << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
 
     current->append(0, value);
     current->append(1, angle);
+
     emit replot();
 }
 

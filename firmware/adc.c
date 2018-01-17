@@ -61,121 +61,78 @@ ADCxIntHandler(tADCx *self)
     //
     ADCIntClear(self->adc_base, 0);
 
-    if (self->single) {
-        // ping_ and pong_enable are required, because uDMAChannelSizeGet
-        // does return 0 at the end when the PRI channel is about to be disabled
-        if(self->ping_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
-        {
-            // PRI is done, ALT is working this moment
-            RingWrite(&self->ring);
+    // ping_ and pong_enable are required, because uDMAChannelSizeGet
+    // does return 0 at the end when the PRI channel is about to be disabled
+    if(self->ping_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
+    {
+        // PRI is done, ALT is working this moment
+        RingWrite(&self->ring);
 
-            if (RingFull(&self->ring)) {
+        if (RingFull(&self->ring))
+        {
+            if (self->single)
+            {
                 // done
                 self->ping_enable = 0;
             }
-            else {
-                // continue
-                page = RingAcquire(&self->ring);
-
-                uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
-                    UDMA_MODE_PINGPONG,
-                    (void *)(self->adc_base + ADC_O_SSFIFO0),
-                    page->buffer+24, ADC_SAMPLES);
+            else
+            {
+                // error
+                DEBUG_PRINT("Timing error: The firmware is too slow reading ADC data\n");
+                adc.error = 1;
             }
         }
-        else if(self->pong_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
-        {
-            // ALT is done, PRI is working this moment
-            RingWrite(&self->ring);
 
-            if (RingFull(&self->ring)) {
+        else {
+            // continue
+            page = RingAcquire(&self->ring);
+
+            uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
+                UDMA_MODE_PINGPONG,
+                (void *)(self->adc_base + ADC_O_SSFIFO0),
+                page->buffer+24, ADC_SAMPLES);
+        }
+    }
+
+    else if(self->pong_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
+    {
+        // ALT is done, PRI is working this moment
+        RingWrite(&self->ring);
+
+        if (RingFull(&self->ring))
+        {
+            if (self->single)
+            {
                 // done
                 self->pong_enable = 0;
+
                 // disable ADC
                 TimerDisable(TIMER1_BASE, TIMER_A);
                 uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
                 ADCSequenceDisable(self->adc_base, 0);
                 ADCIntDisable(self->adc_base, 0);
+
                 // flag ready
-                self->single = 0;
-                if (!adc.adc0.single && !adc.adc1.single) adc.ready = 1;
+                if (!adc.adc0.pong_enable && !adc.adc1.pong_enable) adc.ready = 1;
             }
-            else {
-                // continue
-                page = RingAcquire(&self->ring);
-
-                uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
-                    UDMA_MODE_PINGPONG,
-                    (void *)(self->adc_base + ADC_O_SSFIFO0),
-                    page->buffer+24, ADC_SAMPLES);
+            else
+            {
+                // error
+                DEBUG_PRINT("Timing error: The firmware is too slow reading ADC data\n");
+                adc.error = 1;
             }
         }
-    }
 
-    /*
-    if(!uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
-    {
-        self->ping_ready = 1;
-        if (self->pong_ready) {
-            DEBUG_PRINT("Timing error: The firmware is too slow reading ADC data\n");
-            adc.enable = 0;
-            adc.error = 1;
-        }
-        uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
+        else {
+            // continue
+            page = RingAcquire(&self->ring);
+
+            uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
                 UDMA_MODE_PINGPONG,
                 (void *)(self->adc_base + ADC_O_SSFIFO0),
-                self->ping, ADC_BUFFER_LENGTH);
-
-        if (adc.adc0.ping_ready && adc.adc1.ping_ready) {
-            if (adc.enable) {
-                adc.pingpong = 0;
-                adc.ready = 1;
-            }
-            else {
-                adc.adc0.ping_ready = 0;
-                adc.adc1.ping_ready = 0;
-                if (adc.prepare) {
-                    adc.enable = 1;
-                    adc.prepare = 0;
-                }
-            }
+                page->buffer+24, ADC_SAMPLES);
         }
     }
-    else if(!uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
-    {
-        self->pong_ready = 1;
-        if (self->ping_ready) {
-            DEBUG_PRINT("Timing error: The firmware is too slow reading ADC data\n");
-            adc.enable = 0;
-            adc.error = 1;
-        }
-        uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
-                UDMA_MODE_PINGPONG,
-                (void *)(self->adc_base + ADC_O_SSFIFO0),
-                self->pong, ADC_BUFFER_LENGTH);
-
-        if (adc.adc0.pong_ready && adc.adc1.pong_ready) {
-            if (adc.enable) {
-                adc.pingpong = 1;
-                adc.ready = 1;
-            }
-            else {
-                adc.adc0.pong_ready = 0;
-                adc.adc1.pong_ready = 0;
-                if (adc.prepare) {
-                    adc.enable = 1;
-                    adc.prepare = 0;
-                }
-            }
-        }
-    }
-    else
-    {
-        // normal ADC interrupt, not uDMA interrupt / what???
-        // does happen if IntEnable is with ADCStart instead of ADCInit.
-        //ASSERT(0);
-    }
-    */
 }
 
 void
@@ -190,19 +147,6 @@ ADC1IntHandler(void)
     ADCxIntHandler(&adc.adc1);
 }
 
-void
-ADCEnable()
-{
-    if (!adc.prepare && !adc.enable && !adc.error)
-        adc.prepare = 1;
-}
-
-void
-ADCDisable()
-{
-    adc.enable = 0;
-}
-
 bool
 ADCReady()
 {
@@ -213,16 +157,6 @@ void
 ADCRelease()
 {
     adc.ready = 0;
-    /*
-    if (adc.pingpong) {
-        adc.adc0.pong_ready = 0;
-        adc.adc1.pong_ready = 0;
-    }
-    else {
-        adc.adc0.ping_ready = 0;
-        adc.adc1.ping_ready = 0;
-    }
-    */
 }
 
 tRing *
@@ -300,8 +234,8 @@ ADCStart(uint32_t length, bool single)
     }
     else
     {
-        adc.adc0.pingpong = 1;
-        adc.adc1.pingpong = 1;
+        adc.adc0.single = 0;
+        adc.adc1.single = 0;
     }
 
     // Both ADC shall run exactly in sync
@@ -376,10 +310,7 @@ ConfigureADCx(tADCx* self)
 void
 ADCInit()
 {
-    adc.pingpong = 0;
     adc.ready = 0;
-    adc.enable = 0;
-    adc.prepare = 0;
     adc.error = 0;
 
     adc.adc0.adc_base = ADC0_BASE;
@@ -389,11 +320,6 @@ ADCInit()
     adc.adc0.gpio_pin = GPIO_PIN_0;
     adc.adc0.udma_channel = UDMA_CHANNEL_ADC0;
 
-    /*
-    adc.adc0.ping_ready = 0;
-    adc.adc0.pong_ready = 0;
-    */
-
     adc.adc1.adc_base = ADC1_BASE;
     adc.adc1.adc_int = INT_ADC1SS0;
     adc.adc1.adc_channel = ADC_CTL_CH6;
@@ -402,10 +328,7 @@ ADCInit()
     adc.adc1.udma_channel = 24; // UDMA_CHANNEL_ADC1 enthält einen falschen Wert?!
 
     uDMAChannelAssign(UDMA_CH24_ADC1_0);
-    /*
-    adc.adc1.ping_ready = 0;
-    adc.adc1.pong_ready = 0;
-    */
+
     ConfigureADCx(&adc.adc0);
     ConfigureADCx(&adc.adc1);
 }

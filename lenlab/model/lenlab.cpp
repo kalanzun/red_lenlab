@@ -32,8 +32,6 @@ Lenlab::Lenlab(QObject *parent) :
 {
     qDebug() << "Lenlab";
 
-    connect(oscilloscope, SIGNAL(replot()),
-            frequencysweep, SLOT(on_replot()));
     connect(signalgenerator, SIGNAL(updated()),
             frequencysweep, SLOT(on_updated()));
 }
@@ -96,6 +94,7 @@ Lenlab::on_comDestroyed(QObject *obj)
     Q_UNUSED(obj);
     signalgenerator->try_to_setSine();
     oscilloscope->try_to_start();
+    frequencysweep->try_to_start();
 }
 
 void

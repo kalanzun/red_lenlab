@@ -44,9 +44,26 @@ OscilloscopeSetSamplerateDivider(tOscilloscope *self, uint8_t divider)
 void
 OscilloscopeStart(tOscilloscope *self)
 {
+    //DEBUG_PRINT("OscilloscopeStart\n");
+
+    if (self->active)// || self->send)
+        return;
+
+    self->active = 1;
+    self->trigger = 0;
+    self->count = 0;
+
+    MemoryInit(&memory);
+    ADCSingle(8);
+}
+
+
+void
+OscilloscopeStartTrigger(tOscilloscope *self)
+{
     uint32_t i;
 
-    DEBUG_PRINT("OscilloscopeStart\n");
+    DEBUG_PRINT("OscilloscopeStartTrigger\n");
 
     if (self->active)// || self->send)
         return;
@@ -61,12 +78,13 @@ OscilloscopeStart(tOscilloscope *self)
     self->trigger_post_count = 0;
 
     self->active = 1;
+    self->trigger = 1;
     self->count = 0;
 
     MemoryInit(&memory);
-    ADCSingle(8);
+    ADCPingPong(); // Allocates 4
+    RingAllocate(&self->ring, 12);
 }
-
 
 inline int8_t
 delta(uint16_t previous, uint16_t next)
@@ -88,21 +106,19 @@ OscilloscopeMain(tOscilloscope *self)
     tRing *ring0;
     tRing *ring1;
     tPage *page;
-    /*
+
+    tPage *adc_page0;
+    tPage *adc_page1;
     uint16_t *buffer0;
     uint16_t *buffer1;
-    tPage *page0;
-    tPage *page1;
+
     uint16_t state0, state1;
-    int8_t *data0;
-    int8_t *data1;
-    */
+    int8_t *data;
 
-    if (!self->active) return;
+    if (!self->active)
+        return;
 
-    //while (self->active) {
-
-    if (ADCReady())
+    if (!self->trigger && ADCReady()) // single done
     {
         //DEBUG_PRINT("OscilloscopeReady\n");
 
@@ -135,46 +151,44 @@ OscilloscopeMain(tOscilloscope *self)
 
         USBDeviceSendInterleaved(ring0, ring1);
         self->active = 0;
+    }
 
-        /*
-        buffer0 = ADCGetBuffer(0);
-        buffer1 = ADCGetBuffer(1);
+    else if (self->trigger && ADCReady())
+    {
+        ring0 = ADCGetRing(0);
+        ring1 = ADCGetRing(1);
 
-        ASSERT(!MemoryFull(&memory));
-        page0 = MemoryAcquire(&memory);
-        MemoryWrite(&memory);
-        page1 = MemoryAcquire(&memory);
-        MemoryWrite(&memory);
+        adc_page0 = RingRead(ring0);
+        adc_page1 = RingRead(ring1);
 
-        page0->buffer[0] = OscilloscopeData;
-        page0->buffer[1] = ByteArray;
-        page0->buffer[2] = 0;
-        page0->buffer[3] = 0;
+        buffer0 = (uint16_t *) (adc_page0->buffer + 24);
+        buffer1 = (uint16_t *) (adc_page1->buffer + 24);
+
+        page = RingAcquire(&self->ring);
+
+        page->buffer[0] = OscilloscopeData;
+        page->buffer[1] = ByteArray;
+        page->buffer[2] = 0;
+        page->buffer[3] = 0;
 
         state0 = buffer0[0] >> 2;
-        *(uint16_t *) (page0->buffer + 4) = state0;
-        *(uint16_t *) (page0->buffer + 6) = 0;
-
-        data0 = (int8_t *) (page0->buffer + OSCILLOSCOPE_HEADER_LENGTH);
-
-        page1->buffer[0] = OscilloscopeData;
-        page1->buffer[1] = ByteArray;
-        page1->buffer[2] = 1;
-        page1->buffer[3] = 0;
-
         state1 = buffer1[0] >> 2;
-        *(uint16_t *) (page1->buffer + 4) = state1;
+        *(uint16_t *) (page->buffer + 4) = state0;
+        *(uint16_t *) (page->buffer + 6) = state1;
+        *(uint16_t *) (page->buffer + 8) = 0; // trigger value
 
-        data1 = (int8_t *) (page1->buffer + OSCILLOSCOPE_HEADER_LENGTH);
+        data = (int8_t *) (page->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
         if (self->count == 3) {
             self->trigger_wait = 1;
         }
 
-        for (i = 1; i < ADC_BUFFER_LENGTH; i++)
+        for (i = 1; i < ADC_SAMPLES; i++)
         {
-            data0[i] = delta(state0, buffer0[i] >> 2);
-            state0 += data0[i];
+            data[2*i] = delta(state0, buffer0[i] >> 2);
+            state0 += data[2*i];
+            data[2*i+1] = delta(state1, buffer1[i] >> 2);
+            state1 += data[2*i+1];
 
             if (self->count == 2 || self->trigger_wait || self->trigger_active) {
                 self->filter_state -= self->filter[self->filter_index];
@@ -195,41 +209,35 @@ OscilloscopeMain(tOscilloscope *self)
                     ) {
                 self->trigger_active = 0;
                 self->trigger_save = 1;
-                *(uint16_t *) (page0->buffer + 6) = i;
+                *(uint16_t *) (page->buffer + 8) = i;
             }
-
-            data1[i] = delta(state1, buffer1[i] >> 2);
-            state1 += data1[i];
         }
 
-        ADCRelease();
+        RingRelease(ring0);
+        RingRelease(ring1);
 
         self->count++;
 
-        if (self->count == 7) {
-            page1->buffer[3] = 1; // mark this the last package
-            ADCDisable();
-            MemoryStartSending(&memory);
+        if (self->count == 12) {
+            page->buffer[3] = 1; // mark this the last package
+            ADCStop();
+            USBDeviceSend(&self->ring);
             self->active = 0;
         }
 
+        /*
         if (self->trigger_save) {
             self->trigger_post_count++;
             if (self->trigger_post_count == 4) {
                 self->trigger_save = 0;
-                page1->buffer[3] = 1; // mark this the last package
+                page->buffer[3] = 1; // mark this the last package
                 ADCDisable();
                 MemoryStartSending(&memory);
                 self->active = 0;
             }
         }
-
-        //self->write = (self->write + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
         */
-
     }
-
-    //}
 }
 
 
