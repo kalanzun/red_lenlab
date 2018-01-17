@@ -38,9 +38,10 @@ typedef struct ADCx {
     uint32_t gpio_pin;
     uint32_t udma_channel;
 
-    volatile bool ping_ready;
-    volatile bool pong_ready;
+    volatile bool ping_enable;
+    volatile bool pong_enable;
     volatile bool single;
+    volatile bool pingpong;
 
     tPage *ping;
     tPage *pong;
@@ -63,13 +64,12 @@ typedef struct ADC {
 
 void ADCSetDivider(uint8_t divider);
 
-void ADCStart();
+void ADCStart(uint32_t length, bool single);
 void ADCStop();
 bool ADCReady();
-uint16_t *ADCGetBuffer(bool channel);
 void ADCRelease();
 
-void ADCSingle(uint32_t length0, uint32_t length1);
+void ADCSingle(uint32_t length);
 tRing *ADCGetRing(bool channel);
 
 void ADCInit();

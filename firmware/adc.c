@@ -62,39 +62,41 @@ ADCxIntHandler(tADCx *self)
     ADCIntClear(self->adc_base, 0);
 
     if (self->single) {
-        if(self->ping_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
+        // ping_ and pong_enable are required, because uDMAChannelSizeGet
+        // does return 0 at the end when the PRI channel is about to be disabled
+        if(self->ping_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
         {
-            DEBUG_PRINT("ADCInt PRI\n");
-            // pri is done, alt is working right now
+            // PRI is done, ALT is working this moment
             RingWrite(&self->ring);
+
             if (RingFull(&self->ring)) {
                 // done
-                self->ping_ready = 0;
+                self->ping_enable = 0;
             }
             else {
                 // continue
                 page = RingAcquire(&self->ring);
 
                 uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
-                        UDMA_MODE_PINGPONG,
-                        (void *)(self->adc_base + ADC_O_SSFIFO0),
-                        page->buffer+24, ADC_SAMPLES);
+                    UDMA_MODE_PINGPONG,
+                    (void *)(self->adc_base + ADC_O_SSFIFO0),
+                    page->buffer+24, ADC_SAMPLES);
             }
         }
-        else if(self->pong_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
+        else if(self->pong_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
         {
-            DEBUG_PRINT("ADCInt ALT\n");
-            // alt is done, pri is working right now
+            // ALT is done, PRI is working this moment
             RingWrite(&self->ring);
+
             if (RingFull(&self->ring)) {
                 // done
-                self->pong_ready = 0;
-                uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
+                self->pong_enable = 0;
+                // disable ADC
                 TimerDisable(TIMER1_BASE, TIMER_A);
+                uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
                 ADCSequenceDisable(self->adc_base, 0);
-
                 ADCIntDisable(self->adc_base, 0);
-
+                // flag ready
                 self->single = 0;
                 if (!adc.adc0.single && !adc.adc1.single) adc.ready = 1;
             }
@@ -103,9 +105,9 @@ ADCxIntHandler(tADCx *self)
                 page = RingAcquire(&self->ring);
 
                 uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
-                        UDMA_MODE_PINGPONG,
-                        (void *)(self->adc_base + ADC_O_SSFIFO0),
-                        page->buffer+24, ADC_SAMPLES);
+                    UDMA_MODE_PINGPONG,
+                    (void *)(self->adc_base + ADC_O_SSFIFO0),
+                    page->buffer+24, ADC_SAMPLES);
             }
         }
     }
@@ -211,6 +213,7 @@ void
 ADCRelease()
 {
     adc.ready = 0;
+    /*
     if (adc.pingpong) {
         adc.adc0.pong_ready = 0;
         adc.adc1.pong_ready = 0;
@@ -219,6 +222,7 @@ ADCRelease()
         adc.adc0.ping_ready = 0;
         adc.adc1.ping_ready = 0;
     }
+    */
 }
 
 tRing *
@@ -238,7 +242,7 @@ ADCSetDivider(uint8_t divider)
 }
 
 void
-StartADCx(tADCx* self, tPage* ping, tPage* pong)
+StartADCx(tADCx *self, tPage *ping, tPage *pong)
 {
     uDMAChannelAttributeDisable(self->udma_channel,
         UDMA_ATTR_ALTSELECT | UDMA_ATTR_USEBURST |
@@ -258,10 +262,14 @@ StartADCx(tADCx* self, tPage* ping, tPage* pong)
         (void *)(self->adc_base + ADC_O_SSFIFO0),
         ping->buffer+24, ADC_SAMPLES);
 
+    self->ping_enable = 1;
+
     uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
         UDMA_MODE_PINGPONG,
         (void *)(self->adc_base + ADC_O_SSFIFO0),
         pong->buffer+24, ADC_SAMPLES);
+
+    self->pong_enable = 1;
 
     ADCSequenceEnable(self->adc_base, 0);
     uDMAChannelEnable(self->udma_channel);
@@ -269,15 +277,15 @@ StartADCx(tADCx* self, tPage* ping, tPage* pong)
 }
 
 void
-ADCSingle(uint32_t length0, uint32_t length1)
+ADCStart(uint32_t length, bool single)
 {
     tPage *ping0;
     tPage *pong0;
     tPage *ping1;
     tPage *pong1;
 
-    RingAllocate(&adc.adc0.ring, length0);
-    RingAllocate(&adc.adc1.ring, length1);
+    RingAllocate(&adc.adc0.ring, length);
+    RingAllocate(&adc.adc1.ring, length);
 
     ping0 = RingAcquire(&adc.adc0.ring);
     pong0 = RingAcquire(&adc.adc0.ring);
@@ -285,14 +293,16 @@ ADCSingle(uint32_t length0, uint32_t length1)
     ping1 = RingAcquire(&adc.adc1.ring);
     pong1 = RingAcquire(&adc.adc1.ring);
 
-    adc.adc0.single = 1;
-    adc.adc1.single = 1;
-
-    adc.adc0.ping_ready = 1;
-    adc.adc0.pong_ready = 1;
-
-    adc.adc1.ping_ready = 1;
-    adc.adc1.pong_ready = 1;
+    if (single)
+    {
+        adc.adc0.single = 1;
+        adc.adc1.single = 1;
+    }
+    else
+    {
+        adc.adc0.pingpong = 1;
+        adc.adc1.pingpong = 1;
+    }
 
     // Both ADC shall run exactly in sync
     // - A common timer triggers both ADCs
@@ -318,6 +328,23 @@ ADCSingle(uint32_t length0, uint32_t length1)
 
     RingRelease(&adc.adc1.ring);
     RingRelease(&adc.adc1.ring);
+}
+
+void
+ADCSingle(uint32_t length)
+{
+    ADCStart(length, 1);
+}
+
+void
+ADCPingPong()
+{
+    ADCStart(2, 0);
+}
+
+void
+ADCStop()
+{
 }
 
 void
@@ -362,8 +389,10 @@ ADCInit()
     adc.adc0.gpio_pin = GPIO_PIN_0;
     adc.adc0.udma_channel = UDMA_CHANNEL_ADC0;
 
+    /*
     adc.adc0.ping_ready = 0;
     adc.adc0.pong_ready = 0;
+    */
 
     adc.adc1.adc_base = ADC1_BASE;
     adc.adc1.adc_int = INT_ADC1SS0;
@@ -373,10 +402,10 @@ ADCInit()
     adc.adc1.udma_channel = 24; // UDMA_CHANNEL_ADC1 enthält einen falschen Wert?!
 
     uDMAChannelAssign(UDMA_CH24_ADC1_0);
-
+    /*
     adc.adc1.ping_ready = 0;
     adc.adc1.pong_ready = 0;
-
+    */
     ConfigureADCx(&adc.adc0);
     ConfigureADCx(&adc.adc1);
 }

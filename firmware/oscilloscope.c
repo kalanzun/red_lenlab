@@ -64,7 +64,7 @@ OscilloscopeStart(tOscilloscope *self)
     self->count = 0;
 
     MemoryInit(&memory);
-    ADCSingle(8, 8);
+    ADCSingle(8);
 }
 
 
