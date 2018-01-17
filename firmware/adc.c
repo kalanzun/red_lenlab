@@ -64,16 +64,16 @@ ADCxIntHandler(tADCx *self)
     if (self->single) {
         if(self->ping_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
         {
-            DEBUG_PRINT("ADCInt PRI\n");
+            //DEBUG_PRINT("ADCInt PRI\n");
             // pri is done, alt is working right now
-            RingWrite(&adc.ring);
-            if (RingFull(&adc.ring)) {
+            RingWrite(&self->ring);
+            if (RingFull(&self->ring)) {
                 // done
                 self->ping_ready = 0;
             }
             else {
                 // continue
-                page = RingAcquire(&adc.ring);
+                page = RingAcquire(&self->ring);
 
                 uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
                         UDMA_MODE_PINGPONG,
@@ -83,19 +83,21 @@ ADCxIntHandler(tADCx *self)
         }
         else if(self->pong_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
         {
-            DEBUG_PRINT("ADCInt ALT\n");
+            //DEBUG_PRINT("ADCInt ALT\n");
             // alt is done, pri is working right now
-            RingWrite(&adc.ring);
-            if (RingFull(&adc.ring)) {
+            RingWrite(&self->ring);
+            if (RingFull(&self->ring)) {
                 // done
                 self->pong_ready = 0;
                 uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
+                ADCIntDisable(self->adc_base, 0);
+
                 self->single = 0;
                 if (!adc.adc0.single && !adc.adc1.single) adc.ready = 1;
             }
             else {
                 // continue
-                page = RingAcquire(&adc.ring);
+                page = RingAcquire(&self->ring);
 
                 uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
                         UDMA_MODE_PINGPONG,
@@ -237,9 +239,14 @@ ADCGetBuffer(bool channel)
 }
 
 tRing *
-ADCGetRing()
+ADCGetRing(uint32_t channel)
 {
-    return &adc.ring;
+    if (channel == 0)
+        return &adc.adc0.ring;
+    if (channel == 1)
+        return &adc.adc1.ring;
+    ASSERT(0);
+    return 0;
 }
 
 void
@@ -257,7 +264,7 @@ ConfigureADCx(tADCx* self)
     //
     GPIOPinTypeADC(self->gpio_base, self->gpio_pin);
 
-    ADCHardwareOversampleConfigure(self->adc_base, 4); // 1 is too fast for the oscilloscope module
+    ADCHardwareOversampleConfigure(self->adc_base, 1); // 1 is too fast for the oscilloscope module
 
     // Set the ADC Sequence to trigger always (that is 1 MHz)
     // and to generate an interrupt every 4 samples.
@@ -353,22 +360,21 @@ ADCInit()
 }
 
 void
-ADCSingle()
+ADCSingle(uint32_t length0, uint32_t length1)
 {
     tPage *ping0;
     tPage *pong0;
     tPage *ping1;
     tPage *pong1;
 
-    ADCInit();
+    RingAllocate(&adc.adc0.ring, length0);
+    RingAllocate(&adc.adc1.ring, length1);
 
-    RingAllocate(&adc.ring, MEMORY_LENGTH);
+    ping0 = RingAcquire(&adc.adc0.ring);
+    pong0 = RingAcquire(&adc.adc0.ring);
 
-    ping0 = RingAcquire(&adc.ring);
-    ping1 = RingAcquire(&adc.ring);
-
-    pong0 = RingAcquire(&adc.ring);
-    pong1 = RingAcquire(&adc.ring);
+    ping1 = RingAcquire(&adc.adc1.ring);
+    pong1 = RingAcquire(&adc.adc1.ring);
 
     adc.adc0.single = 1;
     adc.adc1.single = 1;

@@ -33,8 +33,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 typedef struct {
     volatile uint8_t dma_pending;
     volatile bool send_ring_buffer;
+    volatile bool send_ring_buffer_interleaved;
+    volatile bool pingpong;
 
     tRing *ring;
+    tRing *pingpong_ring[2];
 } tUSBDevice;
 
 
@@ -43,6 +46,7 @@ extern tUSBDevice USBDevice;
 
 //void SendBuffer(uint8_t *buffer);
 void USBDeviceSend(tRing *ring);
+void USBDeviceSendInterleaved(tRing *ring0, tRing *ring1);
 
 void USBDeviceMain(void);
 

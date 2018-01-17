@@ -44,6 +44,8 @@ typedef struct ADCx {
 
     tPage *ping;
     tPage *pong;
+
+    tRing ring;
 } tADCx;
 
 
@@ -56,8 +58,6 @@ typedef struct ADC {
 
     tADCx adc0;
     tADCx adc1;
-
-    tRing ring;
 } tADC;
 
 
@@ -69,8 +69,8 @@ bool ADCReady();
 uint16_t *ADCGetBuffer(bool channel);
 void ADCRelease();
 
-void ADCSingle();
-tRing *ADCGetRing();
+void ADCSingle(uint32_t length0, uint32_t length1);
+tRing *ADCGetRing(uint32_t channel);
 
 void ADCInit();
 

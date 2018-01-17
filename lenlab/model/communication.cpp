@@ -32,14 +32,14 @@ Communication::Communication(usb::Handler *handler, QObject *parent) : QObject(p
 void
 Communication::send(const usb::pMessage &cmd)
 {
-    qDebug() << "send" << cmd;
+    //qDebug() << "send" << cmd;
     handler->send(cmd);
 }
 
 void
 Communication::on_reply(const usb::pMessage &rpl)
 {
-    qDebug() << "reply" << rpl;
+    //qDebug() << "reply" << rpl;
     emit reply(pCommunication(this), rpl);
 }
 

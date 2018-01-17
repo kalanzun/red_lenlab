@@ -264,6 +264,13 @@ void USBIntHandler(void)
             RingRelease(usb_device.ring);
             if (RingEmpty(usb_device.ring)) usb_device.send_ring_buffer = 0;
         }
+        else if (usb_device.send_ring_buffer_interleaved)
+        {
+            RingRelease(usb_device.pingpong_ring[usb_device.pingpong]);
+            usb_device.pingpong = !usb_device.pingpong;
+            if (RingEmpty(usb_device.pingpong_ring[usb_device.pingpong])) usb_device.send_ring_buffer_interleaved = 0;
+
+        }
         else
         {
             USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
@@ -349,6 +356,17 @@ USBDeviceSend(tRing *ring)
 }
 
 void
+USBDeviceSendInterleaved(tRing *ring0, tRing *ring1)
+{
+    DEBUG_PRINT("USBDeviceSendInterleaved\n");
+
+    usb_device.pingpong = 0;
+    usb_device.pingpong_ring[0] = ring0;
+    usb_device.pingpong_ring[1] = ring1;
+    usb_device.send_ring_buffer_interleaved = 1;
+}
+
+void
 USBDeviceMain()
 {
     tEvent *event;
@@ -366,6 +384,11 @@ USBDeviceMain()
         else if (usb_device.send_ring_buffer)
         {
             page = RingRead(usb_device.ring);
+            USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
+        }
+        else if (usb_device.send_ring_buffer_interleaved)
+        {
+            page = RingRead(usb_device.pingpong_ring[usb_device.pingpong]);
             USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
         }
         /*

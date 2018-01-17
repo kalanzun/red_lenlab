@@ -65,8 +65,7 @@ OscilloscopeStart(tOscilloscope *self)
     //MemoryAllocate(&memory); // TODO MemoryFree call
     //ADCEnable();
     MemoryInit(&memory);
-    ADCInit();
-    ADCSingle();
+    ADCSingle(8, 8);
 }
 
 
@@ -87,7 +86,8 @@ void
 OscilloscopeMain(tOscilloscope *self)
 {
     uint32_t i;
-    tRing *ring;
+    tRing *ring0;
+    tRing *ring1;
     tPage *page;
     /*
     uint16_t *buffer0;
@@ -107,22 +107,34 @@ OscilloscopeMain(tOscilloscope *self)
     {
         DEBUG_PRINT("OscilloscopeReady\n");
 
-        ring = ADCGetRing();
+        ring0 = ADCGetRing(0);
+        ring1 = ADCGetRing(1);
         ADCRelease();
 
-        for (i = 0; i < ring->length; i++)
+        for (i = 0; i < ring0->length; i++)
         {
-            page = RingGet(ring, i);
+            page = RingGet(ring0, i);
 
             page->buffer[0] = OscilloscopeData; // reply
             page->buffer[1] = ShortArray; // type
-            page->buffer[2] = i&1; // channel
+            page->buffer[2] = 0; // channel
+            page->buffer[3] = 0; // last
+            page->buffer[4] = i;
+        }
+
+        for (i = 0; i < ring1->length; i++)
+        {
+            page = RingGet(ring1, i);
+
+            page->buffer[0] = OscilloscopeData; // reply
+            page->buffer[1] = ShortArray; // type
+            page->buffer[2] = 1; // channel
             page->buffer[3] = 0; // last
             page->buffer[4] = i;
         }
         page->buffer[3] = 1;
 
-        USBDeviceSend(ring);
+        USBDeviceSendInterleaved(ring0, ring1);
         self->active = 0;
 
         /*
