@@ -34,6 +34,8 @@ Lenlab::Lenlab(QObject *parent) :
 
     connect(oscilloscope, SIGNAL(replot()),
             frequencysweep, SLOT(on_replot()));
+    connect(signalgenerator, SIGNAL(updated()),
+            frequencysweep, SLOT(on_updated()));
 }
 
 Lenlab::~Lenlab()

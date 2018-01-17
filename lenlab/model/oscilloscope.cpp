@@ -62,6 +62,12 @@ Oscilloscope::stop()
 }
 
 void
+Oscilloscope::single()
+{
+    pending = 1;
+}
+
+void
 Oscilloscope::try_to_start()
 {
     if (pending && lenlab->available()) {

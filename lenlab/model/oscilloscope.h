@@ -43,6 +43,7 @@ public:
 
     virtual void start();
     virtual void stop();
+    void single();
 
     void try_to_start();
     void restart();

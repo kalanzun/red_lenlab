@@ -50,6 +50,8 @@ Frequencysweep::start()
 
     index = 0;
     current->clear();
+    lenlab->signalgenerator->setAmplitude(14);
+    lenlab->signalgenerator->setDivider(1);
 
     restart();
 }
@@ -66,6 +68,8 @@ Frequencysweep::restart()
     if (!m_active)
         return;
 
+    divider = 0;
+    /*
     if (index >= 66)
         divider = 1;
     else if (index >= 33)
@@ -74,9 +78,21 @@ Frequencysweep::restart()
         divider = 4;
 
     lenlab->oscilloscope->setSamplerateDivider(divider);
+    */
     toggle = 0;
-    startTimer(10);
+    //startTimer(10);
+    lenlab->signalgenerator->setFrequency(index);
 }
+
+void
+Frequencysweep::on_updated()
+{
+    if (!m_active)
+        return;
+
+    lenlab->oscilloscope->single();
+}
+
 
 void
 Frequencysweep::timerEvent(QTimerEvent *event)
@@ -90,7 +106,7 @@ Frequencysweep::timerEvent(QTimerEvent *event)
         lenlab->signalgenerator->setFrequency(index);
     }
 }
-
+/*
 void
 Frequencysweep::receive(const usb::pMessage &reply)
 {
@@ -99,7 +115,7 @@ Frequencysweep::receive(const usb::pMessage &reply)
         startTimer(100);
     }
 }
-
+*/
 void
 Frequencysweep::on_replot()
 {
@@ -131,10 +147,10 @@ Frequencysweep::on_replot()
     sum0 = 0;
     sum1 = 0;
 
-    waveform->setTrigger(1000);
+    waveform->setTrigger(0);
 
-    for (uint32_t idx = 0; idx < 6000; idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) idx - 3000);
+    for (uint32_t idx = 0; idx < waveform->getLength(0); idx++) {
+        x = 2 * pi * f * 1e-6 * (1<<current_divider) * ((double) idx - (waveform->getLength(0) / 2));
         y = std::sin(x) + i * std::cos(x);
         sum0 += waveform->getY(idx, 0) * y;
         sum1 += waveform->getY(idx, 1) * y;
@@ -145,7 +161,7 @@ Frequencysweep::on_replot()
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / 6000 << std::abs(sum0) / 6000 << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
+    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / waveform->getLength(0) << std::abs(sum0) / waveform->getLength(0) << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
 
     current->append(0, value);
     current->append(1, angle);

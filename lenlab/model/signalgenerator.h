@@ -156,6 +156,7 @@ public:
     IndexParameter dividerIndex;
 
 signals:
+    void updated();
 
 public slots:
     void on_reply(const pCommunication &com, const usb::pMessage &reply);

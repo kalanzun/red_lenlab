@@ -65,6 +65,7 @@ signals:
 
 public slots:
     void on_replot();
+    void on_updated();
 
 private:
     typedef Component super;

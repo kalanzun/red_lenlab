@@ -92,6 +92,8 @@ Signalgenerator::on_reply(const pCommunication &com, const usb::pMessage &reply)
 {
     Q_UNUSED(reply);
     com->deleteLater();
+
+    emit updated();
 }
 
 void
