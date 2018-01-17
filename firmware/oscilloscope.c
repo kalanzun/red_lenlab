@@ -46,7 +46,7 @@ OscilloscopeStart(tOscilloscope *self)
 {
     uint32_t i;
 
-    //DEBUG_PRINT("OscilloscopeStart\n");
+    DEBUG_PRINT("OscilloscopeStart\n");
 
     if (self->active)// || self->send)
         return;

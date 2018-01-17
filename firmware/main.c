@@ -176,7 +176,7 @@ main(void) {
     //
     // Configure Timer
     //
-    //TimerInit();
+    TimerInit();
     //TimerSetInterval(200);
     //TimerStart(); // test signal for oscilloscope
 

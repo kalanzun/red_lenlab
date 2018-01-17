@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_adc.h"
-//#include "driverlib/debug.h"
+#include "driverlib/timer.h"
 #include "driverlib/interrupt.h"
 //#include "driverlib/rom_map.h"
 #include "driverlib/sysctl.h"
@@ -64,7 +64,7 @@ ADCxIntHandler(tADCx *self)
     if (self->single) {
         if(self->ping_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
         {
-            //DEBUG_PRINT("ADCInt PRI\n");
+            DEBUG_PRINT("ADCInt PRI\n");
             // pri is done, alt is working right now
             RingWrite(&self->ring);
             if (RingFull(&self->ring)) {
@@ -83,13 +83,16 @@ ADCxIntHandler(tADCx *self)
         }
         else if(self->pong_ready && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT))
         {
-            //DEBUG_PRINT("ADCInt ALT\n");
+            DEBUG_PRINT("ADCInt ALT\n");
             // alt is done, pri is working right now
             RingWrite(&self->ring);
             if (RingFull(&self->ring)) {
                 // done
                 self->pong_ready = 0;
                 uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
+                TimerDisable(TIMER1_BASE, TIMER_A);
+                ADCSequenceDisable(self->adc_base, 0);
+
                 ADCIntDisable(self->adc_base, 0);
 
                 self->single = 0;
@@ -269,7 +272,7 @@ ConfigureADCx(tADCx* self)
     // Set the ADC Sequence to trigger always (that is 1 MHz)
     // and to generate an interrupt every 4 samples.
     // This is an arbitration size of 4 for the uDMA transfer
-    ADCSequenceConfigure(self->adc_base, 0, ADC_TRIGGER_ALWAYS, 0);
+    ADCSequenceConfigure(self->adc_base, 0, ADC_TRIGGER_TIMER, 0);
     ADCSequenceStepConfigure(self->adc_base, 0, 0, self->adc_channel);
     ADCSequenceStepConfigure(self->adc_base, 0, 1, self->adc_channel);
     ADCSequenceStepConfigure(self->adc_base, 0, 2, self->adc_channel);
@@ -278,6 +281,8 @@ ConfigureADCx(tADCx* self)
     ADCSequenceStepConfigure(self->adc_base, 0, 5, self->adc_channel);
     ADCSequenceStepConfigure(self->adc_base, 0, 6, self->adc_channel);
     ADCSequenceStepConfigure(self->adc_base, 0, 7, self->adc_channel | ADC_CTL_IE | ADC_CTL_END);
+
+    ADCPhaseDelaySet(self->adc_base, ADC_PHASE_0);
 
     //
     // Enable the sequencer
@@ -318,7 +323,6 @@ StartADCx(tADCx* self, tPage* ping, tPage* pong)
 
     uDMAChannelEnable(self->udma_channel);
 
-    IntEnable(self->adc_int);
 }
 
 void
@@ -387,6 +391,17 @@ ADCSingle(uint32_t length0, uint32_t length1)
 
     StartADCx(&adc.adc0, ping0, pong0);
     StartADCx(&adc.adc1, ping1, pong1);
+
+    // Timer is disabled, while no measurement is running,
+    // to be able to start both ADC exactly in sync for a new measurement
+    // If spurious interrupts are around, DMA does not start in sync
+    // when the timer is enabled.
+
+    ADCSequenceEnable(adc.adc0.adc_base, 0);
+    IntEnable(adc.adc0.adc_int);
+    ADCSequenceEnable(adc.adc1.adc_base, 0);
+    IntEnable(adc.adc1.adc_int);
+    TimerEnable(TIMER1_BASE, TIMER_A);
 
     // drop the first two pages
 
