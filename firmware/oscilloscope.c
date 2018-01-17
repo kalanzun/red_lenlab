@@ -62,8 +62,7 @@ OscilloscopeStart(tOscilloscope *self)
 
     self->active = 1;
     self->count = 0;
-    //MemoryAllocate(&memory); // TODO MemoryFree call
-    //ADCEnable();
+
     MemoryInit(&memory);
     ADCSingle(8, 8);
 }

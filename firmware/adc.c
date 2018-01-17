@@ -221,35 +221,13 @@ ADCRelease()
     }
 }
 
-uint16_t *
-ADCGetBuffer(bool channel)
-{
-    return 0;
-    /*
-    if (adc.pingpong) {
-        if (channel)
-            return adc.adc1.pong;
-        else
-            return adc.adc0.pong;
-    }
-    else {
-        if (channel)
-            return adc.adc1.ping;
-        else
-            return adc.adc0.ping;
-    }
-    */
-}
-
 tRing *
-ADCGetRing(uint32_t channel)
+ADCGetRing(bool channel)
 {
-    if (channel == 0)
-        return &adc.adc0.ring;
-    if (channel == 1)
+    if (channel)
         return &adc.adc1.ring;
-    ASSERT(0);
-    return 0;
+    else
+        return &adc.adc0.ring;
 }
 
 void
@@ -257,42 +235,6 @@ ADCSetDivider(uint8_t divider)
 {
     ADCHardwareOversampleConfigure(adc.adc0.adc_base, 1 << divider);
     ADCHardwareOversampleConfigure(adc.adc1.adc_base, 1 << divider);
-}
-
-void
-ConfigureADCx(tADCx* self)
-{
-    //
-    // Configure Pins
-    //
-    GPIOPinTypeADC(self->gpio_base, self->gpio_pin);
-
-    ADCHardwareOversampleConfigure(self->adc_base, 1); // 1 is too fast for the oscilloscope module
-
-    // Set the ADC Sequence to trigger always (that is 1 MHz)
-    // and to generate an interrupt every 4 samples.
-    // This is an arbitration size of 4 for the uDMA transfer
-    ADCSequenceConfigure(self->adc_base, 0, ADC_TRIGGER_TIMER, 0);
-    ADCSequenceStepConfigure(self->adc_base, 0, 0, self->adc_channel);
-    ADCSequenceStepConfigure(self->adc_base, 0, 1, self->adc_channel);
-    ADCSequenceStepConfigure(self->adc_base, 0, 2, self->adc_channel);
-    ADCSequenceStepConfigure(self->adc_base, 0, 3, self->adc_channel | ADC_CTL_IE);
-    ADCSequenceStepConfigure(self->adc_base, 0, 4, self->adc_channel);
-    ADCSequenceStepConfigure(self->adc_base, 0, 5, self->adc_channel);
-    ADCSequenceStepConfigure(self->adc_base, 0, 6, self->adc_channel);
-    ADCSequenceStepConfigure(self->adc_base, 0, 7, self->adc_channel | ADC_CTL_IE | ADC_CTL_END);
-
-    ADCPhaseDelaySet(self->adc_base, ADC_PHASE_0);
-
-    //
-    // Enable the sequencer
-    //
-    ADCSequenceEnable(self->adc_base, 0);
-
-    //
-    // Enable sequencer interrupts
-    //
-    ADCIntEnable(self->adc_base, 0);
 }
 
 void
@@ -312,17 +254,96 @@ StartADCx(tADCx* self, tPage* ping, tPage* pong)
         UDMA_DST_INC_16 | UDMA_ARB_4);
 
     uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
-            UDMA_MODE_PINGPONG,
-            (void *)(self->adc_base + ADC_O_SSFIFO0),
-            ping->buffer+24, ADC_SAMPLES);
+        UDMA_MODE_PINGPONG,
+        (void *)(self->adc_base + ADC_O_SSFIFO0),
+        ping->buffer+24, ADC_SAMPLES);
 
     uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
-            UDMA_MODE_PINGPONG,
-            (void *)(self->adc_base + ADC_O_SSFIFO0),
-            pong->buffer+24, ADC_SAMPLES);
+        UDMA_MODE_PINGPONG,
+        (void *)(self->adc_base + ADC_O_SSFIFO0),
+        pong->buffer+24, ADC_SAMPLES);
 
+    ADCSequenceEnable(self->adc_base, 0);
     uDMAChannelEnable(self->udma_channel);
+    IntEnable(self->adc_int);
+}
 
+void
+ADCSingle(uint32_t length0, uint32_t length1)
+{
+    tPage *ping0;
+    tPage *pong0;
+    tPage *ping1;
+    tPage *pong1;
+
+    RingAllocate(&adc.adc0.ring, length0);
+    RingAllocate(&adc.adc1.ring, length1);
+
+    ping0 = RingAcquire(&adc.adc0.ring);
+    pong0 = RingAcquire(&adc.adc0.ring);
+
+    ping1 = RingAcquire(&adc.adc1.ring);
+    pong1 = RingAcquire(&adc.adc1.ring);
+
+    adc.adc0.single = 1;
+    adc.adc1.single = 1;
+
+    adc.adc0.ping_ready = 1;
+    adc.adc0.pong_ready = 1;
+
+    adc.adc1.ping_ready = 1;
+    adc.adc1.pong_ready = 1;
+
+    // Both ADC shall run exactly in sync
+    // - A common timer triggers both ADCs
+    // - The timer is disabled before a new measurement starts
+    // - The sequencer and interrupts are disabled, too.
+    //   DMA does not start in sync if spurious interrupts are around
+
+    StartADCx(&adc.adc0, ping0, pong0);
+    StartADCx(&adc.adc1, ping1, pong1);
+
+    TimerEnable(TIMER1_BASE, TIMER_A);
+
+    // Drop the first two pages
+    // The ring buffer is empty again
+    ping0 = RingRead(&adc.adc0.ring);
+    pong0 = RingRead(&adc.adc0.ring);
+
+    ping1 = RingRead(&adc.adc1.ring);
+    pong1 = RingRead(&adc.adc1.ring);
+
+    RingRelease(&adc.adc0.ring);
+    RingRelease(&adc.adc0.ring);
+
+    RingRelease(&adc.adc1.ring);
+    RingRelease(&adc.adc1.ring);
+}
+
+void
+ConfigureADCx(tADCx* self)
+{
+    //
+    // Configure Pins
+    //
+    GPIOPinTypeADC(self->gpio_base, self->gpio_pin);
+
+    // Set the ADC Sequence
+    // to generate an interrupt every 4 samples.
+    // This is an arbitration size of 4 for the uDMA transfer
+    ADCSequenceConfigure(self->adc_base, 0, ADC_TRIGGER_TIMER, 0);
+    ADCSequenceStepConfigure(self->adc_base, 0, 0, self->adc_channel);
+    ADCSequenceStepConfigure(self->adc_base, 0, 1, self->adc_channel);
+    ADCSequenceStepConfigure(self->adc_base, 0, 2, self->adc_channel);
+    ADCSequenceStepConfigure(self->adc_base, 0, 3, self->adc_channel | ADC_CTL_IE);
+    ADCSequenceStepConfigure(self->adc_base, 0, 4, self->adc_channel);
+    ADCSequenceStepConfigure(self->adc_base, 0, 5, self->adc_channel);
+    ADCSequenceStepConfigure(self->adc_base, 0, 6, self->adc_channel);
+    ADCSequenceStepConfigure(self->adc_base, 0, 7, self->adc_channel | ADC_CTL_IE | ADC_CTL_END);
+
+    ADCPhaseDelaySet(self->adc_base, ADC_PHASE_0);
+
+    ADCHardwareOversampleConfigure(self->adc_base, 1);
 }
 
 void
@@ -358,63 +379,4 @@ ADCInit()
 
     ConfigureADCx(&adc.adc0);
     ConfigureADCx(&adc.adc1);
-
-    //StartADCx(&adc.adc0);
-    //StartADCx(&adc.adc1);
-}
-
-void
-ADCSingle(uint32_t length0, uint32_t length1)
-{
-    tPage *ping0;
-    tPage *pong0;
-    tPage *ping1;
-    tPage *pong1;
-
-    RingAllocate(&adc.adc0.ring, length0);
-    RingAllocate(&adc.adc1.ring, length1);
-
-    ping0 = RingAcquire(&adc.adc0.ring);
-    pong0 = RingAcquire(&adc.adc0.ring);
-
-    ping1 = RingAcquire(&adc.adc1.ring);
-    pong1 = RingAcquire(&adc.adc1.ring);
-
-    adc.adc0.single = 1;
-    adc.adc1.single = 1;
-
-    adc.adc0.ping_ready = 1;
-    adc.adc0.pong_ready = 1;
-
-    adc.adc1.ping_ready = 1;
-    adc.adc1.pong_ready = 1;
-
-    StartADCx(&adc.adc0, ping0, pong0);
-    StartADCx(&adc.adc1, ping1, pong1);
-
-    // Timer is disabled, while no measurement is running,
-    // to be able to start both ADC exactly in sync for a new measurement
-    // If spurious interrupts are around, DMA does not start in sync
-    // when the timer is enabled.
-
-    ADCSequenceEnable(adc.adc0.adc_base, 0);
-    IntEnable(adc.adc0.adc_int);
-    ADCSequenceEnable(adc.adc1.adc_base, 0);
-    IntEnable(adc.adc1.adc_int);
-    TimerEnable(TIMER1_BASE, TIMER_A);
-
-    // drop the first two pages
-
-    ping0 = RingRead(&adc.adc0.ring);
-    pong0 = RingRead(&adc.adc0.ring);
-
-    ping1 = RingRead(&adc.adc1.ring);
-    pong1 = RingRead(&adc.adc1.ring);
-
-    RingRelease(&adc.adc0.ring);
-    RingRelease(&adc.adc0.ring);
-
-    RingRelease(&adc.adc1.ring);
-    RingRelease(&adc.adc1.ring);
-
 }

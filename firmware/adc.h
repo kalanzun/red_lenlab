@@ -70,7 +70,7 @@ uint16_t *ADCGetBuffer(bool channel);
 void ADCRelease();
 
 void ADCSingle(uint32_t length0, uint32_t length1);
-tRing *ADCGetRing(uint32_t channel);
+tRing *ADCGetRing(bool channel);
 
 void ADCInit();
 
