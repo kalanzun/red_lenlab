@@ -35,7 +35,7 @@ typedef struct Signal {
 extern tSignal signal;
 
 
-void SignalSetSine(uint32_t multiplier, uint32_t divider, uint32_t amplitude, uint32_t second);
+void SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second);
 
 
 void SignalStart(void);

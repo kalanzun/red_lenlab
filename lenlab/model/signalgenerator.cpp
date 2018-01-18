@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(100), dividerIndex(20), lenlab(parent)
+Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(100), dividerIndex(21), lenlab(parent)
 {
     double value;
 
@@ -46,7 +46,7 @@ Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18)
     }
 
     for (uint32_t i = 0; i < dividerIndex.length; i++) {
-        dividerIndex.labels << QString("%1").arg(i+1);
+        dividerIndex.labels << QString("%1").arg(i);
     }
 }
 
@@ -73,6 +73,7 @@ Signalgenerator::setSine()
     cmd->setBodyLength(0);
     cmd->setType(IntArray);
     cmd->setInt(sine[frequency][0]); // multiplier
+    cmd->setInt(sine[frequency][1]); // predivider
     cmd->setInt(sine[frequency][2]); // divider
     cmd->setInt(std::round((1<<11) * (0.8 + 0.05 * amplitude) / 1.65)); // amplitude
     cmd->setInt(second); // second

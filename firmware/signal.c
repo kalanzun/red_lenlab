@@ -123,10 +123,10 @@ WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t se
 }
 
 void
-SignalSetSine(uint32_t multiplier, uint32_t divider, uint32_t amplitude, uint32_t second)
+SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second)
 {
     WriteSine(SSIGetBuffer(), multiplier, amplitude, second);
-    SSISetDivider(2, divider);
+    SSISetDivider(predivider, divider);
 }
 
 void
@@ -139,5 +139,5 @@ void
 SignalInit(void)
 {
     SSISetLength(1000);
-    SignalSetSine(1, 5, 1241, 1);
+    SignalSetSine(1, 2, 5, 1241, 1);
 }
