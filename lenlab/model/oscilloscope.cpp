@@ -81,10 +81,11 @@ Oscilloscope::try_to_start()
 void
 Oscilloscope::restart()
 {
-    qDebug() << "XXX restart" << pending;
+    //qDebug() << "XXX restart" << pending;
 
     incoming.reset(new Waveform());
-
+    incoming->setSamplerate(1e6/(1<<(samplerate+2)));
+    qDebug() << incoming->samplerate();
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
             this, SLOT(on_reply(pCommunication, usb::pMessage)));
@@ -133,7 +134,7 @@ Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
     }
 
     if (last_package) {
-        qDebug() << "last package" << incoming->getLength(0);
+        //qDebug() << "last package" << incoming->getLength(0);
 
         incoming->setView(8000);
 

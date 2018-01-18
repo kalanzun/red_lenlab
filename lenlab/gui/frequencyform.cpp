@@ -40,6 +40,21 @@ FrequencyForm::FrequencyForm(QWidget *parent) :
     QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
     ui->plot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine);
 
+    QwtText x_label("Frequenz [Hz]");
+    QFont x_font(ui->plot->axisFont(2));
+    x_label.setFont(x_font);
+    ui->plot->setAxisTitle(2, x_label);
+
+    QwtText y_label("Amplitude [dB]");
+    QFont y_font(ui->plot->axisFont(0));
+    y_label.setFont(y_font);
+    ui->plot->setAxisTitle(0, y_label);
+
+    QwtText phase_label("Phase [°]");
+    QFont phase_font(ui->plot->axisFont(QwtPlot::yRight));
+    phase_label.setFont(phase_font);
+    ui->plot->setAxisTitle(QwtPlot::yRight, phase_label);
+
     //QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
     //ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
 }

@@ -37,13 +37,12 @@ Waveform::append(uint32_t channel, double value)
 }
 
 void
-Waveform::setSamplerate(uint32_t samplerate)
+Waveform::setSamplerate(double samplerate)
 {
     m_samplerate = samplerate;
 }
 
-uint32_t
-Waveform::samplerate()
+double Waveform::samplerate()
 {
     return m_samplerate;
 }
@@ -89,7 +88,7 @@ Waveform::getDataLength(uint32_t channel)
 double
 Waveform::getX(uint32_t i)
 {
-    return getMinX() + i;
+    return (((double) m_view / -2) + i) / m_samplerate * 1000;
 }
 
 double
@@ -105,13 +104,13 @@ Waveform::getY(uint32_t i, uint32_t channel)
 double
 Waveform::getMinX()
 {
-    return (double) m_view / -2;
+    return (double) m_view / -2 / m_samplerate * 1000;
 }
 
 double
 Waveform::getMaxX()
 {
-    return (double) m_view / 2;
+    return (double) m_view / 2 / m_samplerate * 1000;
 }
 
 double

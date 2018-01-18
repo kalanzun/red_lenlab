@@ -34,6 +34,16 @@ OscilloscopeForm::OscilloscopeForm(QWidget *parent) :
     qDebug() << "OscilloscopeForm";
     ui->setupUi(this);
 
+    QwtText x_label("Zeit [ms]");
+    QFont x_font(ui->plot->axisFont(2));
+    x_label.setFont(x_font);
+    ui->plot->setAxisTitle(2, x_label);
+
+    QwtText y_label("Spannung [V]");
+    QFont y_font(ui->plot->axisFont(0));
+    y_label.setFont(y_font);
+    ui->plot->setAxisTitle(0, y_label);
+
     newGrid();
 }
 

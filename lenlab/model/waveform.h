@@ -32,19 +32,19 @@ class Waveform : public Series
 {
     Q_OBJECT
 
-    Q_PROPERTY(uint32_t samplerate READ samplerate WRITE setSamplerate)
+    Q_PROPERTY(double samplerate READ samplerate WRITE setSamplerate)
     Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger)
     Q_PROPERTY(uint32_t view READ view WRITE setView)
 
-    uint32_t m_samplerate = 0;
+    double m_samplerate = 0;
     uint32_t m_trigger = 0;
     uint32_t m_view = 0;
 
 public:
     explicit Waveform();
 
-    void setSamplerate(uint32_t samplerate);
-    uint32_t samplerate();
+    void setSamplerate(double samplerate);
+    double samplerate();
 
     void setTrigger(uint32_t trigger);
     uint32_t trigger();
