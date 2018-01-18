@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define REVISION 1
+#define REVISION 2
 
 #define DELIMITER ";"
 

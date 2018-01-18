@@ -53,6 +53,8 @@ public:
 
     void setSamplerate(uint32_t index);
 
+    void save(const QString &fileName);
+
     IndexParameter samplerateIndex;
 
 signals:

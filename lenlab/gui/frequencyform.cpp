@@ -25,6 +25,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "qwt_plot_renderer.h"
 #include "qwt_scale_engine.h"
 #include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
 
 namespace gui {
 
@@ -144,5 +146,22 @@ FrequencyForm::on_replot()
     ui->plot->replot();
 }
 
+void
+FrequencyForm::on_saveButton_clicked()
+{
+    save();
+}
+
+void
+FrequencyForm::save()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
+    try {
+        frequencysweep->save(fileName);
+    }
+    catch (std::exception) {
+        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+    }
+}
 
 } // namespace gui

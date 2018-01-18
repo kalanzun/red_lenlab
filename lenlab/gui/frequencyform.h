@@ -48,11 +48,15 @@ public:
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab *lenlab);
 
+    void save();
+
 private slots:
     void on_replot();
 
     void on_startButton_clicked();
     void on_stopButton_clicked();
+
+    void on_saveButton_clicked();
 
 private:
     QwtPlotCurve *newCurve(uint32_t channel, const QColor &color, bool visible);

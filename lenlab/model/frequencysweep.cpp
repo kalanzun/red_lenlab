@@ -20,9 +20,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "frequencysweep.h"
 #include "lenlab.h"
+#include "config.h"
 #include <QDebug>
 #include <QTimerEvent>
 #include <complex>
+#include <QSaveFile>
 
 namespace model {
 
@@ -211,7 +213,6 @@ QSharedPointer<FrequencySeries> Frequencysweep::getWaveform()
     return current;
 }
 
-/*
 void
 Frequencysweep::save(const QString &fileName)
 {
@@ -226,14 +227,13 @@ Frequencysweep::save(const QString &fileName)
 
     stream << QString("Lenlab red %1.%2 Frequenzanalyse-Daten\n").arg(MAJOR).arg(MINOR);
 
-    stream << "Frequenz" << DELIMITER << "Betrag" << DELIMITER << "Winkel" << "\n";
+    stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
-    for (uint8_t i = 0; i < current->getLength(); i++) {
-        stream << lenlab->signalgenerator->getFrequency(i) << DELIMITER << current->getValue(0, i) << DELIMITER << current->getValue(1, i) << "\n";
+    for (uint32_t i = 0; i < current->getLength(0); i++) {
+        stream << current->getX(i) << DELIMITER << current->getY(i, 0) << DELIMITER << current->getY(i, 1) << "\n";
     }
 
     file.commit();
 }
-*/
 
 } // namespace model

@@ -78,7 +78,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="saveButton">
            <property name="text">
             <string>Speichern</string>
            </property>

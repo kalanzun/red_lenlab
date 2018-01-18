@@ -94,7 +94,8 @@ Waveform::getX(uint32_t i)
 double
 Waveform::getY(uint32_t i, uint32_t channel)
 {
-    Q_ASSERT(channel < 2);
+    if (!(channel < 2))
+        Q_ASSERT(0);
     if (!((m_trigger + i) < 9000)) {
         Q_ASSERT(0);
     }

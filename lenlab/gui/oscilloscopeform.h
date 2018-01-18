@@ -48,6 +48,8 @@ public:
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab *lenlab);
 
+    void save();
+
 private slots:
     void on_replot();
 
@@ -58,6 +60,8 @@ private slots:
 
     void on_ch1CheckBox_stateChanged(int state);
     void on_ch2CheckBox_stateChanged(int state);
+
+    void on_saveButton_clicked();
 
 private:
     QwtPlotCurve *newCurve(const QColor &color, bool visible);

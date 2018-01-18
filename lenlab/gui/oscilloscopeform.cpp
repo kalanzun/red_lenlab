@@ -24,6 +24,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "qwt_text.h"
 #include "qwt_plot_renderer.h"
 #include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
 
 namespace gui {
 
@@ -154,5 +156,22 @@ OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
     curves[1]->setVisible(state == Qt::Checked);
 }
 
+void
+OscilloscopeForm::on_saveButton_clicked()
+{
+    save();
+}
+
+void
+OscilloscopeForm::save()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
+    try {
+        oscilloscope->save(fileName);
+    }
+    catch (std::exception) {
+        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+    }
+}
 
 } // namespace gui

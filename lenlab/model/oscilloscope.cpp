@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab.h"
 #include "config.h"
 #include <QDebug>
+#include <QSaveFile>
 
 namespace model {
 
@@ -155,6 +156,29 @@ QSharedPointer<Waveform>
 Oscilloscope::getWaveform()
 {
     return current;
+}
+
+void
+Oscilloscope::save(const QString &fileName)
+{
+    QSaveFile file(fileName);
+    qDebug("save");
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        throw std::exception();
+    }
+
+    QTextStream stream(&file);
+
+    stream << QString("Lenlab red %1.%2 Oszilloskop-Daten\n").arg(MAJOR).arg(MINOR);
+
+    stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
+
+    for (uint32_t i = 0; i < current->getLength(0); i++) {
+        stream << current->getX(i) << DELIMITER << current->getY(i, 0) << DELIMITER << current->getY(i, 1) << "\n";
+    }
+
+    file.commit();
 }
 
 } // namespace model
