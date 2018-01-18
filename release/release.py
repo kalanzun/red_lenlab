@@ -151,13 +151,13 @@ class Firmware:
     path = Path("..", "bin")
     
     def __init__(self, version):
-        self.firmware = "lenlab_firmware_{}-{}-{}.bin".format(version.major, version.minor, version.firmware_revision)
+        self.firmware = "lenlab_firmware_{}-{}-{}.out".format(version.major, version.minor, version.firmware_revision)
         assert access(self.path / self.firmware, R_OK), "No firmware found"
 
 
 class Lenlab:
 
-    path = Path("..", "build-lenlab-Desktop-Release")
+    path = Path("..", "..", "build-lenlab-Desktop-Release")
 
     def __init__(self, version):
         self.lenlab = self.path / "lenlab"
@@ -166,12 +166,12 @@ class Lenlab:
 
 class LenlabWindows:
 
-    base_path = Path("..")
+    base_path = Path("..", "..")
     arch = "MinGW_32bit"
 
     def __init__(self, version, qt):
-        self.path = self.base_path / "build-lenlab-Desktop_Qt_{}_{}_{}_{}-Release".format(
-            qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch) / "release"
+        self.path = self.base_path / "build-red_lenlab-Desktop_Qt_{}_{}_{}_{}-Release".format(
+            qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch) / "lenlab" / "app" / "release"
         self.lenlab = self.path / "lenlab.exe"
         assert access(self.lenlab, R_OK), "No lenlab found"
 
