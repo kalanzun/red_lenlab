@@ -30,6 +30,7 @@ SOURCES += \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-#PRE_TARGETDEPS += ../../lenlab/model/debug/libmodel.a ../../lenlab/usb/debug/libusb.a
+CONFIG(debug, debug|release) PRE_TARGETDEPS += ../../lenlab/model/debug/libmodel.a ../../lenlab/usb/debug/libusb.a
+CONFIG(release, debug|release) PRE_TARGETDEPS += ../../lenlab/model/release/libmodel.a ../../lenlab/usb/release/libusb.a
 
 include(../../red_lenlab.pri)

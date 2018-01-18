@@ -25,6 +25,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += \
         main.cpp \
 
-#PRE_TARGETDEPS += ../gui/debug/libgui.a ../model/debug/libmodel.a ../usb/debug/libusb.a
+CONFIG(debug, debug|release) PRE_TARGETDEPS += ../gui/debug/libgui.a ../model/debug/libmodel.a ../usb/debug/libusb.a
+CONFIG(release, debug|release) PRE_TARGETDEPS += ../gui/release/libgui.a ../model/release/libmodel.a ../usb/release/libusb.a
 
 include(../../red_lenlab.pri)
