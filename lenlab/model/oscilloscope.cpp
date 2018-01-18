@@ -85,7 +85,7 @@ Oscilloscope::restart()
 
     incoming.reset(new Waveform());
     incoming->setSamplerate(1e6/(1<<(samplerate+2)));
-    qDebug() << incoming->samplerate();
+    //qDebug() << incoming->samplerate();
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
             this, SLOT(on_reply(pCommunication, usb::pMessage)));

@@ -77,7 +77,7 @@ Frequencysweep::step()
     if (!m_active)
         return;
 
-    qDebug() << "step";
+    //qDebug() << "step";
 
     wait_for_update = 1;
     lenlab->signalgenerator->setFrequency(index);
@@ -143,7 +143,7 @@ Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
     }
 
     if (last_package) {
-        qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
+        //qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
 
         //incoming->setView(incoming->getLength(0));
 
