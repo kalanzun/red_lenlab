@@ -72,13 +72,19 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>152</width>
-          <height>548</height>
+          <width>318</width>
+          <height>534</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QPushButton" name="saveButton">
+           <property name="minimumSize">
+            <size>
+             <width>300</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
             <string>Speichern</string>
            </property>

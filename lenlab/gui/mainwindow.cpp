@@ -41,8 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef QT_NO_DEBUG
     // Hide logger because it is not implemented, yet
-#endif
     ui->tabWidget->setTabEnabled(0, false); // logger
+#endif
 }
 
 MainWindow::~MainWindow()
