@@ -24,6 +24,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdbool.h>
 #include <stdint.h>
 #include "driverlib/sysctl.h"
+#include "driverlib/udma.h"
+#include "debug.h"
 
 
 const uint32_t peripherals[] = {
@@ -46,6 +48,16 @@ const uint32_t peripherals[] = {
 };
 
 #define NUM_PERIPHERALS (sizeof(peripherals) / sizeof(uint32_t))
+
+
+void
+uDMAErrorHandler(void)
+{
+    //uint32_t status;
+    //status = uDMAErrorStatusGet();
+    DEBUG_PRINT("uDMA Error\n");
+    uDMAErrorStatusClear();
+}
 
 
 inline void

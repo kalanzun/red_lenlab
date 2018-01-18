@@ -61,6 +61,8 @@ ADCxIntHandler(tADCx *self)
     //
     ADCIntClear(self->adc_base, 0);
 
+    //DEBUG_PRINT("x\n");
+
     // ping_ and pong_enable are required, because uDMAChannelSizeGet
     // does return 0 at the end when the PRI channel is about to be disabled
     if(self->ping_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_PRI_SELECT))
@@ -68,12 +70,15 @@ ADCxIntHandler(tADCx *self)
         // PRI is done, ALT is working this moment
         RingWrite(&self->ring);
 
+        //DEBUG_PRINT("%d %d %d\n", self->ring.full, self->ring.acquire, self->ring.release);
+
         if (RingFull(&self->ring))
         {
             if (self->single)
             {
                 // done
                 self->ping_enable = 0;
+                //DEBUG_PRINT("ping disable\n");
             }
             else
             {
@@ -85,6 +90,7 @@ ADCxIntHandler(tADCx *self)
 
         else {
             // continue
+            //DEBUG_PRINT("pri %d, %d\n", self->ring.length, self->ring.acquire);
             page = RingAcquire(&self->ring);
 
             uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
@@ -106,6 +112,8 @@ ADCxIntHandler(tADCx *self)
                 // done
                 self->pong_enable = 0;
 
+                //DEBUG_PRINT("single\n");
+
                 // disable ADC
                 TimerDisable(TIMER1_BASE, TIMER_A);
                 uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
@@ -125,6 +133,7 @@ ADCxIntHandler(tADCx *self)
 
         else {
             // continue
+            //DEBUG_PRINT("alt %d, %d\n", self->ring.length, self->ring.acquire);
             page = RingAcquire(&self->ring);
 
             uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
@@ -214,6 +223,8 @@ ADCStart(uint32_t length, bool single, uint32_t samplerate)
     tPage *ping1;
     tPage *pong1;
 
+    //DEBUG_PRINT("ADCStart\n");
+
     RingAllocate(&adc.adc0.ring, length);
     RingAllocate(&adc.adc1.ring, length);
 
@@ -243,6 +254,8 @@ ADCStart(uint32_t length, bool single, uint32_t samplerate)
     StartADCx(&adc.adc0, ping0, pong0, samplerate);
     StartADCx(&adc.adc1, ping1, pong1, samplerate);
 
+    //DEBUG_PRINT("TimerEnable\n");
+
     TimerEnable(TIMER1_BASE, TIMER_A);
 
     // Drop the first two pages
@@ -258,15 +271,17 @@ ADCStart(uint32_t length, bool single, uint32_t samplerate)
 
     RingRelease(&adc.adc1.ring);
     RingRelease(&adc.adc1.ring);
+
+    //DEBUG_PRINT("ADCStart() done %d %d\n", adc.adc0.ring.acquire, adc.adc0.ring.release);
 }
 
-void
+inline void
 ADCSingle(uint32_t length, uint32_t samplerate)
 {
     ADCStart(length, 1, samplerate);
 }
 
-void
+inline void
 ADCPingPong(uint32_t samplerate)
 {
     ADCStart(2, 0, samplerate);

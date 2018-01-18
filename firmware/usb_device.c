@@ -266,6 +266,7 @@ void USBIntHandler(void)
         }
         else if (usb_device.send_ring_buffer_interleaved)
         {
+            //DEBUG_PRINT("usb int %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
             RingRelease(usb_device.pingpong_ring[usb_device.pingpong]);
             usb_device.pingpong = !usb_device.pingpong;
             if (RingEmpty(usb_device.pingpong_ring[usb_device.pingpong])) usb_device.send_ring_buffer_interleaved = 0;
@@ -388,6 +389,7 @@ USBDeviceMain()
         }
         else if (usb_device.send_ring_buffer_interleaved)
         {
+            //DEBUG_PRINT("usb %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
             page = RingRead(usb_device.pingpong_ring[usb_device.pingpong]);
             USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
         }

@@ -38,7 +38,7 @@ tOscilloscope oscilloscope;
 void
 OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
-    DEBUG_PRINT("OscilloscopeStart %d\n", samplerate);
+    //DEBUG_PRINT("OscilloscopeStart %d\n", samplerate);
 
     if (self->active)// || self->send)
         return;
@@ -57,7 +57,7 @@ OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate)
 {
     uint32_t i;
 
-    DEBUG_PRINT("OscilloscopeStartTrigger %d\n", samplerate);
+    //DEBUG_PRINT("OscilloscopeStartTrigger %d\n", samplerate);
 
     if (self->active)// || self->send)
         return;
@@ -112,39 +112,46 @@ OscilloscopeMain(tOscilloscope *self)
     if (!self->active)
         return;
 
-    if (!self->trigger && ADCReady()) // single done
+    if (!self->trigger)
     {
-        //DEBUG_PRINT("OscilloscopeReady\n");
-
-        ring0 = ADCGetRing(0);
-        ring1 = ADCGetRing(1);
-        ADCRelease();
-
-        for (i = 0; i < ring0->length; i++)
+        if (ADCReady()) // single done
         {
-            page = RingRead(ring0);
+            //DEBUG_PRINT("OscilloscopeReady\n");
 
-            page->buffer[0] = OscilloscopeData; // reply
-            page->buffer[1] = ShortArray; // type
-            page->buffer[2] = 0; // channel
-            page->buffer[3] = 0; // last
-            page->buffer[4] = i;
+            ring0 = ADCGetRing(0);
+            ring1 = ADCGetRing(1);
+            ADCRelease();
+
+            //DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
+
+            for (i = 0; i < ring0->length; i++)
+            {
+                page = RingRead(ring0);
+
+                page->buffer[0] = OscilloscopeData; // reply
+                page->buffer[1] = ShortArray; // type
+                page->buffer[2] = 0; // channel
+                page->buffer[3] = 0; // last
+                page->buffer[4] = i;
+            }
+
+            for (i = 0; i < ring1->length; i++)
+            {
+                page = RingRead(ring1);
+
+                page->buffer[0] = OscilloscopeData; // reply
+                page->buffer[1] = ShortArray; // type
+                page->buffer[2] = 1; // channel
+                page->buffer[3] = 0; // last
+                page->buffer[4] = 10+i;
+            }
+            page->buffer[3] = 1;
+
+            //DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
+
+            USBDeviceSendInterleaved(ring0, ring1);
+            self->active = 0;
         }
-
-        for (i = 0; i < ring1->length; i++)
-        {
-            page = RingRead(ring1);
-
-            page->buffer[0] = OscilloscopeData; // reply
-            page->buffer[1] = ShortArray; // type
-            page->buffer[2] = 1; // channel
-            page->buffer[3] = 0; // last
-            page->buffer[4] = i;
-        }
-        page->buffer[3] = 1;
-
-        USBDeviceSendInterleaved(ring0, ring1);
-        self->active = 0;
     }
     else
     {

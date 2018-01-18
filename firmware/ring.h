@@ -15,10 +15,10 @@
 typedef struct Ring {
     tPage *pages;
     uint32_t length;
-    uint32_t acquire;
-    uint32_t write;
-    uint32_t read;
-    uint32_t release;
+    volatile uint32_t acquire;
+    volatile uint32_t write;
+    volatile uint32_t read;
+    volatile uint32_t release;
     volatile bool empty;
     volatile bool full;
     volatile bool content;

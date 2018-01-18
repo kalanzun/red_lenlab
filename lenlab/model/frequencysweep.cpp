@@ -129,21 +129,21 @@ Frequencysweep::restart()
 void
 Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
 {
-    //qDebug("receive");
+    qDebug("receive");
     uint8_t *buffer = reply->getBody();
     int16_t *data = (int16_t *) (reply->getBody() + 22);
 
     uint8_t channel = buffer[0];
     uint8_t last_package = buffer[1];
     uint8_t count = buffer[2];
-    //qDebug() << "receive" << count << channel << last_package;
+    qDebug() << "receive" << count << channel << last_package;
 
     for (uint32_t i = 1; i < 500; i++) {
         incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
     }
 
     if (last_package) {
-        //qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
+        qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
 
         incoming->setView(incoming->getLength(0));
 
@@ -157,6 +157,8 @@ Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
 void
 Frequencysweep::on_calculate()
 {
+    qDebug("on_calculate");
+
     // Ignore normal oscilloscope events
     if (!m_active)
         return;
