@@ -61,37 +61,37 @@ class Pattern:
 
 
 class Version:
-    
+
     version_h = Path("..", "include", "lenlab_version.h")
     lenlab_config_h = Path("..", "lenlab", "config.h")
     firmware_config_h = Path("..", "firmware", "config.h")
-    
+
     major_pattern = Pattern("#define MAJOR (\d+)$")
     minor_pattern = Pattern("#define MINOR (\d+)$")
     revision_pattern = Pattern("#define REVISION (\d+)$")
-    
+
     def __init__(self):
         with open(self.version_h) as file:
             data = file.readlines()
-        
+
         self.major = int(single(self.major_pattern(data), "No major version number found").group(1))
         self.minor = int(single(self.minor_pattern(data), "No minor version number found").group(1))
-        
+
         with open(self.lenlab_config_h) as file:
             self.lenlab_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
-        
+
         with open(self.firmware_config_h) as file:
             self.firmware_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
-            
+
         self.revision = max(self.lenlab_revision, self.firmware_revision)
 
         self.sys = platform.system()
-        
+
         if self.sys == "Windows":
             self.release_name = "lenlab_{}-{}-{}_win".format(self.major, self.minor, self.revision)
         elif self.sys == "Linux":
             self.release_name = "lenlab_{}-{}-{}_linux".format(self.major, self.minor, self.revision)
-            
+
 
 class QtWindows:
 
@@ -149,7 +149,7 @@ class LibusbWindows:
 class Firmware:
 
     path = Path("..", "bin")
-    
+
     def __init__(self, version):
         self.firmware = "lenlab_firmware_{}-{}-{}.out".format(version.major, version.minor, version.firmware_revision)
         assert access(self.path / self.firmware, R_OK), "No firmware found"
@@ -157,7 +157,7 @@ class Firmware:
 
 class Lenlab:
 
-    path = Path("..", "..", "build-lenlab-Desktop-Release")
+    path = Path("..", "..", "build-red_lenlab-Desktop-Release", "lenlab", "app")
 
     def __init__(self, version):
         self.lenlab = self.path / "lenlab"
@@ -187,7 +187,7 @@ class Doc:
 
 def build():
     version = Version()
-    
+
     if version.sys == "Windows":
         qt = QtWindows()
         qwt = QwtWindows()
@@ -195,10 +195,10 @@ def build():
         lenlab = LenlabWindows(version, qt)
     else:
         lenlab = Lenlab(version)
-        
+
     firmware = Firmware(version)
     doc = Doc()
-    
+
     if not "build" in listdir():
         mkdir("build")
 
@@ -229,7 +229,7 @@ def build():
 
     elif version.sys == "Linux":
         copy(lenlab.lenlab, Path("build", version.release_name, "lenlab", "lenlab"))
-        
+
         ldd_parser = compile("\t([^ ]*) => ([^ ]*) \(0x[0-9a-f]*\)$")
         library_selectors = (
             compile("libqwt\.so\.6$"),
@@ -253,7 +253,7 @@ def build():
         copy(join("/usr/lib/qt/plugins/platforms/libqxcb.so"), join("build", version.release_name, "lenlab", "platforms", "libqxcb.so"))
         for lib in ["libQt5DBus.so.5", "libQt5XcbQpa.so.5", "libstdc++.so.6", "libxcb-xinerama.so.0"]:
             copy(join("/usr/lib", lib), join("build", version.release_name, "lenlab", lib))
-            
+
     else:
         raise Exception("Unknown system.")
 
@@ -277,7 +277,7 @@ def build():
         copytree(Path("..", "uniflash_windows_64"), build / "uniflash_windows_64")
         mkdir(build / "uniflash_windows_64" / "user_files" / "images")
         copy(firmware.path / firmware.firmware, build / "uniflash_windows_64" / "user_files" / "images" / "red_firmware.out")
-        
+
     # Linux
     if version.sys == "Linux":
         mkdir(build / "linux")
@@ -292,9 +292,9 @@ def build():
 
 def main():
     chdir(dirname(abspath(__file__)))
-    
+
     build()
-    
+
     #try:
         #build()
     #except Exception as detail:
