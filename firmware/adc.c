@@ -234,16 +234,16 @@ ADCStart(uint32_t length, bool single, uint32_t samplerate)
     ping1 = RingAcquire(&adc.adc1.ring);
     pong1 = RingAcquire(&adc.adc1.ring);
 
-    if (single)
-    {
+    //if (single)
+    //{
         adc.adc0.single = 1;
         adc.adc1.single = 1;
-    }
-    else
-    {
-        adc.adc0.single = 0;
-        adc.adc1.single = 0;
-    }
+    //}
+    //else
+    //{
+    //    adc.adc0.single = 0;
+    //    adc.adc1.single = 0;
+    //}
 
     // Both ADC shall run exactly in sync
     // - A common timer triggers both ADCs

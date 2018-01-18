@@ -76,7 +76,7 @@ OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate)
     self->count = 0;
 
     MemoryInit(&memory);
-    RingAllocate(&self->ring, 12);
+    RingAllocate(&self->ring, 18);
     ADCPingPong(samplerate); // Allocates 4
 }
 
@@ -166,6 +166,11 @@ OscilloscopeMain(tOscilloscope *self)
             buffer0 = (uint16_t *) (adc_page0->buffer + 24);
             buffer1 = (uint16_t *) (adc_page1->buffer + 24);
 
+            if (RingFull(&self->ring)) {
+                RingRead(&self->ring);
+                RingRelease(&self->ring);
+            }
+
             page = RingAcquire(&self->ring);
 
             page->buffer[0] = OscilloscopeData;
@@ -181,7 +186,7 @@ OscilloscopeMain(tOscilloscope *self)
 
             data = (int8_t *) (page->buffer + OSCILLOSCOPE_HEADER_LENGTH);
 
-            if (self->count == 3) {
+            if (self->count == 9) {
                 self->trigger_wait = 1;
             }
 
@@ -192,7 +197,7 @@ OscilloscopeMain(tOscilloscope *self)
                 data[2*i+1] = delta(state1, buffer1[i] >> 2);
                 state1 += data[2*i+1];
 
-                if (self->count == 2 || self->trigger_wait || self->trigger_active) {
+                if (self->count == 8 || self->trigger_wait || self->trigger_active) {
                     self->filter_state -= self->filter[self->filter_index];
                     self->filter_state += state0;
                     self->filter[self->filter_index] = state0;
@@ -221,26 +226,25 @@ OscilloscopeMain(tOscilloscope *self)
 
             self->count++;
 
+            /*
             if (self->count == 12) {
                 page->buffer[3] = 1; // mark this the last package
                 ADCStop();
                 USBDeviceSend(&self->ring);
                 self->active = 0;
             }
-
-            /*
+            */
             if (self->trigger_save) {
                 self->trigger_post_count++;
-                if (self->trigger_post_count == 4) {
+                if (self->trigger_post_count == 9) {
+                    //DEBUG_PRINT("%d\n", self->count);
                     self->trigger_save = 0;
                     page->buffer[3] = 1; // mark this the last package
-                    ADCDisable();
-                    MemoryStartSending(&memory);
+                    //ADCDisable();
+                    USBDeviceSend(&self->ring);
                     self->active = 0;
                 }
             }
-            */
-
         }
 
     }

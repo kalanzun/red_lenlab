@@ -145,7 +145,7 @@ Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
     if (last_package) {
         qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
 
-        incoming->setView(incoming->getLength(0));
+        //incoming->setView(incoming->getLength(0));
 
         com->deleteLater();
         emit calculate();
@@ -187,8 +187,8 @@ Frequencysweep::on_calculate()
 
     incoming->setTrigger(0);
 
-    for (uint32_t idx = 0; idx < incoming->getLength(0); idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_samplerate) * ((double) idx - (incoming->getLength(0) / 2));
+    for (uint32_t idx = 0; idx < incoming->getDataLength(0); idx++) {
+        x = 2 * pi * f * 1e-6 * (1<<current_samplerate) * ((double) idx - (incoming->getDataLength(0) / 2));
         y = std::sin(x) + i * std::cos(x);
         sum0 += incoming->getY(idx, 0) * y;
         sum1 += incoming->getY(idx, 1) * y;

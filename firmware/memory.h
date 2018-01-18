@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MEMORY_H_
 
 
-#define MEMORY_LENGTH 16
+#define MEMORY_LENGTH 22
 #define PAGE_LENGTH 1024
 
 

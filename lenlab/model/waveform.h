@@ -55,6 +55,7 @@ public:
     void append(uint32_t channel, double value);
 
     uint32_t getLength(uint32_t channel);
+    uint32_t getDataLength(uint32_t channel);
 
     double getX(uint32_t i);
     double getY(uint32_t i, uint32_t channel);
@@ -72,7 +73,7 @@ private:
     typedef Series super;
 
     std::array< uint32_t, 2 > index{{0, 0}};
-    std::array< std::array< double, 7000 >, 2 > data;
+    std::array< std::array< double, 9000 >, 2 > data;
 
 };
 

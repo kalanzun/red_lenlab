@@ -103,7 +103,7 @@ void
 Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
 {
     // ByteArray Code
-    qDebug("on_reply");
+    //qDebug("on_reply");
 
     uint8_t *buffer = reply->getBody();
     int8_t *data = (int8_t *) (reply->getBody() + 10);
@@ -133,7 +133,7 @@ Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
     if (last_package) {
         qDebug() << "last package" << incoming->getLength(0);
 
-        incoming->setView(incoming->getLength(0));
+        incoming->setView(8000);
 
         current.swap(incoming);
         incoming.clear();
