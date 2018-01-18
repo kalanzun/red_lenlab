@@ -102,16 +102,21 @@ WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t se
         buffer[2*i] = DACFormat(value, 0);
     }
 
+    value = 0;
+
     for (i = 0; i < 500; i++)
     {
-        x = multiplier * second * i * f_PI / 250;
-        sign = 0;
-        while (x > f_PI) {
-            x -= f_PI;
-            sign = !sign;
-        }
+        if (second)
+        {
+            x = multiplier * second * i * f_PI / 250;
+            sign = 0;
+            while (x > f_PI) {
+                x -= f_PI;
+                sign = !sign;
+            }
 
-        value = (sign ? -1 : 1) * f_mul(taylor(x - f_PI2), amplitude);
+            value = (sign ? -1 : 1) * f_mul(taylor(x - f_PI2), amplitude);
+        }
 
         buffer[2*i + 1] = DACFormat(value, 1);
     }
