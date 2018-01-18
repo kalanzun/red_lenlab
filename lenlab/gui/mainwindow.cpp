@@ -186,9 +186,7 @@ MainWindow::on_actionQuit_triggered()
 }
 
 const QString ABOUT(
-        R"_(
-        <h1>Lenlab 7.0</h1>
-        )_"
+        "<h1>Lenlab " STR(MAJOR) "." STR(MINOR) "</h1>\n"
 
         "<p>Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) ", "
 
@@ -198,7 +196,7 @@ const QString ABOUT(
         "debug build"
 #endif
 
-        "</p>"
+        "</p>\n"
 
         R"_(
         <p>Copyright 2017<br/>
