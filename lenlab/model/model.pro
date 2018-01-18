@@ -32,7 +32,8 @@ SOURCES += \
     series.cpp \
     frequencyseries.cpp \
     indexparameter.cpp \
-    communication.cpp
+    communication.cpp \
+    utils.cpp
 
 HEADERS += \
     component.h \
@@ -45,7 +46,8 @@ HEADERS += \
     series.h \
     frequencyseries.h \
     indexparameter.h \
-    communication.h
+    communication.h \
+    utils.h
 
 include(../../red_lenlab.pri)
 

@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "oscilloscope.h"
 #include "lenlab.h"
 #include "config.h"
+#include "utils.h"
 #include <QDebug>
 #include <QSaveFile>
 
@@ -31,8 +32,8 @@ Oscilloscope::Oscilloscope(Lenlab *parent) : Component(parent), samplerateIndex(
     double value;
 
     for (uint32_t i = 0; i < samplerateIndex.length; i++) {
-        value = 1000 / (1<<(i+2));
-        samplerateIndex.labels << QString("%1 kHz").arg(value);
+        value = 1000.0 / (1<<(i+2));
+        samplerateIndex.labels << QString("%1 kHz").arg(german_double(value));
     }
 
 }

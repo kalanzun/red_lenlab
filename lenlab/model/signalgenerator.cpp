@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "lenlab.h"
 #include "signalgenerator.h"
+#include "utils.h".
 #include <cmath>
 
 namespace model {
@@ -30,19 +31,19 @@ Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18)
 
     for (uint32_t i = 0; i < amplitudeIndex.length; i++) {
         value = 0.8 + 0.05 * i;
-        amplitudeIndex.labels << QString("%1 V").arg(value);
+        amplitudeIndex.labels << QString("%1 V").arg(german_double(value));
     }
 
     for (uint32_t i = 0; i < frequencyIndex.length; i++) {
         value = getFrequency(i);
         if (value < 100)
-            frequencyIndex.labels << QString("%1 Hz").arg(std::round(10*value)/10);
+            frequencyIndex.labels << QString("%1 Hz").arg(german_double(std::round(10*value)/10));
         else if (value < 1000)
-            frequencyIndex.labels << QString("%1 Hz").arg(std::round(value));
+            frequencyIndex.labels << QString("%1 Hz").arg(german_double(std::round(value)));
         else if (value < 10000)
-            frequencyIndex.labels << QString("%1 kHz").arg(std::round(value/10)/100);
+            frequencyIndex.labels << QString("%1 kHz").arg(german_double(std::round(value/10)/100));
         else
-            frequencyIndex.labels << QString("%1 kHz").arg(std::round(value/100)/10);
+            frequencyIndex.labels << QString("%1 kHz").arg(german_double(std::round(value/100)/10));
     }
 
     for (uint32_t i = 0; i < dividerIndex.length; i++) {
