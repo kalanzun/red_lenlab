@@ -193,7 +193,7 @@ Frequencysweep::on_calculate()
         sum1 += incoming->getY(idx, 1) * y;
     }
 
-    value = std::abs(sum1) / std::abs(sum0);
+    value = 20.0 * std::log10(std::abs(sum1) / std::abs(sum0));
     angle = (std::arg(sum1) - std::arg(sum0)) / pi * 180;
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;

@@ -40,8 +40,8 @@ FrequencyForm::FrequencyForm(QWidget *parent) :
     QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
     ui->plot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine);
 
-    QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
-    ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
+    //QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
+    //ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
 }
 
 FrequencyForm::~FrequencyForm()
@@ -65,6 +65,8 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     curves[0] = newCurve(0, QColor("#729fcf"), true); // sky blue 0
     curves[1] = newCurve(1, QColor("#ef2929"), true); // scarlet red 0
     curves[1]->setYAxis(QwtPlot::yRight);
+
+    newGrid();
 
     connect(frequencysweep, SIGNAL(replot()),
             this, SLOT(on_replot()));
