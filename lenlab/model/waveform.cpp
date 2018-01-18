@@ -32,7 +32,7 @@ void
 Waveform::append(uint32_t channel, double value)
 {
     Q_ASSERT(channel < 2);
-    //Q_ASSERT(index[channel] < 7000);
+    Q_ASSERT(index[channel] < 9000);
     data[channel][index[channel]++] = value;
 }
 
@@ -76,7 +76,6 @@ uint32_t
 Waveform::getLength(uint32_t channel)
 {
     Q_ASSERT(channel < 2);
-    //return index[channel];
     return m_view;
 }
 

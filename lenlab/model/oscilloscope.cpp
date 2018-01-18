@@ -64,6 +64,8 @@ Oscilloscope::stop()
 {
     super::stop();
 
+    qDebug() << "stop";
+
     pending = 0;
 }
 
@@ -71,15 +73,15 @@ void
 Oscilloscope::try_to_start()
 {
     if (pending && lenlab->available()) {
-        restart();
         pending = 0;
+        restart();
     }
 }
 
 void
 Oscilloscope::restart()
 {
-    qDebug() << "restart";
+    qDebug() << "XXX restart" << pending;
 
     incoming.reset(new Waveform());
 
@@ -116,7 +118,7 @@ Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
     uint16_t trigger = *(uint16_t *) (buffer + 6);
 
     if (trigger) {
-        qDebug() << "trigger" << trigger;
+        //qDebug() << "trigger" << trigger;
         incoming->setTrigger(trigger);
     }
 
@@ -139,9 +141,9 @@ Oscilloscope::on_reply(const pCommunication &com, const usb::pMessage &reply)
         incoming.clear();
         emit replot();
 
-        if (m_active) {
-            com->deleteLater();
+        com->deleteLater();
 
+        if (m_active) {
             pending = 1;
             // try_to_start(); // does not succeed because of deleteLater()
         }

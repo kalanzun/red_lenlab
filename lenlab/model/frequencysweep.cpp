@@ -97,15 +97,15 @@ void
 Frequencysweep::try_to_start()
 {
     if (pending && lenlab->available()) {
-        restart();
         pending = 0;
+        restart();
     }
 }
 
 void
 Frequencysweep::restart()
 {
-    qDebug() << "restart";
+    qDebug() << "frequencysweep restart";
 
     incoming.reset(new Waveform());
 
@@ -114,7 +114,7 @@ Frequencysweep::restart()
     else if (index >= 33)
         samplerate = 2;
     else
-        samplerate = 4;
+        samplerate = 3;
 
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
@@ -129,7 +129,7 @@ Frequencysweep::restart()
 void
 Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
 {
-    qDebug("receive");
+    //qDebug("receive");
     uint8_t *buffer = reply->getBody();
     int16_t *data = (int16_t *) (reply->getBody() + 22);
 
@@ -159,7 +159,6 @@ Frequencysweep::on_calculate()
 {
     qDebug("on_calculate");
 
-    // Ignore normal oscilloscope events
     if (!m_active)
         return;
 
@@ -199,7 +198,7 @@ Frequencysweep::on_calculate()
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / incoming->getLength(0) << std::abs(sum0) / incoming->getLength(0) << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
+    //qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / incoming->getLength(0) << std::abs(sum0) / incoming->getLength(0) << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
 
     current->append(0, value);
     current->append(1, angle);

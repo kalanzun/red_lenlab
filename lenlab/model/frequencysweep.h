@@ -41,8 +41,8 @@ class Frequencysweep : public Component
 
     QSharedPointer<FrequencySeries> current;
 
-    bool pending;
-    bool wait_for_update;
+    bool pending = 0;
+    bool wait_for_update = 0;
 
 public:
     explicit Frequencysweep(Lenlab *parent);

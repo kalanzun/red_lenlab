@@ -43,6 +43,7 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
     if (self->active)// || self->send)
         return;
 
+    ADCRelease();
     self->active = 1;
     self->trigger = 0;
     self->count = 0;
@@ -120,7 +121,6 @@ OscilloscopeMain(tOscilloscope *self)
 
             ring0 = ADCGetRing(0);
             ring1 = ADCGetRing(1);
-            ADCRelease();
 
             //DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
 
