@@ -62,8 +62,8 @@ SignalForm::setModel(model::Lenlab *lenlab)
 
     ui->frequencyBox->insertItems(0, signalgenerator->frequencyIndex.labels);
     ui->frequencySlider->setMaximum(signalgenerator->frequencyIndex.length - 1);
-    ui->frequencyBox->setCurrentIndex(25);
-    ui->frequencySlider->setValue(25);
+    ui->frequencyBox->setCurrentIndex(82);
+    ui->frequencySlider->setValue(82);
 
     ui->dividerBox->insertItems(0, signalgenerator->dividerIndex.labels);
     ui->dividerSlider->setMaximum(signalgenerator->dividerIndex.length - 1);
