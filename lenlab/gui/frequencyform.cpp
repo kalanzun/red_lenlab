@@ -41,6 +41,7 @@ FrequencyForm::FrequencyForm(QWidget *parent) :
 
     QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
     ui->plot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine);
+    ui->plot->setAxisMaxMinor(QwtPlot::xBottom, 10);
 
     QwtText x_label("Frequenz [Hz]");
     QFont x_font(ui->plot->axisFont(2));
@@ -116,6 +117,7 @@ FrequencyForm::newGrid()
     pen.setStyle(Qt::DotLine);
     pen.setColor("#555753"); // aluminium 4
     grid->setPen(pen);
+    grid->enableXMin(true);
 
     grid->attach(ui->plot); // acquires ownership
     return grid.release();
