@@ -73,10 +73,49 @@
           <x>0</x>
           <y>0</y>
           <width>318</width>
-          <height>534</height>
+          <height>548</height>
          </rect>
         </property>
+        <property name="styleSheet">
+         <string notr="true">#ch1Label {
+	color: #3465a4;
+	font-weight: bold;
+}
+#ch2Label {
+	color: #73d216;
+	font-weight: bold;
+}
+#amplitudeLabel {
+	color: #3465a4;
+	font-weight: bold;
+}
+#phaseLabel {
+	color: #cc0000;
+	font-weight: bold;
+}</string>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Legende</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="amplitudeLabel">
+           <property name="text">
+            <string>Amplitude [dB]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="phaseLabel">
+           <property name="text">
+            <string>Phase [°]</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="saveButton">
            <property name="minimumSize">
@@ -87,6 +126,83 @@
            </property>
            <property name="text">
             <string>Speichern</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Messaufbau</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="2" column="1">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Eingang</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="ch1Label">
+             <property name="text">
+              <string>1 (PD0)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="ch2Label">
+             <property name="text">
+              <string>2 (PD1)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Schaltung</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Ausgang</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>DAC Kanal 1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Eingang</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Kanal</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Verbinden Sie Kanal 1 (PD0) mit Kanal 1 des DAC und dem Eingang der Schaltung sowie Kanal 2 (PD1) mit dem Ausgang der Schaltung</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
