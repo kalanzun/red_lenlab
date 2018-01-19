@@ -202,10 +202,8 @@ Frequencysweep::on_calculate()
     value = 20.0 * std::log10(std::abs(transfer_fct));
     angle = std::arg(transfer_fct) / pi * 180;
 
-    /*
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
-    */
 
     qDebug() << "frequency" << current_index << f;
 
