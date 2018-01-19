@@ -137,6 +137,16 @@
           </layout>
          </item>
          <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Zeitbereich</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="timerangeBox"/>
+         </item>
+         <item>
           <widget class="QPushButton" name="saveButton">
            <property name="minimumSize">
             <size>

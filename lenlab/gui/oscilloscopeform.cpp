@@ -46,6 +46,10 @@ OscilloscopeForm::OscilloscopeForm(QWidget *parent) :
     y_label.setFont(y_font);
     ui->plot->setAxisTitle(0, y_label);
 
+    for (uint32_t i = 0; i < 7; i++)
+        ui->timerangeBox->insertItem(i, QString("%L1 ms").arg(0.5*(1<<i)));
+    ui->timerangeBox->setCurrentIndex(3);
+
     newGrid();
 }
 
@@ -172,6 +176,14 @@ OscilloscopeForm::save()
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
     }
+}
+
+void
+OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
+{
+    double timerange = 0.5 * (1<<index);
+    ui->plot->setAxisScale(QwtPlot::xBottom, -timerange/2, timerange/2);
+    ui->plot->replot();
 }
 
 } // namespace gui

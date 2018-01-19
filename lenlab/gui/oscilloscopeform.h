@@ -63,6 +63,8 @@ private slots:
 
     void on_saveButton_clicked();
 
+    void on_timerangeBox_currentIndexChanged(int index);
+
 private:
     QwtPlotCurve *newCurve(const QColor &color, bool visible);
     QwtPlotGrid *newGrid();
