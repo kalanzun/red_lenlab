@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "waveform.h"
 #include "communication.h"
 #include <QObject>
+#include <QTimerEvent>
 
 namespace model {
 
@@ -43,6 +44,7 @@ class Frequencysweep : public Component
 
     bool pending = 0;
     bool wait_for_update = 0;
+    bool wait_for_step = 0;
 
 public:
     explicit Frequencysweep(Lenlab *parent);
@@ -56,6 +58,7 @@ public:
     void try_to_start();
     void restart();
     void step();
+    void timerEvent(QTimerEvent *event);
 
     QSharedPointer<FrequencySeries> getWaveform();
 

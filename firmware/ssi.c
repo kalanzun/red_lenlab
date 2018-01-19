@@ -134,8 +134,6 @@ SSISetDivider(uint8_t predivider, uint8_t divider)
 void
 SSIStart(void)
 {
-    SSIEnable(SSI0_BASE);
-
     SSIStartuDMAChannel(UDMA_PRI_SELECT);
     SSIStartuDMAChannel(UDMA_ALT_SELECT);
 
@@ -147,6 +145,10 @@ void
 SSIStop(void)
 {
     uDMAChannelDisable(UDMA_CHANNEL_SSI0TX);
+
+    // Set DAC Output to 1/2.
+    SSIDataPut(SSI0_BASE, 0x3800); // channel A
+    SSIDataPut(SSI0_BASE, 0xB800); // channel B
 }
 
 
@@ -166,18 +168,18 @@ SSIConfigure()
     //
     HWREG(SSI0_BASE + SSI_O_CR1) = 0; // master mode
 
-    // Set DAC Output to zero. Needed after reset of µC
-    SSIDataPut(SSI0_BASE, 0x3800);
-
-    IntEnable(INT_SSI0);
-    SSIDMAEnable(SSI0_BASE, SSI_DMA_TX);
-
-    // **************************************************************************************
     //
-    // Config of SSI with uDMA
+    // Configure SSI Frequency and Protocol
     //
-    // **************************************************************************************
+    SSISetDivider(2, 2);
 
+    SSIEnable(SSI0_BASE);
+
+    SSIStop();
+
+    //
+    // Configure SSI with uDMA
+    //
     uDMAChannelAttributeDisable(UDMA_CHANNEL_SSI0TX,
             UDMA_ATTR_ALTSELECT |
             UDMA_ATTR_HIGH_PRIORITY |
@@ -191,75 +193,16 @@ SSIConfigure()
     uDMAChannelControlSet(UDMA_CHANNEL_SSI0TX | UDMA_ALT_SELECT,
             UDMA_SIZE_16 | UDMA_SRC_INC_16 | UDMA_DST_INC_NONE |
             UDMA_ARB_4);
-}
-/*
-inline int32_t
-f_mul(int32_t a, int32_t b)
-{
-    return (a * b) >> 11;
+
+    IntEnable(INT_SSI0);
+    SSIDMAEnable(SSI0_BASE, SSI_DMA_TX);
+
+    // DMA enabled, but not running (DMAChannelEnable not called)
 }
 
-inline int32_t
-taylor(int32_t x)
-{
-    int32_t x2 = f_mul(x, x);
-    int32_t x3 = f_mul(x2, x);
-    int32_t x5 = f_mul(x3, x2);
-    int32_t x7 = f_mul(x5, x2);
-
-    return (x) - (x3 / 6) + (x5 / 120) - (x7 / 5040);
-}
-*/
 void
 SSIInit(void)
 {
-    //uint32_t i;
-
     SSIConfigure();
-
-    /*
-    // Rampe steigend auf Ausgang A
-    // Rampe fallend auf Ausgang B
-    // Vollausschlag ist 4096 (12 bit), i läuft bis 512
-    // SSI_PAYLOAD_LENGTH == 1024
-    for (i = 0; i < (SSI_PAYLOAD_LENGTH >> 1); i++)
-    {
-        ssi.buffer[2*i] = (8*i) | 0x3000; // channel A
-        ssi.buffer[2*i+1] = (8*((SSI_PAYLOAD_LENGTH >> 1)-i)) | 0xB000; // channel B
-    }
-    */
-
-    /*
-    // Sinus und Cosinus
-    // SSI_PAYLOAD_LENGTH == 2*4*119
-    for (i = 0; i < (SSI_PAYLOAD_LENGTH >> 1); i++)
-    {
-        ssi.buffer[2*i] = 0x3000; // channel A
-        ssi.buffer[2*i+1] = 0xB000; // channel B
-    }
-#define OFFSET 2047
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-    for (i = 0; i < 120; i++)
-    {
-        ssi.buffer[2*i] = ((uint16_t) MIN(OFFSET + taylor(27*i), 4095)) | 0x3000; // channel A
-        ssi.buffer[2*i+1] = ((uint16_t) MIN(OFFSET + taylor(27*(119-i)), 4095)) | 0xB000; // channel B
-    }
-    for (i = 0; i < 120; i++)
-    {
-        ssi.buffer[2*(120+i)] = ((uint16_t) MIN(OFFSET + taylor(27*(119-i)), 4095)) | 0x3000; // channel A
-        ssi.buffer[2*(120+i)+1] = ((uint16_t) MAX(OFFSET - taylor(27*i), 0)) | 0xB000; // channel B
-    }
-    for (i = 0; i < 120; i++)
-    {
-        ssi.buffer[2*(2*120+i)] = ((uint16_t) MAX(OFFSET - taylor(27*i), 0)) | 0x3000; // channel A
-        ssi.buffer[2*(2*120+i)+1] = ((uint16_t) MAX(OFFSET - taylor(27*(119-i)), 0)) | 0xB000; // channel B
-    }
-    for (i = 0; i < 120; i++)
-    {
-        ssi.buffer[2*(3*120+i)] = ((uint16_t) MAX(OFFSET - taylor(27*(119-i)), 0)) | 0x3000; // channel A
-        ssi.buffer[2*(3*120+i)+1] = ((uint16_t) MIN(OFFSET + taylor(27*i), 4095)) | 0xB000; // channel B
-    }
-    */
 }
 

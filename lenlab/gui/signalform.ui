@@ -50,7 +50,7 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="2" column="0">
-      <widget class="QLabel" name="dividerLabel">
+      <widget class="QLabel" name="secondLabel">
        <property name="text">
         <string>Frequenzmultiplikator
 für Kanal B (Pin 10)</string>
@@ -76,10 +76,10 @@ Kanal A (Pin 14)</string>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="dividerBox"/>
+      <widget class="QComboBox" name="secondBox"/>
      </item>
      <item row="2" column="2">
-      <widget class="QSlider" name="dividerSlider">
+      <widget class="QSlider" name="secondSlider">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

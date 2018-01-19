@@ -48,8 +48,6 @@ on_init(tEvent *event)
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
-    //LoggerStop();
-
     EventSetReply(reply, Init);
     EventSetBodyLength(reply, 0);
 
@@ -65,7 +63,7 @@ on_getName(tEvent *event)
 {
     tEvent *reply;
 
-    DEBUG_PRINT("getName\n");
+    //DEBUG_PRINT("getName\n");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -81,7 +79,7 @@ on_getVersion(tEvent *event)
     tEvent *reply;
     uint32_t array[3] = {MAJOR, MINOR, REVISION};
 
-    DEBUG_PRINT("getVersion\n");
+    //DEBUG_PRINT("getVersion\n");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -91,56 +89,14 @@ on_getVersion(tEvent *event)
     QueueWrite(&reply_handler.reply_queue);
 }
 
-/*
-void
-on_setLoggerInterval(tEvent *event)
-{
-    uint32_t value = *(uint32_t *) (event->payload + 4);
-
-    DEBUG_PRINT("setLoggerInterval\n");
-
-    LoggerSetInterval(value);
-}
-
-void
-on_startLogger(tEvent *event)
-{
-    DEBUG_PRINT("startLogger\n");
-
-    LoggerStart();
-}
-
-void
-on_stopLogger(tEvent *event)
-{
-    DEBUG_PRINT("stopLogger\n");
-
-    LoggerStop();
-}
-
-void
-on_calculateSine(tEvent *event)
-{
-    DEBUG_PRINT("on_calculateSine\n");
-    SignalCalculateSine();
-}
-*/
 void
 on_startOscilloscope(tEvent *event)
 {
     uint32_t samplerate = EventGetInt(event, 0);
+
     //DEBUG_PRINT("startOscilloscope\n");
 
     OscilloscopeStart(&oscilloscope, samplerate);
-}
-
-void
-on_startOscilloscopeTrigger(tEvent *event)
-{
-    uint32_t samplerate = EventGetInt(event, 0);
-    //DEBUG_PRINT("startOscilloscope\n");
-
-    OscilloscopeStartTrigger(&oscilloscope, samplerate);
 }
 
 void
@@ -154,6 +110,8 @@ on_setSignalSine(tEvent *event)
     uint32_t amplitude  = EventGetInt(event, 3);
     uint32_t second     = EventGetInt(event, 4);
 
+    //DEBUG_PRINT("setSignalSine\n");
+
     // this may need a long time
     SignalSetSine(multiplier, predivider, divider, amplitude, second);
 
@@ -164,117 +122,25 @@ on_setSignalSine(tEvent *event)
     EventSetBodyLength(reply, 0);
 
     QueueWrite(&reply_handler.reply_queue);
-
-    //DEBUG_PRINT("SignalSetSine(%d, %d, %d);\n", multiplier, predivider, divider);
-}
-
-/*
-void
-on_testSignalgeneratorSineFrequency(tEvent *event)
-{
-    SignalTestSineFrequency(event);
-}
-*/
-
-//#define min(a, b) (((a) < (b))? (a) : (b))
-
-/*
-
-inline void
-SendMessage(tPacketQueue *queue, const uint8_t data[], uint32_t size)
-{
-    tPacket *packet;
-    uint32_t i;
-
-    packet = PacketQueueWrite(queue);
-    packet->size = min(size + 1, PACKET_QUEUE_PAYLOAD_SIZE);
-
-    packet->payload[0] = 1; // Reply Code for Message
-    for (i = 1; i < packet->size; i++)
-        packet->payload[i] = data[i-1];
-
-    PacketQueueWriteDone(queue);
-
 }
 
 void
-GetName (tCommandHandler *self, tPacket *command)
+on_stopSignal(tEvent *event)
 {
-    DEBUG_PRINT("GetName\n");
-    if (!PacketQueueFull(self->reply_queue)) {
-        SendMessage(self->reply_queue, name, NAME_SIZE);
-    }
-}
+    //DEBUG_PRINT("stopSignal\n");
 
-
-void
-SetLoggerTimestep(tCommandHandler *self, tPacket *command)
-{
-    tPacket *packet;
-    uint32_t timestep;
-
-    if (command->size < 5) return;
-
-    timestep = *(uint32_t *) (command->payload+1);
-    DEBUG_PRINT("SetLoggerTimestamp %i\n", timestep);
-    // set timestep
-    if (!PacketQueueFull(self->reply_queue)) {
-        packet = PacketQueueWrite(self->reply_queue);
-        packet->payload[0] = 2; // Reply Code for OK
-        packet->size = usnprintf((char *) packet->payload+1, PACKET_QUEUE_PAYLOAD_SIZE-1, "SetLoggerTimestep %i", timestep) + 1 + 1; // reply code and string terminator
-
-        PacketQueueWriteDone(self->reply_queue);
-    }
-
-}
-void
-GetADCInterruptCounter(tCommandHandler *self, tPacket *command)
-{
-    tPacket *packet;
-
-    DEBUG_PRINT("GetADCInterruptCounter %i\n", adc_interrupt_counter);
-    // set timestep
-    if (!PacketQueueFull(self->reply_queue)) {
-        packet = PacketQueueWrite(self->reply_queue);
-        packet->payload[0] = 2; // Reply Code for OK
-        packet->size = usnprintf((char *) packet->payload+1, PACKET_QUEUE_PAYLOAD_SIZE-1, "GetADCInterruptCounter %i", adc_interrupt_counter) + 1 + 1; // reply code and string terminator
-
-        PacketQueueWriteDone(self->reply_queue);
-    }
-
+    SignalStop();
 }
 
 void
-StartADC(tCommandHandler *self, tPacket *command)
+on_startOscilloscopeTrigger(tEvent *event)
 {
-    DEBUG_PRINT("StartADC\n");
-    ADCStart();
+    uint32_t samplerate = EventGetInt(event, 0);
+
+    //DEBUG_PRINT("startOscilloscopeTrigger\n");
+
+    OscilloscopeStartTrigger(&oscilloscope, samplerate);
 }
-*/
-/*
-void
-SendLorem(tCommandHandler *self, tPacket *command)
-{
-    Lorem();
-}
-*/
-
-/*
-typedef void (* const tCommandFunction)(tEvent *);
-
-tCommandFunction commands[] =
-{
-    NoOperation,
-    getName,
-    acquireLogger,
-    releaseLogger,
-    setLoggerInterval,
-    startLogger,
-    stopLogger
-};
-
-#define NUM_COMMANDS (sizeof(commands) / sizeof(tCommandFunction))
-*/
 
 void
 CommandHandlerMain(void)
@@ -285,27 +151,21 @@ CommandHandlerMain(void)
     if (!QueueEmpty(&command_handler.command_queue)) {
         event = QueueRead(&command_handler.command_queue);
         command = EventGetCommand(event);
+
         if (command == init) on_init(event);
         else if (command == getName) on_getName(event);
         else if (command == getVersion) on_getVersion(event);
-        else if (command == startOscilloscope) on_startOscilloscope(event);
         else if (command == setSignalSine) on_setSignalSine(event);
+        else if (command == stopSignal) on_stopSignal(event);
+        else if (command == startOscilloscope) on_startOscilloscope(event);
         else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
-        /*
-        else if (command == setLoggerInterval) on_setLoggerInterval(event);
-        else if (command == startLogger) on_startLogger(event);
-        else if (command == stopLogger) on_stopLogger(event);
-        else if (command == calculateSine) on_calculateSine(event);
-        else if (command == testSignalgeneratorSineFrequency) on_testSignalgeneratorSineFrequency(event);
-        */
+
         QueueRelease(&command_handler.command_queue);
     }
 }
-
 
 void
 CommandHandlerInit(void)
 {
     QueueInit(&command_handler.command_queue);
 }
-

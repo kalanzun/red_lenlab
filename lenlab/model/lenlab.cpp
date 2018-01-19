@@ -93,6 +93,7 @@ Lenlab::on_comDestroyed(QObject *obj)
 {
     Q_UNUSED(obj);
     signalgenerator->try_to_setSine();
+    signalgenerator->try_to_stop();
     oscilloscope->try_to_start();
     frequencysweep->try_to_start();
 }

@@ -27,8 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 typedef struct Signal {
-    uint16_t frequency_divisor;
-    uint16_t memory_multiplier;
+    bool active;
 } tSignal;
 
 
@@ -37,8 +36,9 @@ extern tSignal signal;
 
 void SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second);
 
-
 void SignalStart(void);
+
+void SignalStop(void);
 
 void SignalInit(void);
 

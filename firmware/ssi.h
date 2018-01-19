@@ -44,6 +44,7 @@ uint16_t *SSIGetBuffer(void);
 void SSISetDivider(uint8_t predivider, uint8_t divider);
 
 void SSIStart(void);
+
 void SSIStop(void);
 
 void SSIInit(void);

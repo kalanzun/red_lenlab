@@ -44,13 +44,9 @@ enum Command {
     init,
     getName,
     getVersion,
-    setLoggerInterval,
-    startLogger,
-    stopLogger,
-    startOscilloscope,
-    stopOscilloscope,
     setSignalSine,
-    setOscilloscopeSamplerateDivider,
+    stopSignal,
+    startOscilloscope,
     startOscilloscopeTrigger,
     NUM_COMMANDS
 };

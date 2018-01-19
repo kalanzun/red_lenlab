@@ -80,14 +80,14 @@ Voltmeter::restart()
 
     qDebug("set intervall");
     usb::pMessage cmdSetInterval(new usb::Message());
-    cmdSetInterval->setCommand(setLoggerInterval);
+    //cmdSetInterval->setCommand(setLoggerInterval);
     *((uint32_t *) cmdSetInterval->getBody()) = interval;
     cmdSetInterval->setBodyLength(4);
     //lenlab->send(cmdSetInterval);
 
     qDebug("start");
     usb::pMessage cmdStart(new usb::Message());
-    cmdStart->setCommand(startLogger);
+    //cmdStart->setCommand(startLogger);
     //lenlab->send(cmdStart);
 }
 
@@ -96,7 +96,7 @@ Voltmeter::stop()
 {
     qDebug("stop");
     usb::pMessage cmd(new usb::Message());
-    cmd->setCommand(stopLogger);
+    //cmd->setCommand(stopLogger);
     //lenlab->send(cmd);
 
     super::stop();

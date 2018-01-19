@@ -55,13 +55,16 @@ Frequencysweep::start()
 
     pending = 0;
     wait_for_update = 0;
+    lenlab->signalgenerator->lock();
 
     current->clear();
     index = current->start_index;
+    lenlab->signalgenerator->stop();
     lenlab->signalgenerator->setAmplitude(14);
-    lenlab->signalgenerator->setDivider(1);
+    lenlab->signalgenerator->setSecond(1);
 
-    step();
+    wait_for_step = 1;
+    startTimer(100);
 }
 
 void
@@ -71,6 +74,8 @@ Frequencysweep::stop()
 
     pending = 0;
     wait_for_update = 0;
+    lenlab->signalgenerator->stop();
+    lenlab->signalgenerator->unlock();
 }
 
 void
@@ -79,10 +84,11 @@ Frequencysweep::step()
     if (!m_active)
         return;
 
-    //qDebug() << "step";
+    qDebug() << "step";
 
-    wait_for_update = 1;
     lenlab->signalgenerator->setFrequency(index);
+    wait_for_update = 1;
+    lenlab->signalgenerator->setSine();
 }
 
 void
@@ -91,8 +97,32 @@ Frequencysweep::on_updated()
     if (!wait_for_update)
         return;
 
-    pending = 1;
     wait_for_update = 0;
+
+    // wait a little for the signalgenerator to settle
+    qDebug("startTimer");
+    if (index == current->start_index)
+        startTimer(500);
+    else
+        startTimer(10);
+}
+
+void
+Frequencysweep::timerEvent(QTimerEvent *event)
+{
+    killTimer(event->timerId());
+
+    qDebug("timerEvent");
+
+    if (wait_for_step) {
+        wait_for_step = 0;
+        step();
+    }
+
+    else {
+        pending = 1;
+        try_to_start();
+    }
 }
 
 void
@@ -140,7 +170,7 @@ Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
 
     uint8_t channel = buffer[0];
     uint8_t last_package = buffer[1];
-    uint8_t count = buffer[2];
+    //uint8_t count = buffer[2];
     //qDebug() << "receive" << count << channel << last_package;
 
     for (uint32_t i = 1; i < 500; i++) {

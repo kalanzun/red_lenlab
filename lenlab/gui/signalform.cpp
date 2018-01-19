@@ -31,7 +31,7 @@ SignalForm::SignalForm(QWidget *parent) :
     qDebug() << "SignalForm";
     ui->setupUi(this);
 
-    setUIConfiguration(false, false, false);
+    //setUIConfiguration(false, false, false);
 }
 
 SignalForm::~SignalForm()
@@ -52,6 +52,9 @@ SignalForm::setModel(model::Lenlab *lenlab)
     this->lenlab = lenlab;
     this->signalgenerator = lenlab->signalgenerator;
 
+    connect(signalgenerator, SIGNAL(lockedDataChanged(bool)),
+            this, SLOT(signalgenerator_lockedDataChanged(bool)));
+
     ui->signalTypeBox->insertItem(0, "Aus");
     ui->signalTypeBox->insertItem(1, "Sinus");
 
@@ -65,12 +68,13 @@ SignalForm::setModel(model::Lenlab *lenlab)
     ui->frequencyBox->setCurrentIndex(82);
     ui->frequencySlider->setValue(82);
 
-    ui->dividerBox->insertItems(0, signalgenerator->dividerIndex.labels);
-    ui->dividerSlider->setMaximum(signalgenerator->dividerIndex.length - 1);
+    ui->secondBox->insertItems(0, signalgenerator->secondIndex.labels);
+    ui->secondSlider->setMaximum(signalgenerator->secondIndex.length - 1);
 }
 
+/*
 void
-SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool divider)
+SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool second)
 {
     if (amplitude) {
         ui->amplitudeLabel->show();
@@ -94,28 +98,53 @@ SignalForm::setUIConfiguration(bool amplitude, bool frequency, bool divider)
         ui->frequencySlider->hide();
     }
 
-    if (divider) {
-        ui->dividerLabel->show();
-        ui->dividerBox->show();
-        ui->dividerSlider->show();
+    if (second) {
+        ui->secondLabel->show();
+        ui->secondBox->show();
+        ui->secondSlider->show();
     }
     else {
-        ui->dividerLabel->hide();
-        ui->dividerBox->hide();
-        ui->dividerSlider->hide();
+        ui->secondLabel->hide();
+        ui->secondBox->hide();
+        ui->secondSlider->hide();
     }
 }
+*/
 
 void
 SignalForm::on_signalTypeBox_activated(int index)
 {
     if (index == 1) { // Sinus
-        //signalgenerator->start();
-        setUIConfiguration(true, true, true);
+        if (signalgenerator->locked()) {
+            ui->signalTypeBox->setCurrentIndex(0);
+            active = 0;
+        }
+        else {
+            signalgenerator->setAmplitude(ui->amplitudeBox->currentIndex());
+            signalgenerator->setFrequency(ui->frequencyBox->currentIndex());
+            signalgenerator->setSecond(ui->secondBox->currentIndex());
+            signalgenerator->setSine();
+            active = 1;
+            //setUIConfiguration(true, true, true);
+        }
     }
     else {
-        //signalgenerator->stop();
-        setUIConfiguration(false, false, false);
+        if (signalgenerator->locked()) {
+        }
+        else {
+            signalgenerator->stop();
+            active = 0;
+            //setUIConfiguration(false, false, false);
+        }
+    }
+}
+
+void
+SignalForm::signalgenerator_lockedDataChanged(bool locked)
+{
+    if (locked) {
+        ui->signalTypeBox->setCurrentIndex(0); // does not trigger activated
+        active = 0;
     }
 }
 
@@ -130,7 +159,10 @@ void
 SignalForm::on_amplitudeSlider_valueChanged(int index)
 {
     ui->amplitudeBox->setCurrentIndex(index);
-    signalgenerator->setAmplitude(index);
+    if (active) {
+        signalgenerator->setAmplitude(index);
+        signalgenerator->setSine();
+    }
 }
 
 void
@@ -144,21 +176,27 @@ void
 SignalForm::on_frequencySlider_valueChanged(int index)
 {
     ui->frequencyBox->setCurrentIndex(index);
-    signalgenerator->setFrequency(index);
+    if (active) {
+        signalgenerator->setFrequency(index);
+        signalgenerator->setSine();
+    }
 }
 
 void
-SignalForm::on_dividerBox_activated(int index)
+SignalForm::on_secondBox_activated(int index)
 {
     // this will call valueChanged, which updates the model
-    ui->dividerSlider->setValue(index);
+    ui->secondSlider->setValue(index);
 }
 
 void
-SignalForm::on_dividerSlider_valueChanged(int index)
+SignalForm::on_secondSlider_valueChanged(int index)
 {
-    ui->dividerBox->setCurrentIndex(index);
-    signalgenerator->setDivider(index);
+    ui->secondBox->setCurrentIndex(index);
+    if (active) {
+        signalgenerator->setSecond(index);
+        signalgenerator->setSine();
+    }
 }
 
 

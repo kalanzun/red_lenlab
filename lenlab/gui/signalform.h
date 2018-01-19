@@ -52,17 +52,21 @@ private slots:
     void on_amplitudeSlider_valueChanged(int index);
     void on_frequencyBox_activated(int index);
     void on_frequencySlider_valueChanged(int index);
-    void on_dividerBox_activated(int index);
-    void on_dividerSlider_valueChanged(int index);
+    void on_secondBox_activated(int index);
+    void on_secondSlider_valueChanged(int index);
+
+    void signalgenerator_lockedDataChanged(bool locked);
 
 private:
-    void setUIConfiguration(bool amplitude, bool frequency, bool divider);
+    //void setUIConfiguration(bool amplitude, bool frequency, bool divider);
 
     Ui::SignalForm *ui;
 
     MainWindow *main_window;
     model::Lenlab *lenlab;
     model::Signalgenerator *signalgenerator;
+
+    bool active = 0;
 };
 
 } // namespace gui

@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(sine_length), dividerIndex(21), lenlab(parent)
+Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(sine_length), secondIndex(21), lenlab(parent)
 {
     double value;
 
@@ -47,8 +47,8 @@ Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18)
             frequencyIndex.labels << QString("%1 kHz").arg(german_double(std::round(value/100)/10));
     }
 
-    for (uint32_t i = 0; i < dividerIndex.length; i++) {
-        dividerIndex.labels << QString("%1").arg(i);
+    for (uint32_t i = 0; i < secondIndex.length; i++) {
+        secondIndex.labels << QString("%1").arg(i);
     }
 }
 
@@ -67,7 +67,44 @@ Signalgenerator::getFrequency(uint32_t index)
 }
 
 void
+Signalgenerator::lock()
+{
+    Q_ASSERT(!m_locked);
+    m_locked = 1;
+    emit lockedDataChanged(1);
+}
+
+void
+Signalgenerator::unlock()
+{
+    Q_ASSERT(m_locked);
+    m_locked = 0;
+    emit lockedDataChanged(0);
+}
+
+bool
+Signalgenerator::locked()
+{
+    return m_locked;
+}
+
+void
 Signalgenerator::setSine()
+{
+    setSine_pending = 1;
+    try_to_setSine();
+}
+
+void
+Signalgenerator::try_to_setSine() {
+    if (setSine_pending && lenlab->available()) {
+        setSine_cmd();
+        setSine_pending = 0;
+    }
+}
+
+void
+Signalgenerator::setSine_cmd()
 {
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
@@ -84,11 +121,30 @@ Signalgenerator::setSine()
 }
 
 void
-Signalgenerator::try_to_setSine() {
-    if (pending && lenlab->available()) {
-        setSine();
-        pending = 0;
+Signalgenerator::stop()
+{
+    stop_pending = 1;
+    try_to_stop();
+}
+
+void
+Signalgenerator::try_to_stop() {
+    if (stop_pending && lenlab->available()) {
+        stop_cmd();
+        stop_pending = 0;
     }
+}
+
+void
+Signalgenerator::stop_cmd()
+{
+    auto com = lenlab->initCommunication();
+    connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
+            this, SLOT(on_reply(pCommunication, usb::pMessage)));
+    auto cmd = usb::newCommand(stopSignal);
+    cmd->setBodyLength(0);
+    com->send(cmd);
+    com->deleteLater();
 }
 
 void
@@ -105,8 +161,6 @@ Signalgenerator::setAmplitude(uint32_t index)
 {
     Q_ASSERT(index < amplitudeIndex.length);
     amplitude = index;
-    pending = 1;
-    try_to_setSine();
 }
 
 void
@@ -114,17 +168,13 @@ Signalgenerator::setFrequency(uint32_t index)
 {
     Q_ASSERT(index < frequencyIndex.length);
     frequency = index;
-    pending = 1;
-    try_to_setSine();
 }
 
 void
-Signalgenerator::setDivider(uint32_t index)
+Signalgenerator::setSecond(uint32_t index)
 {
-    Q_ASSERT(index < dividerIndex.length);
+    Q_ASSERT(index < secondIndex.length);
     second = index;
-    pending = 1;
-    try_to_setSine();
 }
 
 } // namespace model

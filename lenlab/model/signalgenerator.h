@@ -176,19 +176,29 @@ public:
 
     double getFrequency(uint32_t index);
 
+    void lock();
+    void unlock();
+    bool locked();
+
     void setSine();
     void try_to_setSine();
+    void setSine_cmd();
+
+    void stop();
+    void try_to_stop();
+    void stop_cmd();
 
     void setAmplitude(uint32_t index);
     void setFrequency(uint32_t index);
-    void setDivider(uint32_t index);
+    void setSecond(uint32_t index);
 
     IndexParameter amplitudeIndex;
     IndexParameter frequencyIndex;
-    IndexParameter dividerIndex;
+    IndexParameter secondIndex;
 
 signals:
     void updated();
+    void lockedDataChanged(bool locked);
 
 public slots:
     void on_reply(const pCommunication &com, const usb::pMessage &reply);
@@ -196,11 +206,13 @@ public slots:
 private:
     Lenlab *lenlab;
 
+    bool m_locked;
+    bool setSine_pending = 0;
+    bool stop_pending = 0;
+
     uint32_t amplitude = 0;
     uint32_t frequency = 0;
     uint32_t second = 0;
-
-    bool pending = 0;
 };
 
 } // namespace model

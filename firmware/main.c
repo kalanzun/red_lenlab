@@ -177,8 +177,6 @@ main(void) {
     // Configure Timer
     //
     TimerInit();
-    //TimerSetInterval(200);
-    //TimerStart(); // test signal for oscilloscope
 
     //
     // Initialize Command, Data and Reply Handler
@@ -194,9 +192,6 @@ main(void) {
     //
     DEBUG_PRINT("Red Firmware\n");
     DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
-
-    //OscilloscopeStart(&oscilloscope);
-    SignalStart();
 
     while(1)
     {

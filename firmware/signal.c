@@ -125,6 +125,10 @@ WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t se
 void
 SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second)
 {
+    if (!signal.active)
+        SignalStart();
+
+    // unconditionally overwrite the SSI DMA buffer
     WriteSine(SSIGetBuffer(), multiplier, amplitude, second);
     SSISetDivider(predivider, divider);
 }
@@ -132,12 +136,26 @@ SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32
 void
 SignalStart(void)
 {
+    if (signal.active)
+        return;
+
     SSIStart();
+    signal.active = 1;
+}
+
+void
+SignalStop(void)
+{
+    if (!signal.active)
+        return;
+
+    SSIStop();
+    signal.active = 0;
 }
 
 void
 SignalInit(void)
 {
+    signal.active = 0;
     SSISetLength(1000);
-    SignalSetSine(1, 2, 5, 1241, 1);
 }

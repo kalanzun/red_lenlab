@@ -248,7 +248,7 @@ LoggerForm::on_measurementDataChanged(bool measurementData)
 void
 LoggerForm::on_unsavedDataChanged(bool unsavedData)
 {
-
+    Q_UNUSED(unsavedData);
 }
 
 void
