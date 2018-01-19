@@ -71,7 +71,7 @@ für Kanal B (Pin 10)</string>
       <widget class="QLabel" name="frequencyLabel">
        <property name="text">
         <string>Frequenz
-Kanal A (Pin14)</string>
+Kanal A (Pin 14)</string>
        </property>
       </widget>
      </item>

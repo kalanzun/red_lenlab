@@ -75,7 +75,7 @@ DACFormat(int32_t value, bool channel)
     value += SIGNAL_OFFSET;
     value = value > 0 ? value : 0;
     value = value < SIGNAL_MAX ? value : SIGNAL_MAX;
-    value |= channel ? 0x3000 : 0xB000;
+    value |= channel ? 0xB000 : 0x3000;
     return (uint16_t) value;
 }
 
