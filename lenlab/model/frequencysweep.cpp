@@ -56,8 +56,8 @@ Frequencysweep::start()
     pending = 0;
     wait_for_update = 0;
 
-    index = 0;
     current->clear();
+    index = current->start_index;
     lenlab->signalgenerator->setAmplitude(14);
     lenlab->signalgenerator->setDivider(1);
 
@@ -111,12 +111,15 @@ Frequencysweep::restart()
 
     incoming.reset(new Waveform());
 
+    samplerate = 0;
+    /*
     if (index >= 66)
         samplerate = 0;
     else if (index >= 33)
         samplerate = 2;
     else
         samplerate = 3;
+    */
 
     auto com = lenlab->initCommunication();
     connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
@@ -168,7 +171,7 @@ Frequencysweep::on_calculate()
     auto current_index = index;
 
     index++;
-    if (index < 100) {
+    if (index < current->stop_index) {
         step();
     }
     else {
@@ -195,15 +198,20 @@ Frequencysweep::on_calculate()
         sum1 += incoming->getY(idx, 1) * y;
     }
 
-    value = 20.0 * std::log10(std::abs(sum1) / std::abs(sum0));
-    angle = (std::arg(sum1) - std::arg(sum0)) / pi * 180;
+    std::complex<double> transfer_fct = sum1 / sum0;
+    value = 20.0 * std::log10(std::abs(transfer_fct));
+    angle = std::arg(transfer_fct) / pi * 180;
+
+    /*
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
+    */
 
-    //qDebug() << "frequency sweep" << current_index << value << std::abs(sum1) / incoming->getLength(0) << std::abs(sum0) / incoming->getLength(0) << angle << std::arg(sum0) / pi * 180 << std::arg(sum1) / pi * 180;
+    qDebug() << "frequency" << current_index << f;
 
-    current->append(0, value);
-    current->append(1, angle);
+    current->append(0, f);
+    current->append(1, value);
+    current->append(2, angle);
 
     emit replot();
 }

@@ -79,8 +79,8 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     this->lenlab = lenlab;
     this->frequencysweep = lenlab->frequencysweep;
 
-    curves[0] = newCurve(0, QColor("#729fcf"), true); // sky blue 0
-    curves[1] = newCurve(1, QColor("#ef2929"), true); // scarlet red 0
+    curves[0] = newCurve(1, QColor("#729fcf"), true); // sky blue 0
+    curves[1] = newCurve(2, QColor("#ef2929"), true); // scarlet red 0
     curves[1]->setYAxis(QwtPlot::yRight);
 
     newGrid();

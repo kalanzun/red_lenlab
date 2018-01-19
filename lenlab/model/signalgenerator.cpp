@@ -20,12 +20,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "lenlab.h"
 #include "signalgenerator.h"
-#include "utils.h".
+#include "utils.h"
 #include <cmath>
+#include <QDebug>
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(100), dividerIndex(21), lenlab(parent)
+Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(sine_length), dividerIndex(21), lenlab(parent)
 {
     double value;
 
@@ -61,6 +62,7 @@ Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18)
 double
 Signalgenerator::getFrequency(uint32_t index)
 {
+    Q_ASSERT(index < frequencyIndex.length);
     return BASE_FREQUENCY  * (double) sine[index][0] / (double) (sine[index][1] * sine[index][2]);
 }
 

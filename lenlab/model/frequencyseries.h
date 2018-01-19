@@ -34,6 +34,12 @@ class FrequencySeries : public Series
 public:
     FrequencySeries();
 
+    static const uint32_t start_index = 34;
+    static const uint32_t stop_index = 129;
+
+    static const uint32_t channel_length = 3;
+    static const uint32_t values_length = stop_index - start_index;
+
     void append(uint32_t channel, double value);
     void clear();
 
@@ -50,10 +56,10 @@ public:
 private:
     typedef Series super;
 
-    std::array< uint32_t, 2 > index{{0, 0}};
-    std::array< double, 2 > MinY{{0.1, -90}};
-    std::array< double, 2 > MaxY{{10.0, 90}};
-    std::array< std::array< double, 100 >, 2 > data;
+    std::array< uint32_t, channel_length > index;
+    std::array< double, channel_length > MinY;
+    std::array< double, channel_length > MaxY;
+    std::array< std::array< double, values_length >, channel_length > data;
 
 };
 
