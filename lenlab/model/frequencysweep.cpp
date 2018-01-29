@@ -266,7 +266,7 @@ Frequencysweep::save(const QString &fileName)
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
     for (uint32_t i = 0; i < current->getLength(0); i++) {
-        stream << current->getX(i) << DELIMITER << current->getY(i, 0) << DELIMITER << current->getY(i, 1) << "\n";
+        stream << current->getX(i) << DELIMITER << current->getY(i, 1) << DELIMITER << current->getY(i, 2) << "\n";
     }
 
     file.commit();
