@@ -29,15 +29,16 @@ qwt will install to C:\Qwt-6.1.3, default settings are fine
 
 Installation instructions http://qwt.sourceforge.net/qwtinstall.html
 
-unzip
+- unzip
 
-cd qwt-6.1.3 
+- cd qwt-6.1.3 
 
-qmake qwt.pro
+- qmake qwt.pro
 
-mingw32-make -j4
+- mingw32-make -j4
 
-mingw32-make install
+- mingw32-make install
+
 
 **register qwt with qt build system**
 
@@ -57,9 +58,15 @@ http://libusb.info
 
 Downloads -> Latest Windows Binaries
 
-Extract file to project directory, libusb
+Extract file to project directory, name libusb, remove version number
 
+```
 /libusb
+```
+
+#### Python
+
+Anaconda or standard python
 
 #### Anaconda
 
@@ -75,13 +82,19 @@ sphinx, breathe, doxygen,
 
 doxygen.org, download and install
 
+#### Standard Python
+
+`pip install sphinx breathe sphinx_rtd_theme sphinxcontrib-mermaid`
+
+doxygen.org, download and install
+
 #### TI Code Composer Studio
 
 Download von www.ti.com/tool/CCSTUDIO
 
 Virenscanner dekativeieren, dieser verhindert unter Umständen das Kopieren einiger Dateien.
 
-Standard-Pfad c:\ti
+Standard-Pfad `c:\ti`
 
 TM4C12x ARM Cortex-M4F core-based MCUs
 
@@ -90,6 +103,8 @@ Standard-Einstellungen
 TI XDS Debug Probe Support
 
 Tiva/Stellaris ICDI Debug Probe
+
+##### Tiva Ware
 
 http://www.ti.com/tool/SW-TM4C
 
@@ -101,37 +116,15 @@ TI Account notwendig
 
 Installieren im Standard-Pfad
 
-vars.ini in workspace
+After installation, register Tiva Ware in the Code Composer Studio. Create a file vars.ini in the workspace directory:
 
+```
 TIVAWARE_INSTALL = C:\ti\TivaWare_C_Series-2.1.4.178
+```
 
-and in code composer studio File/Import/Code Composer Studio/Build Variables
+Import it in Code Composer Studio with File/Import/Code Composer Studio/Build Variables
 
 Scope: Workspace
-
-Import Project
-
-red_lenlab/firmware
-
-do not tick copy
-
-The build settings use TIVAWARE_INSTALL to link files and should work right away
-
-Import project red_lenlab/firmware
-
-do not copy, just link
-
-If it complains about target configuration not set, 
-
-right click on target Configurations/Tiva TM4C1230H6PM.ccxml and select set as default target Configuration.
-
-UART terminal for debug messages
-
-View->Terminal
-
-In the terminal window select Open Terminal
-
-115200 baud, no parity bit, 1 stop bit
 
 ### Linux
 
@@ -156,9 +149,33 @@ Arch Linux,
 
 ## Build
 
-Open lenlab.pro in Qt Creator
+### Lenlab
+
+Open `/red_lenlab.pro` in Qt Creator
 
 Click build or run
+
+### Firmware
+
+Code Composer Studio
+
+#### Import Project
+
+File/Import/Code Composer Studio/CCS Projects
+
+Directory `red_lenlab/firmware`
+
+do not tick copy
+
+The build settings use `TIVAWARE_INSTALL` to link files and should work right away
+
+If it complains about target configuration not set, right click on target Configurations/Tiva TM4C1230H6PM.ccxml and select set as default target Configuration.
+
+#### UART terminal for debug messages
+
+View->Terminal
+
+In the terminal window select Open Terminal, 115200 baud, no parity bit, 1 stop bit.
 
 ## Deploy
 
