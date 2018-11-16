@@ -142,11 +142,18 @@ Message::setByte(uint8_t value)
 }
 
 void
+Message::setIntArray(uint32_t array[], uint32_t length)
+{
+    for (uint32_t i = 0; i < length; i++)
+        getBody()[i] = array[i];
+    setType(IntArray);
+    setBodyLength(length);
+}
+
+void
 Message::setInt(uint32_t value)
 {
-    Q_ASSERT(getType() == IntArray);
-    *(uint32_t *) (getBody() + getBodyLength()) = value;
-    setBodyLength(getBodyLength() + 4);
+    setIntArray(&value, 1);
 }
 
 pMessage
