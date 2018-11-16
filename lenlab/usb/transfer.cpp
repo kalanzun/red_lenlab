@@ -56,12 +56,12 @@ Transfer::start(const pMessage &message)
     std::unique_ptr<NoteToSelf> note(new NoteToSelf(this, &active, message));
 
     xfr->buffer = message->getPacketBuffer();
-    xfr->length = message->getPacketLength();
+    xfr->length = static_cast<int>(message->getPacketLength());
     xfr->user_data = note.get();
     xfr->callback = callbackComplete;
 
     auto err = libusb_submit_transfer(xfr.get());
-    if (err) throw Exception(libusb_strerror((libusb_error) err));
+    if (err) throw Exception(libusb_strerror(static_cast<libusb_error>(err)));
 
     note.release(); // release ownership
 }
@@ -69,7 +69,7 @@ Transfer::start(const pMessage &message)
 void
 LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer *xfr)
 {
-    std::unique_ptr<NoteToSelf> note((NoteToSelf *) xfr->user_data); // acquire ownership
+    std::unique_ptr<NoteToSelf> note(static_cast<NoteToSelf *>(xfr->user_data)); // acquire ownership
 
     switch(xfr->status)
     {

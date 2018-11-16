@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using namespace usb::resource;
 
-DeviceListIterator::DeviceListIterator(libusb_device **list, size_t i) : list(list), i(i) {}
+DeviceListIterator::DeviceListIterator(libusb_device **list, int i) : list(list), i(i) {}
 
 bool
 DeviceListIterator::operator !=(DeviceListIterator const &other)
@@ -45,8 +45,8 @@ DeviceListIterator::operator *()
 
 DeviceList::DeviceList()
 {
-    auto err = libusb_get_device_list(NULL, &list);
-    if (err < 0) throw Exception(libusb_strerror((libusb_error) err));
+    auto err = libusb_get_device_list(nullptr, &list);
+    if (err < 0) throw Exception(libusb_strerror(static_cast<libusb_error>(err)));
     else count = err;
 }
 

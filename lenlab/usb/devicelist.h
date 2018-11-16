@@ -29,10 +29,10 @@ namespace resource {
     class DeviceListIterator
     {
         libusb_device **list = nullptr;
-        size_t i;
+        int i;
 
     public:
-        DeviceListIterator(libusb_device **list, size_t i);
+        DeviceListIterator(libusb_device **list, int i);
 
         bool operator !=(DeviceListIterator const &other);
         DeviceListIterator& operator ++();
@@ -42,7 +42,7 @@ namespace resource {
     class DeviceList
     {
         libusb_device **list = nullptr;
-        size_t count;
+        int count;
 
     public:
         DeviceList();

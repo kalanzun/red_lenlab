@@ -28,7 +28,7 @@ DevHandle::DevHandle(libusb_device *dev)
 {
     qDebug("open");
     auto err = libusb_open(dev, &dev_handle);
-    if (err) throw Exception(libusb_strerror((libusb_error) err));
+    if (err) throw Exception(libusb_strerror(static_cast<libusb_error>(err)));
 }
 
 DevHandle::~DevHandle()

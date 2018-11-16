@@ -24,16 +24,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_protocol.h"
 #include <QSharedPointer>
 
-#define MESSAGE_BUFFER_LENGTH 1024
+#define MESSAGE_BUFFER_LENGTH 256
 
 namespace usb {
 
     class Message
     {
-        uint16_t length = LENLAB_PACKET_HEAD_LENGTH;
-        uint8_t buffer[MESSAGE_BUFFER_LENGTH];
+        uint32_t length = LENLAB_PACKET_HEAD_LENGTH;
+        uint32_t buffer[MESSAGE_BUFFER_LENGTH];
 
     public:
+        // interface for usb::Transfer
+
+        int getPacketLength();
+        void setPacketLength(int length);
+
+        unsigned char *getPacketBuffer();
+
+    public:
+        // interface
+
+        uint32_t *getHead();
+        uint8_t *getHeadByte();
+
+        uint32_t *getBody();
+        uint16_t *getBodyShort();
+        uint8_t *getBodyByte();
+
         void setCommand(Command command);
         Command getCommand();
 
@@ -48,21 +65,23 @@ namespace usb {
 
         void setFullBufferLength();
 
-        uint8_t *getBody();
-
-        uint32_t getPacketLength();
-        void setPacketLength(uint32_t length);
-
-        uint8_t *getPacketBuffer();
-
         const char *getString();
+
         uint32_t *getIntArray(uint32_t length);
-
-        void setByteArray(uint8_t array[], uint32_t length);
-        void setByte(uint8_t value);
-
         void setIntArray(uint32_t array[], uint32_t length);
-        void setInt(uint32_t value);
+
+        uint16_t *getShortArray(uint32_t length);
+        void setShortArray(uint16_t array[], uint32_t length);
+
+        uint8_t *getByteArray(uint32_t length);
+        void setByteArray(uint8_t array[], uint32_t length);
+
+        uint32_t getInt(uint32_t index);
+        void setInt(uint32_t index, uint32_t value);
+
+        uint8_t getByte(uint32_t index);
+        void setByte(uint32_t index, uint8_t value);
+
     };
 
     typedef QSharedPointer<Message> pMessage;

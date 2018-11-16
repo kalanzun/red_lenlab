@@ -39,7 +39,7 @@ namespace usb {
 
     public:
         explicit Transfer(libusb_device_handle *dev_handle, unsigned char endpoint, QObject *parent = nullptr);
-        virtual ~Transfer();
+        ~Transfer() override;
 
         bool isActive();
 
