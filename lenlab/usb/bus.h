@@ -18,29 +18,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include "communication.h"
-#include <QDebug>
+#ifndef BUS_H
+#define BUS_H
 
-namespace model {
+#include "context.h"
+#include "device.h"
+#include <QSharedPointer>
 
-Communication::Communication(usb::Handler *handler, QObject *parent) : QObject(parent), handler(handler)
-{
-    connect(handler, SIGNAL(reply(usb::pMessage)),
-            this, SLOT(on_reply(usb::pMessage)));
-}
+namespace usb {
 
-void
-Communication::send(const usb::pMessage &cmd)
-{
-    //qDebug() << "send" << cmd;
-    handler->send(cmd);
-}
+    class Bus
+    {
+        resource::Context context;
 
-void
-Communication::on_reply(const usb::pMessage &rpl)
-{
-    //qDebug() << "reply" << rpl;
-    emit reply(pCommunication(this), rpl);
-}
+    public:
+        Bus();
 
-} // namespace model
+        QSharedPointer<Device> query(uint16_t vid, uint16_t pid);
+    };
+
+} // namespace usb
+
+#endif // BUS_H

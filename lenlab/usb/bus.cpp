@@ -18,40 +18,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef COMMUNICATION_H
-#define COMMUNICATION_H
+#include "bus.h"
+#include "devicelist.h"
 
-#include "usb/handler.h"
-#include "usb/message.h"
-#include <QObject>
-#include <QPointer>
+using namespace usb;
 
-namespace model {
-
-class Communication;
-
-typedef QPointer<Communication> pCommunication;
-
-class Communication : public QObject
+Bus::Bus() : context()
 {
-    Q_OBJECT
 
-public:
-    explicit Communication(usb::Handler *handler, QObject *parent = nullptr);
+}
 
-    void send(const usb::pMessage &cmd);
+QSharedPointer<Device>
+Bus::query(uint16_t vid, uint16_t pid)
+{
+    struct libusb_device_descriptor desc;
+    resource::DeviceList device_list;
 
-signals:
-    void reply(const pCommunication &, const usb::pMessage &);
+    for(auto dev: device_list) {
+        libusb_get_device_descriptor(dev, &desc);
 
-public slots:
-    void on_reply(const usb::pMessage &rpl);
+        // Is it our device?
+        if(desc.idVendor == vid && desc.idProduct == pid) {
+            return QSharedPointer<Device>(new Device(dev));
+        }
+    }
 
-private:
-    usb::Handler *handler;
-
-};
-
-} // namespace model
-
-#endif // COMMUNICATION_H
+    return QSharedPointer<Device>();
+}
