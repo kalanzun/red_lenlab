@@ -30,23 +30,23 @@ Device::Device(libusb_device *dev, QObject *parent) :
     dev_handle(dev),
     event_loop(thread.get()),
     interface(dev_handle.get()),
-    send_queue(new QVector<pMessage>()),
+    send_queue(new QVector<pPacket>()),
     sender(new Transfer(dev_handle.get(), 0x01)),
     receiver0(new Transfer(dev_handle.get(), 0x81)),
     receiver1(new Transfer(dev_handle.get(), 0x81))
 {
-    connect(&*receiver0, SIGNAL(completed(pMessage)),
-            this, SIGNAL(reply(pMessage)));
-    connect(&*receiver1, SIGNAL(completed(pMessage)),
-            this, SIGNAL(reply(pMessage)));
-    connect(this, SIGNAL(reply(pMessage)),
-            this, SLOT(on_reply(pMessage)));
+    connect(&*receiver0, SIGNAL(completed(pPacket)),
+            this, SIGNAL(reply(pPacket)));
+    connect(&*receiver1, SIGNAL(completed(pPacket)),
+            this, SIGNAL(reply(pPacket)));
+    connect(this, SIGNAL(reply(pPacket)),
+            this, SLOT(on_reply(pPacket)));
 
-    connect(&*sender, SIGNAL(completed(pMessage)),
+    connect(&*sender, SIGNAL(completed(pPacket)),
             this, SLOT(on_send_transfer_ready()));
-    connect(&*receiver0, SIGNAL(completed(pMessage)),
+    connect(&*receiver0, SIGNAL(completed(pPacket)),
             this, SLOT(on_reply_transfer_ready()));
-    connect(&*receiver1, SIGNAL(completed(pMessage)),
+    connect(&*receiver1, SIGNAL(completed(pPacket)),
             this, SLOT(on_reply_transfer_ready()));
 
     connect(&*sender, SIGNAL(error(QString)),
@@ -63,7 +63,7 @@ Device::Device(libusb_device *dev, QObject *parent) :
 }
 
 void
-Device::send(const pMessage &cmd)
+Device::send(const pPacket &cmd)
 {
     //qDebug() << "send" << cmd->getCommand();
     send_queue->append(cmd);
@@ -71,7 +71,7 @@ Device::send(const pMessage &cmd)
 }
 
 void
-Device::on_reply(const pMessage &reply)
+Device::on_reply(const pPacket &reply)
 {
     Q_UNUSED(reply);
     //qDebug() << "reply" << reply->getReply() << reply->getPacketLength();

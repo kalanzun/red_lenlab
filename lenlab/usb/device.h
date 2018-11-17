@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "devhandle.h"
 #include "eventloop.h"
 #include "interface.h"
-#include "message.h"
+#include "packet.h"
 #include "thread.h"
 #include "transfer.h"
 #include "libusb.h"
@@ -42,7 +42,7 @@ namespace usb {
         resource::DevHandle dev_handle;
         resource::EventLoop event_loop;
         resource::Interface interface;
-        QSharedPointer<QVector<pMessage>> send_queue;
+        QSharedPointer<QVector<pPacket>> send_queue;
         std::unique_ptr<Transfer> sender;
         std::unique_ptr<Transfer> receiver0;
         std::unique_ptr<Transfer> receiver1;
@@ -50,14 +50,14 @@ namespace usb {
     public:
         explicit Device(libusb_device *dev, QObject *parent = nullptr);
 
-        void send(const pMessage &cmd);
+        void send(const pPacket &cmd);
 
     signals:
-        void reply(const pMessage &);
+        void reply(const pPacket &);
         void error(const QString &);
 
     private slots:
-        void on_reply(const pMessage &);
+        void on_reply(const pPacket &);
         void on_reply_transfer_ready();
         void on_send_transfer_ready();
 

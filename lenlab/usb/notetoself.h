@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "active.h"
 #include "activeguard.h"
-#include "message.h"
+#include "packet.h"
 #include "transfer.h"
 
 namespace usb {
@@ -31,11 +31,11 @@ namespace usb {
     class NoteToSelf
     {
     public:
-        NoteToSelf(Transfer *transfer, Active *active, pMessage message);
+        NoteToSelf(Transfer *transfer, Active *active, pPacket packet);
 
         Transfer *transfer;
         resource::ActiveGuard active_guard;
-        pMessage message;
+        pPacket packet;
     };
 
 }

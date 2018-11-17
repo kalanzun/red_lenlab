@@ -51,12 +51,12 @@ Transfer::isActive()
 }
 
 void
-Transfer::start(const pMessage &message)
+Transfer::start(const pPacket &packet)
 {
-    std::unique_ptr<NoteToSelf> note(new NoteToSelf(this, &active, message));
+    std::unique_ptr<NoteToSelf> note(new NoteToSelf(this, &active, packet));
 
-    xfr->buffer = message->getPacketBuffer();
-    xfr->length = static_cast<int>(message->getPacketLength());
+    xfr->buffer = packet->getByteBuffer();
+    xfr->length = static_cast<int>(packet->getByteLength());
     xfr->user_data = note.get();
     xfr->callback = callbackComplete;
 
@@ -78,8 +78,8 @@ LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer *xfr)
             // xfr->buffer
             // and the length is
             // xfr->actual_length
-            note->message->setPacketLength(xfr->actual_length);
-            emit note->transfer->completed(note->message);
+            note->packet->setByteLength(xfr->actual_length);
+            emit note->transfer->completed(note->packet);
             break;
         case LIBUSB_TRANSFER_CANCELLED:
             qDebug("USB transfer error: LIBUSB_TRANSFER_CANCELLED");

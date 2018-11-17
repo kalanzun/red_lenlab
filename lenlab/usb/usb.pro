@@ -25,11 +25,11 @@ SOURCES += \
     eventloop.cpp \
     exception.cpp \
     interface.cpp \
-    message.cpp \
     notetoself.cpp \
     thread.cpp \
     transfer.cpp \
-    bus.cpp
+    bus.cpp \
+    packet.cpp
 
 HEADERS += \
     active.h \
@@ -41,10 +41,10 @@ HEADERS += \
     eventloop.h \
     exception.h \
     interface.h \
-    message.h \
     notetoself.h \
     thread.h \
     transfer.h \
-    bus.h
+    bus.h \
+    packet.h
 
 include(../../red_lenlab.pri)

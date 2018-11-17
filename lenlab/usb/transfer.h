@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define USBTRANSFER_H
 
 #include "active.h"
-#include "message.h"
+#include "packet.h"
 #include "libusb.h"
 #include <QObject>
 #include <functional>
@@ -44,11 +44,11 @@ namespace usb {
         bool isActive();
 
     signals:
-        void completed(const pMessage &);
+        void completed(const pPacket &);
         void error(const QString &);
 
     public slots:
-        void start(const pMessage &);
+        void start(const pPacket &);
 
     private:
         static void LIBUSB_CALL callbackComplete(struct libusb_transfer *xfr);
