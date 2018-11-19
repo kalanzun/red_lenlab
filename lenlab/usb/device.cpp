@@ -56,8 +56,8 @@ Device::Device(libusb_device *dev, QObject *parent) :
     connect(&*receiver1, SIGNAL(error(QString)),
             this, SIGNAL(error(QString)));
 
-    receiver0->start(newReply());
-    receiver1->start(newReply());
+    receiver0->start(pPacket::create());
+    receiver1->start(pPacket::create());
 
     thread->start();
 }
@@ -80,7 +80,7 @@ Device::on_reply(const pPacket &reply)
 void
 Device::on_reply_transfer_ready()
 {
-    qobject_cast<Transfer *>(QObject::sender())->start(newReply());
+    qobject_cast<Transfer *>(QObject::sender())->start(pPacket::create());
 }
 
 void

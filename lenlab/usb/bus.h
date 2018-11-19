@@ -34,7 +34,7 @@ namespace usb {
     public:
         Bus();
 
-        QSharedPointer<Device> query(uint16_t vid, uint16_t pid);
+        pDevice query(uint16_t vid, uint16_t pid);
     };
 
 } // namespace usb

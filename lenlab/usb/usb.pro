@@ -10,11 +10,6 @@ TARGET = usb
 TEMPLATE = lib
 CONFIG += staticlib
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
-
 SOURCES += \
     active.cpp \
     activeguard.cpp \
@@ -46,5 +41,10 @@ HEADERS += \
     transfer.h \
     bus.h \
     packet.h
+
+unix {
+    target.path = /usr/lib
+    INSTALLS += target
+}
 
 include(../../red_lenlab.pri)

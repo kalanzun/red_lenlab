@@ -18,56 +18,44 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include "protocol/manager.h"
-#include <QString>
-#include <QDebug>
-#include <QtTest>
+#ifndef TRANSACTION_H
+#define TRANSACTION_H
 
-class ProtocolTest : public QObject
+#include "usb/device.h"
+#include "usb/packet.h"
+#include "message.h"
+#include <QPointer>
+#include <QTimerEvent>
+#include <QObject>
+
+namespace protocol {
+
+class Transaction : public QObject
 {
     Q_OBJECT
 
-public:
-    ProtocolTest();
-    ~ProtocolTest();
+    bool watchdog = false;
+    bool successfull = false;
 
-private slots:
-    void initTestCase();
-    void cleanupTestCase();
+public:
+    explicit Transaction(QObject *parent = nullptr);
+    ~Transaction();
+
+signals:
+    void reply(const pMessage &);
+
+    void succeeded();
+    void failed();
+
+public slots:
+    void on_reply_packet(const usb::pPacket &);
 
 private:
-    protocol::pManager manager;
-
-    //int m_short_timeout = 10;
-    int m_long_timeout = 800;
+    void timerEvent(QTimerEvent *);
 };
 
-ProtocolTest::ProtocolTest()
-{
+typedef QPointer<Transaction> pTransaction;
 
-}
+} // namespace protocol
 
-ProtocolTest::~ProtocolTest()
-{
-
-}
-
-void ProtocolTest::initTestCase()
-{
-    manager = protocol::pManager::create();
-
-    QSignalSpy spy(manager.data(), &protocol::Manager::ready);
-    QVERIFY(spy.isValid());
-
-    QVERIFY(spy.wait(m_long_timeout));
-    QCOMPARE(spy.count(), 1);
-}
-
-void ProtocolTest::cleanupTestCase()
-{
-    manager.clear();
-}
-
-QTEST_MAIN(ProtocolTest)
-
-#include "tst_protocoltest.moc"
+#endif // TRANSACTION_H

@@ -18,37 +18,43 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include "packet.h"
+#ifndef MANAGER_H
+#define MANAGER_H
 
-using namespace usb;
+#include "transaction.h"
+#include "usb/bus.h"
+#include "usb/device.h"
+#include <QTimerEvent>
+#include <QObject>
 
-static int p_packet_type_id = qRegisterMetaType<usb::pPacket>("pPacket");
+namespace protocol {
 
-Packet::Packet()
+class Manager : public QObject
 {
+    Q_OBJECT
 
-}
+    usb::Bus bus;
+    usb::pDevice device;
 
-size_t
-Packet::getByteLength()
-{
-    return byte_length;
-}
+public:
+    explicit Manager(QObject *parent = nullptr);
 
-void
-Packet::setByteLength(size_t length)
-{
-    byte_length = length;
-}
+signals:
+    void ready();
+    void send(const pTransaction &, const pMessage &, int);
 
-uint32_t *
-Packet::getBuffer()
-{
-    return buffer;
-}
+public slots:
+    void on_send(const pTransaction &, const pMessage &, int);
+    void on_getName();
+    void on_getVersion();
 
-uint8_t *
-Packet::getByteBuffer()
-{
-    return reinterpret_cast<uint8_t *>(buffer);
-}
+private:
+    void query();
+    void timerEvent(QTimerEvent *);
+};
+
+typedef QSharedPointer<Manager> pManager;
+
+} // namespace protocol
+
+#endif // MANAGER_H

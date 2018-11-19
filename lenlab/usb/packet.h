@@ -26,34 +26,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define PACKET_BUFFER_BYTE_LENGTH 1024
 #define PACKET_BUFFER_ELEMENT_SIZE sizeof(uint32_t)
-#define PACKET_HEAD_LENGTH 1
 
 namespace usb {
 
     class Packet
     {
-        int byte_length;
+        size_t byte_length = PACKET_BUFFER_BYTE_LENGTH;
         uint32_t buffer[PACKET_BUFFER_BYTE_LENGTH / PACKET_BUFFER_ELEMENT_SIZE];
         // this uses a large type, because only casts to shorter types are ok with alignment
 
     public:
-        Packet(int byte_length);
+        Packet();
 
-        int getByteLength();
-        void setByteLength(int length);
+        size_t getByteLength();
+        void setByteLength(size_t length);
 
+        uint32_t *getBuffer();
         uint8_t *getByteBuffer();
-
-        uint8_t *getHead();
-        uint32_t *getIntBody();
-        uint16_t *getShortBody();
-        uint8_t *getByteBody();
     };
 
     typedef QSharedPointer<Packet> pPacket;
-
-    pPacket newCommand(unsigned char code);
-    pPacket newReply();
 
 } // namespace usb
 

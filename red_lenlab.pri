@@ -32,12 +32,14 @@ win32 {
     CONFIG(debug, debug|release) {
         #LIBS += -L../../lenlab/gui/debug -lgui
         #LIBS += -L../../lenlab/model/debug -lmodel
+        LIBS += -L../../lenlab/protocol/debug -lprotocol
         LIBS += -L../../lenlab/usb/debug -lusb
     }
 
     CONFIG(release, debug|release) {
         #LIBS += -L../../lenlab/gui/release -lgui
         #LIBS += -L../../lenlab/model/release -lmodel
+        LIBS += -L../../lenlab/protocol/release -lprotocol
         LIBS += -L../../lenlab/usb/release -lusb
     }
 

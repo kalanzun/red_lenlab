@@ -66,6 +66,8 @@ namespace usb {
 
     };
 
+    typedef QSharedPointer<Device> pDevice;
+
 }
 
 #endif // DEVICE_H
