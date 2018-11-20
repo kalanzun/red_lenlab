@@ -25,6 +25,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
+static int p_board_type_id = qRegisterMetaType<pBoard>("pBoard");
+
 Board::Board(usb::pDevice &device, QObject *parent) :
     QObject(parent),
     device(device)

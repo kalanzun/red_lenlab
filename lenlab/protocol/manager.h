@@ -40,7 +40,7 @@ public:
     explicit Manager(QObject *parent = nullptr);
 
 signals:
-    void ready();
+    void ready(const pBoard &);
     void error(const QString &);
 
 public slots:

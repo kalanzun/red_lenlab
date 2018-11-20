@@ -32,7 +32,7 @@ Manager::Manager(QObject *parent) : QObject(parent)
 void Manager::on_board_ready()
 {
     qDebug() << "on_board_ready";
-    emit ready();
+    emit ready(board);
 }
 
 void Manager::on_board_error(const QString &msg)

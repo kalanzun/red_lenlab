@@ -62,4 +62,6 @@ typedef QSharedPointer<Board> pBoard;
 
 } // namespace protocol
 
+Q_DECLARE_METATYPE(protocol::pBoard)
+
 #endif // BOARD_H
