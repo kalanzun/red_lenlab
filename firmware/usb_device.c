@@ -200,6 +200,7 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
                     event = QueueAcquire(&command_handler.command_queue);
                     event->length = size;
                     USBDBulkPacketRead(&bulk_device, event->payload, size, true);
+                    //DEBUG_PRINT("put command\n");
                     QueueWrite(&command_handler.command_queue);
                 }
                 else {

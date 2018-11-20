@@ -53,8 +53,7 @@ Manager::timerEvent(QTimerEvent *event)
 
     if (device) {
         qDebug() << "create board";
-        board = pBoard(new Board(device));//::create(device);
-        qDebug() << "connect";
+        board = pBoard::create(device);
         connect(board.data(), &Board::ready, this, &Manager::on_board_ready);
         connect(board.data(), &Board::error, this, &Manager::on_board_error);
     }

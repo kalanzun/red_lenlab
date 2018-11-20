@@ -81,6 +81,9 @@ void ProtocolTest::test_startOscilloscope()
 {
     auto command = protocol::pMessage::create();
     command->setCommand(startOscilloscope);
+    command->setType(IntArray);
+    command->setIntBufferLength(1);
+    command->getIntBuffer()[0] = 0; // samplerate
 
     auto transaction = board->call(command, m_short_timeout);
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
@@ -90,7 +93,16 @@ void ProtocolTest::test_startOscilloscope()
 
 void ProtocolTest::test_startOscilloscopeTrigger()
 {
+    auto command = protocol::pMessage::create();
+    command->setCommand(startOscilloscopeTrigger);
+    command->setType(IntArray);
+    command->setIntBufferLength(1);
+    command->getIntBuffer()[0] = 0; // samplerate
 
+    auto transaction = board->call(command, 2000);
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(2000));
 }
 
 QTEST_MAIN(ProtocolTest)

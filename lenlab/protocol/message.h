@@ -55,12 +55,15 @@ public:
     bool isLast();
 
     size_t getIntBufferLength();
+    void setIntBufferLength(size_t length);
     uint32_t *getIntBuffer();
 
     size_t getShortBufferLength();
+    void setShortBufferLength(size_t length);
     uint16_t *getShortBuffer();
 
     size_t getByteBufferLength();
+    void setByteBufferLength(size_t length);
     uint8_t *getByteBuffer();
 
     QString getString();

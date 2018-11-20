@@ -46,6 +46,7 @@ public:
 
     pTransaction call(const pMessage &, int);
 
+    void init();
     void getName();
     void getVersion();
 
@@ -54,6 +55,7 @@ signals:
     void error(const QString &);
 
 public slots:
+    void on_init(const pMessage &);
     void on_getName(const pMessage &);
     void on_getVersion(const pMessage &);
 };

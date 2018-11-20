@@ -37,6 +37,9 @@ public:
 private slots:
     void initTestCase();
     void cleanupTestCase();
+    usb::pPacket create_command(enum Command code);
+    void verify_header(const usb::pPacket &reply, enum Reply code, enum Type type);
+    void test_init();
     void test_getName();
     void test_getVersion();
     void test_setSignalSine();
@@ -72,27 +75,66 @@ void USBTest::cleanupTestCase()
     device.clear();
 }
 
+usb::pPacket USBTest::create_command(enum Command code)
+{
+    auto cmd = usb::pPacket::create();
+    auto buffer = cmd->getByteBuffer();
+    buffer[0] = code;
+    buffer[1] = 0;
+    buffer[2] = 0;
+    buffer[3] = 0;
+    cmd->setByteLength(4);
+    return cmd;
+}
+
+void USBTest::verify_header(const usb::pPacket &reply, enum Reply code, enum Type type)
+{
+    QVERIFY(reply->getByteLength() >= 4);
+    auto buffer = reply->getByteBuffer();
+    QCOMPARE(buffer[0], code);
+    QCOMPARE(buffer[1], type);
+    QCOMPARE(buffer[2], 0);
+    QCOMPARE(buffer[3], 255);
+}
+
+void USBTest::test_init()
+{
+    QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
+    QVERIFY(spy.isValid());
+
+    auto cmd = create_command(init);
+    device->send(cmd);
+
+    QVERIFY(spy.wait(m_short_timeout)); // wait for reply
+    QCOMPARE(spy.count(), 1);
+
+    auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
+    verify_header(reply, Init, noType);
+
+    QVERIFY(spy.wait(m_short_timeout) == 0); // no second packet
+}
+
 void USBTest::test_getName()
 {
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
 
-    auto cmd = usb::pPacket::create();
-    cmd->getByteBuffer()[0] = getName;
-    cmd->setByteLength(4);
+    auto cmd = create_command(getName);
     device->send(cmd);
 
-    QVERIFY(spy.wait(m_short_timeout));
+    QVERIFY(spy.wait(m_short_timeout)); // wait for reply
     QCOMPARE(spy.count(), 1);
 
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
+    verify_header(reply, Name, String);
+
     QString reply_name(reinterpret_cast<const char *>(reply->getByteBuffer() + 4));
-    qDebug() << reply_name;
+    //qDebug() << reply_name;
 
     auto name = QString("Lenlab red Firmware Version %1.%2.").arg(MAJOR).arg(MINOR);
     QVERIFY(reply_name.startsWith(name));
 
-    QVERIFY(spy.wait(m_short_timeout) == 0);
+    QVERIFY(spy.wait(m_short_timeout) == 0); // no second packet
 }
 
 void USBTest::test_getVersion()
@@ -100,21 +142,23 @@ void USBTest::test_getVersion()
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
 
-    auto cmd = usb::pPacket::create();
-    cmd->getByteBuffer()[0] = getVersion;
-    cmd->setByteLength(4);
+    auto cmd = create_command(getVersion);
     device->send(cmd);
 
-    QVERIFY(spy.wait(m_short_timeout));
+    QVERIFY(spy.wait(m_short_timeout)); // wait for reply
     QCOMPARE(spy.count(), 1);
 
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
+    verify_header(reply, Version, IntArray);
+
+    QCOMPARE(reply->getByteLength(), 4*4);
+
     uint32_t *array = reply->getBuffer() + 1;
     QCOMPARE(array[0], uint32_t(MAJOR));
     QCOMPARE(array[1], uint32_t(MINOR));
     //QCOMPARE(array[2], REVISION);
 
-    QVERIFY(spy.wait(m_short_timeout) == 0);
+    QVERIFY(spy.wait(m_short_timeout) == 0); // no second packet
 }
 
 void USBTest::test_setSignalSine()

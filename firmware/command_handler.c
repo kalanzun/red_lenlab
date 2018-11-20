@@ -69,7 +69,6 @@ on_getName(tEvent *event)
 
     EventSetReply(reply, Name);
     EventSetString(reply, name, NAME_LENGTH);
-    EventSetLastPackage(reply);
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -86,7 +85,6 @@ on_getVersion(tEvent *event)
 
     EventSetReply(reply, Version);
     EventSetIntArray(reply, array, 3);
-    EventSetLastPackage(reply);
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -162,6 +160,7 @@ CommandHandlerMain(void)
         else if (command == startOscilloscope) on_startOscilloscope(event);
         else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
 
+        //DEBUG_PRINT("pop command\n");
         QueueRelease(&command_handler.command_queue);
     }
 }

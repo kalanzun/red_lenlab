@@ -117,7 +117,7 @@ EventSetReply(tEvent *self, enum Reply reply)
     self->payload[0] = reply;
     self->payload[1] = noType;
     self->payload[2] = 0;
-    self->payload[3] = 0;
+    self->payload[3] = 255;
 }
 
 inline enum Reply
@@ -141,9 +141,9 @@ EventGetType(tEvent *self)
 }
 
 inline void
-EventSetLastPackage(tEvent *self)
+EventSetLastPackage(tEvent *self, uint8_t last)
 {
-    self->payload[3] = 255;
+    self->payload[3] = last;
 }
 
 inline uint8_t

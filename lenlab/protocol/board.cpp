@@ -31,8 +31,8 @@ Board::Board(usb::pDevice &device, QObject *parent) :
     QObject(parent),
     device(device)
 {
-    qDebug() << "board";
-    getName();
+    qDebug() << "Board::Board";
+    init();
 }
 
 void
@@ -48,8 +48,22 @@ Board::call(const pMessage &command, int timeout)
 }
 
 void
+Board::init()
+{
+    qDebug() << "Board::init";
+
+    auto cmd = pMessage::create();
+    cmd->setCommand(::init);
+
+    auto transaction = call(cmd, 100);
+    connect(transaction.data(), &Transaction::succeeded, this, &Board::on_init);
+}
+
+void
 Board::getName()
 {
+    qDebug() << "Board::getName";
+
     auto cmd = pMessage::create();
     cmd->setCommand(::getName);
 
@@ -62,6 +76,8 @@ Board::getName()
 void
 Board::getVersion()
 {
+    qDebug() << "Board::getVersion";
+
     auto cmd = pMessage::create();
     cmd->setCommand(::getVersion);
 
@@ -72,9 +88,19 @@ Board::getVersion()
 }
 
 void
+Board::on_init(const pMessage &)
+{
+    qDebug() << "Board::on_init";
+
+    getName();
+}
+
+void
 Board::on_getName(const pMessage &reply)
 {
     name = reply->getString();
+
+    qDebug() << "Board::on_getName" << name;
 
     auto prefix = QString("Lenlab red Firmware");
     if (name.startsWith(prefix)) {
@@ -97,6 +123,8 @@ Board::on_getVersion(const pMessage &reply)
         minor = array[1];
         revision = array[2];
 
+        qDebug() << "Board::on_getVersion" << major << minor << revision;
+
         if (major == MAJOR && minor == MINOR) {
             emit ready();
         }
@@ -107,6 +135,8 @@ Board::on_getVersion(const pMessage &reply)
         }
     }
     else {
+        qDebug() << "Board::on_getVersion";
+
         emit error("Das Lenlab Board antwortet mit einer ungültigen Version");
         qDebug() << "Das Lenlab Board antwortet mit einer ungültigen Version";
     }

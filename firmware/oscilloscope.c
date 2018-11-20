@@ -38,7 +38,7 @@ tOscilloscope oscilloscope;
 void
 OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
-    //DEBUG_PRINT("OscilloscopeStart %d\n", samplerate);
+    DEBUG_PRINT("OscilloscopeStart %d\n", samplerate);
 
     if (self->active)// || self->send)
         return;
@@ -58,7 +58,7 @@ OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate)
 {
     uint32_t i;
 
-    //DEBUG_PRINT("OscilloscopeStartTrigger %d\n", samplerate);
+    DEBUG_PRINT("OscilloscopeStartTrigger %d\n", samplerate);
 
     if (self->active)// || self->send)
         return;
@@ -145,9 +145,9 @@ OscilloscopeMain(tOscilloscope *self)
                 page->buffer[3] = 0; // last
                 page->buffer[4] = 10+i;
             }
-            page->buffer[3] = 1;
+            page->buffer[3] = 255;
 
-            //DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
+            DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
 
             USBDeviceSendInterleaved(ring0, ring1);
             self->active = 0;
@@ -246,9 +246,9 @@ OscilloscopeMain(tOscilloscope *self)
             if (self->trigger_save) {
                 self->trigger_post_count++;
                 if (self->trigger_post_count == 10) {
-                    //DEBUG_PRINT("%d\n", self->count);
+                    DEBUG_PRINT("%d\n", self->count);
                     self->trigger_save = 0;
-                    page->buffer[3] = 1; // mark this the last package
+                    page->buffer[3] = 255; // mark this the last package
                     //ADCDisable();
                     USBDeviceSend(&self->ring);
                     self->active = 0;
