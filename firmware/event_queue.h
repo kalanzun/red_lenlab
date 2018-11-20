@@ -116,6 +116,8 @@ EventSetReply(tEvent *self, enum Reply reply)
 {
     self->payload[0] = reply;
     self->payload[1] = noType;
+    self->payload[2] = 0;
+    self->payload[3] = 0;
 }
 
 inline enum Reply
@@ -136,6 +138,18 @@ EventGetType(tEvent *self)
 {
     ASSERT((enum Type) self->payload[1] < NUM_TYPES);
     return (enum Type) self->payload[1];
+}
+
+inline void
+EventSetLastPackage(tEvent *self)
+{
+    self->payload[3] = 255;
+}
+
+inline uint8_t
+EventGetLastPackage(tEvent *self)
+{
+    return self->payload[3];
 }
 
 inline void

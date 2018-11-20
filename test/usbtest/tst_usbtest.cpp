@@ -86,7 +86,7 @@ void USBTest::test_getName()
     QCOMPARE(spy.count(), 1);
 
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
-    QString reply_name(reinterpret_cast<const char *>(reply->getByteBuffer() + 2));
+    QString reply_name(reinterpret_cast<const char *>(reply->getByteBuffer() + 4));
     qDebug() << reply_name;
 
     auto name = QString("Lenlab red Firmware Version %1.%2.").arg(MAJOR).arg(MINOR);
@@ -110,8 +110,8 @@ void USBTest::test_getVersion()
 
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
     uint32_t *array = reply->getBuffer() + 1;
-    QCOMPARE(array[0], MAJOR);
-    QCOMPARE(array[1], MINOR);
+    QCOMPARE(array[0], uint32_t(MAJOR));
+    QCOMPARE(array[1], uint32_t(MINOR));
     //QCOMPARE(array[2], REVISION);
 
     QVERIFY(spy.wait(m_short_timeout) == 0);

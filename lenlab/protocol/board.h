@@ -18,46 +18,48 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef TRANSACTION_H
-#define TRANSACTION_H
+#ifndef BOARD_H
+#define BOARD_H
 
 #include "message.h"
-#include "transactionguard.h"
+#include "transaction.h"
 #include "usb/device.h"
-#include <QPointer>
-#include <QTimerEvent>
 #include <QObject>
 
 namespace protocol {
 
-class Transaction : public QObject
+class Board : public QObject
 {
     Q_OBJECT
 
-    bool watchdog = false;
-    bool successfull = false;
+    usb::pDevice device;
 
-    std::unique_ptr<TransactionGuard> transaction_guard;
+    QString name;
+    uint32_t major;
+    uint32_t minor;
+    uint32_t revision;
 
 public:
-    explicit Transaction(const usb::pDevice &device, const pMessage &command, int timeout, QObject *parent = nullptr);
-    ~Transaction();
+    explicit Board(usb::pDevice &device, QObject *parent = nullptr);
+
+    void send(const pMessage &);
+
+    pTransaction call(const pMessage &, int);
+
+    void getName();
+    void getVersion();
 
 signals:
-    void reply(const pMessage &);
-
-    void succeeded(const pMessage &);
-    void failed();
+    void ready();
+    void error(const QString &);
 
 public slots:
-    void on_reply(const pMessage &);
-
-private:
-    void timerEvent(QTimerEvent *);
+    void on_getName(const pMessage &);
+    void on_getVersion(const pMessage &);
 };
 
-typedef QPointer<Transaction> pTransaction;
+typedef QSharedPointer<Board> pBoard;
 
 } // namespace protocol
 
-#endif // TRANSACTION_H
+#endif // BOARD_H

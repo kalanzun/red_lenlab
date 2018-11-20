@@ -69,6 +69,7 @@ on_getName(tEvent *event)
 
     EventSetReply(reply, Name);
     EventSetString(reply, name, NAME_LENGTH);
+    EventSetLastPackage(reply);
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -85,6 +86,7 @@ on_getVersion(tEvent *event)
 
     EventSetReply(reply, Version);
     EventSetIntArray(reply, array, 3);
+    EventSetLastPackage(reply);
 
     QueueWrite(&reply_handler.reply_queue);
 }

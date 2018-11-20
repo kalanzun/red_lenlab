@@ -21,7 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include "transaction.h"
+#include "board.h"
 #include "usb/bus.h"
 #include "usb/device.h"
 #include <QTimerEvent>
@@ -34,22 +34,20 @@ class Manager : public QObject
     Q_OBJECT
 
     usb::Bus bus;
-    usb::pDevice device;
+    pBoard board;
 
 public:
     explicit Manager(QObject *parent = nullptr);
 
-    pTransaction call(const pMessage &, int);
-
 signals:
     void ready();
+    void error(const QString &);
 
 public slots:
-    void on_getName();
-    void on_getVersion();
+    void on_board_ready();
+    void on_board_error(const QString &);
 
 private:
-    void query();
     void timerEvent(QTimerEvent *);
 };
 

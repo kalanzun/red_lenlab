@@ -29,48 +29,19 @@ Manager::Manager(QObject *parent) : QObject(parent)
     startTimer(500);
 }
 
-pTransaction
-Manager::call(const pMessage &command, int timeout)
+void Manager::on_board_ready()
 {
-    return new Transaction(device, command, timeout, this);
-}
-
-void
-Manager::on_getName()
-{
-    qDebug() << "on_getName";
-    auto cmd = pMessage::create();
-    cmd->setCommand(getVersion);
-
-    auto transaction = call(cmd, 100);
-    connect(transaction.data(), &Transaction::succeeded,
-            this, &Manager::on_getVersion);
-}
-
-void
-Manager::on_getVersion()
-{
-    qDebug() << "on_getVersion";
-
+    qDebug() << "on_board_ready";
     emit ready();
 }
 
-void
-Manager::query()
+void Manager::on_board_error(const QString &msg)
 {
-    device = bus.query(LENLAB_VID, LENLAB_PID);
+    qDebug() << "on_board_error";
+    emit error(msg);
 
-    if (device) {
-        auto cmd = pMessage::create();
-        cmd->setCommand(getName);
-
-        auto transaction = call(cmd, 100);
-        connect(transaction.data(), &Transaction::succeeded,
-                this, &Manager::on_getName);
-    }
-    else {
-        startTimer(500);
-    }
+    board.reset();
+    startTimer(5000);
 }
 
 void
@@ -78,7 +49,18 @@ Manager::timerEvent(QTimerEvent *event)
 {
     killTimer(event->timerId());
 
-    query();
+    auto device = bus.query(LENLAB_VID, LENLAB_PID);
+
+    if (device) {
+        qDebug() << "create board";
+        board = pBoard(new Board(device));//::create(device);
+        qDebug() << "connect";
+        connect(board.data(), &Board::ready, this, &Manager::on_board_ready);
+        connect(board.data(), &Board::error, this, &Manager::on_board_error);
+    }
+    else {
+        startTimer(500);
+    }
 }
 
 } // namespace protocol

@@ -23,8 +23,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
-// TODO transaction blocking!!!
-
 Transaction::Transaction(const usb::pDevice &device, const pMessage &command, int timeout, QObject *parent) :
     QObject(parent),
     transaction_guard(new TransactionGuard(device))
@@ -46,6 +44,8 @@ Transaction::on_reply(const pMessage &message)
 {
     watchdog = true;
 
+    qDebug() << "on_reply" << message->isLast();
+
     if (message->isLast()) {
         transaction_guard.reset(nullptr);
         successfull = true;
@@ -54,7 +54,7 @@ Transaction::on_reply(const pMessage &message)
     emit reply(message);
 
     if (successfull) {
-        emit succeeded();
+        emit succeeded(message);
         deleteLater();
     }
 }
@@ -72,6 +72,7 @@ Transaction::timerEvent(QTimerEvent *event)
         else {
             transaction_guard.reset(nullptr);
             killTimer(event->timerId());
+            qDebug() << "transaction timeout";
             emit failed();
             deleteLater();
         }

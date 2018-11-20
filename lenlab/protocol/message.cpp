@@ -94,7 +94,7 @@ Message::getType()
 bool
 Message::isLast()
 {
-    return static_cast<bool>(packet->getByteBuffer()[2]);
+    return static_cast<bool>(packet->getByteBuffer()[3]);
 }
 
 size_t
