@@ -27,19 +27,12 @@ namespace protocol {
 Manager::Manager(QObject *parent) : QObject(parent)
 {
     startTimer(500);
-
-    connect(this, &Manager::send,
-            this, &Manager::on_send,
-            Qt::QueuedConnection);
 }
 
-void
-Manager::on_send(const pTransaction &transaction, const pMessage &command, int timeout)
+pTransaction
+Manager::call(const pMessage &command, int timeout)
 {
-    connect(device.data(), &usb::Device::reply,
-            transaction, &Transaction::on_reply_packet);
-    transaction->startTimer(timeout);
-    device->send(command->getPacket());
+    return new Transaction(device, command, timeout, this);
 }
 
 void
@@ -49,11 +42,9 @@ Manager::on_getName()
     auto cmd = pMessage::create();
     cmd->setCommand(getVersion);
 
-    auto transaction = new Transaction();
-    connect(transaction, &Transaction::succeeded,
+    auto transaction = call(cmd, 100);
+    connect(transaction.data(), &Transaction::succeeded,
             this, &Manager::on_getVersion);
-
-    emit send(transaction, cmd, 100);
 }
 
 void
@@ -73,11 +64,9 @@ Manager::query()
         auto cmd = pMessage::create();
         cmd->setCommand(getName);
 
-        auto transaction = new Transaction();
-        connect(transaction, &Transaction::succeeded,
+        auto transaction = call(cmd, 100);
+        connect(transaction.data(), &Transaction::succeeded,
                 this, &Manager::on_getName);
-
-        emit send(transaction, cmd, 100);
     }
     else {
         startTimer(500);

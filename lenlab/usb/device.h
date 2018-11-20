@@ -50,6 +50,8 @@ namespace usb {
     public:
         explicit Device(libusb_device *dev, QObject *parent = nullptr);
 
+        std::mutex transaction;
+
         void send(const pPacket &cmd);
 
     signals:

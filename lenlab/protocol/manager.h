@@ -39,12 +39,12 @@ class Manager : public QObject
 public:
     explicit Manager(QObject *parent = nullptr);
 
+    pTransaction call(const pMessage &, int);
+
 signals:
     void ready();
-    void send(const pTransaction &, const pMessage &, int);
 
 public slots:
-    void on_send(const pTransaction &, const pMessage &, int);
     void on_getName();
     void on_getVersion();
 

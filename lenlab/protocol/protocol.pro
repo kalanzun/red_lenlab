@@ -13,12 +13,14 @@ CONFIG += staticlib
 SOURCES += \
     message.cpp \
     transaction.cpp \
-    manager.cpp
+    manager.cpp \
+    transactionguard.cpp
 
 HEADERS += \
     message.h \
     transaction.h \
-    manager.h
+    manager.h \
+    transactionguard.h
 
 unix {
     target.path = /usr/lib

@@ -25,15 +25,15 @@ namespace protocol {
 
 // TODO transaction blocking!!!
 
-Transaction::Transaction(QObject *parent) : QObject(parent)
+Transaction::Transaction(const usb::pDevice &device, const pMessage &command, int timeout, QObject *parent) :
+    QObject(parent),
+    transaction_guard(new TransactionGuard(device))
 {
     qDebug() << "transaction";
-    /*
-    connect(device.data(), SIGNAL(reply(usb::pPacket)),
-            this, SLOT(on_device_reply(usb::pPacket)));
+    connect(transaction_guard.get(), &TransactionGuard::reply,
+            this, &Transaction::on_reply);
     device->send(command->getPacket());
     startTimer(timeout);
-    */
 }
 
 Transaction::~Transaction()
@@ -42,13 +42,12 @@ Transaction::~Transaction()
 }
 
 void
-Transaction::on_reply_packet(const usb::pPacket &packet)
+Transaction::on_reply(const pMessage &message)
 {
     watchdog = true;
 
-    auto message = pMessage::create(packet);
-
     if (message->isLast()) {
+        transaction_guard.reset(nullptr);
         successfull = true;
     }
 
@@ -71,6 +70,7 @@ Transaction::timerEvent(QTimerEvent *event)
             watchdog = false;
         }
         else {
+            transaction_guard.reset(nullptr);
             killTimer(event->timerId());
             emit failed();
             deleteLater();

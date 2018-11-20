@@ -18,46 +18,36 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef TRANSACTION_H
-#define TRANSACTION_H
+#ifndef TRANSACTIONGUARD_H
+#define TRANSACTIONGUARD_H
 
 #include "message.h"
-#include "transactionguard.h"
 #include "usb/device.h"
-#include <QPointer>
-#include <QTimerEvent>
+#include "usb/packet.h"
+#include <QMetaObject>
 #include <QObject>
+#include <mutex>
 
 namespace protocol {
 
-class Transaction : public QObject
+class TransactionGuard : public QObject
 {
     Q_OBJECT
 
-    bool watchdog = false;
-    bool successfull = false;
-
-    std::unique_ptr<TransactionGuard> transaction_guard;
+    std::unique_lock<std::mutex> lock;
+    QMetaObject::Connection connection;
 
 public:
-    explicit Transaction(const usb::pDevice &device, const pMessage &command, int timeout, QObject *parent = nullptr);
-    ~Transaction();
+    TransactionGuard(const usb::pDevice &device, QObject *parent = nullptr);
+    ~TransactionGuard();
 
 signals:
     void reply(const pMessage &);
 
-    void succeeded();
-    void failed();
-
 public slots:
-    void on_reply(const pMessage &);
-
-private:
-    void timerEvent(QTimerEvent *);
+    void on_reply_packet(const usb::pPacket &);
 };
-
-typedef QPointer<Transaction> pTransaction;
 
 } // namespace protocol
 
-#endif // TRANSACTION_H
+#endif // TRANSACTIONGUARD_H
