@@ -34,36 +34,20 @@ class Board : public QObject
 
     usb::pDevice device;
 
-    QString name;
-    uint32_t major;
-    uint32_t minor;
-    uint32_t revision;
-
 public:
     explicit Board(usb::pDevice &device, QObject *parent = nullptr);
 
     void send(const pMessage &);
 
-    pTransaction call(const pMessage &, int);
+    QPointer<Transaction> call(const pMessage &, int);
 
-    void init();
-    void getName();
-    void getVersion();
+    QPointer<Transaction> init();
+    QPointer<Transaction> getName();
+    QPointer<Transaction> getVersion();
 
 signals:
-    void ready();
-    void error(const QString &);
-
-public slots:
-    void on_init(const pMessage &);
-    void on_getName(const pMessage &);
-    void on_getVersion(const pMessage &);
 };
 
-typedef QSharedPointer<Board> pBoard;
-
 } // namespace protocol
-
-Q_DECLARE_METATYPE(protocol::pBoard)
 
 #endif // BOARD_H

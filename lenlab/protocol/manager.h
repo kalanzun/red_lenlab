@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "board.h"
 #include "usb/bus.h"
-#include "usb/device.h"
+#include <QPointer>
 #include <QTimerEvent>
 #include <QObject>
 
@@ -34,24 +34,27 @@ class Manager : public QObject
     Q_OBJECT
 
     usb::Bus bus;
-    pBoard board;
+
+    QPointer<Board> board;
 
 public:
     explicit Manager(QObject *parent = nullptr);
 
-signals:
-    void ready(const pBoard &);
-    void error(const QString &);
+    void start();
 
-public slots:
-    void on_board_ready();
-    void on_board_error(const QString &);
+signals:
+    void error(const QString &);
+    void ready(const QPointer<Board> &);
+
+private slots:
+    void on_error();
+    void on_init(const pMessage &);
+    void on_name(const pMessage &);
+    void on_version(const pMessage &);
 
 private:
     void timerEvent(QTimerEvent *);
 };
-
-typedef QSharedPointer<Manager> pManager;
 
 } // namespace protocol
 

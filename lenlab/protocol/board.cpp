@@ -22,17 +22,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_protocol.h"
 #include "lenlab_version.h"
 #include <QDebug>
+#include <QPointer>
 
 namespace protocol {
-
-static int p_board_type_id = qRegisterMetaType<pBoard>("pBoard");
 
 Board::Board(usb::pDevice &device, QObject *parent) :
     QObject(parent),
     device(device)
 {
-    qDebug() << "Board::Board";
-    init();
+
 }
 
 void
@@ -41,13 +39,17 @@ Board::send(const pMessage &command)
     device->send(command->getPacket());
 }
 
-pTransaction
+QPointer<Transaction>
 Board::call(const pMessage &command, int timeout)
 {
-    return new Transaction(device, command, timeout, this);
+    std::unique_ptr<Transaction> transaction(new Transaction(this));
+
+    transaction->start(device, command, timeout); // may throw
+
+    return transaction.release();
 }
 
-void
+QPointer<Transaction>
 Board::init()
 {
     qDebug() << "Board::init";
@@ -55,11 +57,10 @@ Board::init()
     auto cmd = pMessage::create();
     cmd->setCommand(::init);
 
-    auto transaction = call(cmd, 100);
-    connect(transaction.data(), &Transaction::succeeded, this, &Board::on_init);
+    return call(cmd, 100);
 }
 
-void
+QPointer<Transaction>
 Board::getName()
 {
     qDebug() << "Board::getName";
@@ -67,13 +68,10 @@ Board::getName()
     auto cmd = pMessage::create();
     cmd->setCommand(::getName);
 
-    qDebug() << "call getName";
-
-    auto transaction = call(cmd, 100);
-    connect(transaction.data(), &Transaction::succeeded, this, &Board::on_getName);
+    return call(cmd, 100);
 }
 
-void
+QPointer<Transaction>
 Board::getVersion()
 {
     qDebug() << "Board::getVersion";
@@ -81,65 +79,7 @@ Board::getVersion()
     auto cmd = pMessage::create();
     cmd->setCommand(::getVersion);
 
-    qDebug() << "call getVersion";
-
-    auto transaction = call(cmd, 100);
-    connect(transaction.data(), &Transaction::succeeded, this, &Board::on_getVersion);
-}
-
-void
-Board::on_init(const pMessage &)
-{
-    qDebug() << "Board::on_init";
-
-    getName();
-}
-
-void
-Board::on_getName(const pMessage &reply)
-{
-    name = reply->getString();
-
-    qDebug() << "Board::on_getName" << name;
-
-    auto prefix = QString("Lenlab red Firmware");
-    if (name.startsWith(prefix)) {
-        getVersion();
-    }
-    else {
-        emit error("Das Lenlab Board antwortet mit einem unerwarteten Namen");
-        qDebug() << "Das Lenlab Board antwortet mit einem unerwarteten Namen";
-    }
-}
-
-void
-Board::on_getVersion(const pMessage &reply)
-{
-    auto length = reply->getIntBufferLength();
-    if (length == 3) {
-        auto array = reply->getIntBuffer();
-
-        major = array[0];
-        minor = array[1];
-        revision = array[2];
-
-        qDebug() << "Board::on_getVersion" << major << minor << revision;
-
-        if (major == MAJOR && minor == MINOR) {
-            emit ready();
-        }
-        else {
-            auto msg = QString("Ungültige Version %1.%2.%3. Lenlab erwartet mindestens %4.%5").arg(major).arg(minor).arg(revision).arg(MAJOR).arg(MINOR);
-            emit error(msg);
-            qDebug() << msg;
-        }
-    }
-    else {
-        qDebug() << "Board::on_getVersion";
-
-        emit error("Das Lenlab Board antwortet mit einer ungültigen Version");
-        qDebug() << "Das Lenlab Board antwortet mit einer ungültigen Version";
-    }
+    return call(cmd, 100);
 }
 
 } // namespace protocol

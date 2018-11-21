@@ -14,15 +14,15 @@ SOURCES += \
     message.cpp \
     transaction.cpp \
     manager.cpp \
-    transactionguard.cpp \
-    board.cpp
+    board.cpp \
+    transactionlock.cpp
 
 HEADERS += \
     message.h \
     transaction.h \
     manager.h \
-    transactionguard.h \
-    board.h
+    board.h \
+    transactionlock.h
 
 unix {
     target.path = /usr/lib

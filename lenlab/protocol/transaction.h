@@ -22,9 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define TRANSACTION_H
 
 #include "message.h"
-#include "transactionguard.h"
+#include "transactionlock.h"
 #include "usb/device.h"
-#include <QPointer>
+#include "usb/packet.h"
 #include <QTimerEvent>
 #include <QObject>
 
@@ -37,11 +37,13 @@ class Transaction : public QObject
     bool watchdog = false;
     bool successfull = false;
 
-    std::unique_ptr<TransactionGuard> transaction_guard;
+    std::unique_ptr<TransactionLock> lock;
 
 public:
-    explicit Transaction(const usb::pDevice &device, const pMessage &command, int timeout, QObject *parent = nullptr);
+    explicit Transaction(QObject *parent = nullptr);
     ~Transaction();
+
+    void start(const usb::pDevice &device, const pMessage &command, int timeout);
 
 signals:
     void reply(const pMessage &);
@@ -50,13 +52,11 @@ signals:
     void failed();
 
 public slots:
-    void on_reply(const pMessage &);
+    void on_reply(const usb::pPacket &);
 
 private:
     void timerEvent(QTimerEvent *);
 };
-
-typedef QPointer<Transaction> pTransaction;
 
 } // namespace protocol
 

@@ -18,31 +18,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include "transactionguard.h"
+#ifndef TRANSACTIONLOCK_H
+#define TRANSACTIONLOCK_H
+
+#include "usb/device.h"
+#include <QMetaObject>
 #include <QObject>
+#include <mutex>
 
 namespace protocol {
 
-TransactionGuard::TransactionGuard(const usb::pDevice &device, QObject *parent) :
-    QObject(parent),
-    lock(device->transaction, std::try_to_lock)
+class TransactionLock : public QObject
 {
-    connection = connect(
-                device.data(), &usb::Device::reply,
-                this, &TransactionGuard::on_reply_packet);
+    Q_OBJECT
 
-}
+public:
+    std::unique_lock<std::mutex> lock;
+    QMetaObject::Connection conn;
 
-TransactionGuard::~TransactionGuard()
-{
-    disconnect(connection);
-}
-
-void TransactionGuard::on_reply_packet(const usb::pPacket &packet)
-{
-    auto message = pMessage::create(packet);
-
-    emit reply(message);
-}
+    TransactionLock(const usb::pDevice &device, QObject *parent = nullptr);
+    ~TransactionLock();
+};
 
 } // namespace protocol
+
+#endif // TRANSACTIONLOCK_H

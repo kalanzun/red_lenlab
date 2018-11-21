@@ -56,6 +56,7 @@ void
 Message::setCommand(Command code)
 {
     packet->getByteBuffer()[0] = code;
+    for (int i = 1; i < 4; i++) packet->getByteBuffer()[i] = 0;
     packet->setByteLength(MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE);
 }
 
@@ -69,6 +70,7 @@ void
 Message::setReply(Reply reply)
 {
     packet->getByteBuffer()[0] = reply;
+    for (int i = 1; i < 4; i++) packet->getByteBuffer()[i] = 0;
     packet->setByteLength(MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE);
 }
 
@@ -82,7 +84,6 @@ void
 Message::setType(Type type)
 {
     packet->getByteBuffer()[1] = type;
-    packet->setByteLength(MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE);
 }
 
 Type

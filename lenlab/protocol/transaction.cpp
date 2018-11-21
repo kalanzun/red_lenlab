@@ -23,15 +23,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
-Transaction::Transaction(const usb::pDevice &device, const pMessage &command, int timeout, QObject *parent) :
-    QObject(parent),
-    transaction_guard(new TransactionGuard(device))
+Transaction::Transaction(QObject *parent) :
+    QObject(parent)
 {
     qDebug() << "transaction";
-    connect(transaction_guard.get(), &TransactionGuard::reply,
-            this, &Transaction::on_reply);
-    device->send(command->getPacket());
-    startTimer(timeout);
 }
 
 Transaction::~Transaction()
@@ -39,15 +34,33 @@ Transaction::~Transaction()
     qDebug() << "~transaction";
 }
 
+void Transaction::start(const usb::pDevice &device, const pMessage &command, int timeout)
+{
+    lock.reset(new TransactionLock(device));
+
+    if (!lock->lock) throw std::exception();
+
+    lock->conn = connect(device.data(), &usb::Device::reply,
+                         this, &Transaction::on_reply);
+
+    device->send(command->getPacket());
+
+    startTimer(timeout);
+
+    qDebug() << "transaction";
+}
+
 void
-Transaction::on_reply(const pMessage &message)
+Transaction::on_reply(const usb::pPacket &packet)
 {
     watchdog = true;
+
+    auto message = pMessage::create(packet);
 
     qDebug() << "on_reply" << message->isLast();
 
     if (message->isLast()) {
-        transaction_guard.reset(nullptr);
+        lock.reset(nullptr);
         successfull = true;
     }
 
@@ -70,9 +83,9 @@ Transaction::timerEvent(QTimerEvent *event)
             watchdog = false;
         }
         else {
-            transaction_guard.reset(nullptr);
+            lock.reset(nullptr);
             killTimer(event->timerId());
-            qDebug() << "transaction timeout";
+            qDebug() << "transaction failed";
             emit failed();
             deleteLater();
         }
