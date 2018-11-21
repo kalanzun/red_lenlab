@@ -56,8 +56,8 @@ Device::Device(libusb_device *dev, QObject *parent) :
     connect(&*receiver1, SIGNAL(error(QString)),
             this, SIGNAL(error(QString)));
 
-    receiver0->start(pPacket::create());
-    receiver1->start(pPacket::create());
+    receiver0->start(pPacket::create()); // may throw
+    receiver1->start(pPacket::create()); // may throw
 
     thread->start();
 }
@@ -80,14 +80,22 @@ Device::on_reply(const pPacket &reply)
 void
 Device::on_reply_transfer_ready()
 {
-    qobject_cast<Transfer *>(QObject::sender())->start(pPacket::create());
+    try {
+        qobject_cast<Transfer *>(QObject::sender())->start(pPacket::create());
+    } catch (const Exception &e) {
+        emit error(e.getMsg());
+    }
 }
 
 void
 Device::try_to_send()
 {
     if (!send_queue->isEmpty() && !sender->isActive()) {
-        sender->start(send_queue->takeFirst());
+        try {
+            sender->start(send_queue->takeFirst());
+        } catch (const Exception &e) {
+            emit error(e.getMsg());
+        }
     }
 }
 

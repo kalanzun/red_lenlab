@@ -32,14 +32,14 @@ QSharedPointer<Device>
 Bus::query(uint16_t vid, uint16_t pid)
 {
     struct libusb_device_descriptor desc;
-    resource::DeviceList device_list;
+    resource::DeviceList device_list; // may throw
 
     for(auto dev: device_list) {
         libusb_get_device_descriptor(dev, &desc);
 
         // Is it our device?
         if(desc.idVendor == vid && desc.idProduct == pid) {
-            return QSharedPointer<Device>(new Device(dev));
+            return QSharedPointer<Device>(new Device(dev)); // may throw
         }
     }
 

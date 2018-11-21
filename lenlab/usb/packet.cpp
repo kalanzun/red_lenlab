@@ -52,3 +52,15 @@ Packet::getByteBuffer()
 {
     return reinterpret_cast<uint8_t *>(buffer);
 }
+
+void
+Packet::enableMockSendError()
+{
+    mock_send_error = true;
+}
+
+bool
+Packet::getMockSendError()
+{
+    return mock_send_error;
+}

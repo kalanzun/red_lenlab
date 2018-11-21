@@ -35,6 +35,8 @@ namespace usb {
         uint32_t buffer[PACKET_BUFFER_BYTE_LENGTH / PACKET_BUFFER_ELEMENT_SIZE];
         // this uses a large type, because only casts to shorter types are ok with alignment
 
+        bool mock_send_error = false;
+
     public:
         Packet();
 
@@ -43,6 +45,9 @@ namespace usb {
 
         uint32_t *getBuffer();
         uint8_t *getByteBuffer();
+
+        void enableMockSendError();
+        bool getMockSendError();
     };
 
     typedef QSharedPointer<Packet> pPacket;

@@ -60,6 +60,8 @@ Transfer::start(const pPacket &packet)
     xfr->user_data = note.get();
     xfr->callback = callbackComplete;
 
+    if (packet->getMockSendError()) throw Exception("Mock send error");
+
     auto err = libusb_submit_transfer(xfr.get());
     if (err) throw Exception(libusb_strerror(static_cast<libusb_error>(err)));
 
@@ -78,7 +80,7 @@ LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer *xfr)
             // xfr->buffer
             // and the length is
             // xfr->actual_length
-            note->packet->setByteLength(xfr->actual_length);
+            note->packet->setByteLength(static_cast<size_t>(xfr->actual_length));
             emit note->transfer->completed(note->packet);
             break;
         case LIBUSB_TRANSFER_CANCELLED:

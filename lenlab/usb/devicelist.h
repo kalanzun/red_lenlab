@@ -42,7 +42,7 @@ namespace resource {
     class DeviceList
     {
         libusb_device **list = nullptr;
-        int count;
+        int count = 0;
 
     public:
         DeviceList();
