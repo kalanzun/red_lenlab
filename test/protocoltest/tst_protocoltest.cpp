@@ -38,6 +38,8 @@ public:
 private slots:
     void initTestCase();
     void cleanupTestCase();
+    void test_TransactionTimeout();
+    void test_TransactionLock();
     void test_startOscilloscope();
     //void test_startOscilloscopeTrigger();
 
@@ -75,6 +77,43 @@ void ProtocolTest::initTestCase()
 void ProtocolTest::cleanupTestCase()
 {
     board.clear();
+}
+
+void ProtocolTest::test_TransactionTimeout()
+{
+    auto command = protocol::pMessage::create();
+    command->setCommand(startOscilloscope);
+    command->setType(IntArray);
+    command->setIntBufferLength(1);
+    command->getIntBuffer()[0] = 0; // samplerate
+
+    auto transaction = board->call(command, 1);
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
+    QCOMPARE(spy.count(), 1);
+}
+
+void ProtocolTest::test_TransactionLock()
+{
+    auto command = protocol::pMessage::create();
+    command->setCommand(startOscilloscope);
+    command->setType(IntArray);
+    command->setIntBufferLength(1);
+    command->getIntBuffer()[0] = 0; // samplerate
+
+    auto transaction = board->call(command, m_short_timeout);
+
+    try {
+        auto second_transaction = board->call(command, m_short_timeout);
+        QVERIFY(false);
+    } catch (std::exception) {
+        QVERIFY(true);
+    }
+
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
 }
 
 void ProtocolTest::test_startOscilloscope()
