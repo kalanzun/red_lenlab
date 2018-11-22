@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_protocol.h"
 #include "usb/packet.h"
 #include <QString>
+#include <QVector>
 #include <stdint.h>
 
 #define MESSAGE_HEAD_LENGTH 1
@@ -60,15 +61,13 @@ public:
     bool isLast();
 
     size_t getIntBufferLength();
-    void setIntBufferLength(size_t length);
     uint32_t *getIntBuffer();
+    void setIntVector(const QVector<uint32_t> &vector);
 
     size_t getShortBufferLength();
-    void setShortBufferLength(size_t length);
     uint16_t *getShortBuffer();
 
     size_t getByteBufferLength();
-    void setByteBufferLength(size_t length);
     uint8_t *getByteBuffer();
 
     QString getString();

@@ -64,6 +64,7 @@ Transaction::on_reply(const usb::pPacket &packet)
         successfull = true;
     }
 
+    replies.append(message);
     emit reply(message);
 
     if (successfull) {

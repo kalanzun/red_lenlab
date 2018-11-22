@@ -104,28 +104,25 @@ Message::getIntBufferLength()
     return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint32_t);
 }
 
-void
-Message::setIntBufferLength(size_t length)
-{
-    packet->setByteLength((MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE) + (length * sizeof(uint32_t)));
-}
-
 uint32_t *
 Message::getIntBuffer()
 {
     return (packet->getBuffer() + MESSAGE_HEAD_LENGTH);
 }
 
+void
+Message::setIntVector(const QVector<uint32_t> &vector)
+{
+    setType(IntArray);
+    for (int i = 0; i < vector.size(); ++i)
+        getIntBuffer()[i] = vector.at(i);
+    packet->setByteLength((MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE) + (static_cast<size_t>(vector.size()) * sizeof(uint32_t)));
+}
+
 size_t
 Message::getShortBufferLength()
 {
     return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint16_t);
-}
-
-void
-Message::setShortBufferLength(size_t length)
-{
-    packet->setByteLength((MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE) + (length * sizeof(uint16_t)));
 }
 
 uint16_t *
@@ -138,12 +135,6 @@ size_t
 Message::getByteBufferLength()
 {
     return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint8_t);
-}
-
-void
-Message::setByteBufferLength(size_t length)
-{
-    packet->setByteLength((MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE) + (length * sizeof(uint8_t)));
 }
 
 uint8_t *

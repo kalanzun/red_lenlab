@@ -51,6 +51,11 @@ public:
     QPointer<Transaction> init();
     QPointer<Transaction> getName();
     QPointer<Transaction> getVersion();
+    void setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second);
+    QPointer<Transaction> startOscilloscope(uint32_t samplerate);
+    QPointer<Transaction> startOscilloscopeTrigger(uint32_t samplerate);
+    QPointer<Transaction> startLogger(uint32_t samplerate);
+    void stopLogger();
 
 signals:
 };

@@ -48,6 +48,8 @@ enum Command {
     stopSignal,
     startOscilloscope,
     startOscilloscopeTrigger,
+    startLogger,
+    stopLogger,
     NUM_COMMANDS
 };
 
@@ -58,6 +60,7 @@ enum Reply {
     Version,
     SignalSine,
     OscilloscopeData,
+    LoggerData,
     NUM_REPLIES
 };
 

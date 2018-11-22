@@ -82,4 +82,70 @@ Board::getVersion()
     return call(cmd, 100);
 }
 
+void
+Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second)
+{
+    QVector<uint32_t> args;
+    args.append(multiplier);
+    args.append(predivider);
+    args.append(divider);
+    args.append(amplitude);
+    args.append(second);
+
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::setSignalSine);
+    cmd->setIntVector(args);
+
+    send(cmd);
+}
+
+QPointer<Transaction>
+Board::startOscilloscope(uint32_t samplerate)
+{
+    QVector<uint32_t> args;
+    args.append(samplerate);
+
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::startOscilloscope);
+    cmd->setIntVector(args);
+
+    return call(cmd, 100);
+}
+
+QPointer<Transaction>
+Board::startOscilloscopeTrigger(uint32_t samplerate)
+{
+    QVector<uint32_t> args;
+    args.append(samplerate);
+
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::startOscilloscope);
+    cmd->setIntVector(args);
+
+    return call(cmd, 100);
+}
+
+QPointer<Transaction>
+Board::startLogger(uint32_t samplerate)
+{
+    QVector<uint32_t> args;
+    args.append(samplerate);
+
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::startLogger);
+    cmd->setIntVector(args);
+
+    return call(cmd, 100);
+}
+
+void
+Board::stopLogger()
+{
+    auto cmd = pMessage::create();
+    cmd->setCommand(::getVersion);
+
+    send(cmd);
+
+}
+
 } // namespace protocol

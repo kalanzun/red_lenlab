@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "usb/device.h"
 #include "usb/packet.h"
 #include <QTimerEvent>
+#include <QVector>
 #include <QObject>
 
 namespace protocol {
@@ -47,6 +48,8 @@ class Transaction : public QObject
 public:
     explicit Transaction(QObject *parent = nullptr);
     ~Transaction();
+
+    QVector<pMessage> replies;
 
     void start(const usb::pDevice &device, const pMessage &command, int timeout);
 
