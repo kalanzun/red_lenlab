@@ -28,6 +28,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
+/*!
+ * \brief The TransactionLock class
+ *
+ * Ownership: member
+ */
 class TransactionLock : public QObject
 {
     Q_OBJECT

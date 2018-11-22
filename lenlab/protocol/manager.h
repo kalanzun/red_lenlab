@@ -29,6 +29,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
+/*!
+ * \brief The Manager class
+ *
+ * Single instance only.
+ *
+ * Ownership: member
+ */
 class Manager : public QObject
 {
     Q_OBJECT
@@ -38,8 +45,19 @@ class Manager : public QObject
     QPointer<Board> board;
 
 public:
+    /*!
+     * \brief Manager
+     * \param parent
+     *
+     * May throw.
+     */
     explicit Manager(QObject *parent = nullptr);
 
+    /*!
+     * \brief start
+     *
+     * Start looking for the board. Emit signals error or ready.
+     */
     void start();
 
 signals:

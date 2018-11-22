@@ -30,6 +30,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
+/*!
+ * \brief The Message class
+ *
+ * Ownership: QSharedPointer<Message>
+ */
 class Message
 {
     usb::pPacket packet;

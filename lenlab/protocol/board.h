@@ -28,6 +28,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
+/*!
+ * \brief The Board class
+ *
+ * Single instance only.
+ *
+ * Ownership: Child of Manager
+ */
 class Board : public QObject
 {
     Q_OBJECT

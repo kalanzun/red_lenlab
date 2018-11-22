@@ -30,6 +30,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
+/*!
+ * \brief The Transaction class
+ *
+ * Ownership: Child of Board
+ */
 class Transaction : public QObject
 {
     Q_OBJECT
