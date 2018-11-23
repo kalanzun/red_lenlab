@@ -40,32 +40,26 @@ typedef struct ADCx {
 
     volatile bool ping_enable;
     volatile bool pong_enable;
-    volatile bool single;
+    volatile bool logger_ready;
 
     tRing ring;
 } tADCx;
 
 
 typedef struct ADC {
-    volatile bool ready;
-    volatile bool error;
+    volatile bool lock;
+    //volatile bool ready;
+    //volatile bool error;
 
     tADCx adc0;
     tADCx adc1;
 } tADC;
 
-
-void ADCStop();
-bool ADCReady();
-void ADCRelease();
-
-void ADCStartSingle(uint32_t interval);
-
-bool ADCSingle();
-void ADCSingleRelease();
-void ADCSingleGet(uint32_t *channel0, uint32_t *channel1);
-
-tRing *ADCGetRing(bool channel);
+uint32_t ADCLoggerStart();
+bool ADCLoggerReady();
+void ADCLoggerGet(uint32_t *channel0, uint32_t *channel1);
+void ADCLoggerRelease();
+void ADCLoggerStop();
 
 void ADCInit();
 

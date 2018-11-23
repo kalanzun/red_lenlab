@@ -43,6 +43,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "oscilloscope.h"
 #include "ssi.h"
 #include "signal.h"
+#include "state_machine.h"
 
 
 //*****************************************************************************
@@ -142,6 +143,11 @@ main(void) {
     //
     SysTickPeriodSet(16777216);
     SysTickEnable();
+
+    //
+    // Initialize State Machine
+    //
+    StateMachineInit(&state_machine);
 
     //
     // GPIO Pin Configuration

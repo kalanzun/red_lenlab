@@ -60,7 +60,10 @@ enum Reply {
     Version,
     SignalSine,
     OscilloscopeData,
+    Oscilloscope,
     LoggerData,
+    Logger,
+    Error,
     NUM_REPLIES
 };
 

@@ -22,81 +22,67 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "adc.h"
-#include "driverlib/debug.h"
-#include "timer.h"
-#include "logger.h"
-#include "reply_handler.h"
-#include "debug.h"
 
-#include "inc/hw_memmap.h"
+#include "driverlib/debug.h"
+
+#include "adc.h"
+#include "debug.h"
+#include "reply_handler.h"
+#include "state_machine.h"
+
+#include "logger.h"
+
 
 tLogger logger;
 
 
-void
+uint32_t
 LoggerStart(uint32_t interval)
 {
-    //DEBUG_PRINT("start\n");
+    uint32_t error;
 
-    if (logger.active)
-        return;
+    error = ADCLoggerStart(interval);
 
-    logger.active = 1;
-    logger.request_stop = false;
-
-    logger.interval = interval;
-
-    DEBUG_PRINT("LoggerStart %d\n", interval);
-
-    ADCStartSingle(interval);
-}
-
-void
-LoggerStop(void)
-{
-    DEBUG_PRINT("LoggerStop\n");
-
-    if (logger.active) {
-        logger.request_stop = true;
+    if (!error) {
+        StateMachineSetState(&state_machine, LOGGER);
     }
+
+    return error;
 }
 
+
 void
-LoggerMain(void)
+LoggerStop()
+{
+    ADCLoggerStop();
+    StateMachineSetState(&state_machine, READY);
+}
+
+
+void
+LoggerMain()
 {
     tEvent *reply;
-    uint32_t array[2]; // TODO without itermediate copy?
+    uint32_t array[2]; // TODO without copy?
 
-    if (!logger.active)
+    if (!StateMachineGetState(&state_machine) == LOGGER)
         return;
 
-    if (ADCSingle()) {
-        DEBUG_PRINT("ADCSingle\n");
-        ADCSingleGet(array, array+1);
-        ADCSingleRelease();
+    if (ADCLoggerReady()) {
+        ADCLoggerGet(array, array+1);
+        ADCLoggerRelease();
 
         reply = QueueAcquire(&reply_handler.reply_queue);
 
         EventSetReply(reply, LoggerData);
         EventSetIntArray(reply, array, 2);
 
-        if (logger.request_stop) {
-            ADCStop();
-            logger.active = 0;
-        }
-        else {
-            EventSetLastPackage(reply, 0);
-        }
-
         QueueWrite(&reply_handler.reply_queue);
     }
 }
 
+
 void
-LoggerInit(void)
+LoggerInit()
 {
-    logger.active = 0;
-    logger.request_stop = 0;
-    logger.interval = 1000;
 }

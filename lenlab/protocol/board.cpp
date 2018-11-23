@@ -30,7 +30,8 @@ Board::Board(usb::pDevice &device, QObject *parent) :
     QObject(parent),
     device(device)
 {
-
+    connect(device.data(), &usb::Device::reply,
+            this, &Board::on_reply);
 }
 
 void
@@ -82,7 +83,7 @@ Board::getVersion()
     return call(cmd, 100);
 }
 
-void
+QPointer<Transaction>
 Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second)
 {
     QVector<uint32_t> args;
@@ -96,7 +97,7 @@ Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider,
     cmd->setCommand(::setSignalSine);
     cmd->setIntVector(args);
 
-    send(cmd);
+    return call(cmd, 100);
 }
 
 QPointer<Transaction>
@@ -135,17 +136,25 @@ Board::startLogger(uint32_t interval)
     cmd->setCommand(::startLogger);
     cmd->setIntVector(args);
 
-    return call(cmd, 1100);
+    return call(cmd, 100);
 }
 
-void
-Board::stopLogger()
+QPointer<Transaction> Board::stopLogger()
 {
     auto cmd = pMessage::create();
     cmd->setCommand(::stopLogger);
 
-    send(cmd);
+    // TODO interval?
+    return call(cmd, 1100);
+}
 
+void Board::on_reply(const usb::pPacket &packet)
+{
+    auto message = pMessage::create(packet);
+
+    if (message->getReply() == LoggerData) {
+        emit logger(message);
+    }
 }
 
 } // namespace protocol

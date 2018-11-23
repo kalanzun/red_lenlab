@@ -22,8 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "utils/ustdlib.h"
 #include "driverlib/debug.h"
+
 #include "debug.h"
 #include "command_handler.h"
 #include "usb_device.h"
@@ -33,6 +35,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "config.h"
 #include "oscilloscope.h"
 #include "signal.h"
+#include "state_machine.h"
 
 
 tCommandHandler command_handler;
@@ -43,7 +46,9 @@ on_init(tEvent *event)
 {
     tEvent *reply;
 
-    DEBUG_PRINT("init\n");
+    DEBUG_PRINT("Init\n");
+
+    StateMachineSetState(&state_machine, READY);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -62,7 +67,7 @@ on_getName(tEvent *event)
 {
     tEvent *reply;
 
-    //DEBUG_PRINT("getName\n");
+    DEBUG_PRINT("getName\n");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -78,7 +83,7 @@ on_getVersion(tEvent *event)
     tEvent *reply;
     uint32_t array[3] = {MAJOR, MINOR, REVISION};
 
-    //DEBUG_PRINT("getVersion\n");
+    DEBUG_PRINT("getVersion\n");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -89,13 +94,43 @@ on_getVersion(tEvent *event)
 }
 
 void
-on_startOscilloscope(tEvent *event)
+on_startLogger(tEvent *event)
 {
-    uint32_t samplerate = EventGetInt(event, 0);
+    tEvent *reply;
+    uint32_t interval = EventGetInt(event, 0);
+    uint32_t error;
 
-    //DEBUG_PRINT("startOscilloscope\n");
+    DEBUG_PRINT("startLogger\n");
 
-    OscilloscopeStart(&oscilloscope, samplerate);
+    error = LoggerStart(interval);
+
+    reply = QueueAcquire(&reply_handler.reply_queue);
+
+    if (error) {
+        EventSetReply(reply, Error);
+    }
+    else {
+        EventSetReply(reply, Logger);
+    }
+
+    QueueWrite(&reply_handler.reply_queue);
+}
+
+void
+on_stopLogger(tEvent *event)
+{
+    tEvent *reply;
+
+    DEBUG_PRINT("stopLogger\n");
+
+    LoggerStop();
+
+    reply = QueueAcquire(&reply_handler.reply_queue);
+
+    EventSetReply(reply, Logger);
+    EventSetBodyLength(reply, 0);
+
+    QueueWrite(&reply_handler.reply_queue);
 }
 
 void
@@ -109,7 +144,7 @@ on_setSignalSine(tEvent *event)
     uint32_t amplitude  = EventGetInt(event, 3);
     uint32_t second     = EventGetInt(event, 4);
 
-    //DEBUG_PRINT("setSignalSine\n");
+    DEBUG_PRINT("setSignalSine\n");
 
     // this may need a long time
     SignalSetSine(multiplier, predivider, divider, amplitude, second);
@@ -126,9 +161,19 @@ on_setSignalSine(tEvent *event)
 void
 on_stopSignal(tEvent *event)
 {
-    //DEBUG_PRINT("stopSignal\n");
+    DEBUG_PRINT("stopSignal\n");
 
     SignalStop();
+}
+
+void
+on_startOscilloscope(tEvent *event)
+{
+    uint32_t samplerate = EventGetInt(event, 0);
+
+    DEBUG_PRINT("startOscilloscope\n");
+
+    OscilloscopeStart(&oscilloscope, samplerate);
 }
 
 void
@@ -136,48 +181,60 @@ on_startOscilloscopeTrigger(tEvent *event)
 {
     uint32_t samplerate = EventGetInt(event, 0);
 
-    //DEBUG_PRINT("startOscilloscopeTrigger\n");
+    DEBUG_PRINT("startOscilloscopeTrigger\n");
 
     OscilloscopeStartTrigger(&oscilloscope, samplerate);
 }
 
 void
-on_startLogger(tEvent *event)
+on_error()
 {
-    uint32_t interval = EventGetInt(event, 0);
+    tEvent *reply;
 
-    //DEBUG_PRINT("startLogger\n");
+    DEBUG_PRINT("Error\n");
 
-    LoggerStart(interval);
-}
+    reply = QueueAcquire(&reply_handler.reply_queue);
 
-void
-on_stopLogger(tEvent *event)
-{
-    LoggerStop();
+    EventSetReply(reply, Error);
+    EventSetBodyLength(reply, 0);
+
+    QueueWrite(&reply_handler.reply_queue);
 }
 
 void
 CommandHandlerMain(void)
 {
     tEvent *event;
+    tState state;
     enum Command command;
 
     if (!QueueEmpty(&command_handler.command_queue)) {
+        state = StateMachineGetState(&state_machine);
         event = QueueRead(&command_handler.command_queue);
         command = EventGetCommand(event);
 
-        if (command == init) on_init(event);
-        else if (command == getName) on_getName(event);
-        else if (command == getVersion) on_getVersion(event);
-        else if (command == setSignalSine) on_setSignalSine(event);
-        else if (command == stopSignal) on_stopSignal(event);
-        else if (command == startOscilloscope) on_startOscilloscope(event);
-        else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
-        else if (command == startLogger) on_startLogger(event);
-        else if (command == stopLogger) on_stopLogger(event);
+        if (state == WAKEUP) {
+            if (command == init) on_init(event);
+            else on_error();
+        }
+        else if (state == READY) {
+            if (command == init) on_init(event);
+            else if (command == getName) on_getName(event);
+            else if (command == getVersion) on_getVersion(event);
+            else if (command == startLogger) on_startLogger(event);
+            else if (command == setSignalSine) on_setSignalSine(event);
+            else if (command == stopSignal) on_stopSignal(event);
+            else if (command == startOscilloscope) on_startOscilloscope(event);
+            else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
+            else on_error();
+        }
+        else if (state == LOGGER) {
+            if (command == stopLogger) on_stopLogger(event);
+            else if (command == setSignalSine) on_setSignalSine(event);
+            else if (command == stopSignal) on_stopSignal(event);
+            else on_error();
+        }
 
-        //DEBUG_PRINT("pop command\n");
         QueueRelease(&command_handler.command_queue);
     }
 }

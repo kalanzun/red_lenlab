@@ -70,7 +70,6 @@ void ProtocolTest::initTestCase()
     manager.start();
 
     QVERIFY(spy.wait(m_long_timeout));
-    QCOMPARE(spy.count(), 1);
 
     board = qvariant_cast<QPointer<protocol::Board>>(spy.at(0).at(0));
 }
@@ -95,7 +94,6 @@ void ProtocolTest::test_TransactionTimeout()
     QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));
-    QCOMPARE(spy.count(), 1);
 }
 
 void ProtocolTest::test_TransactionLock()
@@ -124,7 +122,6 @@ void ProtocolTest::test_startOscilloscope()
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));
-    QCOMPARE(spy.count(), 1);
 
     QCOMPARE(transaction->replies.count(), 16);
 }
@@ -139,21 +136,21 @@ void ProtocolTest::test_startLogger()
     auto transaction = board->startLogger(1000);
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
     QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
 
-    QSignalSpy reply_spy(transaction.data(), &protocol::Transaction::reply);
-    QVERIFY(reply_spy.isValid());
+    QSignalSpy logger_spy(board, &protocol::Board::logger);
+    QVERIFY(logger_spy.isValid());
 
-    // first reply within a second
-    QVERIFY(reply_spy.wait(1100));
-    QCOMPARE(reply_spy.count(), 1);
+    for (int i = 0; i < 2; i++) {
+        QVERIFY(logger_spy.wait(1100));
+    }
 
-    board->stopLogger();
+    auto stop_transaction = board->stopLogger();
+    QSignalSpy stop_spy(stop_transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(stop_spy.isValid());
+    QVERIFY(stop_spy.wait(m_short_timeout));
 
-    // success within another second after stop command
-    QVERIFY(spy.wait(1100));
-    QCOMPARE(spy.count(), 1);
-
-    QCOMPARE(transaction->replies.count(), 2);
+    QVERIFY(logger_spy.wait(1100) == 0); // no additional data point after stop
 }
 
 QTEST_MAIN(ProtocolTest)

@@ -1,5 +1,5 @@
 /*
- * logger.h
+ * state_machine.h
  *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
@@ -18,20 +18,28 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-*/
+ */
 
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef STATE_MACHINE_H_
+#define STATE_MACHINE_H_
 
+typedef enum State {
+    WAKEUP,
+    READY,
+    LOGGER,
+    ERROR,
+    NUM_STATES
+} tState;
 
-typedef struct Logger {
-} tLogger;
+typedef struct StateMachine {
+    tState state;
+} tStateMachine;
 
+extern tStateMachine state_machine;
 
-uint32_t LoggerStart(uint32_t interval);
-void LoggerStop(void);
-void LoggerMain(void);
-void LoggerInit(void);
+tState StateMachineGetState(tStateMachine *self);
+void StateMachineSetState(tStateMachine *self, tState state);
 
+void StateMachineInit(tStateMachine *self);
 
-#endif /* LOGGER_H_ */
+#endif /* STATE_MACHINE_H_ */
