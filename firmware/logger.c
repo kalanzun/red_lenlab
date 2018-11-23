@@ -22,48 +22,81 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "adc.h"
 #include "driverlib/debug.h"
 #include "timer.h"
 #include "logger.h"
+#include "reply_handler.h"
 #include "debug.h"
 
+#include "inc/hw_memmap.h"
 
 tLogger logger;
 
 
 void
-LoggerStart(void)
+LoggerStart(uint32_t interval)
 {
-    DEBUG_PRINT("start\n");
+    //DEBUG_PRINT("start\n");
 
     if (logger.active)
         return;
 
     logger.active = 1;
+    logger.request_stop = false;
 
-    TimerSetInterval(logger.interval);
-    TimerStart();
+    logger.interval = interval;
+
+    DEBUG_PRINT("LoggerStart %d\n", interval);
+
+    ADCStartSingle(interval);
 }
 
 void
 LoggerStop(void)
 {
-    DEBUG_PRINT("stop\n");
+    DEBUG_PRINT("LoggerStop\n");
+
     if (logger.active) {
-        TimerStop();
-        logger.active = 0;
+        logger.request_stop = true;
     }
 }
 
 void
-LoggerSetInterval(uint32_t interval)
+LoggerMain(void)
 {
-    DEBUG_PRINT("logger setInterval %d", interval);
-    logger.interval = interval;
+    tEvent *reply;
+    uint32_t array[2]; // TODO without itermediate copy?
+
+    if (!logger.active)
+        return;
+
+    if (ADCSingle()) {
+        DEBUG_PRINT("ADCSingle\n");
+        ADCSingleGet(array, array+1);
+        ADCSingleRelease();
+
+        reply = QueueAcquire(&reply_handler.reply_queue);
+
+        EventSetReply(reply, LoggerData);
+        EventSetIntArray(reply, array, 2);
+
+        if (logger.request_stop) {
+            ADCStop();
+            logger.active = 0;
+        }
+        else {
+            EventSetLastPackage(reply, 0);
+        }
+
+        QueueWrite(&reply_handler.reply_queue);
+    }
 }
 
 void
 LoggerInit(void)
 {
+    logger.active = 0;
+    logger.request_stop = 0;
     logger.interval = 1000;
 }

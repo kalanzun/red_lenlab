@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 typedef struct Logger {
     bool active;
+    bool request_stop;
     uint32_t interval; // milliseconds
 } tLogger;
 
@@ -33,11 +34,9 @@ typedef struct Logger {
 extern tLogger logger;
 
 
-void LoggerStart(void);
+void LoggerStart(uint32_t interval);
 void LoggerStop(void);
-
-void LoggerSetInterval(uint32_t interval);
-
+void LoggerMain(void);
 void LoggerInit(void);
 
 

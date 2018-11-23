@@ -107,9 +107,6 @@ ConfigureTimer(void)
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
     IntEnable(INT_TIMER0A);
 
-    TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, 80);
-    TimerControlTrigger(TIMER1_BASE, TIMER_A, 1);
 
 
     //TimerADCEventSet(TIMER1_BASE, TIMER_ADC_CAPEVENT_A);

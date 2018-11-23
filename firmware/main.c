@@ -196,6 +196,7 @@ main(void) {
     while(1)
     {
         CommandHandlerMain();
+        LoggerMain();
         OscilloscopeMain(&oscilloscope);
         ReplyHandlerMain();
         USBDeviceMain();

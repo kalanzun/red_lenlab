@@ -126,23 +126,23 @@ Board::startOscilloscopeTrigger(uint32_t samplerate)
 }
 
 QPointer<Transaction>
-Board::startLogger(uint32_t samplerate)
+Board::startLogger(uint32_t interval)
 {
     QVector<uint32_t> args;
-    args.append(samplerate);
+    args.append(interval);
 
     auto cmd = protocol::pMessage::create();
     cmd->setCommand(::startLogger);
     cmd->setIntVector(args);
 
-    return call(cmd, 100);
+    return call(cmd, 1100);
 }
 
 void
 Board::stopLogger()
 {
     auto cmd = pMessage::create();
-    cmd->setCommand(::getVersion);
+    cmd->setCommand(::stopLogger);
 
     send(cmd);
 

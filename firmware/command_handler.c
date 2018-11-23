@@ -29,7 +29,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "usb_device.h"
 #include "adc.h"
 #include "reply_handler.h"
-#include "timer.h"
 #include "logger.h"
 #include "config.h"
 #include "oscilloscope.h"
@@ -143,6 +142,22 @@ on_startOscilloscopeTrigger(tEvent *event)
 }
 
 void
+on_startLogger(tEvent *event)
+{
+    uint32_t interval = EventGetInt(event, 0);
+
+    //DEBUG_PRINT("startLogger\n");
+
+    LoggerStart(interval);
+}
+
+void
+on_stopLogger(tEvent *event)
+{
+    LoggerStop();
+}
+
+void
 CommandHandlerMain(void)
 {
     tEvent *event;
@@ -159,6 +174,8 @@ CommandHandlerMain(void)
         else if (command == stopSignal) on_stopSignal(event);
         else if (command == startOscilloscope) on_startOscilloscope(event);
         else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
+        else if (command == startLogger) on_startLogger(event);
+        else if (command == stopLogger) on_stopLogger(event);
 
         //DEBUG_PRINT("pop command\n");
         QueueRelease(&command_handler.command_queue);
