@@ -169,21 +169,37 @@ on_stopSignal(tEvent *event)
 void
 on_startOscilloscope(tEvent *event)
 {
+    tEvent *reply;
     uint32_t samplerate = EventGetInt(event, 0);
+    uint32_t error;
 
     DEBUG_PRINT("startOscilloscope\n");
 
-    OscilloscopeStart(&oscilloscope, samplerate);
+    error = OscilloscopeStart(samplerate);
+    if (error) {
+        reply = QueueAcquire(&reply_handler.reply_queue);
+        EventSetReply(reply, Error);
+        QueueWrite(&reply_handler.reply_queue);
+    }
+
+
 }
 
 void
 on_startOscilloscopeTrigger(tEvent *event)
 {
+    tEvent *reply;
     uint32_t samplerate = EventGetInt(event, 0);
+    uint32_t error;
 
     DEBUG_PRINT("startOscilloscopeTrigger\n");
 
-    OscilloscopeStartTrigger(&oscilloscope, samplerate);
+    error = OscilloscopeStartTrigger(samplerate);
+    if (error) {
+        reply = QueueAcquire(&reply_handler.reply_queue);
+        EventSetReply(reply, Error);
+        QueueWrite(&reply_handler.reply_queue);
+    }
 }
 
 void

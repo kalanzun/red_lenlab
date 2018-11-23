@@ -72,6 +72,8 @@ LoggerMain()
         ADCLoggerGet(array, array+1);
         ADCLoggerRelease();
 
+        DEBUG_PRINT("LoggerData\n");
+
         reply = QueueAcquire(&reply_handler.reply_queue);
 
         EventSetReply(reply, LoggerData);

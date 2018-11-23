@@ -38,11 +38,13 @@ public:
 private slots:
     void initTestCase();
     void cleanupTestCase();
-    void test_TransactionTimeout();
-    void test_TransactionLock();
+    void test_startLogger();
     void test_startOscilloscope();
     void test_startOscilloscopeTrigger();
-    void test_startLogger();
+    void test_startLoggerAgain();
+    void test_startOscilloscopeAgain();
+    void test_TransactionTimeout();
+    void test_TransactionLock();
 
 private:
     protocol::Manager manager;
@@ -79,58 +81,6 @@ void ProtocolTest::cleanupTestCase()
     board.clear();
 }
 
-void ProtocolTest::test_TransactionTimeout()
-{
-    return;
-
-    QVector<uint32_t> args;
-    args.append(0);
-
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startOscilloscope);
-    cmd->setIntVector(args);
-
-    auto transaction = board->call(cmd, 10);
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
-    QVERIFY(spy.isValid());
-    QVERIFY(spy.wait(m_short_timeout));
-}
-
-void ProtocolTest::test_TransactionLock()
-{
-    return;
-
-    auto transaction = board->startOscilloscope(0);
-
-    try {
-        auto second_transaction = board->startOscilloscope(0);
-        QVERIFY(false);
-    } catch (std::exception) {
-        QVERIFY(true);
-    }
-
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
-    QVERIFY(spy.isValid());
-    QVERIFY(spy.wait(m_short_timeout));
-}
-
-void ProtocolTest::test_startOscilloscope()
-{
-    return;
-
-    auto transaction = board->startOscilloscope(0);
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
-    QVERIFY(spy.isValid());
-    QVERIFY(spy.wait(m_short_timeout));
-
-    QCOMPARE(transaction->replies.count(), 16);
-}
-
-void ProtocolTest::test_startOscilloscopeTrigger()
-{
-
-}
-
 void ProtocolTest::test_startLogger()
 {
     auto transaction = board->startLogger(1000);
@@ -142,6 +92,7 @@ void ProtocolTest::test_startLogger()
     QVERIFY(logger_spy.isValid());
 
     for (int i = 0; i < 2; i++) {
+        qDebug() << i;
         QVERIFY(logger_spy.wait(1100));
     }
 
@@ -151,6 +102,64 @@ void ProtocolTest::test_startLogger()
     QVERIFY(stop_spy.wait(m_short_timeout));
 
     QVERIFY(logger_spy.wait(1100) == 0); // no additional data point after stop
+}
+
+void ProtocolTest::test_startOscilloscope()
+{
+    auto transaction = board->startOscilloscope(0);
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
+
+    QCOMPARE(transaction->replies.count(), 16);
+}
+
+void ProtocolTest::test_startOscilloscopeTrigger()
+{
+    test_startOscilloscope();
+}
+
+void ProtocolTest::test_startLoggerAgain()
+{
+    test_startLogger();
+}
+
+void ProtocolTest::test_startOscilloscopeAgain()
+{
+    test_startOscilloscope();
+}
+
+void ProtocolTest::test_TransactionTimeout()
+{
+    QVector<uint32_t> args;
+    args.append(0);
+
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::startOscilloscope);
+    cmd->setIntVector(args);
+
+    auto transaction = board->call(cmd, 10);
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
+
+    QVERIFY(spy.wait(m_short_timeout) == 0); // wait for the device to clean up and unlock
+}
+
+void ProtocolTest::test_TransactionLock()
+{
+    auto transaction = board->startOscilloscope(0);
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+
+    try {
+        auto second_transaction = board->startOscilloscope(0);
+        QVERIFY(false);
+    } catch (std::exception) {
+        QVERIFY(true);
+    }
+
+    QVERIFY(spy.wait(m_short_timeout));
 }
 
 QTEST_MAIN(ProtocolTest)

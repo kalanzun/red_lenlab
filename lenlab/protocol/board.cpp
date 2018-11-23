@@ -144,13 +144,14 @@ QPointer<Transaction> Board::stopLogger()
     auto cmd = pMessage::create();
     cmd->setCommand(::stopLogger);
 
-    // TODO interval?
-    return call(cmd, 1100);
+    return call(cmd, 100);
 }
 
 void Board::on_reply(const usb::pPacket &packet)
 {
     auto message = pMessage::create(packet);
+
+    qDebug() << message->getReply();
 
     if (message->getReply() == LoggerData) {
         emit logger(message);

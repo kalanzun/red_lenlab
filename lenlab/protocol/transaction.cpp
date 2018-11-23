@@ -59,17 +59,24 @@ Transaction::on_reply(const usb::pPacket &packet)
 
     qDebug() << "on_reply" << message->isLast();
 
-    if (message->isLast()) {
+    if (message->getReply() == Error) {
         lock.reset(nullptr);
-        successfull = true;
-    }
-
-    replies.append(message);
-    emit reply(message);
-
-    if (successfull) {
-        emit succeeded(message);
+        emit failed();
         deleteLater();
+    }
+    else {
+        if (message->isLast()) {
+            lock.reset(nullptr);
+            successfull = true;
+        }
+
+        replies.append(message);
+        emit reply(message);
+
+        if (successfull) {
+            emit succeeded(message);
+            deleteLater();
+        }
     }
 }
 

@@ -57,6 +57,8 @@ extern void USBIntHandler(void);
 extern void uDMAErrorHandler(void);
 extern void ADC0IntHandler(void);
 extern void ADC1IntHandler(void);
+extern void ADC0LoggerIntHandler(void);
+extern void ADC1LoggerIntHandler(void);
 extern void Timer0IntHandler(void);
 extern void SSI0IntHandler(void);
 
@@ -108,7 +110,7 @@ void (* const g_pfnVectors[])(void) =
     ADC0IntHandler,                         // ADC Sequence 0
     IntDefaultHandler,                      // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
-    IntDefaultHandler,                      // ADC Sequence 3
+    ADC0LoggerIntHandler,                   // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
     Timer0IntHandler,                       // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
@@ -142,7 +144,7 @@ void (* const g_pfnVectors[])(void) =
     ADC1IntHandler,                         // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
-    IntDefaultHandler,                      // ADC1 Sequence 3
+    ADC1LoggerIntHandler,                   // ADC1 Sequence 3
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // GPIO Port J

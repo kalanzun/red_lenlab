@@ -47,17 +47,13 @@ typedef struct Oscilloscope {
 } tOscilloscope;
 
 
-extern tOscilloscope oscilloscope;
+uint32_t OscilloscopeStart(uint32_t samplerate);
 
-void OscilloscopeSetSamplerateDivider(tOscilloscope *self, uint8_t divider);
+uint32_t OscilloscopeStartTrigger(uint32_t samplerate);
 
-void OscilloscopeStart(tOscilloscope *self, uint32_t samplerate);
+void OscilloscopeMain();
 
-void OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate);
-
-void OscilloscopeMain(tOscilloscope *self);
-
-void OscilloscopeInit(tOscilloscope *self);
+void OscilloscopeInit();
 
 
 #endif /* OSCILLOSCOPE_H_ */

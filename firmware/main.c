@@ -191,7 +191,7 @@ main(void) {
     ReplyHandlerInit();
     SignalInit();
     LoggerInit();
-    OscilloscopeInit(&oscilloscope);
+    OscilloscopeInit();
 
     //
     // Print a string.
@@ -203,7 +203,7 @@ main(void) {
     {
         CommandHandlerMain();
         LoggerMain();
-        OscilloscopeMain(&oscilloscope);
+        OscilloscopeMain();
         ReplyHandlerMain();
         USBDeviceMain();
     }

@@ -387,12 +387,14 @@ USBDeviceMain()
         {
             page = RingRead(usb_device.ring);
             USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
+            //DEBUG_PRINT("send ring buffer\n");
         }
         else if (usb_device.send_ring_buffer_interleaved)
         {
             //DEBUG_PRINT("usb %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
             page = RingRead(usb_device.pingpong_ring[usb_device.pingpong]);
             USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
+            //DEBUG_PRINT("send ring buffer interleaved\n");
         }
         /*
         else if (MemorySend(&memory)) {

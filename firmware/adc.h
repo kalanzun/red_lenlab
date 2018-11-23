@@ -33,6 +33,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 typedef struct ADCx {
     uint32_t adc_base;
     uint32_t adc_int;
+    uint32_t adc_int_logger;
     uint32_t adc_channel;
     uint32_t gpio_base;
     uint32_t gpio_pin;
@@ -48,7 +49,7 @@ typedef struct ADCx {
 
 typedef struct ADC {
     volatile bool lock;
-    //volatile bool ready;
+    volatile bool ready;
     //volatile bool error;
 
     tADCx adc0;
@@ -60,6 +61,10 @@ bool ADCLoggerReady();
 void ADCLoggerGet(uint32_t *channel0, uint32_t *channel1);
 void ADCLoggerRelease();
 void ADCLoggerStop();
+
+uint32_t ADCStart(uint32_t length, uint32_t samplerate);
+bool ADCReady();
+tRing *ADCGetRing(bool channel);
 
 void ADCInit();
 
