@@ -36,7 +36,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "command_handler.h"
 #include "debug.h"
-#include "peripherals.h"
 #include "reply_handler.h"
 #include "signal.h"
 #include "ssi.h"
@@ -79,25 +78,58 @@ __error__(char *pcFilename, uint32_t ui32Line)
 
 //*****************************************************************************
 //
-// Configure the UART and its pins.  This must be called before UARTprintf().
+// Peripherals
 //
 //*****************************************************************************
-inline void
-ConfigureUART(void)
-{
-#ifdef DEBUG
-    //
-    // Configure GPIO Pins for UART mode.
-    //
-    GPIOPinConfigure(GPIO_PA0_U0RX);
-    GPIOPinConfigure(GPIO_PA1_U0TX);
-    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+const uint32_t peripherals[] = {
+    SYSCTL_PERIPH_GPIOA,
+    SYSCTL_PERIPH_GPIOB,
+    SYSCTL_PERIPH_GPIOC,
+    SYSCTL_PERIPH_GPIOD,
+    SYSCTL_PERIPH_GPIOE,
+    SYSCTL_PERIPH_GPIOF,
 
-    //
-    // Initialize the UART for console I/O.
-    //
-    UARTStdioConfig(0, 115200, 80000000);
-#endif
+    SYSCTL_PERIPH_ADC0,
+    SYSCTL_PERIPH_ADC1,
+
+    SYSCTL_PERIPH_TIMER0,
+    SYSCTL_PERIPH_TIMER1,
+
+    SYSCTL_PERIPH_SSI0,
+
+    SYSCTL_PERIPH_UDMA
+};
+
+#define NUM_PERIPHERALS (sizeof(peripherals) / sizeof(uint32_t))
+
+
+inline void
+ConfigurePeripherals(void)
+{
+    uint8_t i;
+
+    for (i=0; i<NUM_PERIPHERALS; i++)
+        SysCtlPeripheralEnable(peripherals[i]);
+
+    for (i=0; i<NUM_PERIPHERALS; i++)
+        while(!SysCtlPeripheralReady(peripherals[i]))
+        {
+        }
+}
+
+
+//*****************************************************************************
+//
+// uDMA
+//
+//*****************************************************************************
+void
+uDMAErrorHandler(void)
+{
+    //uint32_t status;
+    //status = uDMAErrorStatusGet();
+    DEBUG_PRINT("uDMA Error\n");
+    uDMAErrorStatusClear();
 }
 
 
@@ -125,6 +157,30 @@ ConfigureuDMA(void)
 
 //*****************************************************************************
 //
+// Configure the UART and its pins.  This must be called before UARTprintf().
+//
+//*****************************************************************************
+inline void
+ConfigureUART(void)
+{
+#ifdef DEBUG
+    //
+    // Configure GPIO Pins for UART mode.
+    //
+    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinConfigure(GPIO_PA1_U0TX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+
+    //
+    // Initialize the UART for console I/O.
+    //
+    UARTStdioConfig(0, 115200, 80000000);
+#endif
+}
+
+
+//*****************************************************************************
+//
 // This is the main application entry function.
 //
 //*****************************************************************************
@@ -136,15 +192,15 @@ main(void) {
     SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
 
     //
-    // Enable Systick for timing
+    // Enable SysTick for timing
     //
     SysTickPeriodSet(16777216);
     SysTickEnable();
 
     //
-    // GPIO Pin Configuration
+    // Configure peripherals
     //
-    ConfigurePins();
+    ConfigurePeripherals();
 
     //
     // Configure UART for DEBUG_PRINT
