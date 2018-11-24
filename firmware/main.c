@@ -34,8 +34,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/udma.h"
 #include "driverlib/systick.h"
 
+#include "adc.h"
 #include "command_handler.h"
 #include "debug.h"
+#include "logger.h"
+#include "oscilloscope.h"
 #include "reply_handler.h"
 #include "signal.h"
 #include "ssi.h"
@@ -57,6 +60,16 @@ uint8_t ui8ControlTable[1024];
 #else
 uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
 #endif
+
+
+//*****************************************************************************
+//
+// Memory
+//
+//*****************************************************************************
+tADCGroup adc_group;
+tLogger logger;
+tOscilloscope oscilloscope;
 
 
 //*****************************************************************************
@@ -220,7 +233,7 @@ main(void) {
     //
     // Configure ADC
     //
-    //ADCInit();
+    ADCGroupInit(&adc_group);
 
     //
     // Configure SSI
@@ -239,6 +252,12 @@ main(void) {
     ReplyHandlerInit();
 
     //
+    // Initialize Modules
+    //
+    LoggerInit(&logger, &adc_group);
+    OscilloscopeInit(&oscilloscope, &adc_group);
+
+    //
     // Print a string.
     //
     DEBUG_PRINT("Red Firmware\n");
@@ -247,6 +266,8 @@ main(void) {
     while(1)
     {
         CommandHandlerMain();
+        LoggerMain(&logger);
+        OscilloscopeMain(&oscilloscope);
         ReplyHandlerMain();
         USBDeviceMain();
     }

@@ -56,6 +56,10 @@ extern void UARTStdioIntHandler(void);
 extern void USBIntHandler(void);
 extern void uDMAErrorHandler(void);
 extern void SSI0IntHandler(void);
+extern void ADC0SS0Handler(void);
+extern void ADC0SS3Handler(void);
+extern void ADC1SS0Handler(void);
+extern void ADC1SS3Handler(void);
 
 //*****************************************************************************
 //
@@ -102,10 +106,10 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 1
     IntDefaultHandler,                      // PWM Generator 2
     IntDefaultHandler,                      // Quadrature Encoder 0
-    IntDefaultHandler,                         // ADC Sequence 0
+    ADC0SS0Handler,                         // ADC Sequence 0
     IntDefaultHandler,                      // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
-    IntDefaultHandler,                   // ADC Sequence 3
+    ADC0SS3Handler,                         // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
     IntDefaultHandler,                      // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
@@ -136,10 +140,10 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
     uDMAErrorHandler,                       // uDMA Error
-    IntDefaultHandler,                         // ADC1 Sequence 0
+    ADC1SS0Handler,                         // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
-    IntDefaultHandler,                   // ADC1 Sequence 3
+    ADC1SS3Handler,                         // ADC1 Sequence 3
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // GPIO Port J

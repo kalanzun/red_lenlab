@@ -22,9 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "command_handler.h"
 
-//#include "utils/ustdlib.h"
-
 #include "config.h"
+#include "logger.h"
+#include "oscilloscope.h"
 #include "reply_handler.h"
 
 
@@ -92,15 +92,17 @@ on_startLogger(tEvent *event)
 {
     tEvent *reply;
     uint32_t interval = EventGetInt(event, 0);
-    uint32_t error;
+    tError error;
 
     DEBUG_PRINT("startLogger\n");
 
-    error = 0;//LoggerStart(interval);
+    error = LoggerStart(&logger, interval);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
+    EventSetBodyLength(reply, 0);
 
     if (error) {
+        DEBUG_PRINT("Error %i\n", error);
         EventSetReply(reply, Error);
     }
     else {
@@ -115,15 +117,22 @@ void
 on_stopLogger(tEvent *event)
 {
     tEvent *reply;
+    tError error;
 
     DEBUG_PRINT("stopLogger\n");
 
-    //LoggerStop();
+    error = LoggerStop(&logger);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
-
-    EventSetReply(reply, Logger);
     EventSetBodyLength(reply, 0);
+
+    if (error) {
+        DEBUG_PRINT("Error %i\n", error);
+        EventSetReply(reply, Error);
+    }
+    else {
+        EventSetReply(reply, Logger);
+    }
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -169,14 +178,16 @@ on_startOscilloscope(tEvent *event)
 {
     tEvent *reply;
     uint32_t samplerate = EventGetInt(event, 0);
-    uint32_t error;
+    tError error;
 
     DEBUG_PRINT("startOscilloscope\n");
 
-    error = 0;//OscilloscopeStart(samplerate);
+    error = OscilloscopeStart(&oscilloscope, samplerate);
+
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
+        EventSetBodyLength(reply, 0);
         QueueWrite(&reply_handler.reply_queue);
     }
 }
@@ -195,6 +206,7 @@ on_startOscilloscopeTrigger(tEvent *event)
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
+        EventSetBodyLength(reply, 0);
         QueueWrite(&reply_handler.reply_queue);
     }
 }
@@ -205,7 +217,7 @@ on_error()
 {
     tEvent *reply;
 
-    DEBUG_PRINT("Error\n");
+    DEBUG_PRINT("Invalid command\n");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
