@@ -24,6 +24,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MS_OS_DESCRIPTOR_H_
 
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "usblib/usblib.h"
+
+#include "debug.h"
+
+
 //
 // Microsoft OS String Descriptor
 //

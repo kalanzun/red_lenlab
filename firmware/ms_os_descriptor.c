@@ -20,12 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "usblib/usblib.h"
-#include "usblib/device/usbdevice.h"
 #include "ms_os_descriptor.h"
-#include "debug.h"
+
+#include "usblib/device/usbdevice.h"
 
 
 #define USB_WINUSB_INTERFACE_NUM          0x00

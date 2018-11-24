@@ -9,7 +9,18 @@
 #define RING_H_
 
 
-#include "memory.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "debug.h"
+
+
+#define PAGE_LENGTH 1024
+
+
+typedef struct Page {
+    uint8_t buffer[PAGE_LENGTH];
+} tPage;
 
 
 typedef struct Ring {
@@ -19,16 +30,16 @@ typedef struct Ring {
     volatile uint32_t write;
     volatile uint32_t read;
     volatile uint32_t release;
-    volatile bool empty;
-    volatile bool full;
-    volatile bool content;
+    volatile unsigned char empty;
+    volatile unsigned char full;
+    volatile unsigned char content;
 } tRing;
 
 
 inline void
-RingAllocate(tRing *self, uint32_t length)
+RingAllocate(tRing *self, tPage *pages, uint32_t length)
 {
-    self->pages = MemoryAllocate(&memory, length);
+    self->pages = pages;
     self->length = length;
     self->acquire = 0;
     self->write = 0;
@@ -38,20 +49,22 @@ RingAllocate(tRing *self, uint32_t length)
     self->content = 0;
 }
 
-inline bool
+
+inline unsigned char
 RingEmpty(tRing *self)
 {
     return self->empty;
 }
 
-inline bool
+
+inline unsigned char
 RingContent(tRing *self)
 {
     return self->content;
 }
 
 
-inline bool
+inline unsigned char
 RingFull(tRing *self)
 {
     return self->full;

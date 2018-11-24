@@ -26,9 +26,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "driverlib/debug.h"
-#include "lenlab_protocol.h"
+
 #include "debug.h"
+#include "lenlab_protocol.h"
 #include "utils.h"
 
 

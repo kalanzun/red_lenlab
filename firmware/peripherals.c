@@ -20,12 +20,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
+#include "peripherals.h"
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "driverlib/sysctl.h"
 #include "driverlib/udma.h"
-#include "debug.h"
 
 
 const uint32_t peripherals[] = {

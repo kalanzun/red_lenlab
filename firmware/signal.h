@@ -23,11 +23,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef SIGNAL_H_
 #define SIGNAL_H_
 
-#include "event_queue.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "debug.h"
 
 
 typedef struct Signal {
-    bool active;
+    unsigned char active;
 } tSignal;
 
 

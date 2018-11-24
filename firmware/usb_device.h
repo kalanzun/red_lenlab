@@ -23,9 +23,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef USB_DEVICE_H_
 #define USB_DEVICE_H_
 
+
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "usblib/usblib.h"
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdbulk.h"
+
+#include "debug.h"
+
 #include "event_queue.h"
 #include "ring.h"
 

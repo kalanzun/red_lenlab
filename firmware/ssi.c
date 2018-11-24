@@ -20,29 +20,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-//#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-//#include "driverlib/rom.h"
+#include "ssi.h"
+
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_ssi.h"
-//#include "driverlib/debug.h"
 #include "driverlib/interrupt.h"
-//#include "driverlib/rom_map.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/adc.h"
-//#include "driverlib/uart.h"
 #include "driverlib/gpio.h"
-//#include "driverlib/timer.h"
-#include "driverlib/debug.h"
-#include "driverlib/usb.h"
 #include "driverlib/udma.h"
 #include "driverlib/ssi.h"
 #include "driverlib/pin_map.h"
-#include "ssi.h"
-#include "debug.h"
 
 
 tSSI ssi;

@@ -20,22 +20,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "utils/ustdlib.h"
-#include "driverlib/debug.h"
-
-#include "debug.h"
 #include "command_handler.h"
-#include "usb_device.h"
-#include "adc.h"
-#include "reply_handler.h"
-#include "logger.h"
+
+//#include "utils/ustdlib.h"
+
 #include "config.h"
-#include "oscilloscope.h"
-#include "signal.h"
-#include "state_machine.h"
+#include "reply_handler.h"
 
 
 tCommandHandler command_handler;
@@ -48,7 +38,7 @@ on_init(tEvent *event)
 
     DEBUG_PRINT("Init\n");
 
-    StateMachineSetState(&state_machine, READY);
+    //StateMachineSetState(&state_machine, READY);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -58,9 +48,11 @@ on_init(tEvent *event)
     QueueWrite(&reply_handler.reply_queue);
 }
 
+
 const uint8_t name[] = "Lenlab red Firmware Version " STR(MAJOR) "." STR(MINOR) "." STR(REVISION);
 
 #define NAME_LENGTH (sizeof(name)-1)
+
 
 void
 on_getName(tEvent *event)
@@ -76,6 +68,7 @@ on_getName(tEvent *event)
 
     QueueWrite(&reply_handler.reply_queue);
 }
+
 
 void
 on_getVersion(tEvent *event)
@@ -93,6 +86,7 @@ on_getVersion(tEvent *event)
     QueueWrite(&reply_handler.reply_queue);
 }
 
+
 void
 on_startLogger(tEvent *event)
 {
@@ -102,7 +96,7 @@ on_startLogger(tEvent *event)
 
     DEBUG_PRINT("startLogger\n");
 
-    error = LoggerStart(interval);
+    error = 0;//LoggerStart(interval);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -116,6 +110,7 @@ on_startLogger(tEvent *event)
     QueueWrite(&reply_handler.reply_queue);
 }
 
+
 void
 on_stopLogger(tEvent *event)
 {
@@ -123,7 +118,7 @@ on_stopLogger(tEvent *event)
 
     DEBUG_PRINT("stopLogger\n");
 
-    LoggerStop();
+    //LoggerStop();
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -132,6 +127,7 @@ on_stopLogger(tEvent *event)
 
     QueueWrite(&reply_handler.reply_queue);
 }
+
 
 void
 on_setSignalSine(tEvent *event)
@@ -147,7 +143,7 @@ on_setSignalSine(tEvent *event)
     DEBUG_PRINT("setSignalSine\n");
 
     // this may need a long time
-    SignalSetSine(multiplier, predivider, divider, amplitude, second);
+    //SignalSetSine(multiplier, predivider, divider, amplitude, second);
 
     // send a reply
     reply = QueueAcquire(&reply_handler.reply_queue);
@@ -158,13 +154,15 @@ on_setSignalSine(tEvent *event)
     QueueWrite(&reply_handler.reply_queue);
 }
 
+
 void
 on_stopSignal(tEvent *event)
 {
     DEBUG_PRINT("stopSignal\n");
 
-    SignalStop();
+    //SignalStop();
 }
+
 
 void
 on_startOscilloscope(tEvent *event)
@@ -175,15 +173,14 @@ on_startOscilloscope(tEvent *event)
 
     DEBUG_PRINT("startOscilloscope\n");
 
-    error = OscilloscopeStart(samplerate);
+    error = 0;//OscilloscopeStart(samplerate);
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
         QueueWrite(&reply_handler.reply_queue);
     }
-
-
 }
+
 
 void
 on_startOscilloscopeTrigger(tEvent *event)
@@ -194,13 +191,14 @@ on_startOscilloscopeTrigger(tEvent *event)
 
     DEBUG_PRINT("startOscilloscopeTrigger\n");
 
-    error = OscilloscopeStartTrigger(samplerate);
+    error = 0; //OscilloscopeStartTrigger(samplerate);
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
         QueueWrite(&reply_handler.reply_queue);
     }
 }
+
 
 void
 on_error()
@@ -217,39 +215,29 @@ on_error()
     QueueWrite(&reply_handler.reply_queue);
 }
 
+
 void
 CommandHandlerMain(void)
 {
     tEvent *event;
-    tState state;
     enum Command command;
 
     if (!QueueEmpty(&command_handler.command_queue)) {
-        state = StateMachineGetState(&state_machine);
         event = QueueRead(&command_handler.command_queue);
         command = EventGetCommand(event);
 
-        if (state == WAKEUP) {
-            if (command == init) on_init(event);
-            else on_error();
-        }
-        else if (state == READY) {
-            if (command == init) on_init(event);
-            else if (command == getName) on_getName(event);
-            else if (command == getVersion) on_getVersion(event);
-            else if (command == startLogger) on_startLogger(event);
-            else if (command == setSignalSine) on_setSignalSine(event);
-            else if (command == stopSignal) on_stopSignal(event);
-            else if (command == startOscilloscope) on_startOscilloscope(event);
-            else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
-            else on_error();
-        }
-        else if (state == LOGGER) {
-            if (command == stopLogger) on_stopLogger(event);
-            else if (command == setSignalSine) on_setSignalSine(event);
-            else if (command == stopSignal) on_stopSignal(event);
-            else on_error();
-        }
+        if (command == init) on_init(event);
+        else if (command == getName) on_getName(event);
+        else if (command == getVersion) on_getVersion(event);
+        else if (command == startLogger) on_startLogger(event);
+        else if (command == setSignalSine) on_setSignalSine(event);
+        else if (command == stopSignal) on_stopSignal(event);
+        else if (command == startOscilloscope) on_startOscilloscope(event);
+        else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
+        else if (command == stopLogger) on_stopLogger(event);
+        else if (command == setSignalSine) on_setSignalSine(event);
+        else if (command == stopSignal) on_stopSignal(event);
+        else on_error();
 
         QueueRelease(&command_handler.command_queue);
     }

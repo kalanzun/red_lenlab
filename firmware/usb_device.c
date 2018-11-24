@@ -20,8 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "usb_device.h"
+
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
@@ -29,12 +29,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/udma.h"
 #include "driverlib/debug.h"
 #include "usblib/usb-ids.h"
+
 #include "lenlab_protocol.h"
-#include "usb_device.h"
 #include "command_handler.h"
 #include "reply_handler.h"
-//#include "oscilloscope.h"
-#include "debug.h"
 
 /*
 #include "inc/hw_ints.h"

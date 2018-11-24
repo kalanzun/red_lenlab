@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
 #include "driverlib/gpio.h"
@@ -32,18 +33,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "driverlib/interrupt.h"
 #include "driverlib/udma.h"
 #include "driverlib/systick.h"
+
 #include "command_handler.h"
-#include "reply_handler.h"
 #include "debug.h"
-#include "usb_device.h"
 #include "peripherals.h"
-#include "adc.h"
-#include "timer.h"
-#include "logger.h"
-#include "oscilloscope.h"
-#include "ssi.h"
+#include "reply_handler.h"
 #include "signal.h"
-#include "state_machine.h"
+#include "ssi.h"
+#include "usb_device.h"
 
 
 //*****************************************************************************
@@ -145,11 +142,6 @@ main(void) {
     SysTickEnable();
 
     //
-    // Initialize State Machine
-    //
-    StateMachineInit(&state_machine);
-
-    //
     // GPIO Pin Configuration
     //
     ConfigurePins();
@@ -172,7 +164,7 @@ main(void) {
     //
     // Configure ADC
     //
-    ADCInit();
+    //ADCInit();
 
     //
     // Configure SSI
@@ -182,16 +174,13 @@ main(void) {
     //
     // Configure Timer
     //
-    TimerInit();
+    //TimerInit();
 
     //
     // Initialize Command, Data and Reply Handler
     //
     CommandHandlerInit();
     ReplyHandlerInit();
-    SignalInit();
-    LoggerInit();
-    OscilloscopeInit();
 
     //
     // Print a string.
@@ -202,8 +191,6 @@ main(void) {
     while(1)
     {
         CommandHandlerMain();
-        LoggerMain();
-        OscilloscopeMain();
         ReplyHandlerMain();
         USBDeviceMain();
     }

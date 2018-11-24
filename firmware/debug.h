@@ -23,6 +23,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef DEBUG_H_
 #define DEBUG_H_
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "driverlib/debug.h"
 #include "utils/uartstdio.h"
 
 

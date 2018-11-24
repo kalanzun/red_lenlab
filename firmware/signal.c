@@ -20,18 +20,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "driverlib/debug.h"
 #include "signal.h"
-#include "lenlab_protocol.h"
-#include "debug.h"
-#include "driverlib/systick.h"
-#include "driverlib/sysctl.h"
+
+//#include "driverlib/systick.h"
+//#include "driverlib/sysctl.h"
+
 #include "ssi.h"
-#include "reply_handler.h"
+
 
 tSignal signal;
+
 
 inline int32_t
 fixed(int32_t value)
@@ -39,11 +37,13 @@ fixed(int32_t value)
     return value << 11;
 }
 
+
 inline int32_t
 f_div(int32_t a, int32_t b)
 {
     return (a << 11) / b;
 }
+
 
 inline int32_t
 f_mul(int32_t a, int32_t b)
@@ -51,9 +51,11 @@ f_mul(int32_t a, int32_t b)
     return (a * b) >> 11;
 }
 
+
 // in fixed point 11 bit
 #define f_PI (6434)
 #define f_PI2 (3217)
+
 
 inline int32_t
 taylor(int32_t x)
@@ -66,11 +68,13 @@ taylor(int32_t x)
     return (x) - (x3 / 6) + (x5 / 120) - (x7 / 5040);
 }
 
+
 #define SIGNAL_OFFSET 2048
 #define SIGNAL_MAX 4095
 
+
 inline uint16_t
-DACFormat(int32_t value, bool channel)
+DACFormat(int32_t value, unsigned char channel)
 {
     value += SIGNAL_OFFSET;
     value = value > 0 ? value : 0;
@@ -79,6 +83,7 @@ DACFormat(int32_t value, bool channel)
     return (uint16_t) value;
 }
 
+
 void
 WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t second)
 {
@@ -86,7 +91,7 @@ WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t se
     int32_t i;
     int32_t x;
 
-    bool sign;
+    unsigned char sign;
 
     for (i = 0; i < 500; i++)
     {
@@ -122,6 +127,7 @@ WriteSine(uint16_t *buffer, uint32_t multiplier, uint32_t amplitude, uint32_t se
     }
 }
 
+
 void
 SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second)
 {
@@ -133,6 +139,7 @@ SignalSetSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32
     SSISetDivider(predivider, divider);
 }
 
+
 void
 SignalStart(void)
 {
@@ -143,6 +150,7 @@ SignalStart(void)
     signal.active = 1;
 }
 
+
 void
 SignalStop(void)
 {
@@ -152,6 +160,7 @@ SignalStop(void)
     SSIStop();
     signal.active = 0;
 }
+
 
 void
 SignalInit(void)

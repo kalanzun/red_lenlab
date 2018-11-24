@@ -24,6 +24,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SSI_H_
 
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "debug.h"
+
+
 #define SSI_BUFFER_LENGTH 1000
 
 
@@ -37,6 +43,7 @@ extern tSSI ssi;
 
 
 uint32_t SSIGetLength(void);
+
 void SSISetLength(uint32_t length);
 
 uint16_t *SSIGetBuffer(void);

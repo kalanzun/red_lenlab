@@ -24,6 +24,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define PERIPHERALS_H_
 
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "debug.h"
+
+
 inline void ConfigurePins(void);
 
 
