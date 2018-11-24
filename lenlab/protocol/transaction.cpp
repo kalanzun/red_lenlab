@@ -47,7 +47,7 @@ void Transaction::start(const usb::pDevice &device, const pMessage &command, int
 
     startTimer(timeout);
 
-    qDebug() << "transaction";
+    qDebug() << "start";
 }
 
 void
@@ -57,7 +57,7 @@ Transaction::on_reply(const usb::pPacket &packet)
 
     auto message = pMessage::create(packet);
 
-    qDebug() << "on_reply" << message->isLast();
+    qDebug() << "on_reply" << message->getReply() << message->isLast();
 
     if (message->getReply() == Error) {
         lock.reset(nullptr);

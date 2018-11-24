@@ -40,7 +40,7 @@ private slots:
     void cleanupTestCase();
     void test_startLogger();
     void test_startOscilloscope();
-    void test_startOscilloscopeTrigger();
+    //void test_startOscilloscopeTrigger();
     void test_startLoggerAgain();
     void test_startOscilloscopeAgain();
     void test_TransactionTimeout();
@@ -109,16 +109,17 @@ void ProtocolTest::test_startOscilloscope()
     auto transaction = board->startOscilloscope(0);
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
     QVERIFY(spy.isValid());
-    QVERIFY(spy.wait(m_short_timeout));
+    QVERIFY(spy.wait(1100));
 
-    QCOMPARE(transaction->replies.count(), 16);
+    QCOMPARE(transaction->replies.count(), 20);
 }
 
+/*
 void ProtocolTest::test_startOscilloscopeTrigger()
 {
     test_startOscilloscope();
 }
-
+*/
 void ProtocolTest::test_startLoggerAgain()
 {
     test_startLogger();
@@ -138,7 +139,7 @@ void ProtocolTest::test_TransactionTimeout()
     cmd->setCommand(::startOscilloscope);
     cmd->setIntVector(args);
 
-    auto transaction = board->call(cmd, 10);
+    auto transaction = board->call(cmd, 1);
     QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));

@@ -151,8 +151,6 @@ void Board::on_reply(const usb::pPacket &packet)
 {
     auto message = pMessage::create(packet);
 
-    qDebug() << message->getReply();
-
     if (message->getReply() == LoggerData) {
         emit logger(message);
     }

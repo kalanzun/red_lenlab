@@ -57,6 +57,8 @@ typedef struct OscSeqGroup {
 inline void
 OscSeqDisable(tOscSeq *self)
 {
+    //DEBUG_PRINT("OscSeqDisable\n");
+
     ADCTimerStop(self->adc->timer); // it does not hurt to call it twice
 
     IntDisable(self->sequence_int);
@@ -71,6 +73,8 @@ OscSeqIntHandler(tOscSeq *self)
     tPage *page;
 
     ADCIntClear(self->adc->base, self->sequence_num);
+
+    //DEBUG_PRINT("OscSeqIntHandler\n");
 
     // ping_ and pong_enable are required, because uDMAChannelSizeGet
     // does return 0 at the end when the PRI channel is about to be disabled
@@ -166,7 +170,7 @@ OscSeqEnable(tOscSeq *self)
 
     page = RingAcquire(&self->ring);
 
-    uDMAChannelTransferSet(self->adc->udma_channel | UDMA_PRI_SELECT,
+    uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
         UDMA_MODE_PINGPONG,
         (void *)(self->adc->base + ADC_O_SSFIFO0),
         page->buffer+24, ADC_SAMPLES);
@@ -183,8 +187,11 @@ OscSeqEnable(tOscSeq *self)
     self->pong_enable = 1;
 
     ADCSequenceEnable(self->adc->base, self->sequence_num);
+    ADCIntDisable(self->adc->base, self->sequence_num);
     uDMAChannelEnable(self->udma_channel);
     IntEnable(self->sequence_int);
+
+    //DEBUG_PRINT("OscSeqEnable\n");
 }
 
 

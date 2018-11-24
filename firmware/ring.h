@@ -1,9 +1,24 @@
 /*
  * ring.h
  *
- *  Created on: 17.01.2018
- *      Author: christoph
- */
+
+Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
+Copyright (C) 2017 Christoph Simon and the Lenlab developer team
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*/
 
 #ifndef RING_H_
 #define RING_H_
@@ -34,6 +49,13 @@ typedef struct Ring {
     volatile unsigned char full;
     volatile unsigned char content;
 } tRing;
+
+
+typedef struct RingIter {
+    tRing *ring;
+    volatile uint32_t read;
+    volatile unsigned char content;
+} tRingIter;
 
 
 inline void
@@ -109,10 +131,27 @@ RingRelease(tRing *self)
 }
 
 
-inline tPage*
-RingGet(tRing *self, uint32_t index)
+inline void
+RingIterInit(tRingIter *self, tRing *ring)
 {
-    return self->pages + index;
+    self->ring = ring;
+    self->read = ring->read;
+    self->content = ring->content;
+}
+
+
+inline tPage*
+RingIterGet(tRingIter *self)
+{
+    return self->ring->pages + self->read;
+}
+
+
+inline void
+RingIterNext(tRingIter *self)
+{
+    self->read = (self->read + 1) % self->ring->length;
+    if (self->read == self->ring->write) self->content = 0;
 }
 
 

@@ -35,8 +35,8 @@ typedef struct LogSeq {
     uint32_t sequence_int;
     uint32_t priority;
 
-    unsigned char ready;
-    unsigned char error;
+    volatile unsigned char ready;
+    volatile unsigned char error;
 
 } tLogSeq;
 
@@ -64,9 +64,10 @@ inline unsigned char
 LogSeqGroupReady(tLogSeqGroup *self)
 {
     int i;
+    unsigned char ready = 1;
 
-    unsigned char ready = 0;
     FOREACH_ADC ready &= self->log_seq[i].ready;
+
     return ready;
 }
 
@@ -118,10 +119,12 @@ LogSeqEnable(tLogSeq *self)
 inline void
 LogSeqGroupEnable(tLogSeqGroup *self, uint32_t interval)
 {
+    // interval in ms
+
     int i;
     FOREACH_ADC LogSeqEnable(&self->log_seq[i]);
 
-    ADCTimerStart(&self->adc_group->timer, interval);
+    ADCTimerStart(&self->adc_group->timer, 1000 * interval); // timer uses us
 }
 
 

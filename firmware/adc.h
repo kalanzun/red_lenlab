@@ -46,7 +46,6 @@ typedef struct ADC {
     uint32_t channel;
     uint32_t gpio_base;
     uint32_t gpio_pin;
-    uint32_t udma_channel;
 
     tADCTimer *timer;
 

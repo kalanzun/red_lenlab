@@ -1,9 +1,24 @@
 /*
  * oscilloscope.c
  *
- *  Created on: 24.11.2018
- *      Author: Christoph
- */
+
+Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
+Copyright (C) 2017 Christoph Simon and the Lenlab developer team
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*/
 
 #include "oscilloscope.h"
 
@@ -71,17 +86,21 @@ OscilloscopeMain(tOscilloscope *self)
     int i;
     tRing *ring;
     tPage *page;
+    tRingIter iter;
 
     if (!self->lock) return;
 
     if (OscSeqGroupReady(&self->seq_group)) {
 
+        //DEBUG_PRINT("OscilloscopeData\n");
+
         FOREACH_ADC {
 
             ring = &self->seq_group.osc_seq[i].ring;
 
-            while(RingContent(ring)) {
-                page = RingRead(ring);
+            for (RingIterInit(&iter, ring); iter.content; RingIterNext(&iter))
+            {
+                page = RingIterGet(&iter);
 
                 page->buffer[0] = OscilloscopeData; // reply
                 page->buffer[1] = ShortArray; // type
