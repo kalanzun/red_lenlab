@@ -44,7 +44,6 @@ private slots:
     void test_startLoggerAgain();
     void test_startOscilloscopeAgain();
     void test_TransactionTimeout();
-    void test_TransactionLock();
 
 private:
     protocol::Manager manager;
@@ -139,28 +138,15 @@ void ProtocolTest::test_TransactionTimeout()
     cmd->setCommand(::startOscilloscope);
     cmd->setIntVector(args);
 
-    auto transaction = board->call(cmd, 1);
+    auto transaction = protocol::pTransaction::create(cmd);
+    transaction->setWatchdog(1); // very short timeout
     QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
     QVERIFY(spy.isValid());
+
+    board->start(transaction);
     QVERIFY(spy.wait(m_short_timeout));
 
     QVERIFY(spy.wait(m_short_timeout) == 0); // wait for the device to clean up and unlock
-}
-
-void ProtocolTest::test_TransactionLock()
-{
-    auto transaction = board->startOscilloscope(0);
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
-    QVERIFY(spy.isValid());
-
-    try {
-        auto second_transaction = board->startOscilloscope(0);
-        QVERIFY(false);
-    } catch (std::exception) {
-        QVERIFY(true);
-    }
-
-    QVERIFY(spy.wait(m_short_timeout));
 }
 
 QTEST_MAIN(ProtocolTest)

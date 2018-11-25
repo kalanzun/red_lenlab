@@ -40,17 +40,41 @@ Board::send(const pMessage &command)
     device->send(command->getPacket());
 }
 
-QPointer<Transaction>
-Board::call(const pMessage &command, int timeout)
+void
+Board::start(const pTransaction &transaction)
 {
-    std::unique_ptr<Transaction> transaction(new Transaction(this));
-
-    transaction->start(device, command, timeout); // may throw
-
-    return transaction.release();
+    queue.append(transaction);
+    send_queue();
 }
 
-QPointer<Transaction>
+void
+Board::send_queue()
+{
+    if (current_transaction.isNull() && !queue.isEmpty()) {
+        current_transaction = queue.takeFirst();
+
+        current_conn = connect(
+                    device.data(), &usb::Device::reply,
+                    current_transaction.data(), &Transaction::on_reply);
+
+        connect(current_transaction.data(), &Transaction::finished,
+                this, &Board::on_finished);
+
+        send(current_transaction->command);
+
+        current_transaction->startWatchdog();
+    }
+}
+
+void
+Board::on_finished()
+{
+    disconnect(current_conn);
+    current_transaction.clear();
+    send_queue();
+}
+
+pTransaction
 Board::init()
 {
     qDebug() << "Board::init";
@@ -58,10 +82,13 @@ Board::init()
     auto cmd = pMessage::create();
     cmd->setCommand(::init);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction>
+pTransaction
 Board::getName()
 {
     qDebug() << "Board::getName";
@@ -69,10 +96,13 @@ Board::getName()
     auto cmd = pMessage::create();
     cmd->setCommand(::getName);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction>
+pTransaction
 Board::getVersion()
 {
     qDebug() << "Board::getVersion";
@@ -80,10 +110,13 @@ Board::getVersion()
     auto cmd = pMessage::create();
     cmd->setCommand(::getVersion);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction>
+pTransaction
 Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second)
 {
     QVector<uint32_t> args;
@@ -97,10 +130,13 @@ Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider,
     cmd->setCommand(::setSignalSine);
     cmd->setIntVector(args);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction>
+pTransaction
 Board::startOscilloscope(uint32_t samplerate)
 {
     QVector<uint32_t> args;
@@ -110,10 +146,13 @@ Board::startOscilloscope(uint32_t samplerate)
     cmd->setCommand(::startOscilloscope);
     cmd->setIntVector(args);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction>
+pTransaction
 Board::startOscilloscopeTrigger(uint32_t samplerate)
 {
     QVector<uint32_t> args;
@@ -123,10 +162,13 @@ Board::startOscilloscopeTrigger(uint32_t samplerate)
     cmd->setCommand(::startOscilloscope);
     cmd->setIntVector(args);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction>
+pTransaction
 Board::startLogger(uint32_t interval)
 {
     QVector<uint32_t> args;
@@ -136,18 +178,26 @@ Board::startLogger(uint32_t interval)
     cmd->setCommand(::startLogger);
     cmd->setIntVector(args);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-QPointer<Transaction> Board::stopLogger()
+pTransaction
+Board::stopLogger()
 {
     auto cmd = pMessage::create();
     cmd->setCommand(::stopLogger);
 
-    return call(cmd, 100);
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
 }
 
-void Board::on_reply(const usb::pPacket &packet)
+void
+Board::on_reply(const usb::pPacket &packet)
 {
     auto message = pMessage::create(packet);
 

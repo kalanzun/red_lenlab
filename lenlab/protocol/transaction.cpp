@@ -23,8 +23,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace protocol {
 
-Transaction::Transaction(QObject *parent) :
-    QObject(parent)
+static int p_transaction_type_id = qRegisterMetaType<pTransaction>("pTransaction");
+
+Transaction::Transaction(const pMessage &command, QObject *parent) :
+    QObject(parent),
+    command(command)
 {
     qDebug() << "transaction";
 }
@@ -34,20 +37,16 @@ Transaction::~Transaction()
     qDebug() << "~transaction";
 }
 
-void Transaction::start(const usb::pDevice &device, const pMessage &command, int timeout)
+void
+Transaction::setWatchdog(int timeout)
 {
-    lock.reset(new TransactionLock(device));
+    this->timeout = timeout;
+}
 
-    if (!lock->lock) throw std::exception();
-
-    lock->conn = connect(device.data(), &usb::Device::reply,
-                         this, &Transaction::on_reply);
-
-    device->send(command->getPacket());
-
+void
+Transaction::startWatchdog()
+{
     startTimer(timeout);
-
-    qDebug() << "start";
 }
 
 void
@@ -60,22 +59,18 @@ Transaction::on_reply(const usb::pPacket &packet)
     qDebug() << "on_reply" << message->getReply() << message->isLast();
 
     if (message->getReply() == Error) {
-        lock.reset(nullptr);
+        done = true;
         emit failed();
-        deleteLater();
+        emit finished();
     }
     else {
-        if (message->isLast()) {
-            lock.reset(nullptr);
-            successfull = true;
-        }
-
         replies.append(message);
         emit reply(message);
 
-        if (successfull) {
+        if (message->isLast()) {
+            done = true;
             emit succeeded(message);
-            deleteLater();
+            emit finished();
         }
     }
 }
@@ -83,7 +78,7 @@ Transaction::on_reply(const usb::pPacket &packet)
 void
 Transaction::timerEvent(QTimerEvent *event)
 {
-    if (successfull) {
+    if (done) {
         killTimer(event->timerId());
     }
     else {
@@ -91,11 +86,10 @@ Transaction::timerEvent(QTimerEvent *event)
             watchdog = false;
         }
         else {
-            lock.reset(nullptr);
             killTimer(event->timerId());
             qDebug() << "transaction failed";
             emit failed();
-            deleteLater();
+            emit finished();
         }
     }
 }

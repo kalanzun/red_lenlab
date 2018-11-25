@@ -24,7 +24,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "message.h"
 #include "transaction.h"
 #include "usb/device.h"
+#include <QMetaObject>
 #include <QObject>
+#include <QVector>
 
 namespace protocol {
 
@@ -40,28 +42,32 @@ class Board : public QObject
     Q_OBJECT
 
     usb::pDevice device;
+    pTransaction current_transaction;
+    QMetaObject::Connection current_conn;
+    QVector<pTransaction> queue;
 
 public:
     explicit Board(usb::pDevice &device, QObject *parent = nullptr);
 
     void send(const pMessage &);
+    void start(const pTransaction &);
+    void send_queue();
 
-    QPointer<Transaction> call(const pMessage &, int);
-
-    QPointer<Transaction> init();
-    QPointer<Transaction> getName();
-    QPointer<Transaction> getVersion();
-    QPointer<Transaction> setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second);
-    QPointer<Transaction> startOscilloscope(uint32_t samplerate);
-    QPointer<Transaction> startOscilloscopeTrigger(uint32_t samplerate);
-    QPointer<Transaction> startLogger(uint32_t interval);
-    QPointer<Transaction> stopLogger();
+    pTransaction init();
+    pTransaction getName();
+    pTransaction getVersion();
+    pTransaction setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second);
+    pTransaction startOscilloscope(uint32_t samplerate);
+    pTransaction startOscilloscopeTrigger(uint32_t samplerate);
+    pTransaction startLogger(uint32_t interval);
+    pTransaction stopLogger();
 
 signals:
     void logger(const pMessage &);
 
 private slots:
     void on_reply(const usb::pPacket &);
+    void on_finished();
 };
 
 } // namespace protocol

@@ -22,9 +22,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define TRANSACTION_H
 
 #include "message.h"
-#include "transactionlock.h"
-#include "usb/device.h"
-#include "usb/packet.h"
 #include <QTimerEvent>
 #include <QVector>
 #include <QObject>
@@ -34,24 +31,27 @@ namespace protocol {
 /*!
  * \brief The Transaction class
  *
- * Ownership: Child of Board
+ * Ownership: QSharedPointer<Transaction>
  */
 class Transaction : public QObject
 {
     Q_OBJECT
 
     bool watchdog = false;
-    bool successfull = false;
+    bool done = false;
 
-    std::unique_ptr<TransactionLock> lock;
+    int timeout = 100;
 
 public:
-    explicit Transaction(QObject *parent = nullptr);
+    explicit Transaction(const pMessage &command, QObject *parent = nullptr);
     ~Transaction();
 
+    pMessage command;
     QVector<pMessage> replies;
 
-    void start(const usb::pDevice &device, const pMessage &command, int timeout);
+    void setWatchdog(int timeout);
+
+    void startWatchdog();
 
 signals:
     void reply(const pMessage &);
@@ -59,12 +59,16 @@ signals:
     void succeeded(const pMessage &);
     void failed();
 
+    void finished();
+
 public slots:
     void on_reply(const usb::pPacket &);
 
 private:
     void timerEvent(QTimerEvent *);
 };
+
+typedef QSharedPointer<Transaction> pTransaction;
 
 } // namespace protocol
 
