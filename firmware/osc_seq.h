@@ -57,10 +57,6 @@ typedef struct OscSeqGroup {
 inline void
 OscSeqDisable(tOscSeq *self)
 {
-    //DEBUG_PRINT("OscSeqDisable\n");
-
-    ADCTimerStop(self->adc->timer); // it does not hurt to call it twice
-
     IntDisable(self->sequence_int);
     uDMAChannelDisable(self->udma_channel); // this one cancels uDMA immediately.
     ADCSequenceDisable(self->adc->base, self->sequence_num);
@@ -68,13 +64,50 @@ OscSeqDisable(tOscSeq *self)
 
 
 inline void
+OscSeqGroupDisable(tOscSeqGroup *self)
+{
+    int i;
+
+    ADCTimerStop(&self->adc_group->timer);
+
+    FOREACH_ADC OscSeqDisable(&self->osc_seq[i]);
+}
+
+
+inline void
+OscSeqPingPong(tOscSeq *self)
+{
+    tPage *page = RingAcquire(&self->ring);
+
+    if (!self->ping_enable) {
+
+        ASSERT(self->pong_enable); // Pong läuft noch, sonst sind wir hier zu spät
+
+        uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
+            UDMA_MODE_PINGPONG,
+            (void *)(self->adc->base + ADC_O_SSFIFO0),
+            page->buffer+24, ADC_SAMPLES);
+
+        self->ping_enable = 1;
+    }
+    if (!self->pong_enable) {
+
+        ASSERT(self->ping_enable); // Ping läuft noch, sonst sind wir hier zu spät
+
+        uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
+            UDMA_MODE_PINGPONG,
+            (void *)(self->adc->base + ADC_O_SSFIFO0),
+            page->buffer+24, ADC_SAMPLES);
+
+        self->pong_enable = 1;
+    }
+}
+
+
+inline void
 OscSeqIntHandler(tOscSeq *self)
 {
-    tPage *page;
-
     ADCIntClear(self->adc->base, self->sequence_num);
-
-    //DEBUG_PRINT("OscSeqIntHandler\n");
 
     // ping_ and pong_enable are required, because uDMAChannelSizeGet
     // does return 0 at the end when the PRI channel is about to be disabled
@@ -82,43 +115,38 @@ OscSeqIntHandler(tOscSeq *self)
         // PRI is done, ALT is working this moment
         RingWrite(&self->ring);
 
-        if (RingFull(&self->ring)) {
-            // done
-            self->ping_enable = 0;
+        self->ping_enable = 0;
+
+        ASSERT(self->pong_enable);
+        // the program did not reconfigure DMA, DMA did need the configuration just a moment ago
+
+        // Automatic ping pong if the ring is not full.
+        if (!RingFull(&self->ring)) {
+            OscSeqPingPong(self);
         }
 
-        else {
-            // continue
-            page = RingAcquire(&self->ring);
-
-            uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
-                UDMA_MODE_PINGPONG,
-                (void *)(self->adc->base + ADC_O_SSFIFO0),
-                page->buffer+24, ADC_SAMPLES);
-        }
+        // You may also call PingPong from Main after releasing a page of the ring.
+        // There is time until ALT is finished as well
     }
 
     else if(self->pong_enable && !uDMAChannelSizeGet(self->udma_channel | UDMA_ALT_SELECT)) {
         // ALT is done, PRI is working this moment
         RingWrite(&self->ring);
 
-        if (RingFull(&self->ring)) {
-            // done
-            self->pong_enable = 0;
+        self->pong_enable = 0;
 
-            // disable ADC
+        if (!self->ping_enable) {
+            // the program did not reconfigure DMA, DMA did need the configuration just a moment ago
             OscSeqDisable(self);
         }
 
-        else {
-            // continue
-            page = RingAcquire(&self->ring);
-
-            uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
-                UDMA_MODE_PINGPONG,
-                (void *)(self->adc->base + ADC_O_SSFIFO0),
-                page->buffer+24, ADC_SAMPLES);
+        // Automatic ping pong if the ring is not full.
+        if (!RingFull(&self->ring)) {
+            OscSeqPingPong(self);
         }
+
+        // You may also call PingPong from Main after releasing a page of the ring.
+        // There is time until PRI is finished as well
     }
 }
 
@@ -132,6 +160,24 @@ OscSeqGroupAllocate(tOscSeqGroup *self, tPage *pages, uint32_t length)
 }
 
 
+inline void
+OscSeqGroupRelease(tOscSeqGroup *self)
+{
+    int i;
+
+    FOREACH_ADC RingRelease(&self->osc_seq[i].ring);
+}
+
+
+inline void
+OscSeqGroupPingPong(tOscSeqGroup *self)
+{
+    int i;
+
+    FOREACH_ADC OscSeqPingPong(&self->osc_seq[i]);
+}
+
+
 inline unsigned char
 OscSeqGroupReady(tOscSeqGroup *self)
 {
@@ -141,6 +187,18 @@ OscSeqGroupReady(tOscSeqGroup *self)
     FOREACH_ADC enable |= self->osc_seq[i].ping_enable | self->osc_seq[i].pong_enable;
 
     return !enable;
+}
+
+
+inline unsigned char
+OscSeqGroupRingContent(tOscSeqGroup *self)
+{
+    int i;
+    unsigned char content = 1;
+
+    FOREACH_ADC content &= RingContent(&self->osc_seq[i].ring);
+
+    return content;
 }
 
 

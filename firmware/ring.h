@@ -68,6 +68,7 @@ RingAllocate(tRing *self, tPage *pages, uint32_t length)
     self->read = 0;
     self->release = 0;
     self->empty = 1;
+    self->full = 0;
     self->content = 0;
 }
 

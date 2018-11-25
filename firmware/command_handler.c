@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "logger.h"
 #include "oscilloscope.h"
 #include "reply_handler.h"
+#include "trigger.h"
 
 
 tCommandHandler command_handler;
@@ -202,7 +203,8 @@ on_startOscilloscopeTrigger(tEvent *event)
 
     DEBUG_PRINT("startOscilloscopeTrigger\n");
 
-    error = 0; //OscilloscopeStartTrigger(samplerate);
+    error = TriggerStart(&trigger, samplerate);
+
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);

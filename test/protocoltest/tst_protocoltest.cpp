@@ -40,9 +40,10 @@ private slots:
     void cleanupTestCase();
     void test_startLogger();
     void test_startOscilloscope();
-    //void test_startOscilloscopeTrigger();
+    void test_startOscilloscopeTrigger();
     void test_startLoggerAgain();
     void test_startOscilloscopeAgain();
+    void test_startOscilloscopeTriggerAgain();
     void test_TransactionTimeout();
 
 private:
@@ -51,6 +52,7 @@ private:
 
     int m_short_timeout = 100;
     int m_long_timeout = 800;
+    int m_logger_timeout = 1100;
 };
 
 ProtocolTest::ProtocolTest()
@@ -92,7 +94,7 @@ void ProtocolTest::test_startLogger()
 
     for (int i = 0; i < 2; i++) {
         qDebug() << i;
-        QVERIFY(logger_spy.wait(1100));
+        QVERIFY(logger_spy.wait(m_logger_timeout));
     }
 
     auto stop_transaction = board->stopLogger();
@@ -100,7 +102,7 @@ void ProtocolTest::test_startLogger()
     QVERIFY(stop_spy.isValid());
     QVERIFY(stop_spy.wait(m_short_timeout));
 
-    QVERIFY(logger_spy.wait(1100) == 0); // no additional data point after stop
+    QVERIFY(logger_spy.wait(m_logger_timeout) == 0); // no additional data point after stop
 }
 
 void ProtocolTest::test_startOscilloscope()
@@ -108,17 +110,21 @@ void ProtocolTest::test_startOscilloscope()
     auto transaction = board->startOscilloscope(0);
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
     QVERIFY(spy.isValid());
-    QVERIFY(spy.wait(1100));
+    QVERIFY(spy.wait(m_short_timeout));
 
     QCOMPARE(transaction->replies.count(), 20);
 }
 
-/*
 void ProtocolTest::test_startOscilloscopeTrigger()
 {
-    test_startOscilloscope();
+    auto transaction = board->startOscilloscopeTrigger(2);
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(10000));
+
+    QCOMPARE(transaction->replies.count(), 18);
 }
-*/
+
 void ProtocolTest::test_startLoggerAgain()
 {
     test_startLogger();
@@ -127,6 +133,11 @@ void ProtocolTest::test_startLoggerAgain()
 void ProtocolTest::test_startOscilloscopeAgain()
 {
     test_startOscilloscope();
+}
+
+void ProtocolTest::test_startOscilloscopeTriggerAgain()
+{
+    test_startOscilloscopeTrigger();
 }
 
 void ProtocolTest::test_TransactionTimeout()

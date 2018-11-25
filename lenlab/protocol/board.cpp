@@ -159,10 +159,11 @@ Board::startOscilloscopeTrigger(uint32_t samplerate)
     args.append(samplerate);
 
     auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startOscilloscope);
+    cmd->setCommand(::startOscilloscopeTrigger);
     cmd->setIntVector(args);
 
     auto transaction = pTransaction::create(cmd);
+    transaction->setWatchdog(800);
     start(transaction);
 
     return transaction;

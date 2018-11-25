@@ -48,7 +48,13 @@ LoggerStart(tLogger *self, uint32_t interval)
 {
     if (self->lock) return LOCK_ERROR;
 
+    if (self->adc_group->lock) return STATE_ERROR;
+
+    ADCGroupSetHardwareOversample(self->adc_group, 1);
+
     LogSeqGroupEnable(&self->seq_group, interval);
+
+    ADCGroupLock(self->adc_group);
 
     self->lock = 1;
 
@@ -64,6 +70,8 @@ LoggerStop(tLogger *self)
     LogSeqGroupDisable(&self->seq_group);
 
     self->lock = 0;
+
+    ADCGroupUnlock(self->adc_group);
 
     return OK;
 }

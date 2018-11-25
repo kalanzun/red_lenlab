@@ -22,15 +22,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "oscilloscope.h"
 
-#include "logger.h"
 #include "reply_handler.h"
 #include "usb_device.h"
-
-
-#define MEMORY_LENGTH 22
-
-
-tPage memory[MEMORY_LENGTH];
 
 
 void
@@ -56,12 +49,16 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
     if (self->lock) return LOCK_ERROR;
 
-    if (logger.lock) return STATE_ERROR;
+    if (self->adc_group->lock) return STATE_ERROR;
+
+    ADCGroupSetHardwareOversample(self->adc_group, samplerate);
 
     // 2 rings of 10 pages each
-    OscSeqGroupAllocate(&self->seq_group, memory, 10);
+    OscSeqGroupAllocate(&self->seq_group, self->memory, 10);
 
     OscSeqGroupEnable(&self->seq_group);
+
+    ADCGroupLock(self->adc_group);
 
     self->lock = 1;
 
@@ -75,6 +72,8 @@ OscilloscopeStop(tOscilloscope *self)
     if (!self->lock) return LOCK_ERROR;
 
     self->lock = 0;
+
+    ADCGroupUnlock(self->adc_group);
 
     return OK;
 }
@@ -91,6 +90,8 @@ OscilloscopeMain(tOscilloscope *self)
     if (!self->lock) return;
 
     if (OscSeqGroupReady(&self->seq_group)) {
+
+        ADCTimerStop(&self->adc_group->timer); // DMA disables itself, the timer is left running
 
         //DEBUG_PRINT("OscilloscopeData\n");
 
@@ -113,6 +114,7 @@ OscilloscopeMain(tOscilloscope *self)
         page->buffer[3] = 255; // last packet
 
         USBDeviceSendInterleaved(&self->seq_group.osc_seq[0].ring, &self->seq_group.osc_seq[1].ring);
+
         OscilloscopeStop(self);
 
     }

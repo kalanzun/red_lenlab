@@ -41,6 +41,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "reply_handler.h"
 #include "signal.h"
 #include "ssi.h"
+#include "trigger.h"
 #include "usb_device.h"
 
 
@@ -63,12 +64,13 @@ uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
 
 //*****************************************************************************
 //
-// Memory
+// Modules
 //
 //*****************************************************************************
 tADCGroup adc_group;
 tLogger logger;
 tOscilloscope oscilloscope;
+tTrigger trigger;
 
 
 //*****************************************************************************
@@ -255,6 +257,7 @@ main(void) {
     //
     LoggerInit(&logger, &adc_group);
     OscilloscopeInit(&oscilloscope, &adc_group);
+    TriggerInit(&trigger, &oscilloscope);
 
     //
     // Print a string.
@@ -267,6 +270,7 @@ main(void) {
         CommandHandlerMain();
         LoggerMain(&logger);
         OscilloscopeMain(&oscilloscope);
+        TriggerMain(&trigger);
         ReplyHandlerMain();
         USBDeviceMain();
     }

@@ -27,12 +27,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "osc_seq.h"
 
 
+#define OSCILLOSCOPE_MEMORY_LENGTH 22
+
+
 typedef struct Oscilloscope {
 
     tADCGroup *adc_group;
     tOscSeqGroup seq_group;
 
-    volatile unsigned char lock;
+    unsigned char lock;
+
+    tPage memory[OSCILLOSCOPE_MEMORY_LENGTH];
 
 } tOscilloscope;
 
@@ -48,43 +53,5 @@ void OscilloscopeMain(tOscilloscope *self);
 
 void OscilloscopeInit(tOscilloscope *self, tADCGroup *adc_group);
 
-/*
-#include "adcss.h"
-#include "ring.h"
-
-
-#define OSCILLOSCOPE_HEADER_LENGTH 12
-#define OSCILLOSCOPE_FILTER_LENGTH 8
-
-
-typedef struct Oscilloscope {
-    tADC *adc;
-    tADCSS adcss;
-
-    volatile bool lock;
-
-    bool active;
-    bool trigger;
-    uint8_t count;
-    uint16_t filter[OSCILLOSCOPE_FILTER_LENGTH];
-    uint16_t filter_index;
-    uint16_t filter_state;
-    bool trigger_wait;
-    bool trigger_active;
-    bool trigger_save;
-    uint8_t trigger_post_count;
-
-    tRing ring;
-} tOscilloscope;
-
-
-uint32_t OscilloscopeStart(uint32_t samplerate);
-
-uint32_t OscilloscopeStartTrigger(uint32_t samplerate);
-
-void OscilloscopeMain();
-
-void OscilloscopeInit();
-*/
 
 #endif /* OSCILLOSCOPE_H_ */

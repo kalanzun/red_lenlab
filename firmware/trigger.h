@@ -1,5 +1,5 @@
 /*
- * logger.h
+ * trigger.h
  *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
@@ -20,32 +20,48 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef TRIGGER_H_
+#define TRIGGER_H_
 
 
-#include "log_seq.h"
+#include "oscilloscope.h"
 
 
-typedef struct Logger {
+//#define OSCILLOSCOPE_HEADER_LENGTH 12
+#define TRIGGER_FILTER_LENGTH 8
 
-    tADCGroup *adc_group;
-    tLogSeqGroup seq_group;
+
+typedef struct Trigger {
+
+    tOscilloscope *oscilloscope;
 
     unsigned char lock;
 
-} tLogger;
+    unsigned char trigger;
+    uint16_t filter[TRIGGER_FILTER_LENGTH];
+    uint16_t index;
+    uint16_t state;
+    unsigned char wait;
+    unsigned char active;
+    unsigned char save;
+    uint8_t count;
+    uint8_t post_count;
+
+    tRing ring;
+
+} tTrigger;
 
 
-extern tLogger logger;
+extern tTrigger trigger;
 
 
-tError LoggerStart(tLogger *self, uint32_t interval);
+tError TriggerStart(tTrigger *self, uint32_t samplerate);
 
-tError LoggerStop(tLogger *self);
+tError TriggerStop(tTrigger *self);
 
-void LoggerMain(tLogger *self);
+void TriggerMain(tTrigger *self);
 
-void LoggerInit(tLogger *self, tADCGroup *adc_group);
+void TriggerInit(tTrigger *self, tOscilloscope *oscilloscope);
 
-#endif /* LOGGER_H_ */
+
+#endif /* TRIGGER_H_ */
