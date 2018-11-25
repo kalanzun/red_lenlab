@@ -184,6 +184,7 @@ TriggerMain(tTrigger *self)
     }
 
     self->count++;
+    RingWrite(&self->ring);
 
     if (self->save) {
 

@@ -30,8 +30,10 @@ Board::Board(usb::pDevice &device, QObject *parent) :
     QObject(parent),
     device(device)
 {
+    /*
     connect(device.data(), &usb::Device::reply,
             this, &Board::on_reply);
+            */
 }
 
 void

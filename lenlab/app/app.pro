@@ -1,14 +1,15 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-11-17T13:10:19
+# Project created by QtCreator 2018-01-03T19:40:25
 #
 #-------------------------------------------------
 
-QT       -= gui
+QT       += core gui
 
-TARGET = protocol
-TEMPLATE = lib
-CONFIG += staticlib
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+TARGET = lenlab
+TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -22,20 +23,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    message.cpp \
-    transaction.cpp \
-    manager.cpp \
-    board.cpp
+        main.cpp \
 
-HEADERS += \
-    message.h \
-    transaction.h \
-    manager.h \
-    board.h
+win32 {
+    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../gui/debug/libgui.a ../model/debug/libmodel.a ../usb/debug/libusb.a
+    CONFIG(release, debug|release) PRE_TARGETDEPS += ../gui/release/libgui.a ../model/release/libmodel.a ../usb/release/libusb.a
+}
 
 unix {
-    target.path = /usr/lib
-    INSTALLS += target
+    PRE_TARGETDEPS += ../gui/libgui.a ../model/libmodel.a ../usb/libusb.a
 }
 
 include(../../red_lenlab.pri)

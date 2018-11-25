@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>gui::MainWindow</class>
+ <widget class="QMainWindow" name="gui::MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>628</width>
+    <height>495</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="gui::LoggerForm" name="loggerTab">
+         <attribute name="title">
+          <string>Logger</string>
+         </attribute>
+        </widget>
+        <widget class="gui::OscilloscopeForm" name="oscilloscopeTab">
+         <attribute name="title">
+          <string>Oszilloskop</string>
+         </attribute>
+        </widget>
+        <widget class="gui::FrequencyForm" name="FrequencyTab">
+         <attribute name="title">
+          <string>Frequenzanalyse</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="gui::SignalForm" name="signal" native="true">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="logPlainTextEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>100</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QToolButton" name="signalButton">
+          <property name="text">
+           <string>Signalgenerator</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="logButton">
+          <property name="text">
+           <string>Nachrichten</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="logLineEdit"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>628</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuLenlab">
+    <property name="title">
+     <string>Lenlab</string>
+    </property>
+    <addaction name="actionSaveData"/>
+    <addaction name="actionSaveImage"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHilfe">
+    <property name="title">
+     <string>Hilfe</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuLenlab"/>
+   <addaction name="menuHilfe"/>
+  </widget>
+  <action name="actionSaveData">
+   <property name="text">
+    <string>Daten speichern...</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Beenden</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="text">
+    <string>Bild speichern...</string>
+   </property>
+  </action>
+  <action name="actionHandbuch">
+   <property name="text">
+    <string>Handbuch</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>Über</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>gui::SignalForm</class>
+   <extends>QWidget</extends>
+   <header>gui/signalform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::LoggerForm</class>
+   <extends>QWidget</extends>
+   <header>gui/loggerform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::OscilloscopeForm</class>
+   <extends>QWidget</extends>
+   <header>gui/oscilloscopeform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::FrequencyForm</class>
+   <extends>QWidget</extends>
+   <header>gui/frequencyform.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

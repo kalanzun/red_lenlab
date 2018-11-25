@@ -1,11 +1,13 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    #app \
-    #gui \
-    #model \
-    usb \
-    protocol
+    app \
+    gui \
+    model \
+    protocol \
+    usb
 
-#app.depends = gui model usb
-#gui.depends = model usb
+app.depends = gui
+gui.depends = model
+model.depends = protocol
+protocol.depends = usb

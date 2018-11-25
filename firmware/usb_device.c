@@ -384,6 +384,7 @@ USBDeviceMain()
         else if (usb_device.send_ring_buffer)
         {
             page = RingRead(usb_device.ring);
+            //ASSERT(page->buffer[0] == OscilloscopeData);
             USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
             //DEBUG_PRINT("send ring buffer\n");
         }
