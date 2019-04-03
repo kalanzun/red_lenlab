@@ -24,4 +24,11 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>uartstdio.c</name>
+			<type>1</type>
+			<locationURI>TIVAWARE_INSTALL/utils/uartstdio.c</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
