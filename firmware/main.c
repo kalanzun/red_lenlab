@@ -5,30 +5,53 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "inc/hw_memmap.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/uart.h"
-#include "driverlib/systick.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
-#include "debug.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/systick.h"
+#include "driverlib/uart.h"
 #include "utils/uartstdio.h"
-#include "peripherals.h"
+
+#include "tests/tests.h"
+#include "debug.h"
+#include "wait.h"
+
 
 //*****************************************************************************
 //
-// The error routine that is called if an ASSERT fails. (driverlib/debug.h)
+// Peripherals
 //
 //*****************************************************************************
-#ifdef DEBUG
-void __error__(char *pcFilename, uint32_t ui32Line)
+const uint32_t peripherals[] = {
+    SYSCTL_PERIPH_GPIOA,
+    SYSCTL_PERIPH_GPIOB,
+    SYSCTL_PERIPH_GPIOC,
+    SYSCTL_PERIPH_GPIOD,
+    SYSCTL_PERIPH_GPIOE,
+    SYSCTL_PERIPH_GPIOF,
+
+    SYSCTL_PERIPH_TIMER0,
+};
+
+#define NUM_PERIPHERALS (sizeof(peripherals) / sizeof(uint32_t))
+
+
+inline void
+ConfigurePeripherals(void)
 {
-    UARTprintf("Error at line %d of %s\n", ui32Line, pcFilename);
-    while (1)
-    {
-    }
+    uint8_t i;
+
+    for (i=0; i<NUM_PERIPHERALS; i++)
+        SysCtlPeripheralEnable(peripherals[i]);
+
+    for (i=0; i<NUM_PERIPHERALS; i++)
+        while(!SysCtlPeripheralReady(peripherals[i]))
+        {
+        }
 }
-#endif
+
 
 //*****************************************************************************
 //
@@ -52,6 +75,23 @@ inline void ConfigureUART(void)
 #endif
 }
 
+
+//*****************************************************************************
+//
+// The error routine that is called if an ASSERT fails. (driverlib/debug.h)
+//
+//*****************************************************************************
+#ifdef DEBUG
+void __error__(char *pcFilename, uint32_t ui32Line)
+{
+    UARTprintf("Error at line %d of %s\n", ui32Line, pcFilename);
+    while (1)
+    {
+    }
+}
+#endif
+
+
 //*****************************************************************************
 //
 // This is the main application entry function.
@@ -68,11 +108,11 @@ int main(void)
     //
     // Enable Systick for timing
     //
-    SysTickPeriodSet(16777216);
+    SysTickPeriodSet(SysCtlClockGet() / 10); // 100ms (the register is only 32 bits)
     SysTickEnable();
 
     //
-    // GPIO Pin Configuration
+    // Configure peripherals
     //
     ConfigurePeripherals();
 
@@ -82,10 +122,20 @@ int main(void)
     ConfigureUART();
 
     //
+    // Configure wait
+    //
+    ConfigureWait();
+
+    //
     // Print a welcome message
     //
     DEBUG_PRINT("Red Firmware TDD");
     DEBUG_PRINT("Tiva C Series @ %u MHz", SysCtlClockGet() / 1000000);
+
+    //
+    // Run tests
+    //
+    tests();
 
     while (1)
     {
