@@ -10,7 +10,7 @@
 
 
 void
-Timer0AIntHandler(void)
+Timer0AHandler(void)
 {
     IntTimerIntHandler(&int_timer);
 }

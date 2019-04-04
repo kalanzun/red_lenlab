@@ -54,7 +54,9 @@ extern uint32_t __STACK_TOP;
 // External declarations for the interrupt handlers used by the application.
 //
 //*****************************************************************************
-extern void Timer0AIntHandler();
+extern void Timer0AHandler();
+extern void ADC0SS3Handler();
+extern void ADC1SS3Handler();
 
 //*****************************************************************************
 //
@@ -100,9 +102,9 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 0
     IntDefaultHandler,                      // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
-    IntDefaultHandler,                      // ADC Sequence 3
+    ADC0SS3Handler,                         // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    Timer0AIntHandler,                      // Timer 0 subtimer A
+    Timer0AHandler,                         // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
     IntDefaultHandler,                      // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B
@@ -134,7 +136,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
-    IntDefaultHandler,                      // ADC1 Sequence 3
+    ADC1SS3Handler,                         // ADC1 Sequence 3
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // GPIO Port J

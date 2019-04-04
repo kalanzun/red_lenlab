@@ -15,8 +15,27 @@
 #include "utils/uartstdio.h"
 
 #include "tests/tests.h"
+#include "adc.h"
 #include "debug.h"
+#include "logger.h"
 #include "int_timer.h"
+
+
+//*****************************************************************************
+//
+// The control table used by the uDMA controller.  This table must be aligned
+// to a 1024 byte boundary.
+//
+//*****************************************************************************
+#if defined(ewarm)
+#pragma data_alignment=1024
+uint8_t ui8ControlTable[1024];
+#elif defined(ccs)
+#pragma DATA_ALIGN(ui8ControlTable, 1024)
+uint8_t ui8ControlTable[1024];
+#else
+uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
+#endif
 
 
 //*****************************************************************************
@@ -32,7 +51,13 @@ const uint32_t peripherals[] = {
     SYSCTL_PERIPH_GPIOE,
     SYSCTL_PERIPH_GPIOF,
 
-    SYSCTL_PERIPH_TIMER0,
+    SYSCTL_PERIPH_TIMER0, // int_timer
+    SYSCTL_PERIPH_TIMER1, // adc_timer
+
+    SYSCTL_PERIPH_ADC0,
+    SYSCTL_PERIPH_ADC1,
+
+    SYSCTL_PERIPH_UDMA,
 };
 
 #define NUM_PERIPHERALS (sizeof(peripherals) / sizeof(uint32_t))
@@ -94,10 +119,49 @@ void __error__(char *pcFilename, uint32_t ui32Line)
 
 //*****************************************************************************
 //
+// uDMA
+//
+//*****************************************************************************
+void
+uDMAErrorHandler(void)
+{
+    //uint32_t status;
+    //status = uDMAErrorStatusGet();
+    DEBUG_PRINT("uDMA Error\n");
+    uDMAErrorStatusClear();
+}
+
+
+inline void
+ConfigureuDMA(void)
+{
+    //
+    // Enable the uDMA controller error interrupt.  This interrupt will occur
+    // if there is a bus error during a transfer.
+    //
+    IntEnable(INT_UDMAERR);
+
+    //
+    // Enable the uDMA controller.
+    //
+    uDMAEnable();
+
+    //
+    // Point at the control table to use for channel control structures.
+    //
+    uDMAControlBaseSet(ui8ControlTable);
+
+}
+
+
+//*****************************************************************************
+//
 // Modules
 //
 //*****************************************************************************
+tADCGroup adc_group;
 tIntTimer int_timer;
+tLogger logger;
 
 
 //*****************************************************************************
@@ -130,15 +194,30 @@ int main(void)
     ConfigureUART();
 
     //
-    // Init int_timer
-    //
-    IntTimerInit(&int_timer);
-
-    //
     // Print a welcome message
     //
     DEBUG_PRINT("Red Firmware TDD");
     DEBUG_PRINT("Tiva C Series @ %u MHz", SysCtlClockGet() / 1000000);
+
+    //
+    // Configure uDMA
+    //
+    ConfigureuDMA();
+
+    //
+    // Module int_timer
+    //
+    IntTimerInit(&int_timer);
+
+    //
+    // Module adc_group
+    //
+    ADCGroupInit(&adc_group);
+
+    //
+    // Module logger
+    //
+    LoggerInit(&logger, &adc_group);
 
     //
     // Run tests
