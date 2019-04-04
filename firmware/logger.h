@@ -7,6 +7,7 @@
 #define LOGGER_H_
 
 
+#include "error.h"
 #include "log_seq.h"
 
 
@@ -15,19 +16,21 @@ typedef struct Logger {
     tADCGroup *adc_group;
     tLogSeqGroup seq_group;
 
+    bool lock;
+
 } tLogger;
 
 
 extern tLogger logger;
 
 
-inline void
-LoggerInit(tLogger *self, tADCGroup *adc_group)
-{
-    self->adc_group = adc_group;
+tError LoggerStart(tLogger *self, uint32_t interval);
 
-    LogSeqGroupInit(&self->seq_group, adc_group);
-}
+
+tError LoggerStop(tLogger *self);
+
+
+void LoggerInit(tLogger *self, tADCGroup *adc_group);
 
 
 #endif /* LOGGER_H_ */

@@ -31,7 +31,7 @@ test_wait(void)
 
         delta = delta - 4*1000*1000;
         assertIntGreater(delta, 0);
-        assertIntSmaller(delta, 1000);
+        assertIntLess(delta, 1000);
 
     }
 
@@ -62,9 +62,79 @@ test_log_seq(void)
 
 
 void
+test_logger_lock(void)
+{
+    test();
+
+    assertFalse(logger.lock);
+    assertOK(LoggerStart(&logger, 1000));
+    assertTrue(logger.lock);
+    assertTrue(adc_group.lock);
+    assertOK(LoggerStop(&logger));
+    assertFalse(logger.lock);
+    assertFalse(adc_group.lock);
+
+    ok();
+}
+
+
+void
+test_logger_double_start(void)
+{
+    test();
+
+    assertOK(LoggerStart(&logger, 1000));
+    assertError(LoggerStart(&logger, 1000), LOCK_ERROR);
+    assertOK(LoggerStop(&logger));
+
+    ok();
+}
+
+
+void
+test_logger_double_stop(void)
+{
+    test();
+
+    assertOK(LoggerStart(&logger, 1000));
+    assertOK(LoggerStop(&logger));
+    assertError(LoggerStop(&logger), LOCK_ERROR);
+
+    ok();
+}
+
+
+void
+test_logger_state_error(void)
+{
+    test();
+
+    adc_group.lock = true;
+    assertError(LoggerStart(&logger, 1000), STATE_ERROR);
+    // it does not continue if assert fails and leaves the ADC locked
+    // refactor it? BEGIN(); ... END(); and it uses __fail or something?
+    adc_group.lock = false;
+
+    ok();
+}
+
+
+void
 tests(void)
 {
+    DEBUG_PRINT("BEGIN tests");
+
     test_wait();
 
     test_log_seq();
+
+    test_logger_lock();
+
+    test_logger_double_start();
+
+    test_logger_double_stop();
+
+    test_logger_state_error();
+
+    DEBUG_PRINT("END tests");
 }
