@@ -106,7 +106,7 @@ int main(void)
     SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
     //
-    // Enable Systick for timing
+    // Enable systick for timing
     //
     SysTickPeriodSet(SysCtlClockGet() / 10); // 100ms (the register is only 32 bits)
     SysTickEnable();
