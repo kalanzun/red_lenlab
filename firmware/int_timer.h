@@ -1,10 +1,10 @@
 /*
- * wait_timer.h
+ * int_timer.h
  *
  */
 
-#ifndef WAIT_TIMER_H_
-#define WAIT_TIMER_H_
+#ifndef INT_TIMER_H_
+#define INT_TIMER_H_
 
 
 #include <stdbool.h>
@@ -17,7 +17,7 @@
 #include "driverlib/timer.h"
 
 
-typedef struct WaitTimer {
+typedef struct IntTimer {
 
     uint32_t base;
     uint32_t timer;
@@ -25,11 +25,14 @@ typedef struct WaitTimer {
 
     volatile bool ready;
 
-} tWaitTimer;
+} tIntTimer;
+
+
+extern tIntTimer int_timer;
 
 
 inline void
-WaitTimerIntHandler(tWaitTimer *self)
+IntTimerIntHandler(tIntTimer *self)
 {
     TimerIntClear(self->base, self->int_flags);
 
@@ -38,40 +41,33 @@ WaitTimerIntHandler(tWaitTimer *self)
 
 
 inline void
-WaitTimerSetInterval(tWaitTimer *self, uint32_t interval)
+IntTimerStart(tIntTimer *self, uint16_t interval)
 {
     // interval in ms
-    TimerLoadSet64(self->base, (uint64_t) interval * SysCtlClockGet() / 1000);
-}
-
-
-inline void
-WaitTimerStart(tWaitTimer *self, uint32_t interval)
-{
     self->ready = 0;
-    WaitTimerSetInterval(self, interval);
+    TimerLoadSet64(self->base, (uint64_t) interval * SysCtlClockGet() / 1000);
     TimerEnable(self->base, self->timer);
 }
 
 
 inline void
-WaitTimerStop(tWaitTimer *self)
+IntTimerStop(tIntTimer *self)
 {
     TimerDisable(self->base, self->timer);
 }
 
 
 inline void
-WaitTimerWait(tWaitTimer *self, uint32_t interval)
+IntTimerWait(tIntTimer *self, uint16_t interval)
 {
-    WaitTimerStart(self, interval);
+    IntTimerStart(self, interval);
     while (!self->ready) {};
-    WaitTimerStop(self);
+    IntTimerStop(self);
 }
 
 
 inline void
-ConfigureWaitTimer(tWaitTimer *self)
+ConfigureIntTimer(tIntTimer *self)
 {
     TimerConfigure(self->base, TIMER_CFG_ONE_SHOT);
     TimerIntEnable(self->base, self->int_flags);
@@ -81,7 +77,7 @@ ConfigureWaitTimer(tWaitTimer *self)
 
 
 inline void
-WaitTimerInit(tWaitTimer *self)
+IntTimerInit(tIntTimer *self)
 {
     self->base = TIMER0_BASE;
     self->timer = TIMER_A;
@@ -89,8 +85,16 @@ WaitTimerInit(tWaitTimer *self)
 
     self->ready = 0;
 
-    ConfigureWaitTimer(self);
+    ConfigureIntTimer(self);
 }
 
 
-#endif /* WAIT_TIMER_H_ */
+inline void
+wait(uint16_t interval)
+{
+    // interval in ms
+    IntTimerWait(&int_timer, interval);
+}
+
+
+#endif /* INT_TIMER_H_ */

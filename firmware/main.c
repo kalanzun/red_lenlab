@@ -16,7 +16,7 @@
 
 #include "tests/tests.h"
 #include "debug.h"
-#include "wait.h"
+#include "int_timer.h"
 
 
 //*****************************************************************************
@@ -94,6 +94,14 @@ void __error__(char *pcFilename, uint32_t ui32Line)
 
 //*****************************************************************************
 //
+// Modules
+//
+//*****************************************************************************
+tIntTimer int_timer;
+
+
+//*****************************************************************************
+//
 // This is the main application entry function.
 //
 //*****************************************************************************
@@ -122,9 +130,9 @@ int main(void)
     ConfigureUART();
 
     //
-    // Configure wait
+    // Init int_timer
     //
-    ConfigureWait();
+    IntTimerInit(&int_timer);
 
     //
     // Print a welcome message

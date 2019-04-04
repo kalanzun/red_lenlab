@@ -10,8 +10,8 @@
 #include "driverlib/sysctl.h"
 
 #include "debug.h"
+#include "int_timer.h"
 #include "microtest.h"
-#include "wait.h"
 
 
 void
