@@ -3,13 +3,12 @@
  *
  */
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "driverlib/systick.h"
 #include "driverlib/sysctl.h"
 
-#include "debug.h"
 #include "int_timer.h"
 #include "logger.h"
 #include "microtest.h"

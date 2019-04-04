@@ -7,6 +7,9 @@
 #define MICROTEST_H_
 
 
+#include "debug.h"
+
+
 #define test() do { DEBUG_PRINT("TEST %s (%s:%i)", __FUNCTION__, __FILE__, __LINE__); } while (0)
 
 #define fail(msg, ...) do { DEBUG_PRINT("FAIL " msg, ##__VA_ARGS__); return; } while (0)

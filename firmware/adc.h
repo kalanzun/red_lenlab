@@ -7,14 +7,14 @@
 #define ADC_H_
 
 
-#include "adc_timer.h"
-
 #include "inc/hw_adc.h"
 #include "inc/hw_ints.h"
 #include "driverlib/adc.h"
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/udma.h"
+
+#include "adc_timer.h"
 
 
 #define ADC_GROUP_SIZE 2
