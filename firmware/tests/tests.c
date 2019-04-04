@@ -22,9 +22,11 @@ test_wait(void)
     test();
 
     delta = SysTickValueGet();
-    wait(100); // 100 ms, one full round of the systick timer
+    wait(50); // 50 ms, half round of the systick timer
     delta = delta - SysTickValueGet(); // it counts down
+    if (delta < 0) delta = delta + 8*1000*1000;
 
+    delta = delta - 4*1000*1000;
     assertIntGreater(delta, 0);
     assertIntSmaller(delta, 1000);
 
