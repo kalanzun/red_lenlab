@@ -14,6 +14,7 @@
 #include "microtest.h"
 
 #include "test_oscilloscope.h"
+#include "test_ring.h"
 
 
 void
@@ -140,7 +141,9 @@ tests(void)
     test_oscilloscope_double_stop();
     test_oscilloscope_state_error();
     */
-    test_oscilloscope();
+    //test_oscilloscope();
+
+    test_ring();
 
     DEBUG_PRINT("END tests");
 }
