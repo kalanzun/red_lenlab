@@ -9,12 +9,9 @@
 #include "test_ring.h"
 
 #include "microtest.h"
+#include "memory.h"
 #include "oscilloscope.h"
 
-
-// use oscilloscope.memory for the tests
-#define MEMORY_LENGTH OSCILLOSCOPE_MEMORY_LENGTH
-static tPage *memory = oscilloscope.memory;
 
 
 void

@@ -8,9 +8,7 @@
 
 
 #include "osc_seq.h"
-
-
-#define OSCILLOSCOPE_MEMORY_LENGTH 22
+#include "memory.h"
 
 
 typedef struct Oscilloscope {
@@ -19,8 +17,6 @@ typedef struct Oscilloscope {
     tOscSeqGroup seq_group;
 
     unsigned char lock;
-
-    tPage memory[OSCILLOSCOPE_MEMORY_LENGTH];
 
 } tOscilloscope;
 

@@ -13,11 +13,12 @@
 #include "debug.h"
 
 
-#define PAGE_LENGTH 1024
+#define PAGE_LENGTH 256
 
 
 typedef struct Page {
-    uint8_t buffer[PAGE_LENGTH];
+    // 4 bytes alignment for uDMA
+    uint32_t buffer[PAGE_LENGTH];
 } tPage;
 
 

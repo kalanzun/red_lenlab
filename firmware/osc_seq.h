@@ -14,6 +14,7 @@
 
 
 #define OSCILLOSCOPE_SAMPLES 500
+#define OSCILLOSCOPE_OFFSET 6
 
 
 typedef struct OscSeq {
@@ -74,7 +75,7 @@ OscSeqPingPong(tOscSeq *self)
         uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_PINGPONG,
             (void *)(self->adc->base + ADC_O_SSFIFO0),
-            page->buffer+24, OSCILLOSCOPE_SAMPLES);
+            page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
 
         self->ping_enable = 1;
     }
@@ -85,7 +86,7 @@ OscSeqPingPong(tOscSeq *self)
         uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
             UDMA_MODE_PINGPONG,
             (void *)(self->adc->base + ADC_O_SSFIFO0),
-            page->buffer+24, OSCILLOSCOPE_SAMPLES);
+            page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
 
         self->pong_enable = 1;
     }
@@ -218,8 +219,8 @@ OscSeqEnable(tOscSeq *self)
 
     uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
         UDMA_MODE_PINGPONG,
-        (void *)(self->adc->base + ADC_O_SSFIFO0),
-        page->buffer+24, OSCILLOSCOPE_SAMPLES);
+        (void *)(self->adc->base + ADC_O_SSFIFO0),// sequence_num == 0 only
+        page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
 
     self->ping_enable = 1;
 
@@ -227,8 +228,8 @@ OscSeqEnable(tOscSeq *self)
 
     uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
         UDMA_MODE_PINGPONG,
-        (void *)(self->adc->base + ADC_O_SSFIFO0),
-        page->buffer+24, OSCILLOSCOPE_SAMPLES);
+        (void *)(self->adc->base + ADC_O_SSFIFO0), // sequence_num == 0 only
+        page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
 
     self->pong_enable = 1;
 
@@ -288,7 +289,7 @@ ConfigureOscSeq1(tOscSeq *self, tADCGroup *adc_group)
 {
     self->adc = &adc_group->adc[1];
     self->sequence_int = INT_ADC1SS0;
-    self->udma_channel = 24; // UDMA_CHANNEL_ADC1 enth�lt einen falschen Wert?!
+    self->udma_channel = 24; // UDMA_CHANNEL_ADC1 is wrong?!
 
     ConfigureOscSeq(self);
 }

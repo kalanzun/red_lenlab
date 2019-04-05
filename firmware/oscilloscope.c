@@ -39,7 +39,7 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
     ADCGroupSetHardwareOversample(self->adc_group, samplerate);
 
     // 2 rings of 10 pages each
-    OscSeqGroupAllocate(&self->seq_group, self->memory, 10);
+    OscSeqGroupAllocate(&self->seq_group, memory, 10);
 
     OscSeqGroupEnable(&self->seq_group);
 

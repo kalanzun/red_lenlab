@@ -135,15 +135,11 @@ tests(void)
     test_logger_double_start();
     test_logger_double_stop();
     test_logger_state_error();
-
-    test_oscilloscope_lock();
-    test_oscilloscope_double_start();
-    test_oscilloscope_double_stop();
-    test_oscilloscope_state_error();
     */
     //test_oscilloscope();
 
     test_ring();
+    test_oscilloscope();
 
     DEBUG_PRINT("END tests");
 }

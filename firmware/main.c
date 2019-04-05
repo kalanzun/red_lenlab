@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "int_timer.h"
 #include "logger.h"
+#include "memory.h"
 #include "oscilloscope.h"
 
 
@@ -161,6 +162,8 @@ ConfigureuDMA(void)
 // Modules
 //
 //*****************************************************************************
+tPage memory[MEMORY_LENGTH];
+
 tADCGroup adc_group;
 tIntTimer int_timer;
 tLogger logger;

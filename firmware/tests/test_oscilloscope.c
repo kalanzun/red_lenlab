@@ -9,10 +9,11 @@
 #include "test_oscilloscope.h"
 
 #include "oscilloscope.h"
+#include "memory.h"
 #include "microtest.h"
 #include "int_timer.h"
 
-
+/*
 void
 test_oscilloscope_lock(void)
 {
@@ -28,8 +29,8 @@ test_oscilloscope_lock(void)
 
     ok();
 }
-
-
+*/
+/*
 void
 test_oscilloscope_double_start(void)
 {
@@ -41,8 +42,8 @@ test_oscilloscope_double_start(void)
 
     ok();
 }
-
-
+*/
+/*
 void
 test_oscilloscope_double_stop(void)
 {
@@ -54,8 +55,8 @@ test_oscilloscope_double_stop(void)
 
     ok();
 }
-
-
+*/
+/*
 void
 test_oscilloscope_state_error(void)
 {
@@ -69,84 +70,59 @@ test_oscilloscope_state_error(void)
     assertError(err, STATE_ERROR);
     ok();
 }
+*/
 
+void
+test_oscilloscope_measurement()
+{
+    int i, j;
+    tRingIter iter;
+
+    tRing *self;
+    tPage *page;
+    uint16_t *value;
+
+    test();
+
+    for (i = 0; i < MEMORY_LENGTH; i++) {
+        for (j = 0; j < PAGE_LENGTH; j++) {
+            memory[i].buffer[j] = 0xFFFFFFFF;
+        }
+    }
+
+    OscilloscopeStart(&oscilloscope, 1);
+    while (!OscSeqGroupReady(&oscilloscope.seq_group)) {};
+
+    FOREACH_ADC {
+        self = &oscilloscope.seq_group.osc_seq[i].ring;
+        assert(RingFull(self));
+
+        for (RingIterInit(&iter, self); iter.content; RingIterNext(&iter)) {
+            page = RingIterGet(&iter);
+            // head
+            for (j = 0; j < 6; j++) {
+                if (page->buffer[j] != 0xFFFFFFFF)
+                    fail("head (%i, %i, %i)", i, iter.read, j);
+            }
+            // look for alignment error
+            // if the alignment is off, uDMA starts at a later address
+            if (*(uint8_t *) (page->buffer + 6) == 0xFF)
+                fail("alignment (%i, %i)", i, iter.read);
+            // measurement values
+            for (j = 0; j < OSCILLOSCOPE_SAMPLES; j++) {
+                value = (uint16_t *) (page->buffer + 6) + j;
+                if (*value == 0xFFFF)
+                    fail("value (%i, %i, %i)", i, iter.read, j);
+            }
+        }
+    }
+
+    OscilloscopeStop(&oscilloscope);
+    ok();
+}
 
 void
 test_oscilloscope()
 {
-    int i, j;
-    tRing *ring;
-    tPage *page;
-    tRingIter iter;
-
-    test();
-
-    for (i = 0; i < OSCILLOSCOPE_MEMORY_LENGTH; i++) {
-        for (j = 0; j < PAGE_LENGTH; j++) {
-            oscilloscope.memory[i].buffer[j] = 0;
-        }
-    }
-
-
-    assertOK(OscilloscopeStart(&oscilloscope, 1));
-    while (!OscSeqGroupReady(&oscilloscope.seq_group)) {};
-    ADCTimerStop(&oscilloscope.adc_group->timer); // DMA disables itself, the timer is left running
-
-    wait(100);
-
-    for (i = 0; i < 20; i++) {
-        for (j = 0; j < 24; j++) {
-            if (!(oscilloscope.memory[i].buffer[j] == 0)) {
-                fail("(%i, %i)", i, j);
-                //return;
-            }
-        }
-        for (j = 24; j < PAGE_LENGTH; j+=2) {
-            if (*((uint16_t *) oscilloscope.memory[i].buffer+j) == 0) {
-                fail("(%i, %i)", i, j);
-            }
-            /*
-            if (j % 2 == 0 && oscilloscope.memory[i].buffer[j] != 0) {
-                fail("(%i, %i)", i, j);
-                return;
-            }
-            else if (j % 2 == 1 && oscilloscope.memory[i].buffer[j] == 0) {
-                fail("(%i, %i)", i, j);
-                //return;
-            }
-            */
-        }
-    }
-    for (i = 20; i < OSCILLOSCOPE_MEMORY_LENGTH; i++) {
-        for (j = 0; j < PAGE_LENGTH; j++) {
-            if (!(oscilloscope.memory[i].buffer[j] == 0)) {
-                fail("not empty");
-                return;
-            }
-        }
-    }
-
-    /*
-    FOREACH_ADC {
-
-        ring = &oscilloscope.seq_group.osc_seq[i].ring;
-
-        for (RingIterInit(&iter, ring); iter.content; RingIterNext(&iter))
-        {
-            page = RingIterGet(&iter);
-            for (j = 0; j < PAGE_LENGTH; j++)
-            {
-                if (!(page->buffer[j] > 0)) {
-                    fail("page buffer[%i] is not greater 0: %i", i, page->buffer[j]);
-                    return;
-                }
-            }
-        }
-
-    }
-    */
-
-    assertOK(OscilloscopeStop(&oscilloscope));
-
-    ok();
+    test_oscilloscope_measurement();
 }
