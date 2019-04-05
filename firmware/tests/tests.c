@@ -125,7 +125,7 @@ void
 tests(void)
 {
     DEBUG_PRINT("BEGIN tests");
-
+    /*
     test_wait();
 
     test_log_seq();
@@ -139,6 +139,8 @@ tests(void)
     test_oscilloscope_double_start();
     test_oscilloscope_double_stop();
     test_oscilloscope_state_error();
+    */
+    test_oscilloscope();
 
     DEBUG_PRINT("END tests");
 }
