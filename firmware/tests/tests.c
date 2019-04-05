@@ -107,14 +107,14 @@ test_logger_double_stop(void)
 void
 test_logger_state_error(void)
 {
+    tError err = OK;
     test();
 
     adc_group.lock = true;
-    assertError(LoggerStart(&logger, 1000), STATE_ERROR);
-    // it does not continue if assert fails and leaves the ADC locked
-    // refactor it? BEGIN(); ... END(); and it uses __fail or something?
-    adc_group.lock = false;
+    err = LoggerStart(&logger, 1000);
+    adc_group.lock = false; // reset lock even if the assertion fails
 
+    assertError(err, STATE_ERROR);
     ok();
 }
 
