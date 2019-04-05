@@ -55,6 +55,8 @@ extern uint32_t __STACK_TOP;
 //
 //*****************************************************************************
 extern void Timer0AHandler();
+extern void ADC0SS0Handler();
+extern void ADC1SS0Handler();
 extern void ADC0SS3Handler();
 extern void ADC1SS3Handler();
 
@@ -99,7 +101,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 1
     IntDefaultHandler,                      // PWM Generator 2
     IntDefaultHandler,                      // Quadrature Encoder 0
-    IntDefaultHandler,                      // ADC Sequence 0
+    ADC0SS0Handler,                         // ADC Sequence 0
     IntDefaultHandler,                      // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
     ADC0SS3Handler,                         // ADC Sequence 3
@@ -133,7 +135,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
     IntDefaultHandler,                      // uDMA Error
-    IntDefaultHandler,                      // ADC1 Sequence 0
+    ADC1SS0Handler,                         // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
     ADC1SS3Handler,                         // ADC1 Sequence 3

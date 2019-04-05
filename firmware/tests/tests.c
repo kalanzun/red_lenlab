@@ -13,6 +13,8 @@
 #include "logger.h"
 #include "microtest.h"
 
+#include "test_oscilloscope.h"
+
 
 void
 test_wait(void)
@@ -129,12 +131,14 @@ tests(void)
     test_log_seq();
 
     test_logger_lock();
-
     test_logger_double_start();
-
     test_logger_double_stop();
-
     test_logger_state_error();
+
+    test_oscilloscope_lock();
+    test_oscilloscope_double_start();
+    test_oscilloscope_double_stop();
+    test_oscilloscope_state_error();
 
     DEBUG_PRINT("END tests");
 }

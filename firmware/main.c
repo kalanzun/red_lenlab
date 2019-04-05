@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "inc/hw_memmap.h"
+#include "driverlib/debug.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
@@ -17,8 +18,9 @@
 #include "tests/tests.h"
 #include "adc.h"
 #include "debug.h"
-#include "logger.h"
 #include "int_timer.h"
+#include "logger.h"
+#include "oscilloscope.h"
 
 
 //*****************************************************************************
@@ -162,6 +164,7 @@ ConfigureuDMA(void)
 tADCGroup adc_group;
 tIntTimer int_timer;
 tLogger logger;
+tOscilloscope oscilloscope;
 
 
 //*****************************************************************************
@@ -218,6 +221,11 @@ int main(void)
     // Module logger
     //
     LoggerInit(&logger, &adc_group);
+
+    //
+    // Module oscilloscope
+    //
+    OscilloscopeInit(&oscilloscope, &adc_group);
 
     //
     // Run tests
