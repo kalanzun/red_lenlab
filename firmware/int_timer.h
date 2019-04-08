@@ -13,8 +13,9 @@
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
 #include "driverlib/interrupt.h"
-#include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
+
+#include "clock.h"
 
 
 typedef struct IntTimer {
@@ -45,7 +46,7 @@ IntTimerStart(tIntTimer *self, uint16_t interval)
 {
     // interval in ms
     self->ready = 0;
-    TimerLoadSet64(self->base, (uint64_t) interval * SysCtlClockGet() / 1000);
+    TimerLoadSet64(self->base, (uint64_t) interval * clock.cycles_per_ms);
     TimerEnable(self->base, self->timer);
 }
 

@@ -18,6 +18,7 @@
 #include "tests/tests.h"
 #include "adc.h"
 #include "debug.h"
+#include "clock.h"
 #include "int_timer.h"
 #include "logger.h"
 #include "memory.h"
@@ -162,6 +163,7 @@ ConfigureuDMA(void)
 // Modules
 //
 //*****************************************************************************
+tClock clock;
 tIntTimer int_timer;
 tMemory memory;
 tADCGroup adc_group;
@@ -179,14 +181,12 @@ int main(void)
     //
     // System Clock 80 MHz
     //
-    SysCtlClockSet(
-    SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
     //
-    // Enable systick for timing
+    // clock module
     //
-    SysTickPeriodSet(SysCtlClockGet() / 10); // 100ms (the register is only 32 bits)
-    SysTickEnable();
+    ClockInit(&clock);
 
     //
     // Configure peripherals
@@ -202,7 +202,7 @@ int main(void)
     // Print a welcome message
     //
     DEBUG_PRINT("Red Firmware TDD");
-    DEBUG_PRINT("Tiva C Series @ %u MHz", SysCtlClockGet() / 1000000);
+    DEBUG_PRINT("Tiva C Series @ %u MHz", clock.cycles_per_us);
 
     //
     // Configure uDMA

@@ -12,8 +12,8 @@
 
 #include "inc/hw_memmap.h"
 #include "driverlib/timer.h"
-#include "driverlib/sysctl.h"
 
+#include "clock.h"
 #include "debug.h"
 #include "error.h"
 
@@ -27,15 +27,15 @@ typedef struct ADCTimer {
 
 
 inline void
-ADCTimerSetInterval(tADCTimer *self, uint16_t interval)
+ADCTimerSetInterval(tADCTimer *self, uint32_t interval)
 {
-    // interval in ms
-    TimerLoadSet64(self->base, (uint64_t) interval * (SysCtlClockGet() / 1000));
+    // interval in us
+    TimerLoadSet64(self->base, (uint64_t) interval * clock.cycles_per_us);
 }
 
 
 inline void
-ADCTimerStart(tADCTimer *self, uint16_t interval)
+ADCTimerStart(tADCTimer *self, uint32_t interval)
 {
     ADCTimerSetInterval(self, interval);
     TimerEnable(self->base, self->timer);
