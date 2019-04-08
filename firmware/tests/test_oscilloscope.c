@@ -70,7 +70,7 @@ test_oscilloscope_double_stop(void)
 
 
 void
-test_oscilloscope_state_error(void)
+test_oscilloscope_adc_error(void)
 {
     test();
 
@@ -150,7 +150,7 @@ test_oscilloscope()
     test_oscilloscope_lock();
     test_oscilloscope_double_start();
     test_oscilloscope_double_stop();
-    test_oscilloscope_state_error();
+    test_oscilloscope_adc_error();
     test_oscilloscope_memory_error();
     test_oscilloscope_measurement();
 }

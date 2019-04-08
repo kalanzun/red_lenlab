@@ -79,7 +79,7 @@ test_logger_double_stop(void)
 
 
 void
-test_logger_state_error(void)
+test_logger_adc_error(void)
 {
     test();
 
@@ -98,5 +98,5 @@ test_logger()
     test_logger_lock();
     test_logger_double_start();
     test_logger_double_stop();
-    test_logger_state_error();
+    test_logger_adc_error();
 }

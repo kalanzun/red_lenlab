@@ -23,6 +23,7 @@
 #include "logger.h"
 #include "memory.h"
 #include "oscilloscope.h"
+#include "trigger.h"
 
 
 //*****************************************************************************
@@ -170,6 +171,7 @@ tADCGroup adc_group;
 tLogger logger;
 tOscSeqGroup osc_seq_group;
 tOscilloscope oscilloscope;
+tTrigger trigger;
 
 
 //*****************************************************************************
@@ -239,6 +241,11 @@ int main(void)
     // oscilloscope module
     //
     OscilloscopeInit(&oscilloscope, &memory, &osc_seq_group);
+
+    //
+    // trigger module
+    //
+    TriggerInit(&trigger, &memory, &osc_seq_group);
 
     //
     // Run tests
