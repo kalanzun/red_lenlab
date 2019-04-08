@@ -7,12 +7,6 @@
 #define RING_H_
 
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "debug.h"
-
-
 #define PAGE_LENGTH 256
 
 

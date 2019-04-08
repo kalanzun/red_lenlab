@@ -11,6 +11,7 @@ typedef enum Error {
     OK,
     LOCK_ERROR,
     STATE_ERROR,
+    MEMORY_ERROR,
     NUM_ERRORS
 } tError;
 

@@ -12,14 +12,12 @@
 
 
 typedef struct Oscilloscope {
-
-    tMemory *memory;
-
-    tADCGroup *adc_group;
     tOscSeqGroup seq_group;
 
-    unsigned char lock;
+    tMemory *memory;
+    tADCGroup *adc_group;
 
+    bool lock;
 } tOscilloscope;
 
 

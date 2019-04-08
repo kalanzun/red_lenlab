@@ -7,9 +7,6 @@
 #define ADC_TIMER_H_
 
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "inc/hw_memmap.h"
 #include "driverlib/timer.h"
 

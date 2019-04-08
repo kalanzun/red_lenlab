@@ -36,7 +36,7 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 
     if (self->adc_group->lock) return STATE_ERROR;
 
-    if (self->memory->lock) return STATE_ERROR;
+    if (self->memory->lock) return MEMORY_ERROR;
 
     MemoryLock(self->memory);
 
@@ -116,11 +116,10 @@ OscilloscopeMain(tOscilloscope *self)
 void
 OscilloscopeInit(tOscilloscope *self, tMemory *memory, tADCGroup *adc_group)
 {
-    self->memory = memory;
-
-    self->adc_group = adc_group;
-
     OscSeqGroupInit(&self->seq_group, adc_group);
+
+    self->memory = memory;
+    self->adc_group = adc_group;
 
     self->lock = 0;
 }

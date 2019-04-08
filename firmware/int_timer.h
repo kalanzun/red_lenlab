@@ -7,9 +7,6 @@
 #define INT_TIMER_H_
 
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
 #include "driverlib/interrupt.h"
@@ -42,7 +39,7 @@ IntTimerIntHandler(tIntTimer *self)
 
 
 inline void
-IntTimerStart(tIntTimer *self, uint16_t interval)
+IntTimerStart(tIntTimer *self, uint32_t interval)
 {
     // interval in ms
     self->ready = 0;
@@ -59,7 +56,7 @@ IntTimerStop(tIntTimer *self)
 
 
 inline void
-IntTimerWait(tIntTimer *self, uint16_t interval)
+IntTimerWait(tIntTimer *self, uint32_t interval)
 {
     IntTimerStart(self, interval);
     while (!self->ready) {};
@@ -91,7 +88,7 @@ IntTimerInit(tIntTimer *self)
 
 
 inline void
-wait(uint16_t interval)
+wait(uint32_t interval)
 {
     // interval in ms
     IntTimerWait(&int_timer, interval);
