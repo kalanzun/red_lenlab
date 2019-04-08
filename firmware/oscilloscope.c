@@ -36,16 +36,20 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 
     if (self->adc_group->lock) return STATE_ERROR;
 
-    ADCGroupSetHardwareOversample(self->adc_group, samplerate);
+    if (self->memory->lock) return STATE_ERROR;
 
-    // 2 rings of 10 pages each
-    OscSeqGroupAllocate(&self->seq_group, memory, 10);
-
-    OscSeqGroupEnable(&self->seq_group);
+    MemoryLock(self->memory);
 
     ADCGroupLock(self->adc_group);
 
     self->lock = 1;
+
+    ADCGroupSetHardwareOversample(self->adc_group, samplerate);
+
+    // 2 rings of 10 pages each
+    OscSeqGroupAllocate(&self->seq_group, self->memory->pages, 10);
+
+    OscSeqGroupEnable(&self->seq_group);
 
     return OK;
 }
@@ -59,6 +63,8 @@ OscilloscopeStop(tOscilloscope *self)
     self->lock = 0;
 
     ADCGroupUnlock(self->adc_group);
+
+    MemoryUnlock(self->memory);
 
     return OK;
 }
@@ -108,8 +114,10 @@ OscilloscopeMain(tOscilloscope *self)
 
 
 void
-OscilloscopeInit(tOscilloscope *self, tADCGroup *adc_group)
+OscilloscopeInit(tOscilloscope *self, tMemory *memory, tADCGroup *adc_group)
 {
+    self->memory = memory;
+
     self->adc_group = adc_group;
 
     OscSeqGroupInit(&self->seq_group, adc_group);

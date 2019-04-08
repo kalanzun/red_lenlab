@@ -162,10 +162,9 @@ ConfigureuDMA(void)
 // Modules
 //
 //*****************************************************************************
-tPage memory[MEMORY_LENGTH];
-
-tADCGroup adc_group;
 tIntTimer int_timer;
+tMemory memory;
+tADCGroup adc_group;
 tLogger logger;
 tOscilloscope oscilloscope;
 
@@ -211,24 +210,29 @@ int main(void)
     ConfigureuDMA();
 
     //
-    // Module int_timer
+    // int_timer module
     //
     IntTimerInit(&int_timer);
 
     //
-    // Module adc_group
+    // memory module
+    //
+    MemoryInit(&memory);
+
+    //
+    // adc_group module
     //
     ADCGroupInit(&adc_group);
 
     //
-    // Module logger
+    // logger module
     //
     LoggerInit(&logger, &adc_group);
 
     //
-    // Module oscilloscope
+    // oscilloscope module
     //
-    OscilloscopeInit(&oscilloscope, &adc_group);
+    OscilloscopeInit(&oscilloscope, &memory, &adc_group);
 
     //
     // Run tests

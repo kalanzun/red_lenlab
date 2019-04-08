@@ -20,7 +20,7 @@ test_ring_empty()
     tRing ring;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
 
     assert(RingEmpty(&ring));
     assert(!RingContent(&ring));
@@ -36,7 +36,7 @@ test_ring_content()
     tRing ring;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
     RingAcquire(&ring);
     assert(!RingEmpty(&ring));
     assert(!RingContent(&ring));
@@ -58,7 +58,7 @@ test_ring_full()
     tRing ring;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
     for (i = 0; i < MEMORY_LENGTH; i++) {
         RingAcquire(&ring);
         RingWrite(&ring);
@@ -78,7 +78,7 @@ test_ring_read()
     tRing ring;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
     RingAcquire(&ring);
     RingWrite(&ring);
 
@@ -104,7 +104,7 @@ test_ring_iter()
     tRingIter iter;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
     RingAcquire(&ring);
     RingWrite(&ring);
 
@@ -129,7 +129,7 @@ test_ring_fill_up()
     tRing ring;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
     for (i = 0; !RingFull(&ring); i++) {
         RingAcquire(&ring);
         RingWrite(&ring);
@@ -155,7 +155,7 @@ test_ring_wrap_fill_up()
     tRing ring;
     test();
 
-    RingAllocate(&ring, memory, MEMORY_LENGTH);
+    RingAllocate(&ring, memory.pages, MEMORY_LENGTH);
 
     for (i = 0; i < MEMORY_LENGTH / 2; i++) {
         RingAcquire(&ring);

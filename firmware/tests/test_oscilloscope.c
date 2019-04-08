@@ -86,7 +86,7 @@ test_oscilloscope_measurement()
 
     for (i = 0; i < MEMORY_LENGTH; i++) {
         for (j = 0; j < PAGE_LENGTH; j++) {
-            memory[i].buffer[j] = 0xFFFFFFFF;
+            memory.pages[i].buffer[j] = 0xFFFFFFFF;
         }
     }
 

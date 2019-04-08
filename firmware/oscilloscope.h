@@ -13,6 +13,8 @@
 
 typedef struct Oscilloscope {
 
+    tMemory *memory;
+
     tADCGroup *adc_group;
     tOscSeqGroup seq_group;
 
@@ -30,7 +32,7 @@ tError OscilloscopeStop(tOscilloscope *self);
 
 void OscilloscopeMain(tOscilloscope *self);
 
-void OscilloscopeInit(tOscilloscope *self, tADCGroup *adc_group);
+void OscilloscopeInit(tOscilloscope *self, tMemory *memory, tADCGroup *adc_group);
 
 
 #endif /* OSCILLOSCOPE_H_ */
