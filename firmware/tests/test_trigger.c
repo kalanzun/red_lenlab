@@ -84,8 +84,9 @@ test_trigger_measurement()
     test();
 
     for (i = 0; i < MEMORY_LENGTH; i++) {
-        buffer = (int8_t *) memory.pages + i;
-        for (j = 0; j < 4 * PAGE_LENGTH; j++) {
+        memory.pages[i].buffer[0] = 0xFFFFFFFF;
+        buffer = (int8_t *) memory.pages[i].buffer;
+        for (j = 4; j < 4 * PAGE_LENGTH; j++) {
             buffer[j] = -128;
         }
     }
@@ -96,11 +97,23 @@ test_trigger_measurement()
 
     for (RingIterInit(&iter, &trigger.ring); iter.content; RingIterNext(&iter)) {
         page = RingIterGet(&iter);
-        buffer = (int8_t *) (page->buffer + 3);
+        // head
+        if (!(page->buffer[0] == 0xFFFFFFFF)) {
+            fail("head (page[%i], (uint32_t *) buffer[0])", iter.read);
+            return;
+        }
+        // alignment
+        buffer = (int8_t *) (page->buffer);
+        for (j = 4; j < 6; j++) {
+            if (buffer[j] != -128) {
+                fail("alignment (page[%i], (uint8_t *) buffer[%i])", iter.read, j);
+                return;
+            }
+        }
         // measurement values
-        for (j = 2; j < 2*OSCILLOSCOPE_SAMPLES; j++) {
-            if (buffer[j] == -128) {
-                fail("value (page[%i], buffer[%i])", iter.read, j);
+        for (j = 0; j < 2 * OSCILLOSCOPE_SAMPLES; j++) {
+            if (buffer[j + 6] == -128) {
+                fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j + 6);
                 return;
             }
         }

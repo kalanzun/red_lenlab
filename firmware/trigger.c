@@ -9,7 +9,7 @@
 #include "trigger.h"
 
 
-#define TRIGGER_OFFSET 3
+#define TRIGGER_OFFSET 1
 
 
 tError

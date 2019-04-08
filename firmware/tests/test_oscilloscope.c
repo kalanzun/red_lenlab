@@ -25,7 +25,7 @@ test_oscilloscope_lock(void)
     assert(memory.lock == true);
 
     // wait for the measurement to finish
-    while (!OscSeqGroupReady(&oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
     assert(oscilloscope.lock == false);
@@ -45,7 +45,7 @@ test_oscilloscope_double_start(void)
     assert(OscilloscopeStart(&oscilloscope, 1) == LOCK_ERROR);
 
     // wait for the measurement to finish
-    while (!OscSeqGroupReady(&oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
 
@@ -60,7 +60,7 @@ test_oscilloscope_double_stop(void)
     assert(OscilloscopeStart(&oscilloscope, 1) == OK);
 
     // wait for the measurement to finish
-    while (!OscSeqGroupReady(&oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
     assert(OscilloscopeStop(&oscilloscope) == LOCK_ERROR);
@@ -103,7 +103,9 @@ test_oscilloscope_measurement()
 
     tRing *self;
     tPage *page;
-    uint16_t *value;
+
+    uint8_t *byte_buffer;
+    uint16_t *short_buffer;
 
     test();
 
@@ -123,19 +125,18 @@ test_oscilloscope_measurement()
         for (RingIterInit(&iter, self); iter.content; RingIterNext(&iter)) {
             page = RingIterGet(&iter);
             // head
-            for (j = 0; j < 6; j++) {
-                if (page->buffer[j] != 0xFFFFFFFF)
-                    fail("head (adc[%i], page[%i], buffer[%i])", i, iter.read, j);
-            }
+            if (page->buffer[0] != 0xFFFFFFFF)
+                fail("head (adc[%i], page[%i], (uint32_t *) buffer[0])", i, iter.read);
             // look for alignment error
             // if the alignment is off, uDMA starts at a later address
-            if (*(uint8_t *) (page->buffer + 6) == 0xFF)
-                fail("alignment (adc[%i], page[%i])", i, iter.read);
+            byte_buffer = (uint8_t *) page->buffer;
+            if (byte_buffer[4] == 0xFF)
+                fail("alignment (adc[%i], page[%i], (uint8_t *) buffer[4]", i, iter.read);
             // measurement values
+            short_buffer = (uint16_t *) page->buffer;
             for (j = 0; j < OSCILLOSCOPE_SAMPLES; j++) {
-                value = (uint16_t *) (page->buffer + 6) + j;
-                if (*value == 0xFFFF)
-                    fail("value (adc[%i], page[%i], buffer[%i])", i, iter.read, j);
+                if (short_buffer[j + 2] == 0xFFFF)
+                    fail("value (adc[%i], page[%i], (uint16_t *) buffer[%i])", i, iter.read, j + 2);
             }
         }
     }
