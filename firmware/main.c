@@ -168,6 +168,7 @@ tIntTimer int_timer;
 tMemory memory;
 tADCGroup adc_group;
 tLogger logger;
+tOscSeqGroup osc_seq_group;
 tOscilloscope oscilloscope;
 
 
@@ -230,9 +231,14 @@ int main(void)
     LoggerInit(&logger, &adc_group);
 
     //
+    // osc_seq_group module
+    //
+    OscSeqGroupInit(&osc_seq_group, &adc_group);
+
+    //
     // oscilloscope module
     //
-    OscilloscopeInit(&oscilloscope, &memory, &adc_group);
+    OscilloscopeInit(&oscilloscope, &memory, &osc_seq_group);
 
     //
     // Run tests

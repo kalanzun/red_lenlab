@@ -14,7 +14,7 @@
 void
 ADC0SS0Handler(void)
 {
-    tOscSeq *self = &oscilloscope.seq_group.osc_seq[0];
+    tOscSeq *self = &oscilloscope.seq_group->osc_seq[0];
 
     OscSeqIntHandler(self);
 }
@@ -23,7 +23,7 @@ ADC0SS0Handler(void)
 void
 ADC1SS0Handler(void)
 {
-    tOscSeq *self = &oscilloscope.seq_group.osc_seq[1];
+    tOscSeq *self = &oscilloscope.seq_group->osc_seq[1];
 
     OscSeqIntHandler(self);
 }
@@ -34,22 +34,22 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
     if (self->lock) return LOCK_ERROR;
 
-    if (self->adc_group->lock) return ADC_ERROR;
+    if (self->seq_group->adc_group->lock) return ADC_ERROR;
 
     if (self->memory->lock) return MEMORY_ERROR;
 
     MemoryLock(self->memory);
 
-    ADCGroupLock(self->adc_group);
+    ADCGroupLock(self->seq_group->adc_group);
 
     self->lock = 1;
 
-    ADCGroupSetHardwareOversample(self->adc_group, samplerate);
+    ADCGroupSetHardwareOversample(self->seq_group->adc_group, samplerate);
 
     // 2 rings of 10 pages each
-    OscSeqGroupAllocate(&self->seq_group, self->memory->pages, 10);
+    OscSeqGroupAllocate(self->seq_group, self->memory->pages, 10);
 
-    OscSeqGroupEnable(&self->seq_group);
+    OscSeqGroupEnable(self->seq_group);
 
     return OK;
 }
@@ -62,7 +62,7 @@ OscilloscopeStop(tOscilloscope *self)
 
     self->lock = 0;
 
-    ADCGroupUnlock(self->adc_group);
+    ADCGroupUnlock(self->seq_group->adc_group);
 
     MemoryUnlock(self->memory);
 
@@ -73,6 +73,7 @@ OscilloscopeStop(tOscilloscope *self)
 void
 OscilloscopeMain(tOscilloscope *self)
 {
+    // TODO not tested yet
     int i;
     tRing *ring;
     tPage *page;
@@ -80,15 +81,11 @@ OscilloscopeMain(tOscilloscope *self)
 
     if (!self->lock) return;
 
-    if (OscSeqGroupReady(&self->seq_group)) {
-
-        ADCTimerStop(&self->adc_group->timer); // DMA disables itself, the timer is left running
-
-        //DEBUG_PRINT("OscilloscopeData\n");
+    if (OscSeqGroupReady(self->seq_group)) {
 
         FOREACH_ADC {
 
-            ring = &self->seq_group.osc_seq[i].ring;
+            ring = &self->seq_group->osc_seq[i].ring;
 
             for (RingIterInit(&iter, ring); iter.content; RingIterNext(&iter))
             {
@@ -107,19 +104,17 @@ OscilloscopeMain(tOscilloscope *self)
 
         //USBDeviceSendInterleaved(&self->seq_group.osc_seq[0].ring, &self->seq_group.osc_seq[1].ring);
 
-        OscilloscopeStop(self);
+        OscilloscopeStop(self); // TODO memory release should wait until USB is done?
 
     }
 }
 
 
 void
-OscilloscopeInit(tOscilloscope *self, tMemory *memory, tADCGroup *adc_group)
+OscilloscopeInit(tOscilloscope *self, tMemory *memory, tOscSeqGroup *seq_group)
 {
-    OscSeqGroupInit(&self->seq_group, adc_group);
-
     self->memory = memory;
-    self->adc_group = adc_group;
+    self->seq_group = seq_group;
 
     self->lock = 0;
 }

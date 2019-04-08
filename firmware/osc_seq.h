@@ -13,6 +13,7 @@
 #include "driverlib/debug.h"
 
 
+// number of samples and offset in a memory page
 #define OSCILLOSCOPE_SAMPLES 500
 #define OSCILLOSCOPE_OFFSET 6
 
@@ -26,8 +27,8 @@ typedef struct OscSeq {
     uint32_t priority;
     uint32_t udma_channel;
 
-    volatile unsigned char ping_enable;
-    volatile unsigned char pong_enable;
+    volatile bool ping_enable;
+    volatile bool pong_enable;
 
     tRing ring;
 
@@ -70,22 +71,22 @@ OscSeqPingPong(tOscSeq *self)
 
     if (!self->ping_enable) {
 
-        ASSERT(self->pong_enable); // Pong l�uft noch, sonst sind wir hier zu sp�t
+        ASSERT(self->pong_enable); // pong still runs, else we are too late here
 
         uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_PINGPONG,
-            (void *)(self->adc->base + ADC_O_SSFIFO0),
+            (void *)(self->adc->base + ADC_O_SSFIFO0), // sequence_num == 0 only
             page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
 
         self->ping_enable = 1;
     }
     if (!self->pong_enable) {
 
-        ASSERT(self->ping_enable); // Ping l�uft noch, sonst sind wir hier zu sp�t
+        ASSERT(self->ping_enable); // ping still runs, else we are too late here
 
         uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
             UDMA_MODE_PINGPONG,
-            (void *)(self->adc->base + ADC_O_SSFIFO0),
+            (void *)(self->adc->base + ADC_O_SSFIFO0), // sequence_num == 0 only
             page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
 
         self->pong_enable = 1;
@@ -130,7 +131,7 @@ OscSeqIntHandler(tOscSeq *self)
         }
 
         // Automatic ping pong if the ring is not full.
-        if (!RingFull(&self->ring)) {
+        else if (!RingFull(&self->ring)) {
             OscSeqPingPong(self);
         }
 
@@ -194,8 +195,6 @@ OscSeqGroupRingContent(tOscSeqGroup *self)
 inline void
 OscSeqEnable(tOscSeq *self)
 {
-    tPage *page;
-
     // Both ADC shall run exactly in sync
     // - A common timer triggers both ADCs
     // - The timer is disabled before a new measurement starts
@@ -215,30 +214,22 @@ OscSeqEnable(tOscSeq *self)
         UDMA_SIZE_16 | UDMA_SRC_INC_NONE |
         UDMA_DST_INC_16 | UDMA_ARB_4);
 
-    page = RingAcquire(&self->ring);
-
-    uDMAChannelTransferSet(self->udma_channel | UDMA_PRI_SELECT,
-        UDMA_MODE_PINGPONG,
-        (void *)(self->adc->base + ADC_O_SSFIFO0),// sequence_num == 0 only
-        page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
-
-    self->ping_enable = 1;
-
-    page = RingAcquire(&self->ring);
-
-    uDMAChannelTransferSet(self->udma_channel | UDMA_ALT_SELECT,
-        UDMA_MODE_PINGPONG,
-        (void *)(self->adc->base + ADC_O_SSFIFO0), // sequence_num == 0 only
-        page->buffer + OSCILLOSCOPE_OFFSET, OSCILLOSCOPE_SAMPLES);
-
+    // configure ping
+    self->ping_enable = 0;
     self->pong_enable = 1;
+    OscSeqPingPong(self);
+
+    // configure pong
+    self->pong_enable = 0;
+    OscSeqPingPong(self);
+
+    ASSERT(self->ping_enable);
+    ASSERT(self->pong_enable);
 
     ADCSequenceEnable(self->adc->base, self->sequence_num);
     ADCIntDisable(self->adc->base, self->sequence_num);
     uDMAChannelEnable(self->udma_channel);
     IntEnable(self->sequence_int);
-
-    //DEBUG_PRINT("OscSeqEnable\n");
 }
 
 

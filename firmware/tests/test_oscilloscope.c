@@ -114,10 +114,10 @@ test_oscilloscope_measurement()
     }
 
     OscilloscopeStart(&oscilloscope, 1);
-    while (!OscSeqGroupReady(&oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
 
     FOREACH_ADC {
-        self = &oscilloscope.seq_group.osc_seq[i].ring;
+        self = &oscilloscope.seq_group->osc_seq[i].ring;
         assert(RingFull(self));
 
         for (RingIterInit(&iter, self); iter.content; RingIterNext(&iter)) {
