@@ -34,7 +34,7 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
     if (self->lock) return LOCK_ERROR;
 
-    if (self->adc_group->lock) return STATE_ERROR;
+    if (self->adc_group->lock) return ADC_ERROR;
 
     if (self->memory->lock) return MEMORY_ERROR;
 

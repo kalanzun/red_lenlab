@@ -75,7 +75,7 @@ test_oscilloscope_state_error(void)
     test();
 
     adc_group.lock = true;
-    assert(OscilloscopeStart(&oscilloscope, 1000) == STATE_ERROR);
+    assert(OscilloscopeStart(&oscilloscope, 1000) == ADC_ERROR);
     adc_group.lock = false;
 
     ok();

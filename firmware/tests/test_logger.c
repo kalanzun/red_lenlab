@@ -84,7 +84,7 @@ test_logger_state_error(void)
     test();
 
     adc_group.lock = true;
-    assert(LoggerStart(&logger, 1000) == STATE_ERROR);
+    assert(LoggerStart(&logger, 1000) == ADC_ERROR);
     adc_group.lock = false;
 
     ok();
