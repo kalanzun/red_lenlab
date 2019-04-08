@@ -7,7 +7,7 @@
 #define TESTS_TEST_OSCILLOSCOPE_H_
 
 
-void test_oscilloscope(void);
+void test_oscilloscope();
 
 
 #endif /* TESTS_TEST_OSCILLOSCOPE_H_ */

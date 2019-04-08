@@ -51,14 +51,14 @@ LogSeqEnable(tLogSeq *self)
 
 
 inline void
-LogSeqGroupEnable(tLogSeqGroup *self, uint16_t interval)
+LogSeqGroupEnable(tLogSeqGroup *self, uint32_t interval)
 {
     // interval in ms
 
     int i;
     FOREACH_ADC LogSeqEnable(&self->log_seq[i]);
 
-    ADCTimerStart(&self->adc_group->timer, interval);
+    ADCTimerStart(&self->adc_group->timer, interval*1000); // us
 }
 
 
