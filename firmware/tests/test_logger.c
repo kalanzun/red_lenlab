@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "test_logger.h"
+#include "tests/test_logger.h"
 
 #include "int_timer.h"
 #include "logger.h"

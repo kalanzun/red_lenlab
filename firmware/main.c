@@ -22,6 +22,8 @@
 #include "int_timer.h"
 #include "logger.h"
 #include "ring.h"
+#include "signal.h"
+#include "ssi.h"
 #include "oscilloscope.h"
 #include "trigger.h"
 
@@ -61,6 +63,8 @@ const uint32_t peripherals[] = {
 
     SYSCTL_PERIPH_ADC0,
     SYSCTL_PERIPH_ADC1,
+
+    SYSCTL_PERIPH_SSI0,
 
     SYSCTL_PERIPH_UDMA,
 };
@@ -172,6 +176,8 @@ tLogger logger;
 tOscSeqGroup osc_seq_group;
 tOscilloscope oscilloscope;
 tTrigger trigger;
+tSSI ssi;
+tSignal signal;
 
 
 //*****************************************************************************
@@ -246,6 +252,16 @@ int main(void)
     // trigger module
     //
     TriggerInit(&trigger);
+
+    //
+    // ssi module
+    //
+    SSIInit(&ssi);
+
+    //
+    // signal module
+    //
+    SignalInit(&signal);
 
     //
     // Run tests

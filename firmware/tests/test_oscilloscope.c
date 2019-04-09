@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "test_oscilloscope.h"
+#include "tests/test_oscilloscope.h"
 
 #include "microtest.h"
 #include "oscilloscope.h"

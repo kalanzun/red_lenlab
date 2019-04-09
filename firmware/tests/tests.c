@@ -15,6 +15,7 @@
 #include "tests/test_oscilloscope.h"
 #include "tests/test_ring.h"
 #include "tests/test_trigger.h"
+#include "tests/test_signal.h"
 
 
 void
@@ -50,6 +51,7 @@ tests(void)
     test_ring();
     test_oscilloscope();
     test_trigger();
+    test_signal();
 
     DEBUG_PRINT("END tests");
 }
