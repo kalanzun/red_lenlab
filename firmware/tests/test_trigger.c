@@ -22,11 +22,11 @@ test_trigger_lock()
     assert(TriggerStart(&trigger, 1) == OK);
     assert(trigger.lock == true);
     assert(adc_group.lock == true);
-    assert(memory.lock == true);
+    assert(memory.acquire);
     assert(TriggerStop(&trigger) == OK);
     assert(trigger.lock == false);
     assert(adc_group.lock == false);
-    assert(memory.lock == false);
+    assert(memory.acquire == 0);
 
     ok();
 }

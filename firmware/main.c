@@ -21,7 +21,7 @@
 #include "clock.h"
 #include "int_timer.h"
 #include "logger.h"
-#include "memory.h"
+#include "ring.h"
 #include "oscilloscope.h"
 #include "trigger.h"
 
@@ -240,12 +240,12 @@ int main(void)
     //
     // oscilloscope module
     //
-    OscilloscopeInit(&oscilloscope, &memory, &osc_seq_group);
+    OscilloscopeInit(&oscilloscope, &osc_seq_group);
 
     //
     // trigger module
     //
-    TriggerInit(&trigger, &memory, &osc_seq_group);
+    TriggerInit(&trigger, &osc_seq_group);
 
     //
     // Run tests

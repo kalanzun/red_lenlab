@@ -142,11 +142,11 @@ OscSeqIntHandler(tOscSeq *self)
 
 
 inline void
-OscSeqGroupAllocate(tOscSeqGroup *self, tPage *pages, uint32_t length)
+OscSeqGroupAllocate(tOscSeqGroup *self, uint32_t length)
 {
     int i;
 
-    FOREACH_ADC RingAllocate(&self->osc_seq[i].ring, pages + i*length, length);
+    FOREACH_ADC RingAllocate(&self->osc_seq[i].ring, length);
 }
 
 

@@ -7,6 +7,11 @@
 #define RING_H_
 
 
+#include "driverlib/debug.h"
+
+
+#define MEMORY_LENGTH 22
+
 #define PAGE_LENGTH 256
 
 
@@ -14,6 +19,15 @@ typedef struct Page {
     // 4 bytes alignment for uDMA
     uint32_t buffer[PAGE_LENGTH];
 } tPage;
+
+
+typedef struct Memory {
+    tPage pages[MEMORY_LENGTH];
+    uint32_t acquire;
+} tMemory;
+
+
+extern tMemory memory;
 
 
 typedef struct Ring {
@@ -36,10 +50,35 @@ typedef struct RingIter {
 } tRingIter;
 
 
-inline void
-RingAllocate(tRing *self, tPage *pages, uint32_t length)
+inline tPage*
+MemoryAcquire(tMemory *self, uint32_t length)
 {
-    self->pages = pages;
+    ASSERT(self->acquire + length <= MEMORY_LENGTH);
+    tPage *page = self->pages + self->acquire;
+    self->acquire = self->acquire + length;
+    return page;
+}
+
+
+inline void
+MemoryRelease(tMemory *self)
+{
+    ASSERT(self->acquire);
+    self->acquire = 0;
+}
+
+
+inline void
+MemoryInit(tMemory *self)
+{
+    self->acquire = 0;
+}
+
+
+inline void
+RingAllocate(tRing *self, uint32_t length)
+{
+    self->pages = MemoryAcquire(&memory, length);
     self->length = length;
     self->acquire = 0;
     self->write = 0;

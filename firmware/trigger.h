@@ -7,7 +7,6 @@
 #define TRIGGER_H_
 
 
-#include "memory.h"
 #include "osc_seq.h"
 
 
@@ -16,7 +15,6 @@
 
 typedef struct Trigger {
 
-    tMemory *memory;
     tOscSeqGroup *seq_group;
 
     bool lock;
@@ -45,7 +43,7 @@ tError TriggerStop(tTrigger *self);
 
 void TriggerMain(tTrigger *self);
 
-void TriggerInit(tTrigger *self, tMemory *memory, tOscSeqGroup *seq_group);
+void TriggerInit(tTrigger *self, tOscSeqGroup *seq_group);
 
 
 #endif /* TRIGGER_H_ */

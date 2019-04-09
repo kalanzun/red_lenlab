@@ -21,11 +21,7 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
 
     if (self->seq_group->adc_group->lock) return ADC_ERROR;
 
-    if (self->memory->lock) return MEMORY_ERROR;
-
-    MemoryLock(self->memory);
-
-    ADCGroupLock(self->seq_group->adc_group);
+    if (memory.acquire) return MEMORY_ERROR;
 
     self->lock = 1;
 
@@ -39,6 +35,11 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
     self->count = 0;
     self->post_count = 0;
 
+    // 18 memory pages
+    RingAllocate(&self->ring, 18);
+
+    ADCGroupLock(self->seq_group->adc_group);
+
     ADCGroupSetHardwareOversample(self->seq_group->adc_group, samplerate);
 
     // TODO
@@ -47,11 +48,8 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
     // ODER: DMA h�rt automatisch auf und Main muss jeweils am Ende der Verarbeitung die Transaction programmieren
     // Wenn das ausreichend schnell passiert l�uft DMA weiter.
 
-    // 18 memory pages
-    RingAllocate(&self->ring, self->memory->pages, 18);
-
     // 2 rings of 2 memory pages each
-    OscSeqGroupAllocate(self->seq_group, self->memory->pages + 18, 2);
+    OscSeqGroupAllocate(self->seq_group, 2);
 
     OscSeqGroupEnable(self->seq_group);
 
@@ -68,7 +66,7 @@ TriggerStop(tTrigger *self)
 
     ADCGroupUnlock(self->seq_group->adc_group);
 
-    MemoryUnlock(self->memory);
+    MemoryRelease(&memory);
 
     return OK;
 }
@@ -196,9 +194,8 @@ TriggerMain(tTrigger *self)
 
 
 void
-TriggerInit(tTrigger *self, tMemory *memory, tOscSeqGroup *seq_group)
+TriggerInit(tTrigger *self, tOscSeqGroup *seq_group)
 {
-    self->memory = memory;
     self->seq_group = seq_group;
 
     self->lock = 0;

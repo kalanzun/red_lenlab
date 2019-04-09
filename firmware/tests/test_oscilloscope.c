@@ -8,7 +8,6 @@
 
 #include "test_oscilloscope.h"
 
-#include "memory.h"
 #include "microtest.h"
 #include "oscilloscope.h"
 
@@ -22,7 +21,7 @@ test_oscilloscope_lock(void)
     assert(OscilloscopeStart(&oscilloscope, 1) == OK);
     assert(oscilloscope.lock == true);
     assert(adc_group.lock == true);
-    assert(memory.lock == true);
+    assert(memory.acquire);
 
     // wait for the measurement to finish
     while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
@@ -30,7 +29,7 @@ test_oscilloscope_lock(void)
     assert(OscilloscopeStop(&oscilloscope) == OK);
     assert(oscilloscope.lock == false);
     assert(adc_group.lock == false);
-    assert(memory.lock == false);
+    assert(memory.acquire == 0);
 
     ok();
 }
@@ -87,9 +86,9 @@ test_oscilloscope_memory_error(void)
 {
     test();
 
-    memory.lock = true;
+    memory.acquire = 1;
     assert(OscilloscopeStart(&oscilloscope, 1000) == MEMORY_ERROR);
-    memory.lock = false;
+    memory.acquire = 0;
 
     ok();
 }

@@ -8,12 +8,10 @@
 
 
 #include "osc_seq.h"
-#include "memory.h"
 
 
 typedef struct Oscilloscope {
 
-    tMemory *memory;
     tOscSeqGroup *seq_group;
 
     bool lock;
@@ -30,7 +28,7 @@ tError OscilloscopeStop(tOscilloscope *self);
 
 void OscilloscopeMain(tOscilloscope *self);
 
-void OscilloscopeInit(tOscilloscope *self, tMemory *memory, tOscSeqGroup *seq_group);
+void OscilloscopeInit(tOscilloscope *self, tOscSeqGroup *seq_group);
 
 
 #endif /* OSCILLOSCOPE_H_ */
