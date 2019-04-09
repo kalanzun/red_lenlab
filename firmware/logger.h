@@ -13,7 +13,6 @@
 
 typedef struct Logger {
 
-    tADCGroup *adc_group;
     tLogSeqGroup seq_group;
 
     bool lock;
@@ -30,7 +29,7 @@ tError LoggerStart(tLogger *self, uint32_t interval);
 tError LoggerStop(tLogger *self);
 
 
-void LoggerInit(tLogger *self, tADCGroup *adc_group);
+void LoggerInit(tLogger *self);
 
 
 #endif /* LOGGER_H_ */

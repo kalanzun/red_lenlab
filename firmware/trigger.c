@@ -19,7 +19,7 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
 
     if (self->lock) return LOCK_ERROR;
 
-    if (self->seq_group->adc_group->lock) return ADC_ERROR;
+    if (adc_group.lock) return ADC_ERROR;
 
     if (memory.acquire) return MEMORY_ERROR;
 
@@ -38,9 +38,9 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
     // 18 memory pages
     RingAllocate(&self->ring, 18);
 
-    ADCGroupLock(self->seq_group->adc_group);
+    ADCGroupLock(&adc_group);
 
-    ADCGroupSetHardwareOversample(self->seq_group->adc_group, samplerate);
+    ADCGroupSetHardwareOversample(&adc_group, samplerate);
 
     // TODO
     // Ich brauche einen pingpong Modus. W�hrend pong den zweiten Puffer schreibt, verarbeitet Main den ersten Puffer
@@ -49,9 +49,9 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
     // Wenn das ausreichend schnell passiert l�uft DMA weiter.
 
     // 2 rings of 2 memory pages each
-    OscSeqGroupAllocate(self->seq_group, 2);
+    OscSeqGroupAllocate(&osc_seq_group, 2);
 
-    OscSeqGroupEnable(self->seq_group);
+    OscSeqGroupEnable(&osc_seq_group);
 
     return OK;
 }
@@ -64,7 +64,7 @@ TriggerStop(tTrigger *self)
 
     self->lock = 0;
 
-    ADCGroupUnlock(self->seq_group->adc_group);
+    ADCGroupUnlock(&adc_group);
 
     MemoryRelease(&memory);
 
@@ -103,10 +103,10 @@ TriggerMain(tTrigger *self)
 
     if (!self->lock) return;
 
-    if (!OscSeqGroupRingContent(self->seq_group)) return;
+    if (!OscSeqGroupRingContent(&osc_seq_group)) return;
 
-    adc_page0 = RingRead(&self->seq_group->osc_seq[0].ring);
-    adc_page1 = RingRead(&self->seq_group->osc_seq[1].ring);
+    adc_page0 = RingRead(&osc_seq_group.osc_seq[0].ring);
+    adc_page1 = RingRead(&osc_seq_group.osc_seq[1].ring);
 
     buffer0 = (uint16_t *) (adc_page0->buffer + OSCILLOSCOPE_OFFSET);
     buffer1 = (uint16_t *) (adc_page1->buffer + OSCILLOSCOPE_OFFSET);
@@ -165,8 +165,8 @@ TriggerMain(tTrigger *self)
         }
     }
 
-    OscSeqGroupRelease(self->seq_group); // RingRelease
-    OscSeqGroupPingPong(self->seq_group); // Reconfigure DMA
+    OscSeqGroupRelease(&osc_seq_group); // RingRelease
+    OscSeqGroupPingPong(&osc_seq_group); // Reconfigure DMA
 
     // trigger timeout
     if ((self->wait || self->active) && self->count == 100) {
@@ -182,7 +182,7 @@ TriggerMain(tTrigger *self)
 
         if (self->post_count == 9) { // half of 18
             //page->buffer[3] = 255; // mark this the last package
-            OscSeqGroupDisable(self->seq_group); // stop ping pong DMA
+            OscSeqGroupDisable(&osc_seq_group); // stop ping pong DMA
             //USBDeviceSend(&self->ring);
             TriggerStop(self); // TODO keep memory locked until usb is done
         }
@@ -194,9 +194,7 @@ TriggerMain(tTrigger *self)
 
 
 void
-TriggerInit(tTrigger *self, tOscSeqGroup *seq_group)
+TriggerInit(tTrigger *self)
 {
-    self->seq_group = seq_group;
-
     self->lock = 0;
 }

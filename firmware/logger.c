@@ -32,13 +32,13 @@ LoggerStart(tLogger *self, uint32_t interval)
 {
     if (self->lock) return LOCK_ERROR;
 
-    if (self->adc_group->lock) return ADC_ERROR;
+    if (adc_group.lock) return ADC_ERROR;
 
-    ADCGroupSetHardwareOversample(self->adc_group, 1);
+    ADCGroupSetHardwareOversample(&adc_group, 1);
 
     LogSeqGroupEnable(&self->seq_group, interval);
 
-    ADCGroupLock(self->adc_group);
+    ADCGroupLock(&adc_group);
 
     self->lock = true;
 
@@ -55,16 +55,14 @@ LoggerStop(tLogger *self)
 
     self->lock = false;
 
-    ADCGroupUnlock(self->adc_group);
+    ADCGroupUnlock(&adc_group);
 
     return OK;
 }
 
 
 void
-LoggerInit(tLogger *self, tADCGroup *adc_group)
+LoggerInit(tLogger *self)
 {
-    self->adc_group = adc_group;
-
-    LogSeqGroupInit(&self->seq_group, adc_group);
+    LogSeqGroupInit(&self->seq_group);
 }

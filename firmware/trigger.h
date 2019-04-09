@@ -15,8 +15,6 @@
 
 typedef struct Trigger {
 
-    tOscSeqGroup *seq_group;
-
     bool lock;
 
     bool trigger;
@@ -43,7 +41,7 @@ tError TriggerStop(tTrigger *self);
 
 void TriggerMain(tTrigger *self);
 
-void TriggerInit(tTrigger *self, tOscSeqGroup *seq_group);
+void TriggerInit(tTrigger *self);
 
 
 #endif /* TRIGGER_H_ */

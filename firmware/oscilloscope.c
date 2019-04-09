@@ -14,7 +14,7 @@
 void
 ADC0SS0Handler(void)
 {
-    tOscSeq *self = &oscilloscope.seq_group->osc_seq[0];
+    tOscSeq *self = &osc_seq_group.osc_seq[0];
 
     OscSeqIntHandler(self);
 }
@@ -23,7 +23,7 @@ ADC0SS0Handler(void)
 void
 ADC1SS0Handler(void)
 {
-    tOscSeq *self = &oscilloscope.seq_group->osc_seq[1];
+    tOscSeq *self = &osc_seq_group.osc_seq[1];
 
     OscSeqIntHandler(self);
 }
@@ -34,20 +34,20 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
     if (self->lock) return LOCK_ERROR;
 
-    if (self->seq_group->adc_group->lock) return ADC_ERROR;
+    if (adc_group.lock) return ADC_ERROR;
 
     if (memory.acquire) return MEMORY_ERROR;
 
     self->lock = 1;
 
-    ADCGroupLock(self->seq_group->adc_group);
+    ADCGroupLock(&adc_group);
 
-    ADCGroupSetHardwareOversample(self->seq_group->adc_group, samplerate);
+    ADCGroupSetHardwareOversample(&adc_group, samplerate);
 
     // 2 rings of 10 pages each (osc_seq want's an even number)
-    OscSeqGroupAllocate(self->seq_group, 10);
+    OscSeqGroupAllocate(&osc_seq_group, 10);
 
-    OscSeqGroupEnable(self->seq_group);
+    OscSeqGroupEnable(&osc_seq_group);
 
     return OK;
 }
@@ -60,7 +60,7 @@ OscilloscopeStop(tOscilloscope *self)
 
     self->lock = 0;
 
-    ADCGroupUnlock(self->seq_group->adc_group);
+    ADCGroupUnlock(&adc_group);
 
     MemoryRelease(&memory);
 
@@ -79,11 +79,11 @@ OscilloscopeMain(tOscilloscope *self)
 
     if (!self->lock) return;
 
-    if (OscSeqGroupReady(self->seq_group)) {
+    if (OscSeqGroupReady(&osc_seq_group)) {
 
         FOREACH_ADC {
 
-            ring = &self->seq_group->osc_seq[i].ring;
+            ring = &osc_seq_group.osc_seq[i].ring;
 
             for (RingIterInit(&iter, ring); iter.content; RingIterNext(&iter))
             {
@@ -109,9 +109,7 @@ OscilloscopeMain(tOscilloscope *self)
 
 
 void
-OscilloscopeInit(tOscilloscope *self, tOscSeqGroup *seq_group)
+OscilloscopeInit(tOscilloscope *self)
 {
-    self->seq_group = seq_group;
-
     self->lock = 0;
 }

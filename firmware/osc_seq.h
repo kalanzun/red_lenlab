@@ -39,9 +39,10 @@ typedef struct OscSeqGroup {
 
     tOscSeq osc_seq[ADC_GROUP_SIZE];
 
-    tADCGroup *adc_group;
-
 } tOscSeqGroup;
+
+
+extern tOscSeqGroup osc_seq_group;
 
 
 inline void
@@ -58,7 +59,7 @@ OscSeqGroupDisable(tOscSeqGroup *self)
 {
     int i;
 
-    ADCTimerStop(&self->adc_group->timer);
+    ADCTimerStop(&adc_group.timer);
 
     FOREACH_ADC OscSeqDisable(&self->osc_seq[i]);
 }
@@ -239,7 +240,7 @@ OscSeqGroupEnable(tOscSeqGroup *self)
     int i;
     FOREACH_ADC OscSeqEnable(&self->osc_seq[i]);
 
-    ADCTimerStart(&self->adc_group->timer, 1);
+    ADCTimerStart(&adc_group.timer, 1);
 }
 
 
@@ -265,9 +266,9 @@ ConfigureOscSeq(tOscSeq *self)
 
 
 inline void
-ConfigureOscSeq0(tOscSeq *self, tADCGroup *adc_group)
+ConfigureOscSeq0(tOscSeq *self)
 {
-    self->adc = &adc_group->adc[0];
+    self->adc = &adc_group.adc[0];
     self->sequence_int = INT_ADC0SS0;
     self->udma_channel = UDMA_CHANNEL_ADC0;
 
@@ -276,9 +277,9 @@ ConfigureOscSeq0(tOscSeq *self, tADCGroup *adc_group)
 
 
 inline void
-ConfigureOscSeq1(tOscSeq *self, tADCGroup *adc_group)
+ConfigureOscSeq1(tOscSeq *self)
 {
-    self->adc = &adc_group->adc[1];
+    self->adc = &adc_group.adc[1];
     self->sequence_int = INT_ADC1SS0;
     self->udma_channel = 24; // UDMA_CHANNEL_ADC1 is wrong?!
 
@@ -287,12 +288,10 @@ ConfigureOscSeq1(tOscSeq *self, tADCGroup *adc_group)
 
 
 inline void
-OscSeqGroupInit(tOscSeqGroup *self, tADCGroup *adc_group)
+OscSeqGroupInit(tOscSeqGroup *self)
 {
-    self->adc_group = adc_group;
-
-    ConfigureOscSeq0(&self->osc_seq[0], self->adc_group);
-    ConfigureOscSeq1(&self->osc_seq[1], self->adc_group);
+    ConfigureOscSeq0(&self->osc_seq[0]);
+    ConfigureOscSeq1(&self->osc_seq[1]);
 }
 
 #endif /* OSC_SEQ_H_ */

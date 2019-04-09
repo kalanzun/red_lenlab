@@ -27,8 +27,6 @@ typedef struct LogSeqGroup {
 
     tLogSeq log_seq[ADC_GROUP_SIZE];
 
-    tADCGroup *adc_group;
-
 } tLogSeqGroup;
 
 
@@ -58,7 +56,7 @@ LogSeqGroupEnable(tLogSeqGroup *self, uint32_t interval)
     int i;
     FOREACH_ADC LogSeqEnable(&self->log_seq[i]);
 
-    ADCTimerStart(&self->adc_group->timer, interval*1000); // us
+    ADCTimerStart(&adc_group.timer, interval*1000); // us
 }
 
 
@@ -76,7 +74,7 @@ LogSeqGroupDisable(tLogSeqGroup *self)
 {
     int i;
 
-    ADCTimerStop(&self->adc_group->timer);
+    ADCTimerStop(&adc_group.timer);
 
     FOREACH_ADC LogSeqDisable(&self->log_seq[i]);
 }
@@ -97,12 +95,10 @@ ConfigureLogSeq(tLogSeq *self, tADC *adc, uint32_t sequence_int)
 
 
 inline void
-LogSeqGroupInit(tLogSeqGroup *self, tADCGroup *adc_group)
+LogSeqGroupInit(tLogSeqGroup *self)
 {
-    ConfigureLogSeq(&self->log_seq[0], &adc_group->adc[0], INT_ADC0SS3);
-    ConfigureLogSeq(&self->log_seq[1], &adc_group->adc[1], INT_ADC1SS3);
-
-    self->adc_group = adc_group;
+    ConfigureLogSeq(&self->log_seq[0], &adc_group.adc[0], INT_ADC0SS3);
+    ConfigureLogSeq(&self->log_seq[1], &adc_group.adc[1], INT_ADC1SS3);
 }
 
 

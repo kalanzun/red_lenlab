@@ -12,8 +12,6 @@
 
 typedef struct Oscilloscope {
 
-    tOscSeqGroup *seq_group;
-
     bool lock;
 
 } tOscilloscope;
@@ -28,7 +26,7 @@ tError OscilloscopeStop(tOscilloscope *self);
 
 void OscilloscopeMain(tOscilloscope *self);
 
-void OscilloscopeInit(tOscilloscope *self, tOscSeqGroup *seq_group);
+void OscilloscopeInit(tOscilloscope *self);
 
 
 #endif /* OSCILLOSCOPE_H_ */

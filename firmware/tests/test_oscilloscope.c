@@ -24,7 +24,7 @@ test_oscilloscope_lock(void)
     assert(memory.acquire);
 
     // wait for the measurement to finish
-    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
     assert(oscilloscope.lock == false);
@@ -44,7 +44,7 @@ test_oscilloscope_double_start(void)
     assert(OscilloscopeStart(&oscilloscope, 1) == LOCK_ERROR);
 
     // wait for the measurement to finish
-    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
 
@@ -59,7 +59,7 @@ test_oscilloscope_double_stop(void)
     assert(OscilloscopeStart(&oscilloscope, 1) == OK);
 
     // wait for the measurement to finish
-    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
     assert(OscilloscopeStop(&oscilloscope) == LOCK_ERROR);
@@ -115,10 +115,10 @@ test_oscilloscope_measurement()
     }
 
     OscilloscopeStart(&oscilloscope, 1);
-    while (!OscSeqGroupReady(oscilloscope.seq_group)) {};
+    while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     FOREACH_ADC {
-        self = &oscilloscope.seq_group->osc_seq[i].ring;
+        self = &osc_seq_group.osc_seq[i].ring;
         assert(RingFull(self));
 
         for (RingIterInit(&iter, self); iter.content; RingIterNext(&iter)) {

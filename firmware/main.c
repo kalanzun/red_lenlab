@@ -230,22 +230,22 @@ int main(void)
     //
     // logger module
     //
-    LoggerInit(&logger, &adc_group);
+    LoggerInit(&logger);
 
     //
     // osc_seq_group module
     //
-    OscSeqGroupInit(&osc_seq_group, &adc_group);
+    OscSeqGroupInit(&osc_seq_group);
 
     //
     // oscilloscope module
     //
-    OscilloscopeInit(&oscilloscope, &osc_seq_group);
+    OscilloscopeInit(&oscilloscope);
 
     //
     // trigger module
     //
-    TriggerInit(&trigger, &osc_seq_group);
+    TriggerInit(&trigger);
 
     //
     // Run tests
