@@ -289,7 +289,8 @@ int main(void)
     //
     tests();
 
-    while (1)
-    {
-    };
+    while (1) {
+        CommandHandlerMain(&command_handler);
+        USBDeviceMain(&usb_device);
+    }
 }

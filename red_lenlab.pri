@@ -35,8 +35,8 @@ win32 {
 
     # qwt
     # Qt Creator uses this variable to construct the PATH variable for the dynamic linker to run lenlab
-    CONFIG(release, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwt
-    else:CONFIG(debug, debug|release): LIBS += -Lc:/Qwt-6.1.3/lib/ -lqwtd
+    CONFIG(release, debug|release): LIBS += -Lc:/Qwt-6.1.4/lib/ -lqwt
+    else:CONFIG(debug, debug|release): LIBS += -Lc:/Qwt-6.1.4/lib/ -lqwtd
 
     # libusb
     INCLUDEPATH += $$PWD/libusb/include/libusb-1.0
