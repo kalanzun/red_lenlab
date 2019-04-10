@@ -26,6 +26,9 @@
 #include "ssi.h"
 #include "oscilloscope.h"
 #include "trigger.h"
+#include "command_handler.h"
+#include "reply_handler.h"
+#include "usb_device.h"
 
 
 //*****************************************************************************
@@ -178,6 +181,9 @@ tOscilloscope oscilloscope;
 tTrigger trigger;
 tSSI ssi;
 tSignal signal;
+tCommandHandler command_handler;
+tReplyHandler reply_handler;
+tUSBDevice usb_device;
 
 
 //*****************************************************************************
@@ -262,6 +268,21 @@ int main(void)
     // signal module
     //
     SignalInit(&signal);
+
+    //
+    // usb_device module
+    //
+    USBDeviceInit(&usb_device);
+
+    //
+    // command handler module
+    //
+    CommandHandlerInit(&command_handler);
+
+    //
+    // reply handler module
+    //
+    ReplyHandlerInit(&reply_handler);
 
     //
     // Run tests

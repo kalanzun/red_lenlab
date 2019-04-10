@@ -59,6 +59,7 @@ extern void ADC0SS0Handler();
 extern void ADC1SS0Handler();
 extern void ADC0SS3Handler();
 extern void ADC1SS3Handler();
+extern void USB0IntHandler();
 
 //*****************************************************************************
 //
@@ -131,7 +132,7 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // Hibernate
-    IntDefaultHandler,                      // USB0
+    USB0IntHandler,                         // USB0
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
     IntDefaultHandler,                      // uDMA Error
