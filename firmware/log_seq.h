@@ -18,6 +18,8 @@ typedef struct LogSeq {
     uint32_t sequence_int;
     uint32_t priority;
 
+    volatile bool ready;
+    volatile bool error;
     volatile uint32_t count;
 
 } tLogSeq;
@@ -35,13 +37,62 @@ LogSeqIntHandler(tLogSeq *self)
 {
     ADCIntClear(self->adc->base, self->sequence_num);
 
+    if (self->ready) self->error = 1;
+    else self->ready = 1;
     self->count = self->count + 1;
+}
+
+
+inline bool
+LogSeqGroupReady(tLogSeqGroup *self)
+{
+    unsigned int i;
+    bool ready = 1;
+
+    FOREACH_ADC ready &= self->log_seq[i].ready;
+
+    return ready;
+}
+
+
+inline bool
+LogSeqGroupError(tLogSeqGroup *self)
+{
+    unsigned int i;
+
+    bool error = 0;
+    FOREACH_ADC error |= self->log_seq[i].error;
+    return error;
+}
+
+
+inline void
+LogSeqGroupRelease(tLogSeqGroup *self)
+{
+    unsigned int i;
+
+    FOREACH_ADC self->log_seq[i].ready = 0;
+}
+
+
+inline int32_t
+LogSeqGroupDataGet(tLogSeqGroup *self, uint32_t *buffer)
+{
+    unsigned int i;
+    int32_t count = 0;
+
+    FOREACH_ADC count += ADCSequenceDataGet(self->log_seq[i].adc->base, self->log_seq[i].sequence_num, buffer + count);
+
+    return count;
 }
 
 
 inline void
 LogSeqEnable(tLogSeq *self)
 {
+    self->ready = 0;
+    self->error = 0;
+
     ADCSequenceEnable(self->adc->base, self->sequence_num);
     ADCIntEnable(self->adc->base, self->sequence_num); // Enable to generate direct ADC Interrupts, do not enable for DMA
     IntEnable(self->sequence_int); // Enable Interrupt in NVIC
@@ -56,7 +107,7 @@ LogSeqGroupEnable(tLogSeqGroup *self, uint32_t interval)
     int i;
     FOREACH_ADC LogSeqEnable(&self->log_seq[i]);
 
-    ADCTimerStart(&adc_group.timer, interval*1000); // us
+    ADCTimerStart(&adc_group.timer, interval * 1000); // us
 }
 
 

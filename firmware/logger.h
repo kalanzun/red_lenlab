@@ -32,4 +32,7 @@ tError LoggerStop(tLogger *self);
 void LoggerInit(tLogger *self);
 
 
+void LoggerMain(tLogger *self);
+
+
 #endif /* LOGGER_H_ */

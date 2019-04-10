@@ -71,20 +71,19 @@ void
 Manager::on_version(const pMessage &reply)
 {
     auto length = reply->getIntBufferLength();
-    if (length == 3) {
+    if (length == 2) {
         auto array = reply->getIntBuffer();
 
         auto major = array[0];
         auto minor = array[1];
-        auto revision = array[2];
 
-        qDebug() << "Board::on_getVersion" << major << minor << revision;
+        qDebug() << "Board::on_getVersion" << major << minor;
 
         if (major == MAJOR && minor == MINOR) {
             emit ready(board);
         }
         else {
-            auto msg = QString("Ungültige Version %1.%2.%3. Lenlab erwartet mindestens %4.%5").arg(major).arg(minor).arg(revision).arg(MAJOR).arg(MINOR);
+            auto msg = QString("Ungültige Version %1.%2. Lenlab erwartet mindestens %3.%4").arg(major).arg(minor).arg(MAJOR).arg(MINOR);
             emit error(msg);
             qDebug() << msg;
         }

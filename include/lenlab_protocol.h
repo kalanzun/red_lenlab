@@ -49,7 +49,7 @@ enum Command {
     setSignalSine,
     stopSignal,
     startOscilloscope,
-    startOscilloscopeTrigger,
+    startTrigger,
     startLogger,
     stopLogger,
     NUM_COMMANDS
@@ -79,4 +79,3 @@ enum Type {
 };
 
 #endif // LENLAB_PROTOCOL_H
-

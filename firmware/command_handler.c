@@ -20,7 +20,7 @@ on_init(tEvent *event)
 {
     tEvent *reply;
 
-    DEBUG_PRINT("Init\n");
+    //DEBUG_PRINT("Init");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -41,7 +41,7 @@ on_getName(tEvent *event)
 {
     tEvent *reply;
 
-    DEBUG_PRINT("getName\n");
+    //DEBUG_PRINT("getName");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -58,7 +58,7 @@ on_getVersion(tEvent *event)
     tEvent *reply;
     uint32_t array[2] = {MAJOR, MINOR};
 
-    DEBUG_PRINT("getVersion\n");
+    //DEBUG_PRINT("getVersion");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -76,7 +76,7 @@ on_startLogger(tEvent *event)
     uint32_t interval = EventGetInt(event, 0);
     tError error;
 
-    DEBUG_PRINT("startLogger\n");
+    //DEBUG_PRINT("startLogger");
 
     error = LoggerStart(&logger, interval);
 
@@ -101,7 +101,7 @@ on_stopLogger(tEvent *event)
     tEvent *reply;
     tError error;
 
-    DEBUG_PRINT("stopLogger\n");
+    //DEBUG_PRINT("stopLogger");
 
     error = LoggerStop(&logger);
 
@@ -176,13 +176,13 @@ on_startOscilloscope(tEvent *event)
 
 
 void
-on_startOscilloscopeTrigger(tEvent *event)
+on_startTrigger(tEvent *event)
 {
     tEvent *reply;
     uint32_t samplerate = EventGetInt(event, 0);
     uint32_t error;
 
-    DEBUG_PRINT("startOscilloscopeTrigger\n");
+    DEBUG_PRINT("startTrigger\n");
 
     error = TriggerStart(&trigger, samplerate);
 
@@ -225,13 +225,15 @@ CommandHandlerMain(tCommandHandler *self)
         else if (command == getName) on_getName(event);
         else if (command == getVersion) on_getVersion(event);
         else if (command == startLogger) on_startLogger(event);
+        else if (command == stopLogger) on_stopLogger(event);
+        /*
         else if (command == setSignalSine) on_setSignalSine(event);
         else if (command == stopSignal) on_stopSignal(event);
         else if (command == startOscilloscope) on_startOscilloscope(event);
-        else if (command == startOscilloscopeTrigger) on_startOscilloscopeTrigger(event);
-        else if (command == stopLogger) on_stopLogger(event);
+        else if (command == startTrigger) on_startTrigger(event);
         else if (command == setSignalSine) on_setSignalSine(event);
         else if (command == stopSignal) on_stopSignal(event);
+        */
         else on_error();
 
         QueueRelease(&self->command_queue);

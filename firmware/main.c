@@ -291,6 +291,7 @@ int main(void)
 
     while (1) {
         CommandHandlerMain(&command_handler);
+        LoggerMain(&logger);
         USBDeviceMain(&usb_device);
     }
 }

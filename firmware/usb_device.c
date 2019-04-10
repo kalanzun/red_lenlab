@@ -268,7 +268,7 @@ USB0IntHandler()
 inline void
 USBDeviceStartuDMA(tUSBDevice *self, uint8_t *payload, uint32_t length)
 {
-    //ASSERT(!usb_device.dma_pending);
+    ASSERT(!usb_device.dma_pending);
     self->dma_pending = 1;
     //
     // Configure and enable DMA for the IN transfer.
@@ -328,7 +328,7 @@ USBDeviceMain(tUSBDevice *self)
             event = QueueRead(&reply_handler.reply_queue);
             USBDeviceStartuDMA(self, event->payload, event->length);
             //ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
-            QueueRelease(&reply_handler.reply_queue);
+            QueueRelease(&reply_handler.reply_queue); // TODO do not release until DMA is done
             //DEBUG_PRINT("send reply\n");
         }
         else if (self->send_ring_buffer)

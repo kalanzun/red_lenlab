@@ -8,6 +8,9 @@
 
 #include "logger.h"
 
+#include "lenlab_protocol.h"
+#include "reply_handler.h"
+
 
 void
 ADC0SS3Handler(void)
@@ -58,6 +61,45 @@ LoggerStop(tLogger *self)
     ADCGroupUnlock(&adc_group);
 
     return OK;
+}
+
+
+void
+LoggerMain(tLogger *self)
+{
+    uint32_t size;
+    tEvent *reply;
+
+    if (!self->lock) return;
+
+    if (LogSeqGroupError(&self->seq_group)) {
+
+        LoggerStop(self);
+
+        ASSERT(0); // TODO Logger error handling in release build
+
+    }
+    else if (LogSeqGroupReady(&self->seq_group)) {
+
+        //DEBUG_PRINT("LoggerData");
+
+        reply = QueueAcquire(&reply_handler.reply_queue);
+
+        EventSetReply(reply, LoggerData);
+        EventSetType(reply, IntArray);
+
+        size = sizeof(uint32_t) * ADC_GROUP_SIZE;
+        ASSERT(size <= LENLAB_PACKET_BODY_LENGTH);
+        EventSetBodyLength(reply, size);
+
+        size = LogSeqGroupDataGet(&self->seq_group, (uint32_t *) (EventGetBody(reply)));
+        ASSERT(size == ADC_GROUP_SIZE);
+
+        QueueWrite(&reply_handler.reply_queue);
+
+        LogSeqGroupRelease(&self->seq_group);
+
+    }
 }
 
 

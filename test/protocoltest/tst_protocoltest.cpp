@@ -39,12 +39,12 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void test_startLogger();
-    void test_startOscilloscope();
-    void test_startOscilloscopeTrigger();
-    void test_startLoggerAgain();
-    void test_startOscilloscopeAgain();
-    void test_startOscilloscopeTriggerAgain();
-    void test_TransactionTimeout();
+    //void test_startOscilloscope();
+    //void test_startOscilloscopeTrigger();
+    //void test_startLoggerAgain();
+    //void test_startOscilloscopeAgain();
+    //void test_startOscilloscopeTriggerAgain();
+    //void test_TransactionTimeout();
 
 private:
     protocol::Manager manager;
@@ -104,7 +104,7 @@ void ProtocolTest::test_startLogger()
 
     QVERIFY(logger_spy.wait(m_logger_timeout) == 0); // no additional data point after stop
 }
-
+/*
 void ProtocolTest::test_startOscilloscope()
 {
     auto transaction = board->startOscilloscope(0);
@@ -159,6 +159,7 @@ void ProtocolTest::test_TransactionTimeout()
 
     QVERIFY(spy.wait(m_short_timeout) == 0); // wait for the device to clean up and unlock
 }
+*/
 
 QTEST_MAIN(ProtocolTest)
 

@@ -30,10 +30,8 @@ Board::Board(usb::pDevice &device, QObject *parent) :
     QObject(parent),
     device(device)
 {
-    /*
     connect(device.data(), &usb::Device::reply,
             this, &Board::on_reply);
-            */
 }
 
 void
@@ -161,7 +159,7 @@ Board::startOscilloscopeTrigger(uint32_t samplerate)
     args.append(samplerate);
 
     auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startOscilloscopeTrigger);
+    cmd->setCommand(::startTrigger);
     cmd->setIntVector(args);
 
     auto transaction = pTransaction::create(cmd);
