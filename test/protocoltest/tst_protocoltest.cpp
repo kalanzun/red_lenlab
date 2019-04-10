@@ -52,7 +52,7 @@ private:
 
     int m_short_timeout = 100;
     int m_long_timeout = 800;
-    int m_logger_timeout = 1100;
+    int m_logger_timeout = 150;
 };
 
 ProtocolTest::ProtocolTest()
@@ -84,7 +84,7 @@ void ProtocolTest::cleanupTestCase()
 
 void ProtocolTest::test_startLogger()
 {
-    auto transaction = board->startLogger(1000);
+    auto transaction = board->startLogger(100);
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));
@@ -92,7 +92,8 @@ void ProtocolTest::test_startLogger()
     QSignalSpy logger_spy(board, &protocol::Board::logger);
     QVERIFY(logger_spy.isValid());
 
-    for (int i = 0; i < 2; i++) {
+    // reply queue length in the firmware is 4, cycle at least once
+    for (int i = 0; i < 6; i++) {
         qDebug() << i;
         QVERIFY(logger_spy.wait(m_logger_timeout));
     }
