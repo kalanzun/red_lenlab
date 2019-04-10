@@ -60,6 +60,9 @@ extern void ADC1SS0Handler();
 extern void ADC0SS3Handler();
 extern void ADC1SS3Handler();
 extern void USB0IntHandler();
+#ifdef UART_BUFFERED
+extern void UARTStdioIntHandler();
+#endif
 
 //*****************************************************************************
 //
@@ -93,7 +96,11 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
+#ifdef UART_BUFFERED
+    UARTStdioIntHandler,                    // UART0 Rx and Tx
+#else
     IntDefaultHandler,                      // UART0 Rx and Tx
+#endif
     IntDefaultHandler,                      // UART1 Rx and Tx
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
