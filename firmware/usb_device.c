@@ -224,48 +224,6 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
 }
 
 inline void
-USBDeviceIntHandler(tUSBDevice *self)
-{
-    if ((self->dma_pending) && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
-    {
-        //
-        // Handle the DMA complete case.
-        //
-        self->dma_pending = 0;
-
-        if (self->send_ring_buffer)
-        {
-            RingRelease(self->ring);
-            if (RingEmpty(self->ring)) self->send_ring_buffer = 0;
-        }
-        else if (self->send_ring_buffer_interleaved)
-        {
-            //DEBUG_PRINT("usb int %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
-            RingRelease(self->pingpong_ring[self->pingpong]);
-            self->pingpong = !self->pingpong;
-            if (RingEmpty(self->pingpong_ring[self->pingpong])) self->send_ring_buffer_interleaved = 0;
-
-        }
-        else
-        {
-            USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
-        }
-
-        //MemoryRelease(&memory);
-    }
-    else
-    {
-        USB0DeviceIntHandler();
-    }
-}
-
-void
-USB0IntHandler()
-{
-    USBDeviceIntHandler(&usb_device);
-}
-
-inline void
 USBDeviceStartuDMA(tUSBDevice *self, uint8_t *payload, uint32_t length)
 {
     ASSERT(!usb_device.dma_pending);
@@ -297,9 +255,81 @@ USBDeviceStartuDMA(tUSBDevice *self, uint8_t *payload, uint32_t length)
 }
 
 inline void
+USBDeviceIntHandler(tUSBDevice *self)
+{
+    tPage *page;
+
+    if ((self->dma_pending) && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
+    {
+        //
+        // Handle the DMA complete case.
+        //
+        self->dma_pending = false;
+
+        if (self->send_reply)
+        {
+            self->send_reply = false;
+            USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
+            QueueRelease(&reply_handler.reply_queue);
+            // Main will start a new DMA transfer eventually
+        }
+        else if (self->send_ring_buffer)
+        {
+            RingRelease(self->ring);
+            // Main will start a new DMA transfer eventually
+            // Release memory, if this was the last page
+            if (RingEmpty(self->ring)) {
+                self->send_ring_buffer = false;
+                MemoryRelease(&memory);
+            }
+            else {
+                page = RingRead(self->ring);
+                USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+                // because of immediate restart, it does not receive commands meanwhile
+                // commands wait, till the ring is through
+                // TODO command waiting during DMA transfer seems handy for a simpler state machine
+                // no special memory locking while DMA transfer necessary
+                // how fast is it?
+            }
+        }
+        else if (self->send_ring_buffer_interleaved)
+        {
+            RingRelease(self->pingpong_ring[self->pingpong]);
+            self->pingpong = !self->pingpong;
+            // Note: pingpong points to the next packet now
+            // Main will start a new DMA transfer eventually
+            // Release memory, if this was the last page
+            if (RingEmpty(self->pingpong_ring[self->pingpong])) {
+                self->send_ring_buffer_interleaved = false;
+                MemoryRelease(&memory);
+            }
+            else {
+                page = RingRead(self->pingpong_ring[self->pingpong]);
+                USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+            }
+        }
+        else
+        {
+            ASSERT(0);
+        }
+    }
+    else
+    {
+        USB0DeviceIntHandler();
+    }
+}
+
+void
+USB0IntHandler()
+{
+    USBDeviceIntHandler(&usb_device);
+}
+
+inline void
 USBDeviceSend(tUSBDevice *self, tRing *ring)
 {
     //DEBUG_PRINT("USBDeviceSend\n");
+    ASSERT(!self->send_ring_buffer);
 
     self->ring = ring;
     self->send_ring_buffer = 1;
@@ -309,6 +339,7 @@ inline void
 USBDeviceSendInterleaved(tUSBDevice *self, tRing *ring0, tRing *ring1)
 {
     //DEBUG_PRINT("USBDeviceSendInterleaved\n");
+    ASSERT(!self->send_ring_buffer_interleaved);
 
     self->pingpong = 0;
     self->pingpong_ring[0] = ring0;
@@ -325,10 +356,12 @@ USBDeviceMain(tUSBDevice *self)
     if (!self->dma_pending)// && USBDBulkTxPacketAvailable(&bulk_device) == 64)
     {
         if (!QueueEmpty(&reply_handler.reply_queue)) {
+            ASSERT(!self->send_reply);
             event = QueueRead(&reply_handler.reply_queue);
+            self->send_reply = true;
             USBDeviceStartuDMA(self, event->payload, event->length);
             //ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
-            QueueRelease(&reply_handler.reply_queue); // TODO do not release until DMA is done
+            //QueueRelease(&reply_handler.reply_queue);
             //DEBUG_PRINT("send reply\n");
         }
         else if (self->send_ring_buffer)
@@ -374,7 +407,10 @@ ConfigureUSBDevice(tUSBDevice *self)
 void
 USBDeviceInit(tUSBDevice *self)
 {
-    self->dma_pending = 0;
+    self->dma_pending = false;
+    self->send_reply = false;
+    self->send_ring_buffer = false;
+    self->send_ring_buffer_interleaved = false;
 
     ConfigureUSBDevice(self);
 

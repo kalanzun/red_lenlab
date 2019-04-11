@@ -24,6 +24,7 @@ test_trigger_lock()
     assert(adc_group.lock == true);
     assert(memory.acquire);
     assert(TriggerStop(&trigger) == OK);
+    MemoryRelease(&memory);
     assert(trigger.lock == false);
     assert(adc_group.lock == false);
     assert(memory.acquire == 0);
@@ -40,6 +41,7 @@ test_trigger_double_start()
     assert(TriggerStart(&trigger, 1) == OK);
     assert(TriggerStart(&trigger, 1) == LOCK_ERROR);
     assert(TriggerStop(&trigger) == OK);
+    MemoryRelease(&memory);
 
     ok();
 }
@@ -52,6 +54,7 @@ test_trigger_double_stop()
 
     assert(TriggerStart(&trigger, 1) == OK);
     assert(TriggerStop(&trigger) == OK);
+    MemoryRelease(&memory);
     assert(TriggerStop(&trigger) == LOCK_ERROR);
 
     ok();
@@ -94,6 +97,7 @@ test_trigger_measurement()
     // 500 kHz, trigger is too slow for 1 MHz
     TriggerStart(&trigger, 2);
     while (trigger.lock) TriggerMain(&trigger, false);
+    MemoryRelease(&memory); // early on, because of return statements
 
     for (RingIterInit(&iter, &trigger.ring); iter.content; RingIterNext(&iter)) {
         page = RingIterGet(&iter);

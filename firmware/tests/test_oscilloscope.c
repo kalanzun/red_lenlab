@@ -27,6 +27,7 @@ test_oscilloscope_lock(void)
     while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
+    MemoryRelease(&memory);
     assert(oscilloscope.lock == false);
     assert(adc_group.lock == false);
     assert(memory.acquire == 0);
@@ -47,6 +48,7 @@ test_oscilloscope_double_start(void)
     while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
+    MemoryRelease(&memory);
 
     ok();
 }
@@ -62,6 +64,7 @@ test_oscilloscope_double_stop(void)
     while (!OscSeqGroupReady(&osc_seq_group)) {};
 
     assert(OscilloscopeStop(&oscilloscope) == OK);
+    MemoryRelease(&memory);
     assert(OscilloscopeStop(&oscilloscope) == LOCK_ERROR);
 
     ok();
@@ -116,6 +119,8 @@ test_oscilloscope_measurement()
 
     OscilloscopeStart(&oscilloscope, 1);
     while (!OscSeqGroupReady(&osc_seq_group)) {};
+    OscilloscopeStop(&oscilloscope);
+    MemoryRelease(&memory); // early on, because of return statements
 
     FOREACH_ADC {
         self = &osc_seq_group.osc_seq[i].ring;
@@ -140,7 +145,6 @@ test_oscilloscope_measurement()
         }
     }
 
-    OscilloscopeStop(&oscilloscope);
     ok();
 }
 

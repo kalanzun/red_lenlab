@@ -10,6 +10,7 @@
 #include "driverlib/debug.h"
 
 #include "debug.h"
+#include "error.h"
 #include "lenlab_protocol.h"
 
 
@@ -119,6 +120,20 @@ EventGetType(tEvent *self)
 {
     ASSERT((enum Type) self->payload[1] < NUM_TYPES);
     return (enum Type) self->payload[1];
+}
+
+
+inline void
+EventSetError(tEvent *self, enum Error error)
+{
+    self->payload[2] = error;
+}
+
+inline enum Error
+EventGetError(tEvent *self)
+{
+    ASSERT((enum Error) self->payload[2] < NUM_ERRORS);
+    return (enum Error) self->payload[2];
 }
 
 inline void
