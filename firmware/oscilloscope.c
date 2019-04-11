@@ -65,8 +65,6 @@ OscilloscopeStop(tOscilloscope *self)
 
     ADCGroupUnlock(&adc_group);
 
-    MemoryRelease(&memory);
-
     return OK;
 }
 
@@ -103,9 +101,10 @@ OscilloscopeMain(tOscilloscope *self)
 
         head[3] = 255; // last packet
 
+        // will call MemoryRelease when done
         USBDeviceSendInterleaved(&usb_device, &osc_seq_group.osc_seq[0].ring, &osc_seq_group.osc_seq[1].ring);
 
-        OscilloscopeStop(self); // TODO memory release should wait until USB is done?
+        OscilloscopeStop(self);
 
     }
 }

@@ -238,25 +238,34 @@ USBDeviceIntHandler(tUSBDevice *self)
             self->send_reply = false;
             USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
             QueueRelease(&reply_handler.reply_queue);
+            // Main will start a new DMA transfer eventually
         }
         else if (self->send_ring_buffer)
         {
             RingRelease(self->ring);
-            if (RingEmpty(self->ring)) self->send_ring_buffer = 0;
+            // Main will start a new DMA transfer eventually
+            // Release memory, if this was the last page
+            if (RingEmpty(self->ring)) {
+                self->send_ring_buffer = 0;
+                MemoryRelease(&memory);
+            }
         }
         else if (self->send_ring_buffer_interleaved)
         {
-            //DEBUG_PRINT("usb int %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
             RingRelease(self->pingpong_ring[self->pingpong]);
             self->pingpong = !self->pingpong;
-            if (RingEmpty(self->pingpong_ring[self->pingpong])) self->send_ring_buffer_interleaved = 0;
+            // Note: pingpong points to the next packet now
+            // Main will start a new DMA transfer eventually
+            // Release memory, if this was the last page
+            if (RingEmpty(self->pingpong_ring[self->pingpong])) {
+                self->send_ring_buffer_interleaved = 0;
+                MemoryRelease(&memory);
+            }
         }
         else
         {
             ASSERT(0);
         }
-
-        //MemoryRelease(&memory);
     }
     else
     {
