@@ -227,10 +227,10 @@ CommandHandlerMain(tCommandHandler *self)
         else if (command == startLogger) on_startLogger(event);
         else if (command == stopLogger) on_stopLogger(event);
         else if (command == startOscilloscope) on_startOscilloscope(event);
+        else if (command == startTrigger) on_startTrigger(event);
         /*
         else if (command == setSignalSine) on_setSignalSine(event);
         else if (command == stopSignal) on_stopSignal(event);
-        else if (command == startTrigger) on_startTrigger(event);
         else if (command == setSignalSine) on_setSignalSine(event);
         else if (command == stopSignal) on_stopSignal(event);
         */

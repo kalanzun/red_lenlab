@@ -22,9 +22,10 @@ test_log_seq()
     test();
 
     LogSeqGroupEnable(&logger.seq_group, 10); // ms
-    wait(100); // ms
+    // These 101ms may cause the test to fail, if the firmware changes timing behaviour
+    wait(101); // ms
     LogSeqGroupDisable(&logger.seq_group);
-    wait(10); // assert it does not run once more.
+    wait(11); // assert it does not run once more.
 
     FOREACH_ADC {
         count = logger.seq_group.log_seq[i].count;

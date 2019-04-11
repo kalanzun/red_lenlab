@@ -8,6 +8,9 @@
 
 #include "trigger.h"
 
+#include "lenlab_protocol.h"
+#include "usb_device.h"
+
 
 #define TRIGGER_OFFSET 1
 
@@ -86,11 +89,13 @@ delta(uint16_t previous, uint16_t next)
 
 
 void
-TriggerMain(tTrigger *self)
+TriggerMain(tTrigger *self, bool enable_usb)
 {
     unsigned int i;
 
     tPage *page;
+
+    uint8_t *head;
 
     tPage *adc_page0;
     tPage *adc_page1;
@@ -117,13 +122,12 @@ TriggerMain(tTrigger *self)
     }
 
     page = RingAcquire(&self->ring);
+    head = (uint8_t *) page->buffer;
 
-    /*
-    page->buffer[0] = OscilloscopeData;
-    page->buffer[1] = ByteArray;
-    page->buffer[2] = 0;
-    page->buffer[3] = 0;
-    */
+    head[0] = OscilloscopeData;
+    head[1] = ByteArray;
+    head[2] = 0;
+    head[3] = 0;
 
     state0 = buffer0[0] >> 2;
     state1 = buffer1[0] >> 2;
@@ -181,9 +185,11 @@ TriggerMain(tTrigger *self)
     if (self->save) {
 
         if (self->post_count == 9) { // half of 18
-            //page->buffer[3] = 255; // mark this the last package
+            head[3] = 255; // mark this the last package
             OscSeqGroupDisable(&osc_seq_group); // stop ping pong DMA
-            //USBDeviceSend(&self->ring);
+            if (enable_usb) {
+                USBDeviceSend(&usb_device, &self->ring);
+            }
             TriggerStop(self); // TODO keep memory locked until usb is done
         }
 

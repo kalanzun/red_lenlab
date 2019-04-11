@@ -293,6 +293,7 @@ int main(void)
         CommandHandlerMain(&command_handler);
         LoggerMain(&logger);
         OscilloscopeMain(&oscilloscope);
+        TriggerMain(&trigger, true);
         USBDeviceMain(&usb_device);
     }
 }

@@ -39,7 +39,7 @@ tError TriggerStart(tTrigger *self, uint32_t samplerate);
 
 tError TriggerStop(tTrigger *self);
 
-void TriggerMain(tTrigger *self);
+void TriggerMain(tTrigger *self, bool enable_usb);
 
 void TriggerInit(tTrigger *self);
 
