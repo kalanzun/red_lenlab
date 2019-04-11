@@ -292,6 +292,7 @@ int main(void)
     while (1) {
         CommandHandlerMain(&command_handler);
         LoggerMain(&logger);
+        OscilloscopeMain(&oscilloscope);
         USBDeviceMain(&usb_device);
     }
 }

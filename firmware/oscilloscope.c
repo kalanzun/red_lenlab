@@ -10,6 +10,9 @@
 
 #include "driverlib/debug.h"
 
+#include "lenlab_protocol.h"
+#include "usb_device.h"
+
 
 void
 ADC0SS0Handler(void)
@@ -72,9 +75,10 @@ void
 OscilloscopeMain(tOscilloscope *self)
 {
     // TODO not tested yet
-    int i;
+    unsigned int i;
     tRing *ring;
     tPage *page;
+    uint8_t *head;
     tRingIter iter;
 
     if (!self->lock) return;
@@ -88,19 +92,18 @@ OscilloscopeMain(tOscilloscope *self)
             for (RingIterInit(&iter, ring); iter.content; RingIterNext(&iter))
             {
                 page = RingIterGet(&iter);
-                /*
-                page->buffer[0] = OscilloscopeData; // reply
-                page->buffer[1] = ShortArray; // type
-                page->buffer[2] = i; // channel
-                page->buffer[3] = 0; // last
-                */
+                head = (uint8_t *) page->buffer;
+                head[0] = OscilloscopeData; // reply
+                head[1] = ShortArray; // type
+                head[2] = i; // channel
+                head[3] = 0; // last
             }
 
         }
 
-        page->buffer[3] = 255; // last packet
+        head[3] = 255; // last packet
 
-        //USBDeviceSendInterleaved(&self->seq_group.osc_seq[0].ring, &self->seq_group.osc_seq[1].ring);
+        USBDeviceSendInterleaved(&usb_device, &osc_seq_group.osc_seq[0].ring, &osc_seq_group.osc_seq[1].ring);
 
         OscilloscopeStop(self); // TODO memory release should wait until USB is done?
 
