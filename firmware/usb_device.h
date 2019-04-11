@@ -9,7 +9,8 @@
 #include "ring.h"
 
 typedef struct USBDevice {
-    volatile uint8_t dma_pending;
+    volatile bool dma_pending;
+    volatile bool send_reply;
     volatile bool send_ring_buffer;
     volatile bool send_ring_buffer_interleaved;
     volatile bool pingpong;
