@@ -86,6 +86,7 @@ on_startLogger(tEvent *event)
     if (error) {
         DEBUG_PRINT("Error %i\n", error);
         EventSetReply(reply, Error);
+        EventSetError(reply, error);
     }
     else {
         EventSetReply(reply, Logger);
@@ -111,6 +112,7 @@ on_stopLogger(tEvent *event)
     if (error) {
         DEBUG_PRINT("Error %i\n", error);
         EventSetReply(reply, Error);
+        EventSetError(reply, error);
     }
     else {
         EventSetReply(reply, Logger);
@@ -167,8 +169,10 @@ on_startOscilloscope(tEvent *event)
     error = OscilloscopeStart(&oscilloscope, samplerate);
 
     if (error) {
+        DEBUG_PRINT("error %i", error);
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
+        EventSetError(reply, error);
         EventSetBodyLength(reply, 0);
         QueueWrite(&reply_handler.reply_queue);
     }
@@ -180,7 +184,7 @@ on_startTrigger(tEvent *event)
 {
     tEvent *reply;
     uint32_t samplerate = EventGetInt(event, 0);
-    uint32_t error;
+    tError error;
 
     DEBUG_PRINT("startTrigger\n");
 
@@ -189,6 +193,7 @@ on_startTrigger(tEvent *event)
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
+        EventSetError(reply, error);
         EventSetBodyLength(reply, 0);
         QueueWrite(&reply_handler.reply_queue);
     }

@@ -48,7 +48,7 @@ private slots:
     void test_getVersion();
     //void test_setSignalSine();
     void test_startOscilloscopeLock();
-    void test_startOscilloscopeMemory();
+    void test_startOscilloscopeDMAQueue();
     //void test_startOscilloscopeTrigger();
 
 private:
@@ -56,7 +56,7 @@ private:
     usb::pDevice device;
 
     int m_short_timeout = 10;
-    //int m_long_timeout = 800;
+    int m_long_timeout = 800;
 };
 /*
 class ErrorPacket : public usb::Packet
@@ -213,20 +213,33 @@ void USBTest::test_startOscilloscopeLock()
     cmd->getByteBuffer()[1] = IntArray;
     cmd->getBuffer()[1] = 1; // samplerate
     cmd->setByteLength(4 + 4);
-    device->send(cmd);
 
     auto sec = create_command(startOscilloscope);
     sec->getByteBuffer()[1] = IntArray;
     sec->getBuffer()[1] = 1; // samplerate
     sec->setByteLength(4 + 4);
+
+    // send command
+    device->send(cmd);
+    // then immediately send next command
     device->send(sec);
 
-    QVERIFY(spy.wait(m_short_timeout));
-    auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
+    // which should fail
+    QVERIFY(spy.wait(m_long_timeout));
+    auto reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
     QCOMPARE(reply->getByteBuffer()[0], Error);
+    QCOMPARE(reply->getByteBuffer()[2], 1); // LOCK_ERROR
+
+    // await data packages
+    for (int i = 0; i < 20; i++) {
+        QVERIFY(spy.wait(m_long_timeout));
+        auto reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
+        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
+    }
+    QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
 }
 
-void USBTest::test_startOscilloscopeMemory()
+void USBTest::test_startOscilloscopeDMAQueue()
 {
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
@@ -237,19 +250,33 @@ void USBTest::test_startOscilloscopeMemory()
     cmd->setByteLength(4 + 4);
     device->send(cmd);
 
-    QVERIFY(spy.wait(m_short_timeout)); // wait for the first packet
-
-    // then immediately send next command
     auto sec = create_command(startOscilloscope);
     sec->getByteBuffer()[1] = IntArray;
     sec->getBuffer()[1] = 1; // samplerate
     sec->setByteLength(4 + 4);
+
+    QVERIFY(spy.wait(m_long_timeout)); // wait for the first packet
+    // then immediately send next command, which should queue, till the data transfer is through
     device->send(sec);
 
-    // which should fail
-    QVERIFY(spy.wait(m_short_timeout));
-    auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
-    QCOMPARE(reply->getByteBuffer()[0], Error);
+    // await data packages
+    auto reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
+    QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
+
+    for (unsigned int i = 1; i < 20; i++) {
+        QVERIFY(spy.wait(m_long_timeout));
+        reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
+        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
+    }
+    QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
+
+    // await data packages of second command
+    for (unsigned int i = 0; i < 20; i++) {
+        QVERIFY(spy.wait(m_long_timeout));
+        reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
+        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
+    }
+    QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
 }
 
 /*
