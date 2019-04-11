@@ -47,7 +47,8 @@ private slots:
     void test_getName();
     void test_getVersion();
     //void test_setSignalSine();
-    //void test_startOscilloscope();
+    void test_startOscilloscopeLock();
+    void test_startOscilloscopeMemory();
     //void test_startOscilloscopeTrigger();
 
 private:
@@ -201,6 +202,54 @@ void USBTest::test_getVersion()
     QCOMPARE(array[1], uint32_t(MINOR));
 
     QVERIFY(spy.wait(m_short_timeout) == 0); // no second packet
+}
+
+void USBTest::test_startOscilloscopeLock()
+{
+    QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
+    QVERIFY(spy.isValid());
+
+    auto cmd = create_command(startOscilloscope);
+    cmd->getByteBuffer()[1] = IntArray;
+    cmd->getBuffer()[1] = 1; // samplerate
+    cmd->setByteLength(4 + 4);
+    device->send(cmd);
+
+    auto sec = create_command(startOscilloscope);
+    sec->getByteBuffer()[1] = IntArray;
+    sec->getBuffer()[1] = 1; // samplerate
+    sec->setByteLength(4 + 4);
+    device->send(sec);
+
+    QVERIFY(spy.wait(m_short_timeout));
+    auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
+    QCOMPARE(reply->getByteBuffer()[0], Error);
+}
+
+void USBTest::test_startOscilloscopeMemory()
+{
+    QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
+    QVERIFY(spy.isValid());
+
+    auto cmd = create_command(startOscilloscope);
+    cmd->getByteBuffer()[1] = IntArray;
+    cmd->getBuffer()[1] = 1; // samplerate
+    cmd->setByteLength(4 + 4);
+    device->send(cmd);
+
+    QVERIFY(spy.wait(m_short_timeout)); // wait for the first packet
+
+    // then immediately send next command
+    auto sec = create_command(startOscilloscope);
+    sec->getByteBuffer()[1] = IntArray;
+    sec->getBuffer()[1] = 1; // samplerate
+    sec->setByteLength(4 + 4);
+    device->send(sec);
+
+    // which should fail
+    QVERIFY(spy.wait(m_short_timeout));
+    auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
+    QCOMPARE(reply->getByteBuffer()[0], Error);
 }
 
 /*
