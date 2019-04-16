@@ -164,12 +164,11 @@ on_startOscilloscope(tEvent *event)
     uint32_t samplerate = EventGetInt(event, 0);
     tError error;
 
-    DEBUG_PRINT("startOscilloscope\n");
+    //DEBUG_PRINT("startOscilloscope\n");
 
     error = OscilloscopeStart(&oscilloscope, samplerate);
 
     if (error) {
-        DEBUG_PRINT("error %i", error);
         reply = QueueAcquire(&reply_handler.reply_queue);
         EventSetReply(reply, Error);
         EventSetError(reply, error);
@@ -186,7 +185,7 @@ on_startTrigger(tEvent *event)
     uint32_t samplerate = EventGetInt(event, 0);
     tError error;
 
-    DEBUG_PRINT("startTrigger\n");
+    //DEBUG_PRINT("startTrigger\n");
 
     error = TriggerStart(&trigger, samplerate);
 

@@ -41,9 +41,13 @@ private slots:
     void test_startLogger();
     void test_startOscilloscope();
     void test_startTrigger();
-    //void test_startLoggerAgain();
-    //void test_startOscilloscopeAgain();
-    //void test_startOscilloscopeTriggerAgain();
+    void test_startLogger2();
+    void test_startLogger3();
+    void test_startTrigger2();
+    void test_startTrigger3();
+    void test_startOscilloscope2();
+    void test_startOscilloscope3();
+    void test_startLogger4();
     //void test_TransactionTimeout();
 
 private:
@@ -126,22 +130,17 @@ void ProtocolTest::test_startTrigger()
     QCOMPARE(transaction->replies.count(), 18);
 }
 
+void ProtocolTest::test_startLogger2() { test_startLogger(); }
+void ProtocolTest::test_startLogger3() { test_startLogger(); }
+void ProtocolTest::test_startLogger4() { test_startLogger(); }
+
+void ProtocolTest::test_startOscilloscope2() { test_startOscilloscope(); }
+void ProtocolTest::test_startOscilloscope3() { test_startOscilloscope(); }
+
+void ProtocolTest::test_startTrigger2() { test_startTrigger(); }
+void ProtocolTest::test_startTrigger3() { test_startTrigger(); }
+
 /*
-void ProtocolTest::test_startLoggerAgain()
-{
-    test_startLogger();
-}
-
-void ProtocolTest::test_startOscilloscopeAgain()
-{
-    test_startOscilloscope();
-}
-
-void ProtocolTest::test_startOscilloscopeTriggerAgain()
-{
-    test_startOscilloscopeTrigger();
-}
-
 void ProtocolTest::test_TransactionTimeout()
 {
     QVector<uint32_t> args;
