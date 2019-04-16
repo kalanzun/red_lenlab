@@ -44,8 +44,6 @@ test_wait()
 void
 tests(void)
 {
-    unsigned int i;
-
     DEBUG_PRINT("BEGIN tests");
 
     test_wait();

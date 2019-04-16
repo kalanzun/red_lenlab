@@ -128,7 +128,8 @@ OscSeqIntHandler(tOscSeq *self)
 
         if (!self->ping_enable) {
             // the program did not reconfigure DMA, DMA did need the configuration just a moment ago
-            OscSeqDisable(self);
+            // OscSeqDisable(self);
+            // Main shall disable osc_seq later on
         }
 
         // Automatic ping pong if the ring is not full.

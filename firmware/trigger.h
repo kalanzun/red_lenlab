@@ -37,7 +37,7 @@ extern tTrigger trigger;
 
 tError TriggerStart(tTrigger *self, uint32_t samplerate);
 
-tError TriggerStop(tTrigger *self);
+tError TriggerStop(tTrigger *self); // internal and for tests
 
 void TriggerMain(tTrigger *self, bool enable_usb);
 
