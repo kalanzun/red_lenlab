@@ -22,9 +22,9 @@ extern tOscilloscope oscilloscope;
 
 tError OscilloscopeStart(tOscilloscope *self, uint32_t samplerate);
 
-tError OscilloscopeStop(tOscilloscope *self);
+tError OscilloscopeStop(tOscilloscope *self); // internal and for tests
 
-void OscilloscopeMain(tOscilloscope *self);
+void OscilloscopeMain(tOscilloscope *self, bool enable_usb);
 
 void OscilloscopeInit(tOscilloscope *self);
 

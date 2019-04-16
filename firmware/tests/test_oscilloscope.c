@@ -22,10 +22,6 @@ test_oscilloscope_lock(void)
     assert(oscilloscope.lock == true);
     assert(adc_group.lock == true);
     assert(memory.acquire);
-
-    // wait for the measurement to finish
-    while (!OscSeqGroupReady(&osc_seq_group)) {};
-
     assert(OscilloscopeStop(&oscilloscope) == OK);
     MemoryRelease(&memory);
     assert(oscilloscope.lock == false);
@@ -43,10 +39,6 @@ test_oscilloscope_double_start(void)
 
     assert(OscilloscopeStart(&oscilloscope, 1) == OK);
     assert(OscilloscopeStart(&oscilloscope, 1) == LOCK_ERROR);
-
-    // wait for the measurement to finish
-    while (!OscSeqGroupReady(&osc_seq_group)) {};
-
     assert(OscilloscopeStop(&oscilloscope) == OK);
     MemoryRelease(&memory);
 
@@ -59,10 +51,6 @@ test_oscilloscope_double_stop(void)
     test();
 
     assert(OscilloscopeStart(&oscilloscope, 1) == OK);
-
-    // wait for the measurement to finish
-    while (!OscSeqGroupReady(&osc_seq_group)) {};
-
     assert(OscilloscopeStop(&oscilloscope) == OK);
     MemoryRelease(&memory);
     assert(OscilloscopeStop(&oscilloscope) == LOCK_ERROR);
@@ -118,32 +106,41 @@ test_oscilloscope_measurement()
     }
 
     OscilloscopeStart(&oscilloscope, 1);
-    while (!OscSeqGroupReady(&osc_seq_group)) {};
-    OscilloscopeStop(&oscilloscope);
+    while (oscilloscope.lock) OscilloscopeMain(&oscilloscope, false);
     MemoryRelease(&memory); // early on, because of return statements
 
     FOREACH_ADC {
         self = &osc_seq_group.osc_seq[i].ring;
         assert(RingFull(self));
 
+        byte_buffer = (uint8_t *) &i; // the upper bytes are zero
+
         for (RingIterInit(&iter, self); iter.content; RingIterNext(&iter)) {
+            assert(byte_buffer[3] == 0); // previous packet is not last
             page = RingIterGet(&iter);
             // head
-            if (page->buffer[0] != 0xFFFFFFFF)
+            byte_buffer = (uint8_t *) page->buffer;
+            if (!(byte_buffer[0] == 5 && byte_buffer[1] == 3 && byte_buffer[2] == i)) {
                 fail("head (adc[%i], page[%i], (uint32_t *) buffer[0])", i, iter.read);
+                ASSERT(0);
+            }
             // look for alignment error
             // if the alignment is off, uDMA starts at a later address
-            byte_buffer = (uint8_t *) page->buffer;
-            if (byte_buffer[4] == 0xFF)
+            if (byte_buffer[4] == 0xFF) {
                 fail("alignment (adc[%i], page[%i], (uint8_t *) buffer[4]", i, iter.read);
+                ASSERT(0);
+            }
             // measurement values
             short_buffer = (uint16_t *) page->buffer;
             for (j = 0; j < OSCILLOSCOPE_SAMPLES; j++) {
-                if (short_buffer[j + 2] == 0xFFFF)
+                if (short_buffer[j + 2] == 0xFFFF) {
                     fail("value (adc[%i], page[%i], (uint16_t *) buffer[%i])", i, iter.read, j + 2);
+                    ASSERT(0);
+                }
             }
         }
     }
+    assert(byte_buffer[3] == 255); // last packet
 
     ok();
 }

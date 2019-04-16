@@ -7,6 +7,9 @@
 #define TESTS_TEST_LOGGER_H_
 
 
+void test_log_seq();
+
+
 void test_logger();
 
 

@@ -7,6 +7,9 @@
 #define TESTS_TEST_OSCILLOSCOPE_H_
 
 
+void test_oscilloscope_measurement();
+
+
 void test_oscilloscope();
 
 

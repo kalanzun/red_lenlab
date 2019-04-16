@@ -63,6 +63,8 @@ OscilloscopeStop(tOscilloscope *self)
 
     self->lock = 0;
 
+    OscSeqGroupDisable(&osc_seq_group);
+
     ADCGroupUnlock(&adc_group);
 
     return OK;
@@ -70,9 +72,8 @@ OscilloscopeStop(tOscilloscope *self)
 
 
 void
-OscilloscopeMain(tOscilloscope *self)
+OscilloscopeMain(tOscilloscope *self, bool enable_usb)
 {
-    // TODO not tested yet
     unsigned int i;
     tRing *ring;
     tPage *page;
@@ -101,8 +102,10 @@ OscilloscopeMain(tOscilloscope *self)
 
         head[3] = 255; // last packet
 
-        // will call MemoryRelease when done
-        USBDeviceSendInterleaved(&usb_device, &osc_seq_group.osc_seq[0].ring, &osc_seq_group.osc_seq[1].ring);
+        if (enable_usb) {
+            // will call MemoryRelease when done
+            USBDeviceSendInterleaved(&usb_device, &osc_seq_group.osc_seq[0].ring, &osc_seq_group.osc_seq[1].ring);
+        }
 
         OscilloscopeStop(self);
 

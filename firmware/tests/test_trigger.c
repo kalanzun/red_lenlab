@@ -82,6 +82,7 @@ test_trigger_measurement()
     tRingIter iter;
     tPage *page;
 
+    uint8_t *head;
     int8_t *buffer;
 
     test();
@@ -99,31 +100,35 @@ test_trigger_measurement()
     while (trigger.lock) TriggerMain(&trigger, false);
     MemoryRelease(&memory); // early on, because of return statements
 
+    i = 0;
+    head = (uint8_t *) &i; // point head to 4 bytes of zero
+
     for (RingIterInit(&iter, &trigger.ring); iter.content; RingIterNext(&iter)) {
+        assert(head[3] == 0); // previous packet is not last
         page = RingIterGet(&iter);
         // head
-        /*
-        if (!(page->buffer[0] == 0xFFFFFFFF)) {
+        head = (uint8_t *) (page->buffer);
+        if (!(head[0] == 5 && head[1] == 2 && head[2] == 0)) {
             fail("head (page[%i], (uint32_t *) buffer[0])", iter.read);
-            return;
+            ASSERT(0);
         }
-        */
         // alignment
         buffer = (int8_t *) (page->buffer);
         for (j = 4; j < 6; j++) {
             if (buffer[j] != -128) {
                 fail("alignment (page[%i], (uint8_t *) buffer[%i])", iter.read, j);
-                return;
+                ASSERT(0);
             }
         }
         // measurement values
         for (j = 0; j < 2 * OSCILLOSCOPE_SAMPLES; j++) {
             if (buffer[j + 6] == -128) {
                 fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j + 6);
-                return;
+                ASSERT(0);
             }
         }
     }
+    assert(head[3] == 255); // last packet
 
     ok();
 }
