@@ -48,14 +48,25 @@ tests(void)
 
     DEBUG_PRINT("BEGIN tests");
 
-    for (i = 0; i < 3; i++) {
-        test_wait();
-        test_logger();
-        test_ring();
-        test_oscilloscope();
-        test_trigger();
-        test_signal();
-    }
+    test_wait();
+    test_ring();
+
+    test_signal();
+
+    test_logger();
+    test_oscilloscope();
+    test_trigger();
+
+    test_log_seq();
+    test_oscilloscope_measurement();
+    test_trigger_measurement();
+    test_log_seq();
+    test_log_seq();
+    test_trigger_measurement();
+    test_trigger_measurement();
+    test_oscilloscope_measurement();
+    test_oscilloscope_measurement();
+    test_log_seq();
 
     DEBUG_PRINT("END tests");
 }
