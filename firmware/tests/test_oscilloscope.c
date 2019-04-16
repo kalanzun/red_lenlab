@@ -113,26 +113,34 @@ test_oscilloscope_measurement()
         self = &osc_seq_group.osc_seq[i].ring;
         assert(RingFull(self));
 
+        byte_buffer = (uint8_t *) &i; // the upper bytes are zero
+
         for (RingIterInit(&iter, self); iter.content; RingIterNext(&iter)) {
+            assert(byte_buffer[3] == 0); // previous packet is not last
             page = RingIterGet(&iter);
             // head
-            /*
-            if (page->buffer[0] != 0xFFFFFFFF)
+            byte_buffer = (uint8_t *) page->buffer;
+            if (!(byte_buffer[0] == 5 && byte_buffer[1] == 3 && byte_buffer[2] == i)) {
                 fail("head (adc[%i], page[%i], (uint32_t *) buffer[0])", i, iter.read);
-                */
+                ASSERT(0);
+            }
             // look for alignment error
             // if the alignment is off, uDMA starts at a later address
-            byte_buffer = (uint8_t *) page->buffer;
-            if (byte_buffer[4] == 0xFF)
+            if (byte_buffer[4] == 0xFF) {
                 fail("alignment (adc[%i], page[%i], (uint8_t *) buffer[4]", i, iter.read);
+                ASSERT(0);
+            }
             // measurement values
             short_buffer = (uint16_t *) page->buffer;
             for (j = 0; j < OSCILLOSCOPE_SAMPLES; j++) {
-                if (short_buffer[j + 2] == 0xFFFF)
+                if (short_buffer[j + 2] == 0xFFFF) {
                     fail("value (adc[%i], page[%i], (uint16_t *) buffer[%i])", i, iter.read, j + 2);
+                    ASSERT(0);
+                }
             }
         }
     }
+    assert(byte_buffer[3] == 255); // last packet
 
     ok();
 }
