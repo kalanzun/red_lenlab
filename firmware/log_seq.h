@@ -92,6 +92,7 @@ LogSeqEnable(tLogSeq *self)
 {
     self->ready = 0;
     self->error = 0;
+    self->count = 0;
 
     ADCSequenceEnable(self->adc->base, self->sequence_num);
     ADCIntEnable(self->adc->base, self->sequence_num); // Enable to generate direct ADC Interrupts, do not enable for DMA

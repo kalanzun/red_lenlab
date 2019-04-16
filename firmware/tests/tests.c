@@ -44,14 +44,18 @@ test_wait()
 void
 tests(void)
 {
+    unsigned int i;
+
     DEBUG_PRINT("BEGIN tests");
 
-    test_wait();
-    test_logger();
-    test_ring();
-    test_oscilloscope();
-    test_trigger();
-    test_signal();
+    for (i = 0; i < 3; i++) {
+        test_wait();
+        test_logger();
+        test_ring();
+        test_oscilloscope();
+        test_trigger();
+        test_signal();
+    }
 
     DEBUG_PRINT("END tests");
 }
