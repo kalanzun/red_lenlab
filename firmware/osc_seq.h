@@ -153,6 +153,15 @@ OscSeqGroupAllocate(tOscSeqGroup *self, uint32_t length)
 
 
 inline void
+OscSeqGroupFree(tOscSeqGroup *self)
+{
+    int i;
+
+    FOREACH_ADC RingFree(&self->osc_seq[i].ring);
+}
+
+
+inline void
 OscSeqGroupRelease(tOscSeqGroup *self)
 {
     int i;

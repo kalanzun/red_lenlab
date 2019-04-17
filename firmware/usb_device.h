@@ -10,22 +10,16 @@
 
 typedef struct USBDevice {
     volatile bool dma_pending;
-    volatile bool send_reply;
-    volatile bool send_ring_buffer;
-    volatile bool send_ring_buffer_interleaved;
-    volatile bool pingpong;
-
-    tRing *ring;
-    tRing *pingpong_ring[2];
 } tUSBDevice;
 
 
 extern tUSBDevice usb_device;
 
-
+/*
 void USBDeviceSend(tUSBDevice *self, tRing *ring);
 
 void USBDeviceSendInterleaved(tUSBDevice *self, tRing *ring0, tRing *ring1);
+*/
 
 void USBDeviceMain(tUSBDevice *self);
 

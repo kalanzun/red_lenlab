@@ -11,7 +11,7 @@
 #include "driverlib/debug.h"
 
 #include "lenlab_protocol.h"
-#include "usb_device.h"
+#include "reply_handler.h"
 
 
 void
@@ -72,9 +72,10 @@ OscilloscopeStop(tOscilloscope *self)
 
 
 void
-OscilloscopeMain(tOscilloscope *self, bool enable_usb)
+OscilloscopeMain(tOscilloscope *self, bool enable_reply)
 {
     unsigned int i;
+    tEvent *reply;
     tRing *ring;
     tPage *page;
     uint8_t *head;
@@ -102,10 +103,14 @@ OscilloscopeMain(tOscilloscope *self, bool enable_usb)
 
         head[3] = 255; // last packet
 
-        // Note: It does not call RingFree, when enable_usb is false
-        if (enable_usb) {
-            // will call RingFree when done
-            USBDeviceSendInterleaved(&usb_device, &osc_seq_group.osc_seq[0].ring, &osc_seq_group.osc_seq[1].ring);
+        // Note: It does not call RingFree, when enable_reply is false
+        if (enable_reply) {
+            // usb_device will call RingFree when done
+            FOREACH_ADC {
+                reply = QueueAcquire(&reply_handler.reply_queue);
+                EventSetRing(reply, &osc_seq_group.osc_seq[i].ring);
+                QueueWrite(&reply_handler.reply_queue);
+            }
         }
 
         OscilloscopeStop(self);

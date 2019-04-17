@@ -9,7 +9,7 @@
 #include "trigger.h"
 
 #include "lenlab_protocol.h"
-#include "usb_device.h"
+#include "reply_handler.h"
 
 
 #define TRIGGER_OFFSET 1
@@ -69,6 +69,8 @@ TriggerStop(tTrigger *self)
 
     OscSeqGroupDisable(&osc_seq_group); // stop ping pong DMA
 
+    OscSeqGroupFree(&osc_seq_group);
+
     ADCGroupUnlock(&adc_group);
 
     return OK;
@@ -89,10 +91,11 @@ delta(uint16_t previous, uint16_t next)
 
 
 void
-TriggerMain(tTrigger *self, bool enable_usb)
+TriggerMain(tTrigger *self, bool enable_reply)
 {
     unsigned int i;
 
+    tEvent *reply;
     tPage *page;
 
     uint8_t *head;
@@ -187,9 +190,11 @@ TriggerMain(tTrigger *self, bool enable_usb)
         if (self->post_count == 9) { // half of 18
             head[3] = 255; // mark this the last package
             // Note: It does not call RingFree, when enable_usb is false
-            if (enable_usb) {
-                // will call RingFree when done
-                USBDeviceSend(&usb_device, &self->ring);
+            if (enable_reply) {
+                // usb_device will call RingFree when done
+                reply = QueueAcquire(&reply_handler.reply_queue);
+                EventSetRing(reply, &self->ring);
+                QueueWrite(&reply_handler.reply_queue);
             }
             TriggerStop(self);
         }
