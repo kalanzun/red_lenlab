@@ -124,12 +124,14 @@ test_oscilloscope_measurement()
                 fail("head (adc[%i], page[%i], (uint32_t *) buffer[0])", i, iter.read);
                 ASSERT(0);
             }
-            // look for alignment error
+            // watch out for alignment error
             // if the alignment is off, uDMA starts at a later address
+            /*// This if does not work, because 0x(!FF)FF is a valid first value
             if (byte_buffer[4] == 0xFF) {
                 fail("alignment (adc[%i], page[%i], (uint8_t *) buffer[4]", i, iter.read);
                 ASSERT(0);
             }
+            */
             // measurement values
             short_buffer = (uint16_t *) page->buffer;
             for (j = 0; j < OSCILLOSCOPE_SAMPLES; j++) {
