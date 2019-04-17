@@ -24,7 +24,7 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
 
     if (adc_group.lock) return ADC_ERROR;
 
-    if (memory.acquire) return MEMORY_ERROR;
+    if (memory.lock) return MEMORY_ERROR;
 
     self->lock = 1;
 
@@ -186,9 +186,9 @@ TriggerMain(tTrigger *self, bool enable_usb)
 
         if (self->post_count == 9) { // half of 18
             head[3] = 255; // mark this the last package
-            // Note: It does not call MemoryRelease, when enable_usb is false
+            // Note: It does not call RingFree, when enable_usb is false
             if (enable_usb) {
-                // will call MemoryRelease when done
+                // will call RingFree when done
                 USBDeviceSend(&usb_device, &self->ring);
             }
             TriggerStop(self);

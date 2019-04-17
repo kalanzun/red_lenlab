@@ -39,7 +39,7 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 
     if (adc_group.lock) return ADC_ERROR;
 
-    if (memory.acquire) return MEMORY_ERROR;
+    if (memory.lock) return MEMORY_ERROR;
 
     self->lock = 1;
 
@@ -102,8 +102,9 @@ OscilloscopeMain(tOscilloscope *self, bool enable_usb)
 
         head[3] = 255; // last packet
 
+        // Note: It does not call RingFree, when enable_usb is false
         if (enable_usb) {
-            // will call MemoryRelease when done
+            // will call RingFree when done
             USBDeviceSendInterleaved(&usb_device, &osc_seq_group.osc_seq[0].ring, &osc_seq_group.osc_seq[1].ring);
         }
 

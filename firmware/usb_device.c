@@ -280,7 +280,7 @@ USBDeviceIntHandler(tUSBDevice *self)
             // Release memory, if this was the last page
             if (RingEmpty(self->ring)) {
                 self->send_ring_buffer = false;
-                MemoryRelease(&memory);
+                RingFree(self->ring);
             }
             else {
                 page = RingRead(self->ring);
@@ -301,7 +301,7 @@ USBDeviceIntHandler(tUSBDevice *self)
             // Release memory, if this was the last page
             if (RingEmpty(self->pingpong_ring[self->pingpong])) {
                 self->send_ring_buffer_interleaved = false;
-                MemoryRelease(&memory);
+                RingFree(self->ring);
             }
             else {
                 page = RingRead(self->pingpong_ring[self->pingpong]);

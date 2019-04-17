@@ -12,21 +12,24 @@
 #include "oscilloscope.h"
 
 
+#define SAMPLERATE 1
+
+
 void
 test_oscilloscope_lock(void)
 {
     test();
 
     assert(oscilloscope.lock == false);
-    assert(OscilloscopeStart(&oscilloscope, 1) == OK);
+    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == OK);
     assert(oscilloscope.lock == true);
     assert(adc_group.lock == true);
-    assert(memory.acquire);
+    assert(memory.lock);
     assert(OscilloscopeStop(&oscilloscope) == OK);
-    MemoryRelease(&memory);
+    MemoryUnlock(&memory, memory.lock);
     assert(oscilloscope.lock == false);
     assert(adc_group.lock == false);
-    assert(memory.acquire == 0);
+    assert(memory.lock == 0);
 
     ok();
 }
@@ -37,10 +40,10 @@ test_oscilloscope_double_start(void)
 {
     test();
 
-    assert(OscilloscopeStart(&oscilloscope, 1) == OK);
-    assert(OscilloscopeStart(&oscilloscope, 1) == LOCK_ERROR);
+    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == OK);
+    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == LOCK_ERROR);
     assert(OscilloscopeStop(&oscilloscope) == OK);
-    MemoryRelease(&memory);
+    MemoryUnlock(&memory, memory.lock);
 
     ok();
 }
@@ -50,9 +53,9 @@ test_oscilloscope_double_stop(void)
 {
     test();
 
-    assert(OscilloscopeStart(&oscilloscope, 1) == OK);
+    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == OK);
     assert(OscilloscopeStop(&oscilloscope) == OK);
-    MemoryRelease(&memory);
+    MemoryUnlock(&memory, memory.lock);
     assert(OscilloscopeStop(&oscilloscope) == LOCK_ERROR);
 
     ok();
@@ -65,7 +68,7 @@ test_oscilloscope_adc_error(void)
     test();
 
     adc_group.lock = true;
-    assert(OscilloscopeStart(&oscilloscope, 1000) == ADC_ERROR);
+    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == ADC_ERROR);
     adc_group.lock = false;
 
     ok();
@@ -77,9 +80,9 @@ test_oscilloscope_memory_error(void)
 {
     test();
 
-    memory.acquire = 1;
-    assert(OscilloscopeStart(&oscilloscope, 1000) == MEMORY_ERROR);
-    memory.acquire = 0;
+    MemoryLock(&memory, 1);
+    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == MEMORY_ERROR);
+    MemoryUnlock(&memory, memory.lock);
 
     ok();
 }
@@ -105,9 +108,9 @@ test_oscilloscope_measurement()
         }
     }
 
-    OscilloscopeStart(&oscilloscope, 1);
+    OscilloscopeStart(&oscilloscope, SAMPLERATE);
     while (oscilloscope.lock) OscilloscopeMain(&oscilloscope, false);
-    MemoryRelease(&memory); // early on, because of return statements
+    MemoryUnlock(&memory, memory.lock); // early on, because of return statements
 
     FOREACH_ADC {
         self = &osc_seq_group.osc_seq[i].ring;
