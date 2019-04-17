@@ -44,7 +44,7 @@ Manager::on_error()
 {
     qDebug() << "Manager::on_error";
 
-    board->deleteLater();
+    delete board.take();
 }
 
 void
@@ -80,7 +80,7 @@ Manager::on_version(const pMessage &reply)
         qDebug() << "Board::on_getVersion" << major << minor;
 
         if (major == MAJOR && minor == MINOR) {
-            emit ready(board);
+            emit ready(board.data());
         }
         else {
             auto msg = QString("Ungültige Version %1.%2. Lenlab erwartet mindestens %3.%4").arg(major).arg(minor).arg(MAJOR).arg(MINOR);
@@ -106,7 +106,7 @@ Manager::timerEvent(QTimerEvent *event)
     try {
         auto device = bus.query(LENLAB_VID, LENLAB_PID);
         if (device) {
-            board = new Board(device, this);
+            board.reset(new Board(device));
             auto transaction = board->init();
             connect(transaction.data(), &Transaction::succeeded, this, &Manager::on_init);
             connect(transaction.data(), &Transaction::failed, this, &Manager::on_error);

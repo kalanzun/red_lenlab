@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "board.h"
 #include "usb/bus.h"
 #include <QPointer>
+#include <QScopedPointer>
 #include <QTimerEvent>
 #include <QObject>
 
@@ -42,7 +43,7 @@ class Manager : public QObject
 
     usb::Bus bus;
 
-    QPointer<Board> board;
+    QScopedPointer<Board> board;
 
 public:
     /*!
