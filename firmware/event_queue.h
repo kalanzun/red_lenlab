@@ -11,6 +11,7 @@
 
 #include "debug.h"
 #include "error.h"
+#include "ring.h"
 #include "lenlab_protocol.h"
 
 
@@ -20,6 +21,7 @@
 typedef struct Event {
     uint8_t payload[LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH];
     uint32_t length;
+    tRing *ring;
 } tEvent;
 
 
@@ -40,13 +42,14 @@ QueueEmpty(tQueue *self)
 inline bool
 QueueFull(tQueue *self)
 {
-    return (self->write+1) % EVENT_QUEUE_LENGTH == self->read;
+    return (self->write + 1) % EVENT_QUEUE_LENGTH == self->read;
 }
 
 
 inline tEvent*
 QueueAcquire(tQueue *self)
 {
+    ASSERT(!QueueFull(self));
     return self->queue + self->write;
 }
 
@@ -61,6 +64,7 @@ QueueWrite(tQueue *self)
 inline tEvent*
 QueueRead(tQueue *self)
 {
+    ASSERT(!QueueEmpty(self));
     return self->queue + self->read;
 }
 
@@ -100,6 +104,20 @@ EventSetReply(tEvent *self, enum Reply reply)
     self->payload[1] = noType;
     self->payload[2] = 0;
     self->payload[3] = 255;
+
+    self->ring = 0;
+}
+
+inline void
+EventSetRing(tEvent *self, tRing *ring)
+{
+    self->ring = ring;
+}
+
+inline tRing*
+EventGetRing(tEvent *self)
+{
+    return self->ring;
 }
 
 inline enum Reply

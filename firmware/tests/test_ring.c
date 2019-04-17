@@ -18,12 +18,12 @@ test_ring_allocate()
     tRing ring;
     test();
 
-    assert(memory.acquire == 0);
+    assert(memory.lock == 0);
     RingAllocate(&ring, MEMORY_LENGTH);
-    assert(memory.acquire == MEMORY_LENGTH);
+    assert(memory.lock == MEMORY_LENGTH);
 
-    MemoryRelease(&memory);
-    assert(memory.acquire == 0);
+    RingFree(&ring);
+    assert(memory.lock == 0);
 
     ok();
 }
@@ -41,7 +41,7 @@ test_ring_empty()
     assert(!RingContent(&ring));
     assert(!RingFull(&ring));
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }
@@ -64,7 +64,7 @@ test_ring_content()
 
     assert(!RingFull(&ring));
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }
@@ -87,7 +87,7 @@ test_ring_full()
     assert(RingContent(&ring));
     assert(RingFull(&ring));
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }
@@ -113,7 +113,7 @@ test_ring_read()
 
     assert(!RingFull(&ring));
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }
@@ -141,7 +141,7 @@ test_ring_iter()
     assert(!RingEmpty(&ring));
     assert(!RingFull(&ring));
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }
@@ -169,7 +169,7 @@ test_ring_fill_up()
 
     assert(i == MEMORY_LENGTH);
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }
@@ -205,7 +205,7 @@ test_ring_wrap_fill_up()
 
     assert(i == MEMORY_LENGTH);
 
-    MemoryRelease(&memory);
+    RingFree(&ring);
 
     ok();
 }

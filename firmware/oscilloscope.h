@@ -24,7 +24,7 @@ tError OscilloscopeStart(tOscilloscope *self, uint32_t samplerate);
 
 tError OscilloscopeStop(tOscilloscope *self); // internal and for tests
 
-void OscilloscopeMain(tOscilloscope *self, bool enable_usb);
+void OscilloscopeMain(tOscilloscope *self, bool enable_reply);
 
 void OscilloscopeInit(tOscilloscope *self);
 

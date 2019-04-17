@@ -83,7 +83,6 @@ void ProtocolTest::initTestCase()
 
 void ProtocolTest::cleanupTestCase()
 {
-    board.clear();
 }
 
 void ProtocolTest::test_startLogger()

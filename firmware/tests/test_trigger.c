@@ -13,21 +13,24 @@
 #include "microtest.h"
 
 
+#define SAMPLERATE 1
+
+
 void
 test_trigger_lock()
 {
     test();
 
     assert(trigger.lock == false);
-    assert(TriggerStart(&trigger, 1) == OK);
+    assert(TriggerStart(&trigger, SAMPLERATE) == OK);
     assert(trigger.lock == true);
     assert(adc_group.lock == true);
-    assert(memory.acquire);
+    assert(memory.lock);
     assert(TriggerStop(&trigger) == OK);
-    MemoryRelease(&memory);
+    MemoryUnlock(&memory, memory.lock);
     assert(trigger.lock == false);
     assert(adc_group.lock == false);
-    assert(memory.acquire == 0);
+    assert(memory.lock == 0);
 
     ok();
 }
@@ -38,10 +41,10 @@ test_trigger_double_start()
 {
     test();
 
-    assert(TriggerStart(&trigger, 1) == OK);
-    assert(TriggerStart(&trigger, 1) == LOCK_ERROR);
+    assert(TriggerStart(&trigger, SAMPLERATE) == OK);
+    assert(TriggerStart(&trigger, SAMPLERATE) == LOCK_ERROR);
     assert(TriggerStop(&trigger) == OK);
-    MemoryRelease(&memory);
+    MemoryUnlock(&memory, memory.lock);
 
     ok();
 }
@@ -52,9 +55,9 @@ test_trigger_double_stop()
 {
     test();
 
-    assert(TriggerStart(&trigger, 1) == OK);
+    assert(TriggerStart(&trigger, SAMPLERATE) == OK);
     assert(TriggerStop(&trigger) == OK);
-    MemoryRelease(&memory);
+    MemoryUnlock(&memory, memory.lock);
     assert(TriggerStop(&trigger) == LOCK_ERROR);
 
     ok();
@@ -67,8 +70,21 @@ test_trigger_adc_error()
     test();
 
     adc_group.lock = true;
-    assert(TriggerStart(&trigger, 1) == ADC_ERROR);
+    assert(TriggerStart(&trigger, SAMPLERATE) == ADC_ERROR);
     adc_group.lock = false;
+
+    ok();
+}
+
+
+void
+test_trigger_memory_error(void)
+{
+    test();
+
+    MemoryLock(&memory, 1);
+    assert(TriggerStart(&trigger, SAMPLERATE) == MEMORY_ERROR);
+    MemoryUnlock(&memory, memory.lock);
 
     ok();
 }
@@ -98,7 +114,7 @@ test_trigger_measurement()
     // 500 kHz, trigger is too slow for 1 MHz
     TriggerStart(&trigger, 2);
     while (trigger.lock) TriggerMain(&trigger, false);
-    MemoryRelease(&memory); // early on, because of return statements
+    MemoryUnlock(&memory, memory.lock); // early on, because of return statements
 
     i = 0;
     head = (uint8_t *) &i; // point head to 4 bytes of zero
@@ -141,5 +157,6 @@ test_trigger()
     test_trigger_double_start();
     test_trigger_double_stop();
     test_trigger_adc_error();
+    test_trigger_memory_error();
     test_trigger_measurement();
 }

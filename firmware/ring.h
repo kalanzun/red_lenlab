@@ -23,7 +23,7 @@ typedef struct Page {
 
 typedef struct Memory {
     tPage pages[MEMORY_LENGTH];
-    uint32_t acquire;
+    volatile uint32_t lock; // count of pages, which are locked
 } tMemory;
 
 
@@ -51,34 +51,36 @@ typedef struct RingIter {
 
 
 inline tPage*
-MemoryAcquire(tMemory *self, uint32_t length)
+MemoryLock(tMemory *self, uint32_t length)
 {
-    ASSERT(self->acquire + length <= MEMORY_LENGTH);
-    tPage *page = self->pages + self->acquire;
-    self->acquire = self->acquire + length;
+    tPage *page;
+
+    ASSERT(self->lock + length <= MEMORY_LENGTH);
+    page = self->pages + self->lock;
+    self->lock = self->lock + length;
     return page;
 }
 
 
 inline void
-MemoryRelease(tMemory *self)
+MemoryUnlock(tMemory *self, uint32_t length)
 {
-    ASSERT(self->acquire);
-    self->acquire = 0;
+    ASSERT(length <= self->lock);
+    self->lock = self->lock - length;
 }
 
 
 inline void
 MemoryInit(tMemory *self)
 {
-    self->acquire = 0;
+    self->lock = 0;
 }
 
 
 inline void
 RingAllocate(tRing *self, uint32_t length)
 {
-    self->pages = MemoryAcquire(&memory, length);
+    self->pages = MemoryLock(&memory, length);
     self->length = length;
     self->acquire = 0;
     self->write = 0;
@@ -87,6 +89,13 @@ RingAllocate(tRing *self, uint32_t length)
     self->empty = 1;
     self->full = 0;
     self->content = 0;
+}
+
+
+inline void
+RingFree(tRing *self)
+{
+    MemoryUnlock(&memory, self->length);
 }
 
 
