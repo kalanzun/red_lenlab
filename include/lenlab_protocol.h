@@ -52,6 +52,7 @@ enum Command {
     startTrigger,
     startLogger,
     stopLogger,
+    startOscilloscopeLinearTestData,
     NUM_COMMANDS
 };
 

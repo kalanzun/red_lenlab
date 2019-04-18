@@ -58,6 +58,7 @@ public:
     pTransaction getVersion();
     pTransaction setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider, uint32_t amplitude, uint32_t second);
     pTransaction startOscilloscope(uint32_t samplerate);
+    pTransaction startOscilloscopeLinearTestData();
     pTransaction startOscilloscopeTrigger(uint32_t samplerate);
     pTransaction startLogger(uint32_t interval);
     pTransaction stopLogger();

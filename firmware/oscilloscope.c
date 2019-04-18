@@ -57,6 +57,48 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 
 
 tError
+OscilloscopeLinearTestData(tOscilloscope *self)
+{
+    unsigned int i, j, k;
+    tRing *ring;
+    tPage *page;
+    uint16_t *short_buffer;
+
+    if (self->lock) return LOCK_ERROR;
+
+    if (adc_group.lock) return ADC_ERROR;
+
+    if (memory.lock) return MEMORY_ERROR;
+
+    self->lock = 1;
+
+    ADCGroupLock(&adc_group);
+
+    // 2 rings of 10 pages each (osc_seq want's an even number)
+    OscSeqGroupAllocate(&osc_seq_group, 10);
+
+    // write linear test data into the DMA buffer
+    FOREACH_ADC {
+        ring = &osc_seq_group.osc_seq[i].ring;
+        j = 0;
+        while (!RingFull(ring)) {
+            page = RingAcquire(ring);
+            short_buffer = (uint16_t *) &page->buffer;
+
+            for (k = 0; k < OSCILLOSCOPE_SAMPLES; k++) {
+                short_buffer[2 + k] = k + (j * OSCILLOSCOPE_SAMPLES);
+            }
+
+            RingWrite(ring);
+            j++;
+        }
+    }
+
+    return OK;
+}
+
+
+tError
 OscilloscopeStop(tOscilloscope *self)
 {
     if (!self->lock) return LOCK_ERROR;

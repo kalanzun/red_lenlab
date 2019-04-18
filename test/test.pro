@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     protocoltest \
-    usbtest
+    usbtest \
+    measurementtest

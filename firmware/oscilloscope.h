@@ -19,6 +19,7 @@ typedef struct Oscilloscope {
 
 extern tOscilloscope oscilloscope;
 
+tError OscilloscopeLinearTestData(tOscilloscope *self);
 
 tError OscilloscopeStart(tOscilloscope *self, uint32_t samplerate);
 

@@ -1,0 +1,90 @@
+#include "protocol/manager.h"
+#include "protocol/message.h"
+#include "protocol/board.h"
+#include "lenlab_protocol.h"
+#include <QString>
+#include <QDebug>
+#include <QPointer>
+#include <QtTest>
+#include <QCoreApplication>
+
+// add necessary includes here
+
+class MeasurementTest : public QObject
+{
+    Q_OBJECT
+
+public:
+    MeasurementTest();
+    ~MeasurementTest();
+
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void test_startOscilloscopeLinearTestData();
+
+private:
+    protocol::Manager manager;
+    QPointer<protocol::Board> board;
+
+    int m_short_timeout = 100;
+    int m_long_timeout = 800;
+};
+
+MeasurementTest::MeasurementTest()
+{
+
+}
+
+MeasurementTest::~MeasurementTest()
+{
+
+}
+
+void MeasurementTest::initTestCase()
+{
+    QSignalSpy spy(&manager, &protocol::Manager::ready);
+    QVERIFY(spy.isValid());
+
+    manager.start();
+
+    QVERIFY(spy.wait(m_long_timeout));
+
+    board = qvariant_cast<QPointer<protocol::Board>>(spy.at(0).at(0));
+}
+
+void MeasurementTest::cleanupTestCase()
+{
+
+}
+
+void MeasurementTest::test_startOscilloscopeLinearTestData()
+{
+    uint16_t *short_buffer;
+
+    auto transaction = board->startOscilloscopeLinearTestData();
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
+
+    QCOMPARE(transaction->replies.count(), 20);
+
+    unsigned int j = 0;
+    for (auto reply: transaction->replies) {
+        QVERIFY(reply->getReply() == OscilloscopeData);
+        QVERIFY(reply->getType() == ShortArray);
+        QVERIFY(reply->getShortBufferLength() == 510);
+        short_buffer = reply->getShortBuffer();
+        for (unsigned int i = 0; i < 510; i++) {
+            if (!(short_buffer[i] == i + (j * 510))) {
+                qDebug() << i << j << short_buffer[i];
+                QVERIFY(false);
+            }
+        }
+        j = (j + 1) % 10;
+    }
+}
+
+QTEST_MAIN(MeasurementTest)
+
+#include "tst_measurementtest.moc"

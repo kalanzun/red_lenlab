@@ -153,6 +153,18 @@ Board::startOscilloscope(uint32_t samplerate)
 }
 
 pTransaction
+Board::startOscilloscopeLinearTestData()
+{
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::startOscilloscopeLinearTestData);
+
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
+}
+
+pTransaction
 Board::startOscilloscopeTrigger(uint32_t samplerate)
 {
     QVector<uint32_t> args;
