@@ -14,7 +14,7 @@
 
 
 // number of samples and offset in a memory page
-#define OSCILLOSCOPE_SAMPLES 510
+#define OSCILLOSCOPE_SAMPLES 508
 #define OSCILLOSCOPE_OFFSET 1
 
 

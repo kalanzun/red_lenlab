@@ -28,16 +28,25 @@ def startTriggerLinearTestData():
     return cmd
 
 
+# package, 4 bytes per line
+# head (reply, type, 0, last)
+# preamble (state0{2}, state1{2})
+# data (trigger{2}, delta0{1}, delta1{1})
+# data (delta0{1}, delta1{1}, delta0{1}, delta1{1})
+
 dev.write(0x1, startTriggerLinearTestData())
 reply = dev.read(0x81, 100 * 1024)
-data = np.ndarray((18, 1024), np.int8, reply) # checks len
+head = np.ndarray((18, 512), np.uint16, reply)  # checks len
+data = np.ndarray((18, 1024), np.int8, reply)  # checks len
 
 # 4 byte head and 2 byte empty
 # even bytes are channel 1, odd bytes are channel 2
-data0 = np.cumsum(data[:, 6:1024:2]).flat
-data1 = np.cumsum(data[:, 7:1024:2]).flat
+print("trigger value", np.sum(head[:, 6]))
+data0 = (head[:, 2].reshape((18, 1)) + np.cumsum(data[:, 10:1024:2], axis=1)).flat
+data1 = (head[:, 3].reshape((18, 1)) + np.cumsum(data[:, 11:1024:2], axis=1)).flat
+
 plt.plot(data0)
 plt.plot(data1)
-# plt.plot(data[9:, 2:512].flat)
+
 plt.grid()
 plt.show()

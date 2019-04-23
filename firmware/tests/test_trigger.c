@@ -128,18 +128,18 @@ test_trigger_measurement()
             fail("head (page[%i], (uint32_t *) buffer[0])", iter.read);
             ASSERT(0);
         }
-        // alignment
-        buffer = (int8_t *) (page->buffer);
-        for (j = 4; j < 6; j++) {
-            if (buffer[j] != -128) {
-                fail("alignment (page[%i], (uint8_t *) buffer[%i])", iter.read, j);
+        // preamble
+        for (j = 0; j < 6; j++) {
+            if (buffer[j + 4] == -128) {
+                fail("preamble (page[%i], (int8_t *) buffer[%i])", iter.read, j + 4);
                 ASSERT(0);
             }
         }
         // measurement values
+        buffer = (int8_t *) (page->buffer);
         for (j = 0; j < 2 * OSCILLOSCOPE_SAMPLES; j++) {
-            if (buffer[j + 6] == -128) {
-                fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j + 6);
+            if (buffer[j + 10] == -128) {
+                fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j + 10);
                 ASSERT(0);
             }
         }

@@ -12,7 +12,7 @@
 #include "reply_handler.h"
 
 
-#define TRIGGER_OFFSET 1
+#define TRIGGER_OFFSET 2
 
 
 tError
@@ -99,6 +99,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
     tPage *page;
 
     uint8_t *head;
+    uint16_t *preamble;
 
     tPage *adc_page0;
     tPage *adc_page1;
@@ -132,13 +133,14 @@ TriggerMain(tTrigger *self, bool enable_reply)
     head[2] = 0;
     head[3] = 0;
 
+    preamble = (uint16_t *) (page->buffer + 1);
+
     state0 = buffer0[0] >> 2;
     state1 = buffer1[0] >> 2;
-    /*
-    *(uint16_t *) (page->buffer + 4) = state0;
-    *(uint16_t *) (page->buffer + 6) = state1;
-    *(uint16_t *) (page->buffer + 8) = 0; // trigger value
-    */
+
+    preamble[0] = state0;
+    preamble[1] = state1;
+    preamble[2] = 0; // trigger value
 
     data = (int8_t *) (page->buffer + TRIGGER_OFFSET);
 
@@ -168,7 +170,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
         if (self->active && (self->state > (8*512))) {
             self->active = 0;
             self->save = 1;
-            //*(uint16_t *) (page->buffer + 2) = i;
+            preamble[2] = i; // trigger value
         }
     }
 
@@ -208,7 +210,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
 tError
 TriggerLinearTestData(tTrigger *self)
 {
-    unsigned int i, j, k;
+    unsigned int i, k;
     tRing *ring;
     tPage *page;
     uint16_t *short_buffer;
