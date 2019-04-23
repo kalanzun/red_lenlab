@@ -205,6 +205,74 @@ TriggerMain(tTrigger *self, bool enable_reply)
 }
 
 
+tError
+TriggerLinearTestData(tTrigger *self)
+{
+    unsigned int i, j, k;
+    tRing *ring;
+    tPage *page;
+    uint16_t *short_buffer;
+
+    if (self->lock) return LOCK_ERROR;
+
+    if (adc_group.lock) return ADC_ERROR;
+
+    if (memory.lock) return MEMORY_ERROR;
+
+    self->lock = 1;
+
+    for (i = 0; i < TRIGGER_FILTER_LENGTH; i++) self->filter[i] = 0;
+    self->index = 0;
+    self->state = 0;
+
+    self->wait = 0;
+    self->active = 0;
+    self->save = 0;
+    self->count = 0;
+    self->post_count = 0;
+
+    // 18 memory pages
+    RingAllocate(&self->ring, 18);
+
+    ADCGroupLock(&adc_group);
+
+    // 2 rings of 2 memory pages each
+    OscSeqGroupAllocate(&osc_seq_group, 2);
+
+    FOREACH_ADC {
+        osc_seq_group.osc_seq[i].ping_enable = 1;
+        osc_seq_group.osc_seq[i].pong_enable = 1;
+
+        page = RingAcquire(&osc_seq_group.osc_seq[i].ring);
+    }
+
+    while(self->lock) {
+        // write linear test data into the DMA buffer
+        FOREACH_ADC {
+            ring = &osc_seq_group.osc_seq[i].ring;
+            page = ring->acquire > 0 ? ring->pages + ring->acquire - 1 : ring->pages + ring->length - 1;
+            short_buffer = (uint16_t *) (page->buffer + OSCILLOSCOPE_OFFSET);
+
+            for (k = 0; k < OSCILLOSCOPE_SAMPLES / 2; k++) {
+                short_buffer[k] = 16 * k;
+            }
+            for (; k < OSCILLOSCOPE_SAMPLES; k++) {
+                short_buffer[k] = 4080 - (16 * (k - 255));
+            }
+
+            RingWrite(ring);
+
+            osc_seq_group.osc_seq[i].ping_enable = 0; // DMA done
+        }
+
+        TriggerMain(self, true); // will reset self->lock at some point
+        // calls RingAcquire
+    }
+
+    return OK;
+}
+
+
 void
 TriggerInit(tTrigger *self)
 {

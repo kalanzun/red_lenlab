@@ -41,6 +41,8 @@ tError TriggerStop(tTrigger *self); // internal and for tests
 
 void TriggerMain(tTrigger *self, bool enable_reply);
 
+tError TriggerLinearTestData(tTrigger *self);
+
 void TriggerInit(tTrigger *self);
 
 

@@ -220,6 +220,26 @@ on_startTrigger(tEvent *event)
 
 
 void
+on_startTriggerLinearTestData(tEvent *event)
+{
+    tEvent *reply;
+    tError error;
+
+    DEBUG_PRINT("startTriggerLinearTestData");
+
+    error = TriggerLinearTestData(&trigger);
+
+    if (error) {
+        reply = QueueAcquire(&reply_handler.reply_queue);
+        EventSetReply(reply, Error);
+        EventSetError(reply, error);
+        EventSetBodyLength(reply, 0);
+        QueueWrite(&reply_handler.reply_queue);
+    }
+}
+
+
+void
 on_error()
 {
     tEvent *reply;
@@ -253,6 +273,7 @@ CommandHandlerMain(tCommandHandler *self)
         else if (command == startOscilloscope) on_startOscilloscope(event);
         else if (command == startTrigger) on_startTrigger(event);
         else if (command == startOscilloscopeLinearTestData) on_startOscilloscopeLinearTestData(event);
+        else if (command == startTriggerLinearTestData) on_startTriggerLinearTestData(event);
         /*
         else if (command == setSignalSine) on_setSignalSine(event);
         else if (command == stopSignal) on_stopSignal(event);
