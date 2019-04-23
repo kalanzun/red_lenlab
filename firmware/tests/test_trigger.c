@@ -129,6 +129,7 @@ test_trigger_measurement()
             ASSERT(0);
         }
         // preamble
+        buffer = (int8_t *) (page->buffer);
         for (j = 0; j < 6; j++) {
             if (buffer[j + 4] == -128) {
                 fail("preamble (page[%i], (int8_t *) buffer[%i])", iter.read, j + 4);
@@ -136,7 +137,6 @@ test_trigger_measurement()
             }
         }
         // measurement values
-        buffer = (int8_t *) (page->buffer);
         for (j = 0; j < 2 * OSCILLOSCOPE_SAMPLES; j++) {
             if (buffer[j + 10] == -128) {
                 fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j + 10);

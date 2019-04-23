@@ -15,7 +15,7 @@
 
 // number of samples and offset in a memory page
 #define OSCILLOSCOPE_SAMPLES 508
-#define OSCILLOSCOPE_OFFSET 1
+#define OSCILLOSCOPE_OFFSET 2
 
 
 typedef struct OscSeq {

@@ -138,8 +138,8 @@ test_oscilloscope_measurement()
             // measurement values
             short_buffer = (uint16_t *) page->buffer;
             for (j = 0; j < OSCILLOSCOPE_SAMPLES; j++) {
-                if (short_buffer[j + 2] == 0xFFFF) {
-                    fail("value (adc[%i], page[%i], (uint16_t *) buffer[%i])", i, iter.read, j + 2);
+                if (short_buffer[j + 2 * OSCILLOSCOPE_OFFSET] == 0xFFFF) {
+                    fail("value (adc[%i], page[%i], (uint16_t *) buffer[%i])", i, iter.read, j + 2 * OSCILLOSCOPE_OFFSET);
                     ASSERT(0);
                 }
             }

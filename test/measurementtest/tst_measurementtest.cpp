@@ -75,9 +75,9 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
         QVERIFY(reply->getType() == ShortArray);
         QVERIFY(reply->getShortBufferLength() == 510);
         short_buffer = reply->getShortBuffer();
-        for (unsigned int i = 0; i < 510; i++) {
-            if (!(short_buffer[i] == i + (j * 510))) {
-                qDebug() << i << j << short_buffer[i];
+        for (unsigned int i = 0; i < 508; i++) {
+            if (!(short_buffer[i + 2] == i + (j * 508))) {
+                qDebug() << i << j << short_buffer[i + 2];
                 QVERIFY(false);
             }
         }

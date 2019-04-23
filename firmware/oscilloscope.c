@@ -86,7 +86,7 @@ OscilloscopeLinearTestData(tOscilloscope *self)
             short_buffer = (uint16_t *) &page->buffer;
 
             for (k = 0; k < OSCILLOSCOPE_SAMPLES; k++) {
-                short_buffer[2 + k] = k + (j * OSCILLOSCOPE_SAMPLES);
+                short_buffer[2 * OSCILLOSCOPE_OFFSET + k] = k + (j * OSCILLOSCOPE_SAMPLES);
             }
 
             RingWrite(ring);
