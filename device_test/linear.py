@@ -1,4 +1,6 @@
 
+from pathlib import Path
+
 from array import array
 import usb.core
 import usb.backend.libusb1
@@ -6,7 +8,7 @@ import usb.backend.libusb1
 import numpy as np
 import matplotlib.pyplot as plt
 
-backend = usb.backend.libusb1.get_backend(find_library=lambda x: "C:/Users/Christoph/devel/red_lenlab/libusb/MS64/dll/libusb-1.0.dll")
+backend = usb.backend.libusb1.get_backend(find_library=lambda x: str(Path("../libusb/MS64/dll/libusb-1.0.dll").resolve()))
 assert(backend)
 dev = usb.core.find(idVendor=0x1cbe, idProduct=0x0270, backend=backend)
 
