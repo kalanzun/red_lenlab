@@ -170,7 +170,8 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         {
             size = USBDBulkRxPacketAvailable(&bulk_device);
             //DEBUG_PRINT("USB_EVENT_RX_AVAILABLE %d\n", size);
-            if (size > LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH) size = LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH;
+            if (size > LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH)
+                size = LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH;
             if (size) {
                 if (!QueueFull(&command_handler.command_queue)) {
                     event = QueueAcquire(&command_handler.command_queue);

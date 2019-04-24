@@ -41,15 +41,15 @@ data = np.ndarray((18, 1024), np.int8, reply)  # checks len
 
 # 4 byte head and 2 byte empty
 # even bytes are channel 1, odd bytes are channel 2
-print("trigger value", np.sum(head[:, 6]))
-data0 = (head[:, 2].reshape((18, 1)) + np.cumsum(data[:, 10:1024:2], axis=1)).flat
-data1 = (head[:, 3].reshape((18, 1)) + np.cumsum(data[:, 11:1024:2], axis=1)).flat
+print("trigger value", np.sum(head[:, 2]))
+data0 = (head[:, 4].reshape((18, 1)) + np.cumsum(data[:, 18::2], axis=1)).flat
+data1 = (head[:, 5].reshape((18, 1)) + np.cumsum(data[:, 19::2], axis=1)).flat
 
 plt.plot(data0)
 plt.plot(data1)
 
-#plt.plot(data[:, 10::2].flat)
-#plt.plot(data[:, 11::2].flat)
+# plt.plot(data[:, 18::2].flat)
+# plt.plot(data[:, 19::2].flat)
 
 plt.grid()
 plt.show()

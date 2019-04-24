@@ -76,9 +76,10 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
         QVERIFY(reply->getType() == ShortArray);
         QVERIFY(reply->getUInt16BufferLength() == 510);
         short_buffer = reply->getUInt16Buffer();
-        for (unsigned int i = 0; i < 508; i++) {
-            if (!(short_buffer[i + 2] == i + (j * 508))) {
-                qDebug() << i << j << short_buffer[i + 2];
+        // 6 shorts preamble, 504 shorts data
+        for (unsigned int i = 6; i < reply->getUInt16BufferLength(); i++) {
+            if (!(short_buffer[i] == (i - 6) + (j * 504))) {
+                qDebug() << i << j << short_buffer[i];
                 QVERIFY(false);
             }
         }
@@ -89,7 +90,6 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
 void MeasurementTest::test_startTriggerLinearTestData()
 {
     int8_t *byte_buffer;
-    size_t length;
 
     auto transaction = board->startTriggerLinearTestData();
     QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
@@ -101,10 +101,10 @@ void MeasurementTest::test_startTriggerLinearTestData()
     for (auto reply: transaction->replies) {
         QVERIFY(reply->getReply() == OscilloscopeData);
         QVERIFY(reply->getType() == ByteArray);
-        length = reply->getInt8BufferLength();
         QVERIFY(reply->getInt8BufferLength() == 1020);
         byte_buffer = reply->getInt8Buffer();
-        for (unsigned int i = 6; i < reply->getInt8BufferLength(); i++) {
+        // 14 byte preamble, 1006 byte data
+        for (unsigned int i = 14; i < reply->getInt8BufferLength(); i++) {
             if (!(byte_buffer[i] == 4 || byte_buffer[i] == -4)) {
                 qDebug() << i << byte_buffer[i];
                 QVERIFY(false);

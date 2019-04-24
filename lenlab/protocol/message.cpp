@@ -43,7 +43,7 @@ Message::getPacket()
 size_t
 Message::getHeadLength()
 {
-    return MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE;
+    return LENLAB_PACKET_HEAD_LENGTH;
 }
 
 uint8_t *
@@ -56,8 +56,9 @@ void
 Message::setCommand(Command code)
 {
     packet->getByteBuffer()[0] = code;
-    for (int i = 1; i < 4; i++) packet->getByteBuffer()[i] = 0;
-    packet->setByteLength(MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE);
+    for (int i = 1; i < LENLAB_PACKET_HEAD_LENGTH; i++)
+        packet->getByteBuffer()[i] = 0;
+    packet->setByteLength(LENLAB_PACKET_HEAD_LENGTH);
 }
 
 Command
@@ -70,8 +71,9 @@ void
 Message::setReply(Reply reply)
 {
     packet->getByteBuffer()[0] = reply;
-    for (int i = 1; i < 4; i++) packet->getByteBuffer()[i] = 0;
-    packet->setByteLength(MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE);
+    for (int i = 1; i < LENLAB_PACKET_HEAD_LENGTH; i++)
+        packet->getByteBuffer()[i] = 0;
+    packet->setByteLength(LENLAB_PACKET_HEAD_LENGTH);
 }
 
 Reply
@@ -101,13 +103,13 @@ Message::isLast()
 size_t
 Message::getUInt32BufferLength()
 {
-    return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint32_t);
+    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(uint32_t);
 }
 
 uint32_t *
 Message::getUInt32Buffer()
 {
-    return (packet->getBuffer() + MESSAGE_HEAD_LENGTH);
+    return (packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
 }
 
 void
@@ -116,50 +118,49 @@ Message::setUInt32Vector(const QVector<uint32_t> &vector)
     setType(IntArray);
     for (int i = 0; i < vector.size(); ++i)
         getUInt32Buffer()[i] = vector.at(i);
-    packet->setByteLength((MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE) + (static_cast<size_t>(vector.size()) * sizeof(uint32_t)));
+    packet->setByteLength((LENLAB_PACKET_HEAD_LENGTH) + (static_cast<size_t>(vector.size()) * sizeof(uint32_t)));
 }
 
 size_t
 Message::getUInt16BufferLength()
 {
-    return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint16_t);
+    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(uint16_t);
 }
 
 uint16_t *
 Message::getUInt16Buffer()
 {
-    return reinterpret_cast<uint16_t *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
+    return reinterpret_cast<uint16_t *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
 }
 
 size_t
 Message::getUInt8BufferLength()
 {
-    return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint8_t);
+    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(uint8_t);
 }
 
 uint8_t *
 Message::getUInt8Buffer()
 {
-    return reinterpret_cast<uint8_t *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
+    return reinterpret_cast<uint8_t *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
 }
-
 
 size_t
 Message::getInt8BufferLength()
 {
-    return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(int8_t);
+    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(int8_t);
 }
 
 int8_t *
 Message::getInt8Buffer()
 {
-    return reinterpret_cast<int8_t *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
+    return reinterpret_cast<int8_t *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
 }
 
 QString
 Message::getString()
 {
-    auto str = reinterpret_cast<const char *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
+    auto str = reinterpret_cast<const char *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
     Q_ASSERT(*(str + getUInt8BufferLength() - 1) == 0);
     return QString(str);
 }

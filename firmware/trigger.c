@@ -8,11 +8,7 @@
 
 #include "trigger.h"
 
-#include "lenlab_protocol.h"
 #include "reply_handler.h"
-
-
-#define TRIGGER_OFFSET 2
 
 
 tError
@@ -99,7 +95,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
     tPage *page;
 
     uint8_t *head;
-    uint16_t *preamble;
+    uint16_t *short_head;
 
     tPage *adc_page0;
     tPage *adc_page1;
@@ -127,22 +123,22 @@ TriggerMain(tTrigger *self, bool enable_reply)
 
     page = RingAcquire(&self->ring);
     head = (uint8_t *) page->buffer;
+    short_head = (uint16_t *) page->buffer;
 
     head[0] = OscilloscopeData;
     head[1] = ByteArray;
     head[2] = 0;
     head[3] = 0;
 
-    preamble = (uint16_t *) (page->buffer + 1);
-
     state0 = buffer0[0] >> 2;
     state1 = buffer1[0] >> 2;
 
-    preamble[0] = state0;
-    preamble[1] = state1;
-    preamble[2] = 0; // trigger value
+    short_head[2] = 0; // trigger value
+    short_head[3] = 0; // empty
+    short_head[4] = state0;
+    short_head[5] = state1;
 
-    data = (int8_t *) (page->buffer + TRIGGER_OFFSET);
+    data = (int8_t *) (page->buffer + OSCILLOSCOPE_OFFSET);
 
     if (self->count == 8) {
         self->wait = 1;
@@ -170,7 +166,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
         if (self->active && (self->state > (8*512))) {
             self->active = 0;
             self->save = 1;
-            preamble[2] = i; // trigger value
+            short_head[2] = i; // trigger value
         }
     }
 

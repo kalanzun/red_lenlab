@@ -39,7 +39,7 @@ packet header, 4 bytes
  */
 
 #define LENLAB_PACKET_HEAD_LENGTH 4
-#define LENLAB_PACKET_BODY_LENGTH 60
+#define LENLAB_PACKET_BODY_LENGTH 60 // command and reply packet
 
 enum Command {
     noCommand,

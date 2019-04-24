@@ -124,22 +124,21 @@ test_trigger_measurement()
         page = RingIterGet(&iter);
         // head
         head = (uint8_t *) (page->buffer);
+        buffer = (int8_t *) (page->buffer);
         if (!(head[0] == 5 && head[1] == 2 && head[2] == 0)) {
             fail("head (page[%i], (uint32_t *) buffer[0])", iter.read);
             ASSERT(0);
         }
-        // preamble
-        buffer = (int8_t *) (page->buffer);
-        for (j = 0; j < 6; j++) {
-            if (buffer[j + 4] == -128) {
-                fail("preamble (page[%i], (int8_t *) buffer[%i])", iter.read, j + 4);
+        for (j = 4; j < 12; j++) {
+            if (buffer[j] == -128) {
+                fail("head (page[%i], (int8_t *) buffer[%i])", iter.read, j);
                 ASSERT(0);
             }
         }
         // measurement values
-        for (j = 0; j < 2 * OSCILLOSCOPE_SAMPLES; j++) {
-            if (buffer[j + 10] == -128) {
-                fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j + 10);
+        for (j = OSCILLOSCOPE_OFFSET * 4 + 2; j < OSCILLOSCOPE_OFFSET * 4 + OSCILLOSCOPE_SAMPLES * 2; j++) {
+            if (buffer[j] == -128) {
+                fail("value (page[%i], (uint8_t *) buffer[%i])", iter.read, j);
                 ASSERT(0);
             }
         }

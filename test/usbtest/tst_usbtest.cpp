@@ -38,8 +38,9 @@ public:
 private slots:
     void initTestCase();
     void cleanupTestCase();
-    usb::pPacket create_command(enum Command code);
-    void verify_header(const usb::pPacket &reply, enum Reply code, enum Type type);
+    usb::pPacket create_command(enum Command code, Type type);
+    void set_single_int(const usb::pPacket &cmd, const uint32_t &value);
+    void verify_header(const usb::pPacket &reply, Reply code, Type type, uint8_t error = 0, bool last = true);
     void test_bus_query_unsuccessfull();
     void test_device_construct_error();
     void test_device_send_error();
@@ -79,26 +80,32 @@ void USBTest::cleanupTestCase()
     device.clear();
 }
 
-usb::pPacket USBTest::create_command(enum Command code)
+usb::pPacket USBTest::create_command(enum Command code, enum Type type = noType)
 {
     auto cmd = usb::pPacket::create();
     auto buffer = cmd->getByteBuffer();
     buffer[0] = code;
-    buffer[1] = 0;
+    buffer[1] = type;
     buffer[2] = 0;
-    buffer[3] = 0;
-    cmd->setByteLength(4);
+    buffer[3] = 255; // last packet
+    cmd->setByteLength(LENLAB_PACKET_HEAD_LENGTH);
     return cmd;
 }
 
-void USBTest::verify_header(const usb::pPacket &reply, enum Reply code, enum Type type)
+void USBTest::set_single_int(const usb::pPacket &cmd, const uint32_t &value)
+{
+    cmd->getBuffer()[LENLAB_PACKET_HEAD_LENGTH / 4] = value;
+    cmd->setByteLength(LENLAB_PACKET_HEAD_LENGTH + 4);
+}
+
+void USBTest::verify_header(const usb::pPacket &reply, enum Reply code, enum Type type, uint8_t error, bool last)
 {
     QVERIFY(reply->getByteLength() >= 4);
     auto buffer = reply->getByteBuffer();
     QCOMPARE(buffer[0], code);
     QCOMPARE(buffer[1], type);
-    QCOMPARE(buffer[2], 0);
-    QCOMPARE(buffer[3], 255);
+    if (error) QCOMPARE(buffer[2], error);
+    if (last) QCOMPARE(buffer[3], 255);
 }
 
 void USBTest::test_bus_query_unsuccessfull()
@@ -114,7 +121,7 @@ void USBTest::test_device_construct_error()
         // fails, because the device is already open from initTestCase
         QVERIFY(false);
     } catch (const usb::Exception &e) {
-        qDebug() << e.getMsg();
+        //qDebug() << e.getMsg();
         QVERIFY(true);
     }
 }
@@ -163,7 +170,7 @@ void USBTest::test_getName()
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
     verify_header(reply, Name, String);
 
-    QString reply_name(reinterpret_cast<const char *>(reply->getByteBuffer() + 4));
+    QString reply_name(reinterpret_cast<const char *>(reply->getByteBuffer() + LENLAB_PACKET_HEAD_LENGTH));
     //qDebug() << reply_name;
 
     auto name = QString("Lenlab red Firmware Version %1.%2").arg(MAJOR).arg(MINOR);
@@ -186,9 +193,9 @@ void USBTest::test_getVersion()
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
     verify_header(reply, Version, IntArray);
 
-    QCOMPARE(reply->getByteLength(), 3u*4u);
+    QCOMPARE(reply->getByteLength(), LENLAB_PACKET_HEAD_LENGTH + 2u*4u);
 
-    uint32_t *array = reply->getBuffer() + 1;
+    uint32_t *array = reply->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4;
     QCOMPARE(array[0], uint32_t(MAJOR));
     QCOMPARE(array[1], uint32_t(MINOR));
 
@@ -200,15 +207,11 @@ void USBTest::test_startOscilloscopeLockError()
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
 
-    auto cmd = create_command(startOscilloscope);
-    cmd->getByteBuffer()[1] = IntArray;
-    cmd->getBuffer()[1] = 1; // samplerate
-    cmd->setByteLength(4 + 4);
+    auto cmd = create_command(startOscilloscope, IntArray);
+    set_single_int(cmd, 1); // samplerate
 
-    auto sec = create_command(startOscilloscope);
-    sec->getByteBuffer()[1] = IntArray;
-    sec->getBuffer()[1] = 1; // samplerate
-    sec->setByteLength(4 + 4);
+    auto sec = create_command(startOscilloscope, IntArray);
+    set_single_int(sec, 1); // samplerate
 
     // send command
     device->send(cmd);
@@ -218,15 +221,13 @@ void USBTest::test_startOscilloscopeLockError()
     // which should fail
     QVERIFY(spy.wait(m_long_timeout));
     auto reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
-    QCOMPARE(reply->getByteBuffer()[0], Error);
-    QCOMPARE(reply->getByteBuffer()[2], 1); // LOCK_ERROR
+    verify_header(reply, Error, noType, 1); // LOCK_ERROR
 
     // await data packages
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; ++i) {
         QVERIFY(spy.wait(m_long_timeout));
         auto reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
-        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
-        QCOMPARE(reply->getByteBuffer()[1], ShortArray);
+        verify_header(reply, OscilloscopeData, ShortArray, 0, false);
     }
     QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
 }
@@ -236,39 +237,34 @@ void USBTest::test_startTriggerDMAQueue()
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
 
-    auto cmd = create_command(startTrigger);
-    cmd->getByteBuffer()[1] = IntArray;
-    cmd->getBuffer()[1] = 2; // samplerate
-    cmd->setByteLength(4 + 4);
+    auto cmd = create_command(startTrigger, IntArray);
+    set_single_int(cmd, 2); // samplerate
 
-    auto sec = create_command(startTrigger);
-    sec->getByteBuffer()[1] = IntArray;
-    sec->getBuffer()[1] = 2; // samplerate
-    sec->setByteLength(4 + 4);
+    auto sec = create_command(startTrigger, IntArray);
+    set_single_int(sec, 2); // samplerate
 
     device->send(cmd);
     QVERIFY(spy.wait(m_long_timeout)); // wait for the first packet
     // then immediately send next command, which should queue, till the data transfer is through
+    // this test sometimes fails because the firmware is too fast and the second command does not generate an error
     device->send(sec);
 
     // await data packages
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
-    QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
+    verify_header(reply, OscilloscopeData, ByteArray, 0, false);
 
-    for (int i = 1; i < 18; i++) {
+    for (int i = 1; i < 18; ++i) {
         QVERIFY(spy.wait(m_long_timeout));
         reply = qvariant_cast<usb::pPacket>(spy.at(i).at(0));
-        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
-        QCOMPARE(reply->getByteBuffer()[1], ByteArray);
+        verify_header(reply, OscilloscopeData, ByteArray, 0, false);
     }
     QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
 
     // await data packages of second command
-    for (int i = 0; i < 18; i++) {
+    for (int i = 0; i < 18; ++i) {
         QVERIFY(spy.wait(m_long_timeout));
         reply = qvariant_cast<usb::pPacket>(spy.at(18+i).at(0));
-        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
-        QCOMPARE(reply->getByteBuffer()[1], ByteArray);
+        verify_header(reply, OscilloscopeData, ByteArray, 0, false);
     }
     QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
 }
@@ -278,15 +274,11 @@ void USBTest::test_startOscilloscopeMemoryError()
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
 
-    auto cmd = create_command(startOscilloscope);
-    cmd->getByteBuffer()[1] = IntArray;
-    cmd->getBuffer()[1] = 1; // samplerate
-    cmd->setByteLength(4 + 4);
+    auto cmd = create_command(startOscilloscope, IntArray);
+    set_single_int(cmd, 1); // samplerate
 
-    auto sec = create_command(startOscilloscope);
-    sec->getByteBuffer()[1] = IntArray;
-    sec->getBuffer()[1] = 1; // samplerate
-    sec->setByteLength(4 + 4);
+    auto sec = create_command(startOscilloscope, IntArray);
+    set_single_int(sec, 1); // samplerate
 
     device->send(cmd);
     QVERIFY(spy.wait(m_long_timeout)); // wait for the first packet
@@ -297,20 +289,18 @@ void USBTest::test_startOscilloscopeMemoryError()
     auto reply = qvariant_cast<usb::pPacket>(spy.at(0).at(0));
     QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
 
-    for (int i = 1; i < 20; i++) {
+    for (int i = 1; i < 20; ++i) {
         QVERIFY(spy.wait(m_long_timeout));
         reply = qvariant_cast<usb::pPacket>(spy.at(i).at(0));
-        qDebug() << i;
-        QCOMPARE(reply->getByteBuffer()[0], OscilloscopeData);
-        QCOMPARE(reply->getByteBuffer()[1], ShortArray);
+        //qDebug() << i;
+        verify_header(reply, OscilloscopeData, ShortArray, 0, false);
     }
     QCOMPARE(reply->getByteBuffer()[3], 255); // last packet
 
     // error message
     //QVERIFY(spy.wait(m_short_timeout)); // it did already arrive
     reply = qvariant_cast<usb::pPacket>(spy.last().at(0));
-    QCOMPARE(reply->getByteBuffer()[0], Error);
-    QCOMPARE(reply->getByteBuffer()[2], 3); // MEMORY_ERROR
+    verify_header(reply, Error, noType, 3); // MEMORY_ERROR
 }
 
 QTEST_MAIN(USBTest)

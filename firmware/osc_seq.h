@@ -14,8 +14,10 @@
 
 
 // number of samples and offset in a memory page
-#define OSCILLOSCOPE_SAMPLES 508
-#define OSCILLOSCOPE_OFFSET 2
+// total size 1024 bytes
+// offset shall be large enough for LENLAB_PACKET_HEAD_LENGTH
+#define OSCILLOSCOPE_SAMPLES 504 // uint16_t
+#define OSCILLOSCOPE_OFFSET 4 // uint32_t
 
 
 typedef struct OscSeq {
