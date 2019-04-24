@@ -105,7 +105,7 @@ Oscilloscope::on_succeeded(const protocol::pMessage &reply)
     auto transaction = qobject_cast<protocol::Transaction *>(QObject::sender());
 
     for (auto reply: transaction->replies) {
-        uint8_t *buffer = reply->getByteBuffer();
+        uint8_t *buffer = reply->getUInt8Buffer();
 
         uint16_t state0 = *reinterpret_cast<uint16_t *>(buffer + 0);
         uint16_t state1 = *reinterpret_cast<uint16_t *>(buffer + 2);

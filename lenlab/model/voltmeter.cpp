@@ -287,8 +287,8 @@ void Voltmeter::on_logger(const protocol::pMessage &reply)
 
     qDebug("receive");
 
-    uint32_t *buffer = reply->getIntBuffer();
-    Q_ASSERT(reply->getIntBufferLength() == 2);
+    uint32_t *buffer = reply->getUInt32Buffer();
+    Q_ASSERT(reply->getUInt32BufferLength() == 2);
 
     /*
     for (int i = 0; i < 2; i++)

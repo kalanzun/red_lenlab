@@ -70,9 +70,9 @@ Manager::on_name(const pMessage &reply)
 void
 Manager::on_version(const pMessage &reply)
 {
-    auto length = reply->getIntBufferLength();
+    auto length = reply->getUInt32BufferLength();
     if (length == 2) {
-        auto array = reply->getIntBuffer();
+        auto array = reply->getUInt32Buffer();
 
         auto major = array[0];
         auto minor = array[1];

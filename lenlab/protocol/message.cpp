@@ -99,55 +99,68 @@ Message::isLast()
 }
 
 size_t
-Message::getIntBufferLength()
+Message::getUInt32BufferLength()
 {
     return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint32_t);
 }
 
 uint32_t *
-Message::getIntBuffer()
+Message::getUInt32Buffer()
 {
     return (packet->getBuffer() + MESSAGE_HEAD_LENGTH);
 }
 
 void
-Message::setIntVector(const QVector<uint32_t> &vector)
+Message::setUInt32Vector(const QVector<uint32_t> &vector)
 {
     setType(IntArray);
     for (int i = 0; i < vector.size(); ++i)
-        getIntBuffer()[i] = vector.at(i);
+        getUInt32Buffer()[i] = vector.at(i);
     packet->setByteLength((MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE) + (static_cast<size_t>(vector.size()) * sizeof(uint32_t)));
 }
 
 size_t
-Message::getShortBufferLength()
+Message::getUInt16BufferLength()
 {
     return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint16_t);
 }
 
 uint16_t *
-Message::getShortBuffer()
+Message::getUInt16Buffer()
 {
     return reinterpret_cast<uint16_t *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
 }
 
 size_t
-Message::getByteBufferLength()
+Message::getUInt8BufferLength()
 {
     return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(uint8_t);
 }
 
 uint8_t *
-Message::getByteBuffer()
+Message::getUInt8Buffer()
 {
     return reinterpret_cast<uint8_t *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
+}
+
+
+size_t
+Message::getInt8BufferLength()
+{
+    return (packet->getByteLength() - (MESSAGE_HEAD_LENGTH * PACKET_BUFFER_ELEMENT_SIZE)) / sizeof(int8_t);
+}
+
+int8_t *
+Message::getInt8Buffer()
+{
+    return reinterpret_cast<int8_t *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
 }
 
 QString
 Message::getString()
 {
     auto str = reinterpret_cast<const char *>(packet->getBuffer() + MESSAGE_HEAD_LENGTH);
-    Q_ASSERT(*(str + getByteBufferLength() - 1) == 0);
+    Q_ASSERT(*(str + getUInt8BufferLength() - 1) == 0);
     return QString(str);
 }
 

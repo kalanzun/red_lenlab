@@ -22,6 +22,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void test_startOscilloscopeLinearTestData();
+    void test_startTriggerLinearTestData();
 
 private:
     protocol::Manager manager;
@@ -73,8 +74,8 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
     for (auto reply: transaction->replies) {
         QVERIFY(reply->getReply() == OscilloscopeData);
         QVERIFY(reply->getType() == ShortArray);
-        QVERIFY(reply->getShortBufferLength() == 510);
-        short_buffer = reply->getShortBuffer();
+        QVERIFY(reply->getUInt16BufferLength() == 510);
+        short_buffer = reply->getUInt16Buffer();
         for (unsigned int i = 0; i < 508; i++) {
             if (!(short_buffer[i + 2] == i + (j * 508))) {
                 qDebug() << i << j << short_buffer[i + 2];
@@ -82,6 +83,33 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
             }
         }
         j = (j + 1) % 10;
+    }
+}
+
+void MeasurementTest::test_startTriggerLinearTestData()
+{
+    int8_t *byte_buffer;
+    size_t length;
+
+    auto transaction = board->startTriggerLinearTestData();
+    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_short_timeout));
+
+    QCOMPARE(transaction->replies.count(), 18);
+
+    for (auto reply: transaction->replies) {
+        QVERIFY(reply->getReply() == OscilloscopeData);
+        QVERIFY(reply->getType() == ByteArray);
+        length = reply->getInt8BufferLength();
+        QVERIFY(reply->getInt8BufferLength() == 1020);
+        byte_buffer = reply->getInt8Buffer();
+        for (unsigned int i = 6; i < reply->getInt8BufferLength(); i++) {
+            if (!(byte_buffer[i] == 4 || byte_buffer[i] == -4)) {
+                qDebug() << i << byte_buffer[i];
+                QVERIFY(false);
+            }
+        }
     }
 }
 

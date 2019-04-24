@@ -259,7 +259,7 @@ TriggerLinearTestData(tTrigger *self)
                 short_buffer[k] = 16 * k;
             }
             for (; k < OSCILLOSCOPE_SAMPLES; k++) {
-                short_buffer[k] = 4080 - (16 * (k - 255));
+                short_buffer[k] = (16 * OSCILLOSCOPE_SAMPLES / 2) - (16 * (k - OSCILLOSCOPE_SAMPLES / 2));
             }
 
             RingWrite(ring);

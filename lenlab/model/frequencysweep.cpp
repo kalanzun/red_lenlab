@@ -168,7 +168,7 @@ Frequencysweep::on_succeeded(const protocol::pMessage &reply)
 
     for (auto reply: transaction->replies) {
         //uint8_t *buffer = reply->getByteBuffer();
-        uint16_t *data = reply->getShortBuffer();
+        uint16_t *data = reply->getUInt16Buffer();
         //(int16_t *) (buffer + 22);
 
         uint16_t channel = data[0];//reply->getHead()[2];

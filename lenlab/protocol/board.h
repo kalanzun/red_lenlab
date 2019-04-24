@@ -60,6 +60,7 @@ public:
     pTransaction startOscilloscope(uint32_t samplerate);
     pTransaction startOscilloscopeLinearTestData();
     pTransaction startOscilloscopeTrigger(uint32_t samplerate);
+    pTransaction startTriggerLinearTestData();
     pTransaction startLogger(uint32_t interval);
     pTransaction stopLogger();
 

@@ -128,7 +128,7 @@ Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider,
 
     auto cmd = protocol::pMessage::create();
     cmd->setCommand(::setSignalSine);
-    cmd->setIntVector(args);
+    cmd->setUInt32Vector(args);
 
     auto transaction = pTransaction::create(cmd);
     start(transaction);
@@ -144,7 +144,7 @@ Board::startOscilloscope(uint32_t samplerate)
 
     auto cmd = protocol::pMessage::create();
     cmd->setCommand(::startOscilloscope);
-    cmd->setIntVector(args);
+    cmd->setUInt32Vector(args);
 
     auto transaction = pTransaction::create(cmd);
     start(transaction);
@@ -165,6 +165,18 @@ Board::startOscilloscopeLinearTestData()
 }
 
 pTransaction
+Board::startTriggerLinearTestData()
+{
+    auto cmd = protocol::pMessage::create();
+    cmd->setCommand(::startTriggerLinearTestData);
+
+    auto transaction = pTransaction::create(cmd);
+    start(transaction);
+
+    return transaction;
+}
+
+pTransaction
 Board::startOscilloscopeTrigger(uint32_t samplerate)
 {
     QVector<uint32_t> args;
@@ -172,7 +184,7 @@ Board::startOscilloscopeTrigger(uint32_t samplerate)
 
     auto cmd = protocol::pMessage::create();
     cmd->setCommand(::startTrigger);
-    cmd->setIntVector(args);
+    cmd->setUInt32Vector(args);
 
     auto transaction = pTransaction::create(cmd);
     transaction->setWatchdog(800);
@@ -189,7 +201,7 @@ Board::startLogger(uint32_t interval)
 
     auto cmd = protocol::pMessage::create();
     cmd->setCommand(::startLogger);
-    cmd->setIntVector(args);
+    cmd->setUInt32Vector(args);
 
     auto transaction = pTransaction::create(cmd);
     start(transaction);

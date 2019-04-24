@@ -60,15 +60,18 @@ public:
 
     bool isLast();
 
-    size_t getIntBufferLength();
-    uint32_t *getIntBuffer();
-    void setIntVector(const QVector<uint32_t> &vector);
+    size_t getUInt32BufferLength();
+    uint32_t *getUInt32Buffer();
+    void setUInt32Vector(const QVector<uint32_t> &vector);
 
-    size_t getShortBufferLength();
-    uint16_t *getShortBuffer();
+    size_t getUInt16BufferLength();
+    uint16_t *getUInt16Buffer();
 
-    size_t getByteBufferLength();
-    uint8_t *getByteBuffer();
+    size_t getUInt8BufferLength();
+    uint8_t *getUInt8Buffer();
+
+    size_t getInt8BufferLength();
+    int8_t *getInt8Buffer();
 
     QString getString();
 };

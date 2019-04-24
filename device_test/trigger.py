@@ -48,5 +48,8 @@ data1 = (head[:, 3].reshape((18, 1)) + np.cumsum(data[:, 11:1024:2], axis=1)).fl
 plt.plot(data0)
 plt.plot(data1)
 
+#plt.plot(data[:, 10::2].flat)
+#plt.plot(data[:, 11::2].flat)
+
 plt.grid()
 plt.show()
