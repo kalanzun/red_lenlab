@@ -58,4 +58,9 @@ int Task::getSize() const
     return mReplies.size();
 }
 
+const QVector<pMessage> &Task::getReplies() const
+{
+    return mReplies;
+}
+
 } // namespace protocol

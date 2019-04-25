@@ -38,6 +38,7 @@ public:
 
     pMessage const & getReply() const;
     int getSize() const;
+    QVector<pMessage> const & getReplies() const;
 
 signals:
     void succeeded(pTask const &);
