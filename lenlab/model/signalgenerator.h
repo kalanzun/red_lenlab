@@ -21,15 +21,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef SIGNALGENERATOR_H
 #define SIGNALGENERATOR_H
 
-#include "component.h"
 #include "indexparameter.h"
+
 #include <QObject>
 
 namespace model {
 
-/**
- * @brief Lenlab Signal Generator Component.
- */
+class Lenlab;
 
 class Signalgenerator : public QObject
 {
@@ -37,7 +35,7 @@ class Signalgenerator : public QObject
 
     static const uint32_t sine_length = 130;
 
-    uint8_t sine[sine_length][3] = {
+    uint8_t sine[sine_length][3] = { // TODO static const
         {1, 2, 111}, // 0 20.59
         {1, 2, 106}, // 1 21.56
         {1, 2, 101}, // 2 22.63
@@ -170,8 +168,25 @@ class Signalgenerator : public QObject
         {9, 2, 2}, // 129 10285.71
     };
 
+    Lenlab const & mLenlab;
+
+    bool m_locked;
+    bool setSine_pending = 0;
+    bool stop_pending = 0;
+
+    uint32_t amplitude = 0;
+    uint32_t frequency = 0;
+    uint32_t second = 0;
+
+    IndexParameter amplitudeIndex;
+    IndexParameter frequencyIndex;
+    IndexParameter secondIndex;
+
 public:
-    explicit Signalgenerator(Lenlab *parent);
+    explicit Signalgenerator(Lenlab const & lenlab);
+    Signalgenerator(Signalgenerator const &) = delete;
+
+    Signalgenerator & operator=(Signalgenerator const &) = delete;
 
     double getFrequency(uint32_t index);
 
@@ -191,27 +206,12 @@ public:
     void setFrequency(uint32_t index);
     void setSecond(uint32_t index);
 
-    IndexParameter amplitudeIndex;
-    IndexParameter frequencyIndex;
-    IndexParameter secondIndex;
-
 signals:
     void updated();
     void lockedDataChanged(bool locked);
 
 public slots:
     //void on_reply(const pCommunication &com, const usb::pMessage &reply);
-
-private:
-    Lenlab *lenlab;
-
-    bool m_locked;
-    bool setSine_pending = 0;
-    bool stop_pending = 0;
-
-    uint32_t amplitude = 0;
-    uint32_t frequency = 0;
-    uint32_t second = 0;
 };
 
 } // namespace model

@@ -19,40 +19,45 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "frequencysweep.h"
-#include "lenlab.h"
+
 #include "config.h"
+#include "lenlab.h"
+
 #include <QDebug>
-#include <QTimerEvent>
-#include <complex>
 #include <QSaveFile>
+
+#include <complex>
 
 namespace model {
 
-Frequencysweep::Frequencysweep(Lenlab *parent) : Component(parent), current(new FrequencySeries())
+Frequencysweep::Frequencysweep(Lenlab const & lenlab)
+    : Component(lenlab)
+    , current(new FrequencySeries())
 {
     connect(this, SIGNAL(calculate()),
             this, SLOT(on_calculate()),
             Qt::QueuedConnection);
-
 }
 
-QString
-Frequencysweep::getNameNominative()
+QString const &
+Frequencysweep::getNameNominative() const
 {
-    return "ie Frequenzanalyse";
+    static QString name("die Frequenzanalyse");
+    return name;
 }
 
-QString
-Frequencysweep::getNameAccusative()
+QString const &
+Frequencysweep::getNameAccusative() const
 {
-    return "ie Frequenzanalyse";
+    static QString name("die Frequenzanalyse");
+    return name;
 }
 
 void
 Frequencysweep::start()
 {
     super::start();
-
+    /*
     pending = 0;
     wait_for_update = 0;
     lenlab->signalgenerator->lock();
@@ -65,30 +70,33 @@ Frequencysweep::start()
 
     wait_for_step = 1;
     startTimer(100);
+    */
 }
 
 void
 Frequencysweep::stop()
 {
     super::stop();
-
+    /*
     pending = 0;
     wait_for_update = 0;
     lenlab->signalgenerator->stop();
     lenlab->signalgenerator->unlock();
+    */
 }
 
 void
 Frequencysweep::step()
 {
-    if (!m_active)
+    if (!active())
         return;
 
     qDebug() << "step";
-
+    /*
     lenlab->signalgenerator->setFrequency(index);
     wait_for_update = 1;
     lenlab->signalgenerator->setSine();
+    */
 }
 
 void
@@ -108,9 +116,9 @@ Frequencysweep::on_updated()
 }
 
 void
-Frequencysweep::timerEvent(QTimerEvent *event)
+Frequencysweep::on_timeout()
 {
-    killTimer(event->timerId());
+    //killTimer(event->timerId());
 
     qDebug("timerEvent");
 
@@ -128,10 +136,12 @@ Frequencysweep::timerEvent(QTimerEvent *event)
 void
 Frequencysweep::try_to_start()
 {
+    /*
     if (pending && lenlab->available()) {
         pending = 0;
         restart();
     }
+    */
 }
 
 void
@@ -157,9 +167,9 @@ Frequencysweep::restart()
 }
 
 void
-Frequencysweep::on_succeeded(const protocol::pMessage &reply)
+Frequencysweep::on_succeeded(protocol::pTask const & task)
 {
-    Q_UNUSED(reply)
+    Q_UNUSED(task);
 
     // ByteArray Code
     //qDebug("on_reply");
@@ -188,12 +198,17 @@ Frequencysweep::on_succeeded(const protocol::pMessage &reply)
 
 }
 
+void Frequencysweep::on_failed(const protocol::pTask &)
+{
+
+}
+
 void
 Frequencysweep::on_calculate()
 {
     //qDebug("on_calculate");
 
-    if (!m_active)
+    if (!active())
         return;
 
     auto current_samplerate = samplerate;
@@ -207,6 +222,7 @@ Frequencysweep::on_calculate()
         stop();
     }
 
+    /*
     double f = lenlab->signalgenerator->getFrequency(current_index);
 
     std::complex<double> sum0, sum1, y;
@@ -239,11 +255,12 @@ Frequencysweep::on_calculate()
     current->append(0, f);
     current->append(1, value);
     current->append(2, angle);
-
+    */
     emit replot();
 }
 
-QSharedPointer<FrequencySeries> Frequencysweep::getWaveform()
+QSharedPointer<FrequencySeries>
+Frequencysweep::getWaveform()
 {
     return current;
 }

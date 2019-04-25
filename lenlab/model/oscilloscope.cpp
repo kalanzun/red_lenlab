@@ -27,27 +27,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Oscilloscope::Oscilloscope(Lenlab *parent) : Component(parent), samplerateIndex(3)
+Oscilloscope::Oscilloscope(const Lenlab &lenlab)
+    : Component(lenlab),
+      samplerateIndex(3)
 {
     double value;
 
-    for (uint32_t i = 0; i < samplerateIndex.length; i++) {
+    for (uint32_t i = 0; i < samplerateIndex.length; ++i) {
         value = 1000.0 / (1<<(i+2));
         samplerateIndex.labels << QString("%1 kHz").arg(german_double(value));
     }
-
 }
 
-QString
-Oscilloscope::getNameNominative()
+QString const &
+Oscilloscope::getNameNominative() const
 {
-    return "as Oszilloskop";
+    static QString name("das Oszilloskop");
+    return name;
 }
 
-QString
-Oscilloscope::getNameAccusative()
+QString const &
+Oscilloscope::getNameAccusative() const
 {
-    return "as Oszilloskop";
+    static QString name("das Oszilloskop");
+    return name;
 }
 
 void
@@ -55,29 +58,13 @@ Oscilloscope::start()
 {
     super::start();
 
-    qDebug() << "start";
-
-    pending = 1;
-    try_to_start();
+    restart();
 }
 
 void
 Oscilloscope::stop()
 {
     super::stop();
-
-    qDebug() << "stop";
-
-    pending = 0;
-}
-
-void
-Oscilloscope::try_to_start()
-{
-    if (pending && lenlab->available()) {
-        pending = 0;
-        restart();
-    }
 }
 
 void
@@ -85,11 +72,19 @@ Oscilloscope::restart()
 {
     incoming.reset(new Waveform());
     incoming->setSamplerate(1e6/(1<<(samplerate+2)));
-    /*
-    auto transaction = board->startOscilloscopeTrigger(samplerate+2);
-    connect(transaction.data(), &protocol::Transaction::succeeded,
+
+    QVector<uint32_t> args;
+    args.append(samplerate + 2);
+
+    protocol::pMessage cmd(new protocol::Message);
+    cmd->setCommand(::startOscilloscope);
+    cmd->setUInt32Vector(args);
+
+    auto task = mBoard->startTask(cmd);
+    connect(task.data(), &protocol::Task::succeeded,
             this, &Oscilloscope::on_succeeded);
-            */
+    connect(task.data(), &protocol::Task::failed,
+            this, &Oscilloscope::on_failed);
 }
 
 void
@@ -99,33 +94,29 @@ Oscilloscope::setSamplerate(uint32_t index)
 }
 
 void
-Oscilloscope::on_succeeded(const protocol::pMessage &reply)
+Oscilloscope::on_succeeded(protocol::pTask const & task)
 {
-    Q_UNUSED(reply)
-/*
-    auto transaction = qobject_cast<protocol::Transaction *>(QObject::sender());
+    for (auto reply: task->getReplies()) {
+        uint16_t * buffer = reply->getUInt16Buffer();
 
-    for (auto reply: transaction->replies) {
-        uint8_t *buffer = reply->getUInt8Buffer();
-
-        uint16_t state0 = *reinterpret_cast<uint16_t *>(buffer + 0);
-        uint16_t state1 = *reinterpret_cast<uint16_t *>(buffer + 2);
-        uint16_t trigger = *reinterpret_cast<uint16_t *>(buffer + 4);
+        uint16_t trigger = buffer[0];
+        uint16_t state0 = buffer[2];
+        uint16_t state1 = buffer[3];
 
         if (trigger) {
             incoming->setTrigger(trigger);
         }
 
-        incoming->append(0, ((static_cast<double>(state0)) / 1024.0 - 0.5) * 3.3);
-        incoming->append(1, ((static_cast<double>(state1)) / 1024.0 - 0.5) * 3.3);
+        incoming->append(0, to_double(state0));
+        incoming->append(1, to_double(state1));
 
-        int8_t *data = reinterpret_cast<int8_t *>(buffer + 8);
+        int8_t *data = reinterpret_cast<int8_t *>(buffer + 6);
 
-        for (uint32_t i = 1; i < 500; ++i) {
+        for (uint32_t i = 1; i < reply->getUInt16BufferLength(); ++i) {
             state0 += data[2*i];
             state1 += data[2*i+1];
-            incoming->append(0, ((static_cast<double>(state0)) / 1024.0 - 0.5) * 3.3);
-            incoming->append(1, ((static_cast<double>(state1)) / 1024.0 - 0.5) * 3.3);
+            incoming->append(0, to_double(state0));
+            incoming->append(1, to_double(state1));
         }
     }
 
@@ -133,12 +124,26 @@ Oscilloscope::on_succeeded(const protocol::pMessage &reply)
 
     waveform.swap(incoming);
     emit replot();
-    */
 
-    if (m_active) {
-        pending = 1;
-        try_to_start();
+    if (active()) {
+        restart();
     }
+}
+
+void
+Oscilloscope::on_failed(protocol::pTask const & task)
+{
+    Q_UNUSED(task);
+
+    qDebug("Oscilloscope::on_failed");
+
+    Q_ASSERT(false);
+}
+
+double
+Oscilloscope::to_double(uint16_t state)
+{
+    return ((static_cast<double>(state)) / 1024.0 - 0.5) * 3.3;
 }
 
 void
@@ -157,7 +162,7 @@ Oscilloscope::save(const QString &fileName)
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
 
-    for (uint32_t i = 0; i < waveform->getLength(0); i++) {
+    for (uint32_t i = 0; i < waveform->getLength(0); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
 

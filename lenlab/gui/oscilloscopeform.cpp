@@ -68,6 +68,7 @@ OscilloscopeForm::setMainWindow(MainWindow *main_window)
 void
 OscilloscopeForm::setModel(model::Lenlab *lenlab)
 {
+    /*
     this->lenlab = lenlab;
     this->oscilloscope = lenlab->oscilloscope;
 
@@ -80,6 +81,7 @@ OscilloscopeForm::setModel(model::Lenlab *lenlab)
 
     connect(oscilloscope, SIGNAL(replot()),
             this, SLOT(on_replot()));
+            */
 }
 
 QwtPlotCurve *
@@ -136,10 +138,12 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::on_replot()
 {
+    /*
     for (unsigned int i = 0; i < curves.size(); ++i) {
         curves[i]->setSamples(new PointVectorSeriesData(oscilloscope->waveform, i)); // acquires ownership
     }
     ui->plot->replot();
+    */
 }
 
 void

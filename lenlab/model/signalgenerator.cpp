@@ -26,16 +26,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18), frequencyIndex(sine_length), secondIndex(21), lenlab(parent)
+Signalgenerator::Signalgenerator(Lenlab const & lenlab)
+    : QObject()
+    , mLenlab(lenlab)
+    , amplitudeIndex(18)
+    , frequencyIndex(sine_length)
+    , secondIndex(21)
 {
     double value;
 
-    for (uint32_t i = 0; i < amplitudeIndex.length; i++) {
+    for (uint32_t i = 0; i < amplitudeIndex.length; ++i) {
         value = 0.8 + 0.05 * i;
         amplitudeIndex.labels << QString("%1 V").arg(german_double(value));
     }
 
-    for (uint32_t i = 0; i < frequencyIndex.length; i++) {
+    for (uint32_t i = 0; i < frequencyIndex.length; ++i) {
         value = getFrequency(i);
         if (value < 100)
             frequencyIndex.labels << QString("%1 Hz").arg(german_double(std::round(10*value)/10));
@@ -52,6 +57,7 @@ Signalgenerator::Signalgenerator(Lenlab *parent) : QObject(), amplitudeIndex(18)
     }
 }
 
+// TODO static members
 #define OVERHEAD (16.0/17.5)
 #define CHANNELS (2)
 #define SAMPLES (500)
@@ -97,10 +103,12 @@ Signalgenerator::setSine()
 
 void
 Signalgenerator::try_to_setSine() {
+    /*
     if (setSine_pending && lenlab->available()) {
         setSine_cmd();
         setSine_pending = 0;
     }
+    */
 }
 
 void
@@ -131,10 +139,12 @@ Signalgenerator::stop()
 
 void
 Signalgenerator::try_to_stop() {
+    /*
     if (stop_pending && lenlab->available()) {
         stop_cmd();
         stop_pending = 0;
     }
+    */
 }
 
 void

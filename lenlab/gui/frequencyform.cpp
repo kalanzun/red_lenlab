@@ -77,8 +77,9 @@ FrequencyForm::setMainWindow(MainWindow *main_window)
 void
 FrequencyForm::setModel(model::Lenlab *lenlab)
 {
-    this->lenlab = lenlab;
-    this->frequencysweep = lenlab->frequencysweep;
+    /*
+    //this->lenlab = lenlab;
+    //this->frequencysweep = lenlab->frequencysweep;
 
     curves[0] = newCurve(1, QColor("#729fcf"), true); // sky blue 0
     curves[1] = newCurve(2, QColor("#ef2929"), true); // scarlet red 0
@@ -88,6 +89,7 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
 
     connect(frequencysweep, SIGNAL(replot()),
             this, SLOT(on_replot()));
+            */
 }
 
 QwtPlotCurve *
@@ -95,7 +97,7 @@ FrequencyForm::newCurve(uint32_t channel, const QColor &color, bool visible)
 {
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
 
-    curve->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), channel)); // acquires ownership
+    //curve->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), channel)); // acquires ownership
     curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     curve->setVisible(visible);
 

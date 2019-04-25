@@ -24,26 +24,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "component.h"
 #include "waveform.h"
 #include "indexparameter.h"
+
 #include <QObject>
 
 namespace model {
 
-/**
- * @brief Lenlab oscilloscope component.
- */
-
 class Oscilloscope : public Component
 {
     Q_OBJECT
-public:
-    explicit Oscilloscope(Lenlab *parent);
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+    typedef Component super;
+
+    bool pending = 0;
+
+    uint32_t samplerate = 0;
+    QSharedPointer<Waveform> incoming;
+    IndexParameter samplerateIndex;
+    QSharedPointer<Waveform> waveform;
+
+public:
+    explicit Oscilloscope(Lenlab const & lenlab);
+    Oscilloscope(Oscilloscope const &) = delete;
+
+    Oscilloscope & operator=(Oscilloscope const &) = delete;
+
+    virtual QString const & getNameNominative() const;
+    virtual QString const & getNameAccusative() const;
 
     virtual void start();
     virtual void stop();
-    //void single();
 
     void try_to_start();
     void restart();
@@ -52,22 +61,15 @@ public:
 
     void save(const QString &fileName);
 
-    IndexParameter samplerateIndex;
-    QSharedPointer<Waveform> waveform;
-
 signals:
     void replot();
 
-public slots:
-    void on_succeeded(const protocol::pMessage &);
-
 private:
-    bool pending = 0;
+    static double to_double(uint16_t state);
 
-    uint32_t samplerate = 0;
-    QSharedPointer<Waveform> incoming;
-
-    typedef Component super;
+private slots:
+    void on_succeeded(protocol::pTask const &);
+    void on_failed(protocol::pTask const &);
 };
 
 } // namespace model

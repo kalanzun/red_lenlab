@@ -49,6 +49,7 @@ SignalForm::setMainWindow(MainWindow *main_window)
 void
 SignalForm::setModel(model::Lenlab *lenlab)
 {
+    /*
     this->lenlab = lenlab;
     this->signalgenerator = lenlab->signalgenerator;
 
@@ -70,6 +71,7 @@ SignalForm::setModel(model::Lenlab *lenlab)
 
     ui->secondBox->insertItems(0, signalgenerator->secondIndex.labels);
     ui->secondSlider->setMaximum(signalgenerator->secondIndex.length - 1);
+    */
 }
 
 /*

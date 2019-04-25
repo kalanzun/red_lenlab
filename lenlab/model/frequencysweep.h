@@ -24,17 +24,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "component.h"
 #include "frequencyseries.h"
 #include "waveform.h"
+
 #include <QObject>
-#include <QTimerEvent>
+#include <QTimer>
 
 namespace model {
 
-/**
- * @brief Lenlab Frequency Analysis component.
- */
 class Frequencysweep : public Component
 {
     Q_OBJECT
+
+    typedef Component super;
 
     uint8_t index;
     uint32_t samplerate;
@@ -45,11 +45,16 @@ class Frequencysweep : public Component
     bool wait_for_update = 0;
     bool wait_for_step = 0;
 
-public:
-    explicit Frequencysweep(Lenlab *parent);
+    QSharedPointer<Waveform> incoming;
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+public:
+    explicit Frequencysweep(Lenlab const & lenlab);
+    Frequencysweep(Frequencysweep const &) = delete;
+
+    Frequencysweep & operator=(Frequencysweep const &) = delete;
+
+    virtual QString const & getNameNominative() const;
+    virtual QString const & getNameAccusative() const;
 
     virtual void start();
     virtual void stop();
@@ -57,7 +62,6 @@ public:
     void try_to_start();
     void restart();
     void step();
-    void timerEvent(QTimerEvent *event);
 
     QSharedPointer<FrequencySeries> getWaveform();
 
@@ -67,15 +71,12 @@ signals:
     void calculate();
     void replot();
 
-public slots:
-    void on_succeeded(const protocol::pMessage &);
+private slots:
+    void on_timeout();
+    void on_succeeded(protocol::pTask const &);
+    void on_failed(protocol::pTask const &);
     void on_calculate();
     void on_updated();
-
-private:
-    typedef Component super;
-
-    QSharedPointer<Waveform> incoming;
 };
 
 } // namespace model

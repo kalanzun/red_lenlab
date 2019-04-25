@@ -26,10 +26,10 @@ namespace model {
 
 Lenlab::Lenlab(QObject * parent)
     : QObject(parent)
-    , frequencysweep(this)
-    , voltmeter(this)
-    , oscilloscope(this)
-    , signalgenerator(this)
+    , frequencysweep(*this)
+    , voltmeter(*this)
+    , oscilloscope(*this)
+    , signalgenerator(*this)
 {
     connect(&mFactory, &protocol::Factory::ready,
             this, &Lenlab::on_ready);
@@ -53,7 +53,7 @@ Lenlab::Lenlab(QObject * parent)
 }
 
 bool
-Lenlab::isActive()
+Lenlab::isActive() const
 {
     return frequencysweep.active() || voltmeter.active() || oscilloscope.active();
 }

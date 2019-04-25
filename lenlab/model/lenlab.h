@@ -52,7 +52,7 @@ public:
 
     Lenlab & operator=(Lenlab const & other) = delete;
 
-    bool isActive();
+    bool isActive() const;
     Component *getActiveComponent();
 
     //bool available();

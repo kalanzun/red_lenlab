@@ -83,8 +83,10 @@ LoggerForm::setMainWindow(MainWindow *main_window)
 void
 LoggerForm::setModel(model::Lenlab *lenlab)
 {
+    /*
     this->lenlab = lenlab;
     this->voltmeter = lenlab->voltmeter;
+    */
 /*
     curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#edd400"), 2, true); // butter 1
     curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#73d216"), 2, false); // green 1
@@ -97,6 +99,7 @@ LoggerForm::setModel(model::Lenlab *lenlab)
     curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#729fcf"), false); // sky blue 0
     curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#ef2929"), false); // scarlet red 0
     */
+    /*
     connect(voltmeter, SIGNAL(measurementDataChanged(bool)),
             this, SLOT(on_measurementDataChanged(bool)));
     connect(voltmeter, SIGNAL(unsavedDataChanged(bool)),
@@ -110,6 +113,7 @@ LoggerForm::setModel(model::Lenlab *lenlab)
 
     connect(voltmeter, SIGNAL(replot()),
             this, SLOT(on_replot()));
+            */
 }
 /*
 QwtPlotCurve *
