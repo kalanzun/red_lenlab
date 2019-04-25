@@ -27,11 +27,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget * parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
-    qDebug() << "MainWindow";
     ui->setupUi(this);
 
     setWindowTitle("Lenlab");
@@ -46,17 +45,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/**
- * @brief MainWindow::setModel
- * @param lenlab
- *
- * It does not take ownership.
- */
-
 void
-MainWindow::setModel(model::Lenlab *lenlab)
+MainWindow::setModel(model::Lenlab * lenlab)
 {
-    this->lenlab = lenlab;
+    m_lenlab = lenlab;
 
     ui->loggerTab->setMainWindow(this);
     ui->loggerTab->setModel(lenlab);
@@ -67,14 +59,16 @@ MainWindow::setModel(model::Lenlab *lenlab)
     ui->signal->setMainWindow(this);
     ui->signal->setModel(lenlab);
 
+    /*
     connect(lenlab, SIGNAL(logMessage(QString)),
             this, SLOT(on_logMessage(QString)));
+    */
 }
 
 bool
 MainWindow::askToCancelActiveComponent(model::Component *next_component)
 {
-    QString previous = lenlab->getActiveComponent()->getNameNominative();
+    QString previous = m_lenlab->getActiveComponent()->getNameNominative();
     QString next = next_component->getNameAccusative();
     QMessageBox msgBox;
     msgBox.setText(QString(
@@ -87,7 +81,7 @@ MainWindow::askToCancelActiveComponent(model::Component *next_component)
             next));
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     if (msgBox.exec() == QMessageBox::Ok) {
-        lenlab->getActiveComponent()->stop();
+        m_lenlab->getActiveComponent()->stop();
         return true;
     }
     else {
@@ -104,7 +98,7 @@ MainWindow::on_replot()
 void
 MainWindow::on_signalButton_toggled(bool checked)
 {
-    signal_checked = checked;
+    m_signal_checked = checked;
     if (checked)
         ui->signal->show();
     else
@@ -129,13 +123,13 @@ MainWindow::on_tabWidget_currentChanged(int index)
     // diaglog to ask whether to cancel another measurement.
 
     if (index == 2) {
-        bool _signal_checked = ui->signalButton->isChecked();
+        bool signal_checked = ui->signalButton->isChecked();
         ui->signalButton->setChecked(false);
-        signal_checked = _signal_checked;
+        m_signal_checked = signal_checked;
         ui->signalButton->setEnabled(false);
     }
     else {
-        ui->signalButton->setChecked(signal_checked);
+        ui->signalButton->setChecked(m_signal_checked);
         ui->signalButton->setEnabled(true);
     }    
 }

@@ -33,13 +33,20 @@ namespace Ui {
 class FrequencyForm;
 }
 
-/**
- * @brief Controls for the Lenlab Frequency Analysis component.
- */
-
 class FrequencyForm : public QWidget
 {
     Q_OBJECT
+
+    Ui::FrequencyForm * ui;
+
+    MainWindow * m_main_window = nullptr;
+    model::Lenlab * m_lenlab = nullptr;
+    model::Frequencysweep * m_frequencysweep = nullptr;
+
+    std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
+
+    QwtPlotCurve *newCurve(uint32_t channel, const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
 
 public:
     explicit FrequencyForm(QWidget *parent = 0);
@@ -57,18 +64,6 @@ private slots:
     void on_stopButton_clicked();
 
     void on_saveButton_clicked();
-
-private:
-    QwtPlotCurve *newCurve(uint32_t channel, const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
-
-    Ui::FrequencyForm *ui;
-
-    MainWindow *main_window;
-    model::Lenlab *lenlab;
-    model::Frequencysweep *frequencysweep;
-
-    std::array<QwtPlotCurve *, 2> curves; // pointer, no ownership
 };
 
 

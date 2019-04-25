@@ -29,9 +29,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-OscilloscopeForm::OscilloscopeForm(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::OscilloscopeForm)
+OscilloscopeForm::OscilloscopeForm(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::OscilloscopeForm)
 {
     qDebug() << "OscilloscopeForm";
     ui->setupUi(this);
@@ -60,18 +60,18 @@ OscilloscopeForm::~OscilloscopeForm()
 }
 
 void
-OscilloscopeForm::setMainWindow(MainWindow *main_window)
+OscilloscopeForm::setMainWindow(MainWindow * main_window)
 {
-    this->main_window = main_window;
+    m_main_window = main_window;
 }
 
 void
-OscilloscopeForm::setModel(model::Lenlab *lenlab)
+OscilloscopeForm::setModel(model::Lenlab * lenlab)
 {
-    /*
-    this->lenlab = lenlab;
-    this->oscilloscope = lenlab->oscilloscope;
+    m_lenlab = lenlab;
+    m_oscilloscope = &lenlab->oscilloscope;
 
+    /*
     curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
     curves[1] = newCurve(QColor("#8ae234"), true); // green 0
     //curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
@@ -119,19 +119,19 @@ OscilloscopeForm::newGrid()
 void
 OscilloscopeForm::on_startButton_clicked()
 {
-    if (!oscilloscope->active()) {
-        if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(oscilloscope)) return;
+    if (!m_oscilloscope->active()) {
+        if (m_lenlab->isActive()) {
+            if (!m_main_window->askToCancelActiveComponent(m_oscilloscope)) return;
         }
-        oscilloscope->start();
+        m_oscilloscope->start();
     }
 }
 
 void
 OscilloscopeForm::on_stopButton_clicked()
 {
-    if (oscilloscope->active()) {
-        oscilloscope->stop();
+    if (m_oscilloscope->active()) {
+        m_oscilloscope->stop();
     }
 }
 
@@ -149,19 +149,19 @@ OscilloscopeForm::on_replot()
 void
 OscilloscopeForm::on_samplerateBox_activated(int index)
 {
-    oscilloscope->setSamplerate(static_cast<uint32_t>(index));
+    //oscilloscope->setSamplerate(static_cast<uint32_t>(index));
 }
 
 void
 OscilloscopeForm::on_ch1CheckBox_stateChanged(int state)
 {
-    curves[0]->setVisible(state == Qt::Checked);
+    m_curves[0]->setVisible(state == Qt::Checked);
 }
 
 void
 OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
 {
-    curves[1]->setVisible(state == Qt::Checked);
+    m_curves[1]->setVisible(state == Qt::Checked);
 }
 
 void
@@ -175,7 +175,7 @@ OscilloscopeForm::save()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
-        oscilloscope->save(fileName);
+        m_oscilloscope->save(fileName);
     }
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason

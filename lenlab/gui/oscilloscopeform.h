@@ -41,6 +41,17 @@ class OscilloscopeForm : public QWidget
 {
     Q_OBJECT
 
+    Ui::OscilloscopeForm * ui;
+
+    MainWindow * m_main_window = nullptr;
+    model::Lenlab * m_lenlab = nullptr;
+    model::Oscilloscope * m_oscilloscope = nullptr;
+
+    std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
+
+    QwtPlotCurve *newCurve(const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
+
 public:
     explicit OscilloscopeForm(QWidget *parent = nullptr);
     ~OscilloscopeForm();
@@ -64,18 +75,6 @@ private slots:
     void on_saveButton_clicked();
 
     void on_timerangeBox_currentIndexChanged(int index);
-
-private:
-    QwtPlotCurve *newCurve(const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
-
-    Ui::OscilloscopeForm *ui;
-
-    MainWindow *main_window;
-    model::Lenlab *lenlab;
-    model::Oscilloscope *oscilloscope;
-
-    std::array<QwtPlotCurve *, 2> curves; // pointer, no ownership
 };
 
 

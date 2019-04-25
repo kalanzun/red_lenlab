@@ -60,39 +60,23 @@ LoggerForm::~LoggerForm()
     delete ui;
 }
 
-/**
- * @brief LoggerForm::setMainWindow
- * @param main_window
- *
- * It does not take ownership.
- */
-
 void
-LoggerForm::setMainWindow(MainWindow *main_window)
+LoggerForm::setMainWindow(MainWindow * main_window)
 {
-    this->main_window = main_window;
+    m_main_window = main_window;
 }
 
-/**
- * @brief LoggerForm::setModel
- * @param lenlab
- *
- * It does not take ownership.
- */
-
 void
-LoggerForm::setModel(model::Lenlab *lenlab)
+LoggerForm::setModel(model::Lenlab * lenlab)
 {
+    m_lenlab = lenlab;
+    m_voltmeter = &lenlab->voltmeter;
     /*
-    this->lenlab = lenlab;
-    this->voltmeter = lenlab->voltmeter;
-    */
-/*
     curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#edd400"), 2, true); // butter 1
     curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#73d216"), 2, false); // green 1
     curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#3465a4"), 2, false); // sky blue 1
     curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
-*/
+    */
     /*
     curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#fce94f"), true); // butter 0
     curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#8ae234"), false); // green 0
@@ -151,52 +135,52 @@ LoggerForm::newGrid()
 void
 LoggerForm::on_startButton_clicked()
 {
-    if (!voltmeter->active()) {
-        if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(voltmeter)) return;
+    if (!m_voltmeter->active()) {
+        if (m_lenlab->isActive()) {
+            if (!m_main_window->askToCancelActiveComponent(m_voltmeter)) return;
         }
-        voltmeter->start();
+        m_voltmeter->start();
     }
 }
 
 void
 LoggerForm::on_stopButton_clicked()
 {
-    if (voltmeter->active()) {
-        voltmeter->stop();
+    if (m_voltmeter->active()) {
+        m_voltmeter->stop();
     }
 }
 
 void
 LoggerForm::on_ch1CheckBox_stateChanged(int state)
 {
-    auto channels = voltmeter->channels();
+    auto channels = m_voltmeter->channels();
     channels[0] = (state == Qt::Checked);
-    voltmeter->setChannels(channels);
+    m_voltmeter->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch2CheckBox_stateChanged(int state)
 {
-    auto channels = voltmeter->channels();
+    auto channels = m_voltmeter->channels();
     channels[1] = (state == Qt::Checked);
-    voltmeter->setChannels(channels);
+    m_voltmeter->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch3CheckBox_stateChanged(int state)
 {
-    auto channels = voltmeter->channels();
+    auto channels = m_voltmeter->channels();
     channels[2] = (state == Qt::Checked);
-    voltmeter->setChannels(channels);
+    m_voltmeter->setChannels(channels);
 }
 
 void
 LoggerForm::on_ch4CheckBox_stateChanged(int state)
 {
-    auto channels = voltmeter->channels();
+    auto channels = m_voltmeter->channels();
     channels[3] = (state == Qt::Checked);
-    voltmeter->setChannels(channels);
+    m_voltmeter->setChannels(channels);
 }
 
 void
@@ -210,7 +194,7 @@ LoggerForm::save()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
-        voltmeter->save(fileName);
+        m_voltmeter->save(fileName);
     }
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
@@ -220,16 +204,16 @@ LoggerForm::save()
 void
 LoggerForm::on_clearButton_clicked()
 {
-    voltmeter->clear();
+    m_voltmeter->clear();
 }
 
 void
 LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
 {
     if (state == Qt::Unchecked)
-        voltmeter->setAutoSave(false);
+        m_voltmeter->setAutoSave(false);
     else if (state == Qt::Checked)
-        voltmeter->setAutoSave(true);
+        m_voltmeter->setAutoSave(true);
 }
 
 void
@@ -282,7 +266,7 @@ void
 LoggerForm::on_channelsChanged(const std::bitset<4> &channels)
 {
     for (auto i = 0; i < 4; i++)
-        curves[i]->setVisible(channels[i]);
+        m_curves[i]->setVisible(channels[i]);
     ui->plot->replot();
 }
 
@@ -290,7 +274,7 @@ void
 LoggerForm::on_intervalComboBox_activated(int index)
 {
     static const int interval[] = {100, 200, 500, 1000, 2000, 5000};
-    voltmeter->setInterval(interval[index]);
+    m_voltmeter->setInterval(interval[index]);
 }
 
 void

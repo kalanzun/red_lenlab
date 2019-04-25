@@ -24,9 +24,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-SignalForm::SignalForm(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::SignalForm)
+SignalForm::SignalForm(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::SignalForm)
 {
     qDebug() << "SignalForm";
     ui->setupUi(this);
@@ -41,18 +41,18 @@ SignalForm::~SignalForm()
 }
 
 void
-SignalForm::setMainWindow(MainWindow *main_window)
+SignalForm::setMainWindow(MainWindow * main_window)
 {
-    this->main_window = main_window;
+    m_main_window = main_window;
 }
 
 void
-SignalForm::setModel(model::Lenlab *lenlab)
+SignalForm::setModel(model::Lenlab * lenlab)
 {
-    /*
-    this->lenlab = lenlab;
-    this->signalgenerator = lenlab->signalgenerator;
+    m_lenlab = lenlab;
+    m_signalgenerator = &lenlab->signalgenerator;
 
+    /*
     connect(signalgenerator, SIGNAL(lockedDataChanged(bool)),
             this, SLOT(signalgenerator_lockedDataChanged(bool)));
 
@@ -117,25 +117,25 @@ void
 SignalForm::on_signalTypeBox_activated(int index)
 {
     if (index == 1) { // Sinus
-        if (signalgenerator->locked()) {
+        if (m_signalgenerator->locked()) {
             ui->signalTypeBox->setCurrentIndex(0);
-            active = 0;
+            m_active = 0;
         }
         else {
-            signalgenerator->setAmplitude(ui->amplitudeBox->currentIndex());
-            signalgenerator->setFrequency(ui->frequencyBox->currentIndex());
-            signalgenerator->setSecond(ui->secondBox->currentIndex());
-            signalgenerator->setSine();
-            active = 1;
+            m_signalgenerator->setAmplitude(ui->amplitudeBox->currentIndex());
+            m_signalgenerator->setFrequency(ui->frequencyBox->currentIndex());
+            m_signalgenerator->setSecond(ui->secondBox->currentIndex());
+            m_signalgenerator->setSine();
+            m_active = 1;
             //setUIConfiguration(true, true, true);
         }
     }
     else {
-        if (signalgenerator->locked()) {
+        if (m_signalgenerator->locked()) {
         }
         else {
-            signalgenerator->stop();
-            active = 0;
+            m_signalgenerator->stop();
+            m_active = 0;
             //setUIConfiguration(false, false, false);
         }
     }
@@ -146,7 +146,7 @@ SignalForm::signalgenerator_lockedDataChanged(bool locked)
 {
     if (locked) {
         ui->signalTypeBox->setCurrentIndex(0); // does not trigger activated
-        active = 0;
+        m_active = 0;
     }
 }
 
@@ -161,9 +161,9 @@ void
 SignalForm::on_amplitudeSlider_valueChanged(int index)
 {
     ui->amplitudeBox->setCurrentIndex(index);
-    if (active) {
-        signalgenerator->setAmplitude(index);
-        signalgenerator->setSine();
+    if (m_active) {
+        m_signalgenerator->setAmplitude(index);
+        m_signalgenerator->setSine();
     }
 }
 
@@ -178,9 +178,9 @@ void
 SignalForm::on_frequencySlider_valueChanged(int index)
 {
     ui->frequencyBox->setCurrentIndex(index);
-    if (active) {
-        signalgenerator->setFrequency(index);
-        signalgenerator->setSine();
+    if (m_active) {
+        m_signalgenerator->setFrequency(index);
+        m_signalgenerator->setSine();
     }
 }
 
@@ -195,9 +195,9 @@ void
 SignalForm::on_secondSlider_valueChanged(int index)
 {
     ui->secondBox->setCurrentIndex(index);
-    if (active) {
-        signalgenerator->setSecond(index);
-        signalgenerator->setSine();
+    if (m_active) {
+        m_signalgenerator->setSecond(index);
+        m_signalgenerator->setSine();
     }
 }
 

@@ -30,9 +30,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-FrequencyForm::FrequencyForm(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::FrequencyForm)
+FrequencyForm::FrequencyForm(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::FrequencyForm)
 {
     qDebug() << "FrequencyForm";
     ui->setupUi(this);
@@ -71,16 +71,16 @@ FrequencyForm::~FrequencyForm()
 void
 FrequencyForm::setMainWindow(MainWindow *main_window)
 {
-    this->main_window = main_window;
+    m_main_window = main_window;
 }
 
 void
 FrequencyForm::setModel(model::Lenlab *lenlab)
 {
-    /*
-    //this->lenlab = lenlab;
-    //this->frequencysweep = lenlab->frequencysweep;
+    m_lenlab = lenlab;
+    m_frequencysweep = &lenlab->frequencysweep;
 
+    /*
     curves[0] = newCurve(1, QColor("#729fcf"), true); // sky blue 0
     curves[1] = newCurve(2, QColor("#ef2929"), true); // scarlet red 0
     curves[1]->setYAxis(QwtPlot::yRight);
@@ -128,19 +128,19 @@ FrequencyForm::newGrid()
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!frequencysweep->active()) {
-        if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(frequencysweep)) return;
+    if (!m_frequencysweep->active()) {
+        if (m_lenlab->isActive()) {
+            if (!m_main_window->askToCancelActiveComponent(m_frequencysweep)) return;
         }
-        frequencysweep->start();
+        m_frequencysweep->start();
     }
 }
 
 void
 FrequencyForm::on_stopButton_clicked()
 {
-    if (frequencysweep->active()) {
-        frequencysweep->stop();
+    if (m_frequencysweep->active()) {
+        m_frequencysweep->stop();
     }
 }
 
@@ -161,7 +161,7 @@ FrequencyForm::save()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
-        frequencysweep->save(fileName);
+        m_frequencysweep->save(fileName);
     }
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason

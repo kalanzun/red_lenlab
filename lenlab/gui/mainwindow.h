@@ -22,7 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define GUI_MAINWINDOW_H
 
 #include "model/lenlab.h"
+
 #include <QMainWindow>
+#include <QPointer>
 
 namespace gui {
 
@@ -30,13 +32,14 @@ namespace Ui {
 class MainWindow;
 }
 
-/**
- * @brief Lenlab main window.
- */
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    Ui::MainWindow * ui;
+    model::Lenlab * m_lenlab = nullptr;
+
+    bool m_signal_checked = false;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -56,12 +59,6 @@ private slots:
     void on_actionSaveImage_triggered();
     void on_actionQuit_triggered();
     void on_actionAbout_triggered();
-
-private:
-    Ui::MainWindow *ui;
-    model::Lenlab *lenlab;
-
-    bool signal_checked = false;
 };
 
 } // namespace gui

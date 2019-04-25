@@ -33,13 +33,20 @@ namespace Ui {
 class LoggerForm;
 }
 
-/**
- * @brief Controls for the Lenlab Logger component.
- */
-
 class LoggerForm : public QWidget
 {
     Q_OBJECT
+
+    //QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
+
+    Ui::LoggerForm * ui;
+
+    MainWindow * m_main_window = nullptr;
+    model::Lenlab * m_lenlab = nullptr;
+    model::Voltmeter * m_voltmeter = nullptr;
+
+    std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
 
 public:
     explicit LoggerForm(QWidget *parent = 0);
@@ -69,18 +76,6 @@ private slots:
     void on_autoSaveChanged(bool);
     void on_fileNameChanged(const QString &);
     void on_channelsChanged(const std::bitset<4> &);
-
-private:
-    //QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
-
-    Ui::LoggerForm *ui;
-
-    MainWindow *main_window;
-    model::Lenlab *lenlab;
-    model::Voltmeter *voltmeter;
-
-    std::array<QwtPlotCurve *, 4> curves; // pointer, no ownership
 };
 
 
