@@ -1,89 +1,102 @@
-/*
-
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
-
 #include "board.h"
-#include "lenlab_protocol.h"
-#include "lenlab_version.h"
-#include <QDebug>
-#include <QPointer>
+
+#include <QMetaMethod>
 
 namespace protocol {
 
-Board::Board(usb::pDevice &device, QObject *parent) :
-    QObject(parent),
-    device(device)
+static int p_board_type_id = qRegisterMetaType<pBoard>("pBoard");
+
+Board::Board(usb::pDevice &device, QObject *parent)
+    : QObject(parent)
+    , mDevice(device)
 {
     connect(device.data(), &usb::Device::reply,
             this, &Board::on_reply);
+
+    connect(device.data(), &usb::Device::error,
+            this, &Board::on_error);
+
+    connect(&mWatchdog, &QTimer::timeout,
+            this, &Board::on_timeout);
+
+    mWatchdog.setInterval(100);
+    mWatchdog.setSingleShot(true);
 }
 
-void
-Board::send(const pMessage &command)
+
+const pTask &Board::startTask(pMessage const & command, int timeout)
 {
-    device->send(command->getPacket());
+    Q_ASSERT(!mTask);
+
+    mTask.reset(new Task);
+
+    mDevice->send(command->getPacket());
+    mWatchdog.start(timeout);
+
+    return mTask;
 }
 
-void
-Board::start(const pTransaction &transaction)
-{
-    queue.append(transaction);
-    send_queue();
-}
 
 void
-Board::send_queue()
+Board::on_reply(usb::pPacket const & packet)
 {
-    if (current_transaction.isNull() && !queue.isEmpty()) {
-        current_transaction = queue.takeFirst();
+    auto message = pMessage::create(packet);
+    auto task = mTask;
 
-        current_conn = connect(
-                    device.data(), &usb::Device::reply,
-                    current_transaction.data(), &Transaction::on_reply);
-
-        connect(current_transaction.data(), &Transaction::finished,
-                this, &Board::on_finished);
-
-        send(current_transaction->command);
-
-        current_transaction->startWatchdog();
+    if (task) {
+        mWatchdog.start(); // restart
+        if (message->getReply() == Error) {
+            task->setError(message);
+            mTask.clear();
+            mWatchdog.stop();
+            emit task->failed(task);
+        } else {
+            task->addReply(message);
+            if (task->isComplete()) {
+                mTask.clear();
+                mWatchdog.stop();
+                emit task->succeeded(task);
+            }
+        }
+    } else if (message->getReply() == LoggerData) {
+        emit logger(message);
+    } else {
+        emit error("Unerwartetes Paket empfangen");
     }
 }
 
-void
-Board::on_finished()
+void Board::on_error(const QString & message)
 {
-    disconnect(current_conn);
-    current_transaction.clear();
-    send_queue();
+    auto task = mTask;
+
+    if (task) {
+        task->setError(message);
+        mTask.clear();
+        emit task->failed(task);
+    } else {
+        emit error(message);
+    }
 }
 
+
+void
+Board::on_timeout()
+{
+    auto task = mTask;
+
+    if (task) {
+        task->setTimeout();
+        mTask.clear();
+        emit task->failed(task);
+    }
+}
+
+/*
 pTransaction
 Board::init()
 {
-    qDebug() << "Board::init";
-
-    auto cmd = pMessage::create();
-    cmd->setCommand(::init);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::init);
+    send(transaction);
 
     return transaction;
 }
@@ -91,13 +104,8 @@ Board::init()
 pTransaction
 Board::getName()
 {
-    qDebug() << "Board::getName";
-
-    auto cmd = pMessage::create();
-    cmd->setCommand(::getName);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::getName);
+    send(transaction);
 
     return transaction;
 }
@@ -105,13 +113,8 @@ Board::getName()
 pTransaction
 Board::getVersion()
 {
-    qDebug() << "Board::getVersion";
-
-    auto cmd = pMessage::create();
-    cmd->setCommand(::getVersion);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::getVersion);
+    send(transaction);
 
     return transaction;
 }
@@ -126,12 +129,9 @@ Board::setSignalSine(uint32_t multiplier, uint32_t predivider, uint32_t divider,
     args.append(amplitude);
     args.append(second);
 
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::setSignalSine);
-    cmd->setUInt32Vector(args);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::setSignalSine);
+    transaction->command->setUInt32Vector(args);
+    send(transaction);
 
     return transaction;
 }
@@ -142,12 +142,9 @@ Board::startOscilloscope(uint32_t samplerate)
     QVector<uint32_t> args;
     args.append(samplerate);
 
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startOscilloscope);
-    cmd->setUInt32Vector(args);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::startOscilloscope);
+    transaction->command->setUInt32Vector(args);
+    send(transaction);
 
     return transaction;
 }
@@ -155,11 +152,8 @@ Board::startOscilloscope(uint32_t samplerate)
 pTransaction
 Board::startOscilloscopeLinearTestData()
 {
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startOscilloscopeLinearTestData);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::startOscilloscopeLinearTestData);
+    send(transaction);
 
     return transaction;
 }
@@ -167,28 +161,22 @@ Board::startOscilloscopeLinearTestData()
 pTransaction
 Board::startTriggerLinearTestData()
 {
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startTriggerLinearTestData);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::startTriggerLinearTestData);
+    send(transaction);
 
     return transaction;
 }
 
 pTransaction
-Board::startOscilloscopeTrigger(uint32_t samplerate)
+Board::startTrigger(uint32_t samplerate)
 {
     QVector<uint32_t> args;
     args.append(samplerate);
 
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startTrigger);
-    cmd->setUInt32Vector(args);
-
-    auto transaction = pTransaction::create(cmd);
+    auto transaction = pTransaction::create(::startTrigger);
+    transaction->command->setUInt32Vector(args);
     transaction->setWatchdog(800);
-    start(transaction);
+    send(transaction);
 
     return transaction;
 }
@@ -199,12 +187,9 @@ Board::startLogger(uint32_t interval)
     QVector<uint32_t> args;
     args.append(interval);
 
-    auto cmd = protocol::pMessage::create();
-    cmd->setCommand(::startLogger);
-    cmd->setUInt32Vector(args);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::startLogger);
+    transaction->command->setUInt32Vector(args);
+    send(transaction);
 
     return transaction;
 }
@@ -212,23 +197,10 @@ Board::startLogger(uint32_t interval)
 pTransaction
 Board::stopLogger()
 {
-    auto cmd = pMessage::create();
-    cmd->setCommand(::stopLogger);
-
-    auto transaction = pTransaction::create(cmd);
-    start(transaction);
+    auto transaction = pTransaction::create(::stopLogger);
+    send(transaction);
 
     return transaction;
 }
-
-void
-Board::on_reply(const usb::pPacket &packet)
-{
-    auto message = pMessage::create(packet);
-
-    if (message->getReply() == LoggerData) {
-        emit logger(message);
-    }
-}
-
+*/
 } // namespace protocol

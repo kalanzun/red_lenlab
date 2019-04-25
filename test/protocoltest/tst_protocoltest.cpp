@@ -1,39 +1,28 @@
-/*
-
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
-
-#include "protocol/manager.h"
-#include "protocol/message.h"
 #include "protocol/board.h"
+#include "protocol/factory.h"
+#include "protocol/message.h"
+
 #include "lenlab_protocol.h"
-#include <QString>
+
 #include <QDebug>
-#include <QPointer>
+#include <QString>
+#include <QObject>
+
 #include <QtTest>
+
+using namespace protocol;
 
 class ProtocolTest : public QObject
 {
     Q_OBJECT
 
-public:
-    ProtocolTest();
-    ~ProtocolTest();
+    Factory mFactory;
+    pBoard mBoard;
+
+    static int const m_short_timeout = 100;
+    static int const m_long_timeout = 800;
+    static int const m_logger_timeout = 150;
+    static int const m_trigger_timeout = 400;
 
 private slots:
     void initTestCase();
@@ -49,84 +38,92 @@ private slots:
     void test_startOscilloscope3();
     void test_startLogger4();
     //void test_TransactionTimeout();
-
-private:
-    protocol::Manager manager;
-    QPointer<protocol::Board> board;
-
-    int m_short_timeout = 100;
-    int m_long_timeout = 800;
-    int m_logger_timeout = 150;
 };
-
-ProtocolTest::ProtocolTest()
-{
-
-}
-
-ProtocolTest::~ProtocolTest()
-{
-
-}
 
 void ProtocolTest::initTestCase()
 {
-    QSignalSpy spy(&manager, &protocol::Manager::ready);
+    QSignalSpy spy(&mFactory, &Factory::ready);
     QVERIFY(spy.isValid());
 
-    manager.start();
+    mFactory.start();
 
     QVERIFY(spy.wait(m_long_timeout));
 
-    board = qvariant_cast<QPointer<protocol::Board>>(spy.at(0).at(0));
+    mBoard = qvariant_cast<pBoard>(spy.at(0).at(0));
 }
 
 void ProtocolTest::cleanupTestCase()
 {
+    mBoard.clear();
 }
 
 void ProtocolTest::test_startLogger()
 {
-    auto transaction = board->startLogger(100);
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVector<uint32_t> args;
+    args.append(100);
+
+    pMessage cmd(new Message());
+    cmd->setCommand(::startLogger);
+    cmd->setUInt32Vector(args);
+
+    auto task = mBoard->startTask(cmd);
+    QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));
 
-    QSignalSpy logger_spy(board, &protocol::Board::logger);
+    QSignalSpy logger_spy(mBoard.data(), &Board::logger);
     QVERIFY(logger_spy.isValid());
 
     // reply queue length in the firmware is 4, cycle at least once
-    for (int i = 0; i < 6; i++) {
-        qDebug() << i;
+    for (int i = 0; i < 6; ++i) {
+        //qDebug() << i;
         QVERIFY(logger_spy.wait(m_logger_timeout));
     }
 
-    auto stop_transaction = board->stopLogger();
-    QSignalSpy stop_spy(stop_transaction.data(), &protocol::Transaction::succeeded);
+    pMessage stop_cmd(new Message());
+    stop_cmd->setCommand(::stopLogger);
+
+    auto stop_task = mBoard->startTask(stop_cmd);
+    QSignalSpy stop_spy(stop_task.data(), &Task::succeeded);
     QVERIFY(stop_spy.isValid());
     QVERIFY(stop_spy.wait(m_short_timeout));
 
-    QVERIFY(logger_spy.wait(m_logger_timeout) == 0); // no additional data point after stop
+    // no additional data point after stop
+    QVERIFY(logger_spy.wait(m_logger_timeout) == 0);
 }
 
 void ProtocolTest::test_startOscilloscope()
 {
-    auto transaction = board->startOscilloscope(1);
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
+    QVector<uint32_t> args;
+    args.append(1);
+
+    pMessage cmd(new Message());
+    cmd->setCommand(::startOscilloscope);
+    cmd->setUInt32Vector(args);
+
+    auto task = mBoard->startTask(cmd);
+    QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));
 
-    QCOMPARE(transaction->replies.count(), 20);
+    QCOMPARE(task->getSize(), 20);
 }
 
 void ProtocolTest::test_startTrigger()
 {
-    auto transaction = board->startOscilloscopeTrigger(2);
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::succeeded);
-    QVERIFY(spy.isValid());
-    QVERIFY(spy.wait(10000));
+    QVector<uint32_t> args;
+    args.append(2);
 
-    QCOMPARE(transaction->replies.count(), 18);
+    pMessage cmd(new Message());
+    cmd->setCommand(::startTrigger);
+    cmd->setUInt32Vector(args);
+
+    auto task = mBoard->startTask(cmd, m_trigger_timeout);
+    QSignalSpy spy(task.data(), &Task::succeeded);
+    QVERIFY(spy.isValid());
+    QVERIFY(spy.wait(m_trigger_timeout + m_short_timeout));
+
+    QCOMPARE(task->getSize(), 18);
 }
 
 void ProtocolTest::test_startLogger2() { test_startLogger(); }
@@ -145,16 +142,16 @@ void ProtocolTest::test_TransactionTimeout()
     QVector<uint32_t> args;
     args.append(0);
 
-    auto cmd = protocol::pMessage::create();
+    auto cmd = pMessage::create();
     cmd->setCommand(::startOscilloscope);
     cmd->setIntVector(args);
 
-    auto transaction = protocol::pTransaction::create(cmd);
-    transaction->setWatchdog(1); // very short timeout
-    QSignalSpy spy(transaction.data(), &protocol::Transaction::failed);
+    auto task = pTransaction::create(cmd);
+    task->setWatchdog(1); // very short timeout
+    QSignalSpy spy(task.data(), &Task::failed);
     QVERIFY(spy.isValid());
 
-    board->start(transaction);
+    mBoard->start(task);
     QVERIFY(spy.wait(m_short_timeout));
 
     QVERIFY(spy.wait(m_short_timeout) == 0); // wait for the device to clean up and unlock

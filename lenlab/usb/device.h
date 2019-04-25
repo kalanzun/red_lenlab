@@ -50,8 +50,6 @@ namespace usb {
     public:
         explicit Device(libusb_device *dev, QObject *parent = nullptr);
 
-        std::mutex transaction;
-
         void send(const pPacket &cmd);
 
     signals:
@@ -59,7 +57,6 @@ namespace usb {
         void error(const QString &);
 
     private slots:
-        void on_reply(const pPacket &);
         void on_reply_transfer_ready();
         void on_send_transfer_ready();
 

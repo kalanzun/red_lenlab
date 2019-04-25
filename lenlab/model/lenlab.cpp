@@ -35,12 +35,15 @@ Lenlab::Lenlab(QObject *parent) :
     connect(signalgenerator, SIGNAL(updated()),
             frequencysweep, SLOT(on_updated()));
 
+    // TODO Factory
+    /*
     connect(&manager, &protocol::Manager::error,
             this, &Lenlab::on_error);
     connect(&manager, &protocol::Manager::ready,
             this, &Lenlab::on_ready);
 
     manager.start();
+    */
 }
 
 Lenlab::~Lenlab()
@@ -106,7 +109,7 @@ Lenlab::on_comDestroyed(QObject *obj)
 void
 Lenlab::on_ready(const QPointer<protocol::Board> &board)
 {
-    this->board = board;
+    //this->board = board;
 
     frequencysweep->setBoard(board);
     voltmeter->setBoard(board);

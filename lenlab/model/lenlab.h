@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "voltmeter.h"
 #include "oscilloscope.h"
 #include "signalgenerator.h"
-#include "protocol/manager.h"
+#include "protocol/factory.h"
 #include "protocol/message.h"
 #include <QObject>
 #include <QPointer>
@@ -66,9 +66,6 @@ private slots:
     void on_error(const QString &);
     void on_ready(const QPointer<protocol::Board> &);
 
-private:
-    protocol::Manager manager;
-    QPointer<protocol::Board> board;
 };
 
 } // namespace model

@@ -22,16 +22,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    board.cpp \
+    factory.cpp \
     message.cpp \
-    transaction.cpp \
-    manager.cpp \
-    board.cpp
+    task.cpp
 
 HEADERS += \
+    board.h \
+    factory.h \
     message.h \
-    transaction.h \
-    manager.h \
-    board.h
+    task.h
 
 unix {
     target.path = /usr/lib

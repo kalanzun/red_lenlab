@@ -85,10 +85,11 @@ Oscilloscope::restart()
 {
     incoming.reset(new Waveform());
     incoming->setSamplerate(1e6/(1<<(samplerate+2)));
-
+    /*
     auto transaction = board->startOscilloscopeTrigger(samplerate+2);
     connect(transaction.data(), &protocol::Transaction::succeeded,
             this, &Oscilloscope::on_succeeded);
+            */
 }
 
 void
@@ -101,7 +102,7 @@ void
 Oscilloscope::on_succeeded(const protocol::pMessage &reply)
 {
     Q_UNUSED(reply)
-
+/*
     auto transaction = qobject_cast<protocol::Transaction *>(QObject::sender());
 
     for (auto reply: transaction->replies) {
@@ -132,6 +133,7 @@ Oscilloscope::on_succeeded(const protocol::pMessage &reply)
 
     waveform.swap(incoming);
     emit replot();
+    */
 
     if (m_active) {
         pending = 1;

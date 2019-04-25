@@ -1,115 +1,96 @@
-/*
-
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
-
 #include "message.h"
 
 namespace protocol {
 
 static int p_message_type_id = qRegisterMetaType<pMessage>("pMessage");
 
-Message::Message() : packet(new usb::Packet())
+Message::Message()
+    : mPacket(new usb::Packet())
 {
 
 }
 
-Message::Message(const usb::pPacket &packet) : packet(packet)
+Message::Message(usb::pPacket const & packet)
+    : mPacket(packet)
 {
 
 }
 
-usb::pPacket &
-Message::getPacket()
+usb::pPacket &Message::getPacket()
 {
-    return packet;
+    return mPacket;
 }
 
 size_t
 Message::getHeadLength()
 {
-    return LENLAB_PACKET_HEAD_LENGTH;
+    return mHeadLength;
 }
 
 uint8_t *
 Message::getHead()
 {
-    return packet->getByteBuffer();
+    return mPacket->getByteBuffer();
 }
 
 void
 Message::setCommand(Command code)
 {
-    packet->getByteBuffer()[0] = code;
-    for (int i = 1; i < LENLAB_PACKET_HEAD_LENGTH; i++)
-        packet->getByteBuffer()[i] = 0;
-    packet->setByteLength(LENLAB_PACKET_HEAD_LENGTH);
+    mPacket->getByteBuffer()[0] = code;
+    for (size_t i = 1; i < mHeadLength; ++i)
+        mPacket->getByteBuffer()[i] = 0;
+    mPacket->setByteLength(mHeadLength);
 }
 
 Command
-Message::getCommand()
+Message::getCommand() const
 {
-    return static_cast<Command>(packet->getByteBuffer()[0]);
+    return static_cast<Command>(mPacket->getByteBuffer()[0]);
 }
 
 void
 Message::setReply(Reply reply)
 {
-    packet->getByteBuffer()[0] = reply;
-    for (int i = 1; i < LENLAB_PACKET_HEAD_LENGTH; i++)
-        packet->getByteBuffer()[i] = 0;
-    packet->setByteLength(LENLAB_PACKET_HEAD_LENGTH);
+    mPacket->getByteBuffer()[0] = reply;
+    for (size_t i = 1; i < mHeadLength; ++i)
+        mPacket->getByteBuffer()[i] = 0;
+    mPacket->setByteLength(mHeadLength);
 }
 
 Reply
-Message::getReply()
+Message::getReply() const
 {
-    return static_cast<Reply>(packet->getByteBuffer()[0]);
+    return static_cast<Reply>(mPacket->getByteBuffer()[0]);
 }
 
 void
 Message::setType(Type type)
 {
-    packet->getByteBuffer()[1] = type;
+    mPacket->getByteBuffer()[1] = type;
 }
 
 Type
-Message::getType()
+Message::getType() const
 {
-    return static_cast<Type>(packet->getByteBuffer()[1]);
+    return static_cast<Type>(mPacket->getByteBuffer()[1]);
 }
 
 bool
-Message::isLast()
+Message::isLast() const
 {
-    return static_cast<bool>(packet->getByteBuffer()[3]);
+    return static_cast<bool>(mPacket->getByteBuffer()[3]);
 }
 
 size_t
-Message::getUInt32BufferLength()
+Message::getUInt32BufferLength() const
 {
-    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(uint32_t);
+    return (mPacket->getByteLength() - mHeadLength) / sizeof(uint32_t);
 }
 
 uint32_t *
 Message::getUInt32Buffer()
 {
-    return (packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
+    return (mPacket->getBuffer() + mHeadLength / 4);
 }
 
 void
@@ -118,49 +99,49 @@ Message::setUInt32Vector(const QVector<uint32_t> &vector)
     setType(IntArray);
     for (int i = 0; i < vector.size(); ++i)
         getUInt32Buffer()[i] = vector.at(i);
-    packet->setByteLength((LENLAB_PACKET_HEAD_LENGTH) + (static_cast<size_t>(vector.size()) * sizeof(uint32_t)));
+    mPacket->setByteLength(mHeadLength + static_cast<size_t>(vector.size()) * sizeof(uint32_t));
 }
 
 size_t
-Message::getUInt16BufferLength()
+Message::getUInt16BufferLength() const
 {
-    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(uint16_t);
+    return (mPacket->getByteLength() - mHeadLength) / sizeof(uint16_t);
 }
 
 uint16_t *
 Message::getUInt16Buffer()
 {
-    return reinterpret_cast<uint16_t *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
+    return reinterpret_cast<uint16_t *>(mPacket->getBuffer() + mHeadLength / 4);
 }
 
 size_t
-Message::getUInt8BufferLength()
+Message::getUInt8BufferLength() const
 {
-    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(uint8_t);
+    return (mPacket->getByteLength() - mHeadLength) / sizeof(uint8_t);
 }
 
 uint8_t *
 Message::getUInt8Buffer()
 {
-    return reinterpret_cast<uint8_t *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
+    return reinterpret_cast<uint8_t *>(mPacket->getBuffer() + mHeadLength / 4);
 }
 
 size_t
-Message::getInt8BufferLength()
+Message::getInt8BufferLength() const
 {
-    return (packet->getByteLength() - LENLAB_PACKET_HEAD_LENGTH) / sizeof(int8_t);
+    return (mPacket->getByteLength() - mHeadLength) / sizeof(int8_t);
 }
 
 int8_t *
 Message::getInt8Buffer()
 {
-    return reinterpret_cast<int8_t *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
+    return reinterpret_cast<int8_t *>(mPacket->getBuffer() + mHeadLength / 4);
 }
 
 QString
-Message::getString()
+Message::getString() const
 {
-    auto str = reinterpret_cast<const char *>(packet->getBuffer() + LENLAB_PACKET_HEAD_LENGTH / 4);
+    auto str = reinterpret_cast<const char *>(mPacket->getBuffer() + mHeadLength / 4);
     Q_ASSERT(*(str + getUInt8BufferLength() - 1) == 0);
     return QString(str);
 }

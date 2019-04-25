@@ -150,10 +150,10 @@ Frequencysweep::restart()
     else
         samplerate = 3;
     */
-
+/*
     auto transaction = board->startOscilloscope(samplerate);
     connect(transaction.data(), &protocol::Transaction::succeeded,
-            this, &Frequencysweep::on_succeeded);
+            this, &Frequencysweep::on_succeeded);*/
 }
 
 void
@@ -163,7 +163,7 @@ Frequencysweep::on_succeeded(const protocol::pMessage &reply)
 
     // ByteArray Code
     //qDebug("on_reply");
-
+/*
     auto transaction = qobject_cast<protocol::Transaction *>(QObject::sender());
 
     for (auto reply: transaction->replies) {
@@ -181,7 +181,7 @@ Frequencysweep::on_succeeded(const protocol::pMessage &reply)
 
     }
 
-
+*/
     //incoming->setView(incoming->getLength(0));
 
     emit calculate();

@@ -87,7 +87,7 @@ Voltmeter::restart()
         time_offset = data[0].last() + interval / MSEC;
     */
 
-    board->startLogger(interval);
+    //board->startLogger(interval);
 
     /*
     qDebug("set intervall");
@@ -112,7 +112,7 @@ Voltmeter::stop()
     //cmd->setCommand(stopLogger);
     //lenlab->send(cmd);
 
-    board->stopLogger();
+    //board->stopLogger();
 
     super::stop();
 }

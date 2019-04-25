@@ -39,8 +39,6 @@ Device::Device(libusb_device *dev, QObject *parent) :
             this, SIGNAL(reply(pPacket)));
     connect(&*receiver1, SIGNAL(completed(pPacket)),
             this, SIGNAL(reply(pPacket)));
-    connect(this, SIGNAL(reply(pPacket)),
-            this, SLOT(on_reply(pPacket)));
 
     connect(&*sender, SIGNAL(completed(pPacket)),
             this, SLOT(on_send_transfer_ready()));
@@ -65,16 +63,8 @@ Device::Device(libusb_device *dev, QObject *parent) :
 void
 Device::send(const pPacket &cmd)
 {
-    //qDebug() << "send" << cmd->getCommand();
     send_queue->append(cmd);
     try_to_send();
-}
-
-void
-Device::on_reply(const pPacket &reply)
-{
-    Q_UNUSED(reply);
-    //qDebug() << "reply" << reply->getReply() << reply->getPacketLength();
 }
 
 void
