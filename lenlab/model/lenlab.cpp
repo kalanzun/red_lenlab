@@ -19,21 +19,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "lenlab.h"
+
 #include <QDebug>
 
 namespace model {
 
-Lenlab::Lenlab(QObject *parent) :
-    QObject(parent),
-    frequencysweep(new Frequencysweep(this)),
-    voltmeter(new Voltmeter(this)),
-    oscilloscope(new Oscilloscope(this)),
-    signalgenerator(new Signalgenerator(this))
+Lenlab::Lenlab(QObject * parent)
+    : QObject(parent)
+    , frequencysweep(this)
+    , voltmeter(this)
+    , oscilloscope(this)
+    , signalgenerator(this)
 {
-    qDebug() << "Lenlab";
+    connect(&mFactory, &protocol::Factory::ready,
+            this, &Lenlab::on_ready);
 
+    connect(&mFactory, &protocol::Factory::error,
+            this, &Lenlab::on_error);
+    /*
     connect(signalgenerator, SIGNAL(updated()),
             frequencysweep, SLOT(on_updated()));
+            */
 
     // TODO Factory
     /*
@@ -46,40 +52,37 @@ Lenlab::Lenlab(QObject *parent) :
     */
 }
 
-Lenlab::~Lenlab()
-{
-    qDebug() << "~Lenlab";
-}
-
 bool
 Lenlab::isActive()
 {
-    return frequencysweep->active() || voltmeter->active() || oscilloscope->active();
+    return frequencysweep.active() || voltmeter.active() || oscilloscope.active();
 }
 
 Component *
 Lenlab::getActiveComponent()
 {
-    if (frequencysweep->active())
-        return frequencysweep;
-    if (voltmeter->active())
-        return voltmeter;
-    if (oscilloscope->active())
-        return oscilloscope;
+    if (frequencysweep.active())
+        return &frequencysweep;
+    if (voltmeter.active())
+        return &voltmeter;
+    if (oscilloscope.active())
+        return &oscilloscope;
 
     throw std::exception();
 }
-
+/*
 bool
 Lenlab::available()
 {
     //TODO
     return 1;//return m_ready;
 }
-
-void Lenlab::on_error(const QString &message)
+*/
+void
+Lenlab::on_error(const QString & message)
 {
-    emit logMessage(message);
+    qDebug() << message;
+    //emit logMessage(message);
 }
 /*
 QPointer<Communication>
@@ -107,14 +110,15 @@ Lenlab::on_comDestroyed(QObject *obj)
 }
 */
 void
-Lenlab::on_ready(const QPointer<protocol::Board> &board)
+Lenlab::on_ready(protocol::pBoard const & board)
 {
-    //this->board = board;
-
+    mBoard = board;
+    /*
     frequencysweep->setBoard(board);
     voltmeter->setBoard(board);
     oscilloscope->setBoard(board);
     //signalgenerator->setBoard(board);
+    */
 }
 
 } // namespace model

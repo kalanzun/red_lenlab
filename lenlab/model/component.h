@@ -22,48 +22,43 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define COMPONENT_H
 
 #include "protocol/board.h"
+
 #include <QObject>
-#include <QPointer>
 
 namespace model {
 
 class Lenlab;
 
-/**
- * @brief Base class for Lenlab components.
- */
-
 class Component : public QObject
 {
     Q_OBJECT
+
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
+    bool mActive = 0;
+
+protected:
+    Lenlab const & mLenlab;
+    protocol::pBoard mBoard;
 
 public:
-    explicit Component(Lenlab *parent);
-    virtual ~Component();
+    explicit Component(const Lenlab & lenlab);
+    Component(Component const & other) = delete;
+
+    Component & operator=(Component const & other) = delete;
 
     bool active() const;
     void setActive(bool active);
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+    virtual QString const & getNameNominative() const;
+    virtual QString const & getNameAccusative() const;
+
+    virtual void setBoard(protocol::pBoard const & board);
 
     virtual void start();
     virtual void stop();
 
-    virtual void setBoard(const QPointer<protocol::Board> &);
-
 signals:
     void activeChanged(bool);
-
-public slots:
-
-protected:
-    Lenlab *lenlab;
-    QPointer<protocol::Board> board;
-
-    bool m_active = 0;
-
 };
 
 } // namespace model

@@ -25,46 +25,50 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "voltmeter.h"
 #include "oscilloscope.h"
 #include "signalgenerator.h"
+
+#include "protocol/board.h"
 #include "protocol/factory.h"
 #include "protocol/message.h"
+
 #include <QObject>
-#include <QPointer>
 
 namespace model {
-
-/**
- * @brief Root object of the Lenlab data model.
- */
 
 class Lenlab : public QObject
 {
     Q_OBJECT
+
+    protocol::Factory mFactory;
+    protocol::pBoard mBoard;
+
 public:
-    explicit Lenlab(QObject *parent = nullptr);
-    virtual ~Lenlab();
+    Frequencysweep frequencysweep;
+    Voltmeter voltmeter;
+    Oscilloscope oscilloscope;
+    Signalgenerator signalgenerator;
+
+    explicit Lenlab(QObject * parent = nullptr);
+    Lenlab(Lenlab const & other) = delete;
+
+    Lenlab & operator=(Lenlab const & other) = delete;
 
     bool isActive();
     Component *getActiveComponent();
 
-    bool available();
-
-    Frequencysweep *frequencysweep;
-    Voltmeter *voltmeter;
-    Oscilloscope *oscilloscope;
-    Signalgenerator *signalgenerator;
+    //bool available();
 
 signals:
-    void receive(const protocol::pMessage &);
+    //void receive(const protocol::pMessage &);
 
-    void logMessage(const QString &);
+    //void logMessage(const QString &);
 
-    void replot();
+    //void replot();
 
 public slots:
 
 private slots:
-    void on_error(const QString &);
-    void on_ready(const QPointer<protocol::Board> &);
+    void on_error(QString const &);
+    void on_ready(protocol::pBoard const &);
 
 };
 

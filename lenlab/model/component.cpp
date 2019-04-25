@@ -20,66 +20,65 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "component.h"
 #include "lenlab.h"
+
 #include <QDebug>
 
 namespace model {
 
-Component::Component(Lenlab *parent) : QObject(parent), lenlab(parent)
+Component::Component(Lenlab const & lenlab)
+    : QObject()
+    , mLenlab(lenlab)
 {
-    qDebug() << "Component";
-}
 
-Component::~Component()
-{
-    qDebug() << "~Component";
 }
 
 void
 Component::setActive(bool active)
 {
-    if (m_active != active)
-    {
-        m_active = active;
-        emit activeChanged(m_active);
+    if (mActive != active) {
+        mActive = active;
+        emit activeChanged(mActive);
     }
 }
 
 bool
 Component::active() const
 {
-    return m_active;
+    return mActive;
 }
 
-QString
-Component::getNameNominative()
+QString const &
+Component::getNameNominative() const
 {
-    return "ie Komponente";
+    static QString name("die Komponente");
+    return name;
 }
 
-QString
-Component::getNameAccusative()
+QString const &
+Component::getNameAccusative() const
 {
-    return "ie Komponente";
+    static QString name("die Komponente");
+    return name;
+}
+
+void
+Component::setBoard(protocol::pBoard const & board)
+{
+    mBoard = board;
 }
 
 void
 Component::start()
 {
-    Q_ASSERT_X(!lenlab->isActive(), "Component::start()", "No component may be active.");
+    Q_ASSERT_X(!mLenlab.isActive(), "Component::start()", "No component may be active.");
     setActive(true);
 }
 
 void
 Component::stop()
 {
-    Q_ASSERT_X(m_active, "Component::stop()", "This component was not active.");
+    Q_ASSERT_X(mActive, "Component::stop()", "This component was not active.");
     setActive(false);
-}
-
-void
-Component::setBoard(const QPointer<protocol::Board> &board)
-{
-    this->board = board;
 }
 
 } // namespace model

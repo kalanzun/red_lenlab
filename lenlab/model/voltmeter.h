@@ -22,43 +22,53 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define VOLTMETER_H
 
 #include "component.h"
+
 #include <QObject>
+#include <QTimer>
+
 #include <bitset>
 
 namespace model {
 
-/**
- * @brief Lenlab Voltmeter component.
- */
-
 class Voltmeter : public Component
 {
     Q_OBJECT
+
+    typedef Component super;
+
     Q_PROPERTY(bool measurementData READ measurementData WRITE setMeasurementData NOTIFY measurementDataChanged)
     Q_PROPERTY(bool unsavedData READ unsavedData WRITE setUnsavedData NOTIFY unsavedDataChanged)
     Q_PROPERTY(bool autoSave READ autoSave WRITE setAutoSave NOTIFY autoSaveChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PROPERTY(std::bitset<4> channels READ channels WRITE setChannels NOTIFY channelsChanged)
+    Q_PROPERTY(uint32_t interval READ interval WRITE setInterval NOTIFY intervalChanged)
+
+    static double const MSEC;
+    static double const VOLT;
+
+    bool mMeasurementData = false;
+    bool mUnsavedData = false;
+    bool mAutoSave = false;
+    QString mFileName;
+    std::bitset<4> mChannels = 1;
+    uint32_t mInterval = 1000;
+
+    QTimer mAutoSaveTimer;
+    double mOffsetTime;
 
 public:
-    explicit Voltmeter(Lenlab *parent);
+    explicit Voltmeter(Lenlab const & lenlab);
+    Voltmeter(Voltmeter const & other) = delete;
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+    Voltmeter & operator=(Voltmeter const & other) = delete;
 
-    virtual void setBoard(const QPointer<protocol::Board> &);
+    virtual QString const & getNameNominative() const;
+    virtual QString const & getNameAccusative() const;
 
-    uint32_t getInterval() const;
-    void setInterval(uint32_t interval);
+    virtual void setBoard(protocol::pBoard const & board);
 
     virtual void start();
     virtual void stop();
-    void clear();
-
-    //virtual void receive(const usb::pMessage &reply);
-    //virtual void ready();
-
-    void restart();
 
     void setMeasurementData(bool measurementData);
     bool measurementData() const;
@@ -69,44 +79,43 @@ public:
     void setAutoSave(bool autoSave);
     bool autoSave() const;
 
-    void setFileName(const QString &fileName);
+    void setFileName(QString const & fileName);
     const QString &fileName() const;
 
-    void setChannels(const std::bitset<4> &channels);
+    void setChannels(std::bitset<4> const & channels);
     const std::bitset<4> &channels() const;
 
-    void save(const QString &fileName);
+    void setInterval(uint32_t interval);
+    uint32_t interval() const;
 
-    //std::array<MinMaxVector, 5> data;
+    void clear();
+
+    //virtual void receive(const usb::pMessage &reply);
+    //virtual void ready();
+
+    void save(QString const & fileName);
 
 signals:
     void replot();
+
     void measurementDataChanged(bool);
     void unsavedDataChanged(bool);
     void autoSaveChanged(bool);
-    void fileNameChanged(const QString &);
-    void channelsChanged(const std::bitset<4> &);
-
-public slots:
-    void on_logger(const protocol::pMessage &);
+    void fileNameChanged(QString const &);
+    void channelsChanged(std::bitset<4> const &);
+    void intervalChanged(uint32_t);
 
 private:
-    typedef Component super;
+    void do_save();
 
-    void _save();
-    virtual void timerEvent(QTimerEvent *event);
+private slots:
+    void on_logger(protocol::pMessage const &);
+    void on_autosave();
 
-    uint32_t interval = 1000;
-
-    bool m_measurementData = false;
-    bool m_unsavedData = false;
-    bool m_autoSave = false;
-    QString m_fileName;
-    std::bitset<4> m_channels = 1;
-
-    int timer_id = 0;
-    double time_offset;
-
+    void on_start(protocol::pTask const &);
+    void on_start_failed(protocol::pTask const &);
+    void on_stop(protocol::pTask const &);
+    void on_stop_failed(protocol::pTask const &);
 };
 
 } // namespace model
