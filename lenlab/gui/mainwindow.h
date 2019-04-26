@@ -42,10 +42,10 @@ class MainWindow : public QMainWindow
     bool m_signal_checked = false;
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget * parent = nullptr);
     ~MainWindow();
 
-    void setModel(model::Lenlab *lenlab);
+    void setModel(model::Lenlab * lenlab);
 
     bool askToCancelActiveComponent(model::Component *next_component);
 

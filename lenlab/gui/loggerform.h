@@ -49,11 +49,11 @@ class LoggerForm : public QWidget
     std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
 
 public:
-    explicit LoggerForm(QWidget *parent = 0);
+    explicit LoggerForm(QWidget * parent = nullptr);
     ~LoggerForm();
 
     void setMainWindow(MainWindow *main_window);
-    void setModel(model::Lenlab *lenlab);
+    void setModel(model::Lenlab * lenlab);
 
     void saveImage();
     void save();

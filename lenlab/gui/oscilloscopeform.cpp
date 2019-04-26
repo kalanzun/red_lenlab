@@ -29,7 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-OscilloscopeForm::OscilloscopeForm(QWidget *parent)
+OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::OscilloscopeForm)
 {

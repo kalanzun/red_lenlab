@@ -53,11 +53,11 @@ class OscilloscopeForm : public QWidget
     QwtPlotGrid *newGrid();
 
 public:
-    explicit OscilloscopeForm(QWidget *parent = nullptr);
+    explicit OscilloscopeForm(QWidget  *parent = nullptr);
     ~OscilloscopeForm();
 
-    void setMainWindow(MainWindow *main_window);
-    void setModel(model::Lenlab *lenlab);
+    void setMainWindow(MainWindow * main_window);
+    void setModel(model::Lenlab * lenlab);
 
     void save();
 

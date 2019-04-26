@@ -46,11 +46,11 @@ class SignalForm : public QWidget
     bool m_active = false;
 
 public:
-    explicit SignalForm(QWidget *parent = 0);
+    explicit SignalForm(QWidget * parent = nullptr);
     ~SignalForm();
 
-    void setMainWindow(MainWindow *main_window);
-    void setModel(model::Lenlab *lenlab);
+    void setMainWindow(MainWindow * main_window);
+    void setModel(model::Lenlab * lenlab);
 
 private slots:
     void on_signalTypeBox_activated(int index);

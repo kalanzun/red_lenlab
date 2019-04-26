@@ -49,11 +49,11 @@ class FrequencyForm : public QWidget
     QwtPlotGrid *newGrid();
 
 public:
-    explicit FrequencyForm(QWidget *parent = 0);
+    explicit FrequencyForm(QWidget * parent = nullptr);
     ~FrequencyForm();
 
-    void setMainWindow(MainWindow *main_window);
-    void setModel(model::Lenlab *lenlab);
+    void setMainWindow(MainWindow * main_window);
+    void setModel(model::Lenlab * lenlab);
 
     void save();
 

@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-SignalForm::SignalForm(QWidget *parent)
+SignalForm::SignalForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::SignalForm)
 {
