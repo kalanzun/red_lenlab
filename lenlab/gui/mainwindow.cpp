@@ -59,10 +59,8 @@ MainWindow::setModel(model::Lenlab * lenlab)
     ui->signal->setMainWindow(this);
     ui->signal->setModel(lenlab);
 
-    /*
-    connect(lenlab, SIGNAL(logMessage(QString)),
-            this, SLOT(on_logMessage(QString)));
-    */
+    connect(lenlab, &model::Lenlab::logMessage,
+            this, &MainWindow::on_logMessage);
 }
 
 bool
@@ -135,7 +133,7 @@ MainWindow::on_tabWidget_currentChanged(int index)
 }
 
 void
-MainWindow::on_logMessage(const QString &msg)
+MainWindow::on_logMessage(QString const & msg)
 {
     ui->logLineEdit->setText(msg);
     ui->logPlainTextEdit->appendPlainText(msg);

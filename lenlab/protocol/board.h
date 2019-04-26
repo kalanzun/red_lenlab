@@ -20,6 +20,7 @@ class Board : public QObject
     QTimer mWatchdog;
     usb::pDevice mDevice;
     pTask mTask;
+    uint32_t mMajor, mMinor;
 
 public:
     explicit Board(usb::pDevice &device, QObject *parent = nullptr);
@@ -28,6 +29,11 @@ public:
     Board & operator=(Board const & other) = delete;
 
     const pTask & startTask(pMessage const & command, int timeout = 100);
+
+    void setVersion(uint32_t major, uint32_t minor);
+    uint32_t getMajor() const;
+    uint32_t getMinor() const;
+
     /*
     pTransaction init();
     pTransaction getName();

@@ -4,6 +4,42 @@ namespace protocol {
 
 static int p_message_type_id = qRegisterMetaType<pMessage>("pMessage");
 
+std::array<char const *, NUM_COMMANDS> const Message::mCommandNames = {
+    "noCommand",
+    "init",
+    "getName",
+    "getVersion",
+    "setSignalSine",
+    "stopSignal",
+    "startOscilloscope",
+    "startTrigger",
+    "startLogger",
+    "stopLogger",
+    "startOscilloscopeLinearTestData",
+    "startTriggerLinearTestData",
+};
+
+std::array<char const *, NUM_REPLIES> const Message::mReplyNames = {
+    "noReply",
+    "Init",
+    "Name",
+    "Version",
+    "SignalSine",
+    "OscilloscopeData",
+    "Oscilloscope",
+    "LoggerData",
+    "Logger",
+    "Error",
+};
+
+std::array<char const *, NUM_TYPES> const Message::mTypeNames = {
+    "noType",
+    "String",
+    "ByteArray",
+    "ShortArray",
+    "IntArray",
+};
+
 Message::Message()
     : mPacket(new usb::Packet())
 {
@@ -48,6 +84,14 @@ Message::getCommand() const
     return static_cast<Command>(mPacket->getByteBuffer()[0]);
 }
 
+QString
+Message::getCommandName() const
+{
+    auto i = getCommand();
+    if (!(i < mCommandNames.size())) i = noCommand;
+    return mCommandNames[i];
+}
+
 void
 Message::setReply(Reply reply)
 {
@@ -63,6 +107,14 @@ Message::getReply() const
     return static_cast<Reply>(mPacket->getByteBuffer()[0]);
 }
 
+QString
+Message::getReplyName() const
+{
+    auto i = getReply();
+    if (!(i < mReplyNames.size())) i = noReply;
+    return mReplyNames[i];
+}
+
 void
 Message::setType(Type type)
 {
@@ -73,6 +125,20 @@ Type
 Message::getType() const
 {
     return static_cast<Type>(mPacket->getByteBuffer()[1]);
+}
+
+QString
+Message::getTypeName() const
+{
+    auto i = getType();
+    if (!(i < mTypeNames.size())) i = noType;
+    return mTypeNames[i];
+}
+
+uint8_t
+Message::getError() const
+{
+    return mPacket->getByteBuffer()[2];
 }
 
 bool

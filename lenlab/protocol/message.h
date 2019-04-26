@@ -17,6 +17,10 @@ class Message
     static size_t const mHeadLength = LENLAB_PACKET_HEAD_LENGTH; // bytes
     usb::pPacket mPacket;
 
+    static std::array<char const *, NUM_COMMANDS> const mCommandNames;
+    static std::array<char const *, NUM_REPLIES> const mReplyNames;
+    static std::array<char const *, NUM_TYPES> const mTypeNames;
+
 public:
     explicit Message();
     explicit Message(usb::pPacket const &);
@@ -31,12 +35,17 @@ public:
 
     void setCommand(Command);
     Command getCommand() const;
+    QString getCommandName() const;
 
     void setReply(Reply reply);
     Reply getReply() const;
+    QString getReplyName() const;
 
     void setType(Type type);
     Type getType() const;
+    QString getTypeName() const;
+
+    uint8_t getError() const;
 
     bool isLast() const;
 

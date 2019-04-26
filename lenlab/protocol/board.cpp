@@ -24,11 +24,12 @@ Board::Board(usb::pDevice &device, QObject *parent)
 }
 
 
-const pTask &Board::startTask(pMessage const & command, int timeout)
+pTask const &
+Board::startTask(pMessage const & command, int timeout)
 {
     Q_ASSERT(!mTask);
 
-    mTask.reset(new Task);
+    mTask.reset(new Task(command, timeout));
 
     mDevice->send(command->getPacket());
     mWatchdog.start(timeout);
@@ -36,6 +37,24 @@ const pTask &Board::startTask(pMessage const & command, int timeout)
     return mTask;
 }
 
+void
+Board::setVersion(uint32_t major, uint32_t minor)
+{
+    mMajor = major;
+    mMinor = minor;
+}
+
+uint32_t
+Board::getMajor() const
+{
+    return mMajor;
+}
+
+uint32_t
+Board::getMinor() const
+{
+    return mMinor;
+}
 
 void
 Board::on_reply(usb::pPacket const & packet)
@@ -61,11 +80,12 @@ Board::on_reply(usb::pPacket const & packet)
     } else if (message->getReply() == LoggerData) {
         emit logger(message);
     } else {
-        emit error("Unerwartetes Paket empfangen");
+        emit error("Unerwartetes Paket empfangen.");
     }
 }
 
-void Board::on_error(const QString & message)
+void
+Board::on_error(const QString & message)
 {
     auto task = mTask;
 
@@ -85,7 +105,7 @@ Board::on_timeout()
     auto task = mTask;
 
     if (task) {
-        task->setTimeout();
+        task->setTimeoutError();
         mTask.clear();
         emit task->failed(task);
     }

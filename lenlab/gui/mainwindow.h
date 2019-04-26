@@ -54,7 +54,7 @@ private slots:
     void on_signalButton_toggled(bool);
     void on_logButton_toggled(bool);
     void on_tabWidget_currentChanged(int);
-    void on_logMessage(const QString &);
+    void on_logMessage(QString const &);
     void on_actionSaveData_triggered();
     void on_actionSaveImage_triggered();
     void on_actionQuit_triggered();

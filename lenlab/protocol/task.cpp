@@ -4,8 +4,10 @@ namespace protocol {
 
 static int p_task_type_id = qRegisterMetaType<pTask>("pTask");
 
-Task::Task(QObject *parent)
+Task::Task(pMessage const & command, int timeout, QObject * parent)
     : QObject(parent)
+    , mCommand(command)
+    , mTimeout(timeout)
 {
 
 }
@@ -38,14 +40,23 @@ Task::setError(const QString & error)
 }
 
 void
-Task::setTimeout()
+Task::setTimeoutError()
 {
-    mTimeout = true;
+    mTimeoutError = true;
 }
 
-bool Task::isTimeout() const
+QString
+Task::getErrorMessage() const
 {
-    return mTimeout;
+    if (mErrorMessage) {
+        return QString("Firmwarefehler: Fehler in %1: Fehlercode %2.").arg(mCommand->getCommandName()).arg(mErrorMessage->getError());
+    } else if (!mErrorString.isEmpty()) {
+        return mErrorString;
+    } else if (mTimeoutError) {
+        return QString("Zeitüberschreitungsfehler: %1 wurde nicht innerhalb von %2 ms abgeschlossen.").arg(mCommand->getCommandName()).arg(mTimeout);
+    } else {
+        return QString();
+    }
 }
 
 const pMessage &Task::getReply() const

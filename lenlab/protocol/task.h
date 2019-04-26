@@ -17,24 +17,31 @@ class Task : public QObject
 {
     Q_OBJECT
 
+    pMessage mCommand;
+    int mTimeout;
+
     QVector<pMessage> mReplies;
     bool mComplete = false;
+
     pMessage mErrorMessage;
     QString mErrorString;
-    bool mTimeout = false;
+    bool mTimeoutError = false;
+
 
 public:
-    explicit Task(QObject *parent = nullptr);
+    explicit Task(pMessage const & command, int timeout, QObject *parent = nullptr);
     Task(Task const & other) = delete;
 
     Task & operator=(Task const & other) = delete;
 
     void addReply(pMessage const &);
     bool isComplete() const;
+
     void setError(pMessage const &);
     void setError(QString const &);
-    void setTimeout();
-    bool isTimeout() const;
+    void setTimeoutError();
+
+    QString getErrorMessage() const;
 
     pMessage const & getReply() const;
     int getSize() const;

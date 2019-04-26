@@ -45,7 +45,7 @@ void ProtocolTest::initTestCase()
     QSignalSpy spy(&mFactory, &Factory::ready);
     QVERIFY(spy.isValid());
 
-    mFactory.start();
+    mFactory.connectToBoard();
 
     QVERIFY(spy.wait(m_long_timeout));
 

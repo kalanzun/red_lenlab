@@ -58,17 +58,19 @@ public:
     //bool available();
 
 signals:
+    void logMessage(QString const &);
     //void receive(const protocol::pMessage &);
 
-    //void logMessage(const QString &);
 
     //void replot();
 
 public slots:
+    void connectToBoard();
 
 private slots:
-    void on_error(QString const &);
     void on_ready(protocol::pBoard const &);
+    void on_log(QString const &);
+    void on_error(QString const &);
 
 };
 
