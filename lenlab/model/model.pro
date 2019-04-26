@@ -47,6 +47,15 @@ HEADERS += \
     indexparameter.h \
     utils.h
 
+win32 {
+    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../protocol/debug/libprotocol.a
+    CONFIG(release, debug|release) PRE_TARGETDEPS += ../protocol/release/libprotocol.a
+}
+
+unix {
+    PRE_TARGETDEPS += ../protocol/libprotocol.a
+}
+
 unix {
     target.path = /usr/lib
     INSTALLS += target
