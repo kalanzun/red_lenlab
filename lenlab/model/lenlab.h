@@ -38,6 +38,8 @@ class Lenlab : public QObject
 {
     Q_OBJECT
 
+    static int const mErrorTime = 3000;
+
     protocol::Factory mFactory;
     protocol::pBoard mBoard;
 
@@ -68,9 +70,11 @@ public slots:
     void connectToBoard();
 
 private slots:
-    void on_ready(protocol::pBoard const &);
-    void on_log(QString const &);
-    void on_error(QString const &);
+    void on_factory_ready(protocol::pBoard const &);
+    void on_factory_log(QString const &);
+    void on_factory_error(QString const &);
+    void on_board_error(QString const &);
+    void on_board_destroyed();
 
 };
 

@@ -15,11 +15,14 @@ class Factory : public QObject
 {
     Q_OBJECT
 
+    static int const mPollTime = 500;
+    static int const mBootTime = 1200;
+    static int const mErrorTime = 3000;
+
     QTimer mTimer;
+    QTimer mBootTimer;
     usb::Bus mBus;
     pBoard mBoard;
-
-    int mBootTime = 1200;
 
 public:
     explicit Factory(QObject *parent = nullptr);
@@ -35,8 +38,9 @@ signals:
     void error(QString const &);
 
 private slots:
+    void on_board_destroyed();
     void on_timeout();
-    void on_found();
+    void on_boot();
     void on_board_error(QString const &);
     void on_task_error(pTask const &);
     void on_init(pTask const &);

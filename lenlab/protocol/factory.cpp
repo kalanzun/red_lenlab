@@ -12,8 +12,11 @@ Factory::Factory(QObject *parent) : QObject(parent)
 {
     connect(&mTimer, &QTimer::timeout,
             this, &Factory::on_timeout);
+    connect(&mBootTimer, &QTimer::timeout,
+            this, &Factory::on_boot);
 
     mTimer.setSingleShot(true);
+    mBootTimer.setSingleShot(true);
 }
 
 void
@@ -25,21 +28,24 @@ Factory::connectToBoard(int boottime)
         auto device = mBus.query(LENLAB_VID, LENLAB_PID);
         if (device) {
             mBoard.reset(new Board(device));
-            // nothing shall throw after mBoard is set
-            // else catch starts the timer
             connect(mBoard.data(), &Board::error,
                     this, &Factory::on_board_error);
             emit log("Lenlab-Board gefunden.");
             // wait for the board to boot, it just got power
-            QTimer::singleShot(boottime, this, &Factory::on_found);
+            mBootTimer.start(boottime);
         }
         else {
-            mTimer.start(500);
+            mTimer.start(mPollTime);
         }
     } catch (const usb::Exception & e) {
         emit error(e.getMsg());
-        mTimer.start(3000);
+        mTimer.start(mErrorTime);
     }
+}
+
+void Factory::on_board_destroyed()
+{
+    mTimer.start(mErrorTime);
 }
 
 void
@@ -51,20 +57,34 @@ Factory::on_timeout()
 void
 Factory::on_board_error(QString const & msg)
 {
+    Q_ASSERT(mBoard);
+
+    mBootTimer.stop();
+
+    auto board = mBoard;
     mBoard.clear();
+    connect(board.data(), &Board::destroyed,
+            this, &Factory::on_board_destroyed);
     emit error(msg);
 }
 
 void
 Factory::on_task_error(pTask const & task)
 {
+    Q_ASSERT(mBoard);
+
+    auto board = mBoard;
     mBoard.clear();
+    connect(board.data(), &Board::destroyed,
+            this, &Factory::on_board_destroyed);
     emit error(task->getErrorMessage());
 }
 
 void
-Factory::on_found()
+Factory::on_boot()
 {
+    Q_ASSERT(mBoard);
+
     pMessage cmd(new Message());
     cmd->setCommand(::init);
     auto init = mBoard->startTask(cmd);
@@ -78,6 +98,7 @@ void
 Factory::on_init(pTask const & task)
 {
     Q_UNUSED(task);
+    Q_ASSERT(mBoard);
 
     pMessage cmd(new Message());
     cmd->setCommand(::getName);
@@ -92,6 +113,7 @@ void
 Factory::on_name(pTask const & task)
 {
     Q_UNUSED(task);
+    Q_ASSERT(mBoard);
 
     pMessage cmd(new Message());
     cmd->setCommand(::getVersion);
@@ -105,6 +127,10 @@ Factory::on_name(pTask const & task)
 void
 Factory::on_version(pTask const & task)
 {
+    Q_ASSERT(mBoard);
+
+    auto board = mBoard;
+
     auto reply = task->getReply();
     auto length = reply->getUInt32BufferLength();
     if (length == 3 || length == 2) {
@@ -117,19 +143,22 @@ Factory::on_version(pTask const & task)
             mBoard->setVersion(major, minor);
             disconnect(mBoard.data(), &Board::error,
                        this, &Factory::on_board_error);
-            auto board = mBoard;
             mBoard.clear();
             emit ready(board);
         }
         else {
             auto msg = QString("Ungültige Version %1.%2. Lenlab erwartet mindestens %3.%4.").arg(major).arg(minor).arg(MAJOR).arg(MINOR);
             mBoard.clear();
+            connect(board.data(), &Board::destroyed,
+                    this, &Factory::on_board_destroyed);
             emit error(msg);
         }
     }
     else {
         auto msg = QString("Das Lenlab-Board antwortet mit einer ungültigen Version.");
         mBoard.clear();
+        connect(board.data(), &Board::destroyed,
+                this, &Factory::on_board_destroyed);
         emit error(msg);
     }
 }

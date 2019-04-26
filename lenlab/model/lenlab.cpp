@@ -32,11 +32,11 @@ Lenlab::Lenlab(QObject * parent)
     , signalgenerator(*this)
 {
     connect(&mFactory, &protocol::Factory::ready,
-            this, &Lenlab::on_ready);
+            this, &Lenlab::on_factory_ready);
     connect(&mFactory, &protocol::Factory::log,
-            this, &Lenlab::on_log);
+            this, &Lenlab::on_factory_log);
     connect(&mFactory, &protocol::Factory::error,
-            this, &Lenlab::on_error);
+            this, &Lenlab::on_factory_error);
     /*
     connect(signalgenerator, SIGNAL(updated()),
             frequencysweep, SLOT(on_updated()));
@@ -87,11 +87,16 @@ Lenlab::available()
 */
 
 void
-Lenlab::on_ready(protocol::pBoard const & board)
+Lenlab::on_factory_ready(protocol::pBoard const & board)
 {
     mBoard = board;
+
+    connect(mBoard.data(), &protocol::Board::error,
+            this, &Lenlab::on_board_error);
+
     auto msg = QString("Lenlab-Board Version %1.%2 verbunden.").arg(board->getMajor()).arg(board->getMinor());
     emit logMessage(msg);
+
     /*
     frequencysweep->setBoard(board);
     voltmeter->setBoard(board);
@@ -101,15 +106,32 @@ Lenlab::on_ready(protocol::pBoard const & board)
 }
 
 void
-Lenlab::on_log(QString const & msg)
+Lenlab::on_factory_log(QString const & msg)
 {
     emit logMessage(msg);
 }
 
 void
-Lenlab::on_error(QString const & msg)
+Lenlab::on_factory_error(QString const & msg)
 {
     emit logMessage(msg);
+}
+
+void
+Lenlab::on_board_error(QString const & msg)
+{
+    auto board = mBoard;
+    mBoard.clear();
+    connect(board.data(), &protocol::Board::destroyed,
+            this, &Lenlab::on_board_destroyed);
+    emit logMessage(msg);
+}
+
+void
+Lenlab::on_board_destroyed()
+{
+    // attempt to connect again
+    QTimer::singleShot(mErrorTime, this, &Lenlab::connectToBoard);
 }
 
 /*
