@@ -57,6 +57,8 @@ public:
     bool isActive() const;
     Component *getActiveComponent();
 
+    protocol::pBoard const & board() const;
+
     //bool available();
 
 signals:

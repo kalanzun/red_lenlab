@@ -31,8 +31,8 @@ Waveform::Waveform() : Series()
 void
 Waveform::append(uint32_t channel, double value)
 {
-    Q_ASSERT(channel < 2);
-    Q_ASSERT(index[channel] < 10000);
+    Q_ASSERT(channel < index.size());
+    Q_ASSERT(index[channel] < data[channel].size());
     data[channel][index[channel]++] = value;
 }
 
@@ -94,9 +94,9 @@ Waveform::getX(uint32_t i)
 double
 Waveform::getY(uint32_t i, uint32_t channel)
 {
-    if (!(channel < 2))
+    if (!(channel < data.size()))
         Q_ASSERT(0);
-    if (!((m_trigger + i) < 9000)) {
+    if (!((m_trigger + i) < data[channel].size())) {
         Q_ASSERT(0);
     }
     return data[channel][m_trigger+i];

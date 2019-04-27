@@ -27,7 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Oscilloscope::Oscilloscope(const Lenlab &lenlab)
+Oscilloscope::Oscilloscope(Lenlab const & lenlab)
     : Component(lenlab),
       samplerateIndex(3)
 {
@@ -77,10 +77,13 @@ Oscilloscope::restart()
     args.append(samplerate + 2);
 
     protocol::pMessage cmd(new protocol::Message);
-    cmd->setCommand(::startOscilloscope);
+    cmd->setCommand(::startTrigger);
+    //cmd->setCommand(::startTriggerLinearTestData);
     cmd->setUInt32Vector(args);
 
-    auto task = mBoard->startTask(cmd);
+    // TODO try
+
+    auto task = mLenlab.board()->startTask(cmd, m_task_timeout);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Oscilloscope::on_succeeded);
     connect(task.data(), &protocol::Task::failed,
@@ -102,17 +105,17 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         uint16_t trigger = buffer[0];
         uint16_t state0 = buffer[2];
         uint16_t state1 = buffer[3];
-
+    /*
         if (trigger) {
             incoming->setTrigger(trigger);
         }
-
+*/
         incoming->append(0, to_double(state0));
         incoming->append(1, to_double(state1));
 
-        int8_t *data = reinterpret_cast<int8_t *>(buffer + 6);
+        int8_t * data = reinterpret_cast<int8_t *>(buffer + 6);
 
-        for (uint32_t i = 1; i < reply->getUInt16BufferLength(); ++i) {
+        for (uint32_t i = 1; i < reply->getUInt16BufferLength() - 6; ++i) {
             state0 += data[2*i];
             state1 += data[2*i+1];
             incoming->append(0, to_double(state0));

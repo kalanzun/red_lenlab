@@ -71,17 +71,15 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     m_lenlab = lenlab;
     m_oscilloscope = &lenlab->oscilloscope;
 
-    /*
-    curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    curves[1] = newCurve(QColor("#8ae234"), true); // green 0
-    //curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
-    //curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
+    m_curves[1] = newCurve(QColor("#8ae234"), true); // green 0
+    //m_curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
+    //m_curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
 
-    ui->samplerateBox->insertItems(0, oscilloscope->samplerateIndex.labels);
+    ui->samplerateBox->insertItems(0, m_oscilloscope->samplerateIndex.labels);
 
-    connect(oscilloscope, SIGNAL(replot()),
-            this, SLOT(on_replot()));
-            */
+    connect(m_oscilloscope, &model::Oscilloscope::replot,
+            this, &OscilloscopeForm::on_replot);
 }
 
 QwtPlotCurve *
@@ -89,7 +87,6 @@ OscilloscopeForm::newCurve(const QColor &color, bool visible)
 {
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
 
-    //curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
     curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     curve->setVisible(visible);
 
@@ -138,18 +135,16 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::on_replot()
 {
-    /*
-    for (unsigned int i = 0; i < curves.size(); ++i) {
-        curves[i]->setSamples(new PointVectorSeriesData(oscilloscope->waveform, i)); // acquires ownership
+    for (unsigned int i = 0; i < m_curves.size(); ++i) {
+        m_curves[i]->setSamples(new PointVectorSeriesData(m_oscilloscope->waveform, i)); // acquires ownership
     }
     ui->plot->replot();
-    */
 }
 
 void
 OscilloscopeForm::on_samplerateBox_activated(int index)
 {
-    //oscilloscope->setSamplerate(static_cast<uint32_t>(index));
+    m_oscilloscope->setSamplerate(static_cast<uint32_t>(index));
 }
 
 void

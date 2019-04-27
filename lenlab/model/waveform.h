@@ -32,9 +32,14 @@ class Waveform : public Series
 {
     Q_OBJECT
 
+    typedef Series super;
+
     Q_PROPERTY(double samplerate READ samplerate WRITE setSamplerate)
     Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger)
     Q_PROPERTY(uint32_t view READ view WRITE setView)
+
+    std::array< uint32_t, 2 > index{{0, 0}};
+    std::array< std::array< double, 10080 >, 2 > data;
 
     double m_samplerate = 0;
     uint32_t m_trigger = 0;
@@ -68,13 +73,6 @@ public:
 signals:
 
 public slots:
-
-private:
-    typedef Series super;
-
-    std::array< uint32_t, 2 > index{{0, 0}};
-    std::array< std::array< double, 10000 >, 2 > data;
-
 };
 
 } // namespace model

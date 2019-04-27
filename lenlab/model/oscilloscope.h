@@ -35,14 +35,17 @@ class Oscilloscope : public Component
 
     typedef Component super;
 
+    static int const m_task_timeout = 400;
+
     bool pending = 0;
 
     uint32_t samplerate = 0;
     QSharedPointer<Waveform> incoming;
+
+public:
     IndexParameter samplerateIndex;
     QSharedPointer<Waveform> waveform;
 
-public:
     explicit Oscilloscope(Lenlab const & lenlab);
     Oscilloscope(Oscilloscope const &) = delete;
 

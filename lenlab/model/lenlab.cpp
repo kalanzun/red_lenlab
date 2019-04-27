@@ -20,6 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "lenlab.h"
 
+#include "exception.h"
+
 #include <QDebug>
 
 namespace model {
@@ -70,6 +72,16 @@ Lenlab::getActiveComponent()
         return &oscilloscope;
 
     throw std::exception();
+}
+
+protocol::pBoard const &
+Lenlab::board() const
+{
+    if (mBoard)
+        return mBoard;
+    else {
+        throw Exception("Kein Lenlab-Board verbunden.");
+    }
 }
 
 void
