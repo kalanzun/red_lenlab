@@ -30,7 +30,7 @@ namespace gui {
 class PointVectorSeriesData : public QwtSeriesData<QPointF>
 {
 public:
-    PointVectorSeriesData(QSharedPointer<model::Series> series, uint32_t channel);
+    PointVectorSeriesData(QSharedPointer<model::Series> const & series, uint32_t channel);
 
     virtual QRectF boundingRect() const;
 

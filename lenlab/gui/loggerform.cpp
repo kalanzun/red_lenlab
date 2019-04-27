@@ -51,6 +51,21 @@ LoggerForm::LoggerForm(QWidget * parent) :
     y_label.setFont(y_font);
     ui->plot->setAxisTitle(0, y_label);
 
+    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
+    m_curves[1] = newCurve(QColor("#8ae234"), false); // green 0
+    /*
+    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#edd400"), 2, true); // butter 1
+    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#73d216"), 2, false); // green 1
+    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#3465a4"), 2, false); // sky blue 1
+    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
+    */
+    /*
+    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#fce94f"), true); // butter 0
+    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#8ae234"), false); // green 0
+    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#729fcf"), false); // sky blue 0
+    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#ef2929"), false); // scarlet red 0
+    */
+
     newGrid();
 }
 
@@ -71,18 +86,7 @@ LoggerForm::setModel(model::Lenlab * lenlab)
 {
     m_lenlab = lenlab;
     m_voltmeter = &lenlab->voltmeter;
-    /*
-    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#edd400"), 2, true); // butter 1
-    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#73d216"), 2, false); // green 1
-    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#3465a4"), 2, false); // sky blue 1
-    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
-    */
-    /*
-    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#fce94f"), true); // butter 0
-    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#8ae234"), false); // green 0
-    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#729fcf"), false); // sky blue 0
-    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#ef2929"), false); // scarlet red 0
-    */
+
     /*
     connect(voltmeter, SIGNAL(measurementDataChanged(bool)),
             this, SLOT(on_measurementDataChanged(bool)));
@@ -94,14 +98,15 @@ LoggerForm::setModel(model::Lenlab * lenlab)
             this, SLOT(on_fileNameChanged(QString)));
     connect(voltmeter, SIGNAL(channelsChanged(std::bitset<4>)),
             this, SLOT(on_channelsChanged(std::bitset<4>)));
-
-    connect(voltmeter, SIGNAL(replot()),
-            this, SLOT(on_replot()));
-            */
+    */
+    connect(m_voltmeter, &model::Voltmeter::replot,
+            this, &LoggerForm::on_replot);
+    connect(m_voltmeter, &model::Voltmeter::newplot,
+            this, &LoggerForm::on_newplot);
 }
-/*
+
 QwtPlotCurve *
-LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible)
+LoggerForm::newCurve(QColor const & color, bool visible)
 {
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
 
@@ -117,7 +122,7 @@ LoggerForm::newCurve(model::MinMaxVector *time, model::MinMaxVector *value, cons
     curve->attach(ui->plot); // acquires ownership
     return curve.release();
 }
-*/
+
 QwtPlotGrid *
 LoggerForm::newGrid()
 {
@@ -219,6 +224,18 @@ LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
 void
 LoggerForm::on_replot()
 {
+    qDebug("LoggerForm::on_replot");
+    ui->plot->replot();
+}
+
+void
+LoggerForm::on_newplot(QSharedPointer<model::Series> const & series)
+{
+    qDebug("LoggerForm::on_newplot");
+    for (unsigned int i = 0; i < m_curves.size(); ++i) {
+        qDebug() << i;
+        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
+    }
     ui->plot->replot();
 }
 

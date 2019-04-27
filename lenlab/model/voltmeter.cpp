@@ -71,6 +71,13 @@ Voltmeter::start()
 {
     super::start();
 
+    qDebug("start");
+
+    loggerseries.reset(new Loggerseries);
+    loggerseries->setInterval(mInterval);
+
+    emit newplot(loggerseries);
+
     QVector<uint32_t> args;
     args.append(mInterval);
 
@@ -78,7 +85,7 @@ Voltmeter::start()
     cmd->setCommand(::startLogger);
     cmd->setUInt32Vector(args);
 
-    auto task = mBoard->startTask(cmd);
+    auto task = mLenlab.board()->startTask(cmd);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Voltmeter::on_start);
     connect(task.data(), &protocol::Task::failed,
@@ -91,7 +98,7 @@ Voltmeter::stop()
     protocol::pMessage cmd(new protocol::Message());
     cmd->setCommand(::stopLogger);
 
-    auto task = mBoard->startTask(cmd);
+    auto task = mLenlab.board()->startTask(cmd);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Voltmeter::on_stop);
     connect(task.data(), &protocol::Task::failed,
@@ -298,8 +305,13 @@ Voltmeter::do_save()
 void
 Voltmeter::on_logger(protocol::pMessage const & reply)
 {
-    uint32_t *buffer = reply->getUInt32Buffer();
     Q_ASSERT(reply->getUInt32BufferLength() == 2);
+    uint32_t *buffer = reply->getUInt32Buffer();
+
+    qDebug("Voltmeter::on_logger");
+
+    for (uint32_t i = 0; i < 2; ++i)
+        loggerseries->append(i, static_cast<double>(buffer[i]) / VOLT);
 
     /*
     for (int i = 0; i < 2; i++)

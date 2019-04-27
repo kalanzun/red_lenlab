@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+#include "model/series.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 #include <QWidget>
@@ -46,7 +47,7 @@ class LoggerForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
 
-    std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
+    std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
 
 public:
     explicit LoggerForm(QWidget * parent = nullptr);
@@ -57,6 +58,8 @@ public:
 
     void saveImage();
     void save();
+
+    QwtPlotCurve *newCurve(QColor const & color, bool visible);
 
 private slots:
     void on_intervalComboBox_activated(int);
@@ -71,6 +74,7 @@ private slots:
     void on_clearButton_clicked();
 
     void on_replot();
+    void on_newplot(QSharedPointer<model::Series> const &);
     void on_measurementDataChanged(bool);
     void on_unsavedDataChanged(bool);
     void on_autoSaveChanged(bool);

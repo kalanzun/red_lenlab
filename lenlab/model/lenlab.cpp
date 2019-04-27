@@ -106,6 +106,9 @@ Lenlab::on_factory_ready(protocol::pBoard const & board)
     connect(mBoard.data(), &protocol::Board::error,
             this, &Lenlab::on_board_error);
 
+    connect(mBoard.data(), &protocol::Board::logger,
+            &voltmeter, &Voltmeter::on_logger);
+
     auto msg = QString("Lenlab-Board Version %1.%2 verbunden.").arg(board->getMajor()).arg(board->getMinor());
     emit logMessage(msg);
 

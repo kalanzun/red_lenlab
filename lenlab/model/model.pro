@@ -33,7 +33,8 @@ SOURCES += \
     frequencyseries.cpp \
     indexparameter.cpp \
     utils.cpp \
-    exception.cpp
+    exception.cpp \
+    loggerseries.cpp
 
 HEADERS += \
     component.h \
@@ -47,7 +48,8 @@ HEADERS += \
     frequencyseries.h \
     indexparameter.h \
     utils.h \
-    exception.h
+    exception.h \
+    loggerseries.h
 
 win32 {
     CONFIG(debug, debug|release) PRE_TARGETDEPS += ../protocol/debug/libprotocol.a

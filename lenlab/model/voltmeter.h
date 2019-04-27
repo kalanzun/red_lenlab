@@ -22,8 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define VOLTMETER_H
 
 #include "component.h"
+#include "loggerseries.h"
 
 #include <QObject>
+#include <QSharedPointer>
 #include <QTimer>
 
 #include <bitset>
@@ -57,6 +59,8 @@ class Voltmeter : public Component
     double mOffsetTime;
 
 public:
+    QSharedPointer<Loggerseries> loggerseries;
+
     explicit Voltmeter(Lenlab const & lenlab);
     Voltmeter(Voltmeter const & other) = delete;
 
@@ -97,6 +101,7 @@ public:
 
 signals:
     void replot();
+    void newplot(QSharedPointer<Series> const &);
 
     void measurementDataChanged(bool);
     void unsavedDataChanged(bool);
@@ -109,13 +114,15 @@ private:
     void do_save();
 
 private slots:
-    void on_logger(protocol::pMessage const &);
     void on_autosave();
 
     void on_start(protocol::pTask const &);
     void on_start_failed(protocol::pTask const &);
     void on_stop(protocol::pTask const &);
     void on_stop_failed(protocol::pTask const &);
+
+public slots:
+    void on_logger(protocol::pMessage const &);
 };
 
 } // namespace model

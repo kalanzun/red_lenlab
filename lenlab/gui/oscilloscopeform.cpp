@@ -50,6 +50,11 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
         ui->timerangeBox->insertItem(i, QString("%L1 ms").arg(0.5*(1<<i)));
     ui->timerangeBox->setCurrentIndex(3);
 
+    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
+    m_curves[1] = newCurve(QColor("#8ae234"), true); // green 0
+    //m_curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
+    //m_curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+
     newGrid();
 }
 
@@ -70,11 +75,6 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
 {
     m_lenlab = lenlab;
     m_oscilloscope = &lenlab->oscilloscope;
-
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    m_curves[1] = newCurve(QColor("#8ae234"), true); // green 0
-    //m_curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
-    //m_curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
 
     ui->samplerateBox->insertItems(0, m_oscilloscope->samplerateIndex.labels);
 

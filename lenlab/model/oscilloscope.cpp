@@ -105,11 +105,11 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         uint16_t trigger = buffer[0];
         uint16_t state0 = buffer[2];
         uint16_t state1 = buffer[3];
-    /*
+
         if (trigger) {
             incoming->setTrigger(trigger);
         }
-*/
+
         incoming->append(0, to_double(state0));
         incoming->append(1, to_double(state1));
 
