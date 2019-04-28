@@ -118,9 +118,9 @@ Board::on_error(const QString & message)
     if (task) {
         task->setError(message);
         emit task->failed(task);
+    } else {
+        emit error(message);
     }
-
-    emit error(message);
 }
 
 void
