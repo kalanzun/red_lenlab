@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QVector>
 
+#include <array>
+
 namespace model {
 
 class Loggerseries : public Series

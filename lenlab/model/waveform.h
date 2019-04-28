@@ -22,8 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define WAVEFORM_H
 
 #include "series.h"
+
 #include <QObject>
 #include <QVector>
+
 #include <array>
 
 namespace model {

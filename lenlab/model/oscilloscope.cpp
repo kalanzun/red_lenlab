@@ -19,9 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "oscilloscope.h"
-#include "lenlab.h"
+
 #include "config.h"
+#include "lenlab.h"
 #include "utils.h"
+
 #include <QDebug>
 #include <QSaveFile>
 

@@ -1,4 +1,5 @@
 #include "frequencyseries.h"
+
 #include <cmath>
 
 namespace model {

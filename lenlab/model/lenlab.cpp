@@ -20,8 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "lenlab.h"
 
-#include "exception.h"
-
 #include <QDebug>
 
 namespace model {

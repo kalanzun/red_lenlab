@@ -28,6 +28,7 @@ namespace model {
 class IndexParameter : public QObject
 {
     Q_OBJECT
+
 public:
     explicit IndexParameter(uint32_t length, QObject *parent = nullptr);
 
