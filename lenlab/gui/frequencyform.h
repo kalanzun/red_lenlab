@@ -45,7 +45,7 @@ class FrequencyForm : public QWidget
 
     std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
 
-    QwtPlotCurve *newCurve(uint32_t channel, const QColor &color, bool visible);
+    QwtPlotCurve *newCurve(const QColor &color, bool visible);
     QwtPlotGrid *newGrid();
 
 public:

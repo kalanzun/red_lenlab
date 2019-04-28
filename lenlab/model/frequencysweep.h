@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "component.h"
 #include "frequencyseries.h"
+#include "signalgenerator.h"
 #include "waveform.h"
 
 #include <QObject>
@@ -37,19 +38,21 @@ class Frequencysweep : public Component
 
     typedef Component super;
 
-    uint8_t index;
-    uint32_t samplerate;
+    static int const m_task_delay = 10;
+    static int const m_task_timeout = 100;
 
-    QSharedPointer<FrequencySeries> current;
+    Signalgenerator & m_signalgenerator;
+    QSharedPointer<FrequencySeries> m_current;
 
-    bool pending = 0;
-    bool wait_for_update = 0;
-    bool wait_for_step = 0;
+    uint8_t m_index;
+    uint32_t m_samplerate;
 
-    QSharedPointer<Waveform> incoming;
+    QSharedPointer<Waveform> m_incoming;
+
+    QTimer stepTimer;
 
 public:
-    explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board);
+    explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator);
     Frequencysweep(Frequencysweep const &) = delete;
 
     Frequencysweep & operator=(Frequencysweep const &) = delete;
@@ -60,10 +63,6 @@ public:
     virtual void start();
     virtual void stop();
 
-    void try_to_start();
-    void restart();
-    void step();
-
     QSharedPointer<FrequencySeries> getWaveform();
 
     void save(const QString &fileName);
@@ -73,11 +72,11 @@ signals:
     void replot();
 
 private slots:
-    void on_timeout();
+    void on_sine();
+    void on_step();
     void on_succeeded(protocol::pTask const &);
     void on_failed(protocol::pTask const &);
     void on_calculate();
-    void on_updated();
 };
 
 } // namespace model

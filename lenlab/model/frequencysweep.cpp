@@ -30,12 +30,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board)
+Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator)
     : Component(lenlab, board)
-    , current(new FrequencySeries())
+    , m_signalgenerator(signalgenerator)
+    , m_current(new FrequencySeries())
 {
-    connect(this, SIGNAL(calculate()),
-            this, SLOT(on_calculate()),
+    connect(&m_signalgenerator, &Signalgenerator::sine,
+            this, &Frequencysweep::on_sine);
+
+    stepTimer.setInterval(m_task_delay);
+    stepTimer.setSingleShot(true);
+    connect(&stepTimer, &QTimer::timeout,
+            this, &Frequencysweep::on_step);
+
+    connect(this, &Frequencysweep::calculate,
+            this, &Frequencysweep::on_calculate,
             Qt::QueuedConnection);
 }
 
@@ -57,101 +66,41 @@ void
 Frequencysweep::start()
 {
     super::start();
-    /*
-    pending = 0;
-    wait_for_update = 0;
-    lenlab->signalgenerator->lock();
 
-    current->clear();
-    index = current->start_index;
-    lenlab->signalgenerator->stop();
-    lenlab->signalgenerator->setAmplitude(14);
-    lenlab->signalgenerator->setSecond(1);
+    if (m_signalgenerator.active()) m_signalgenerator.stop();
+    m_signalgenerator.lock();
 
-    wait_for_step = 1;
-    startTimer(100);
-    */
+    m_current->clear();
+    m_index = m_current->start_index;
+
+    m_signalgenerator.setAmplitude(14);
+    m_signalgenerator.setFrequency(m_index);
+    m_signalgenerator.setSecond(1);
+    m_signalgenerator.start();
 }
 
 void
-Frequencysweep::stop()
+Frequencysweep::on_sine()
 {
-    super::stop();
-    /*
-    pending = 0;
-    wait_for_update = 0;
-    lenlab->signalgenerator->stop();
-    lenlab->signalgenerator->unlock();
-    */
+    if (!mActive) return;
+
+    stepTimer.start(); // wait a little for the system to settle
 }
 
 void
-Frequencysweep::step()
+Frequencysweep::on_step()
 {
-    if (!active())
+    if (!mActive) return;
+
+    if (!mBoard.isOpen()) {
         return;
+    }
 
-    qDebug() << "step";
-    /*
-    lenlab->signalgenerator->setFrequency(index);
-    wait_for_update = 1;
-    lenlab->signalgenerator->setSine();
-    */
-}
-
-void
-Frequencysweep::on_updated()
-{
-    if (!wait_for_update)
+    if (!mBoard.isReady()) {
         return;
-
-    wait_for_update = 0;
-
-    // wait a little for the signalgenerator to settle
-    qDebug("startTimer");
-    if (index == current->start_index)
-        startTimer(500);
-    else
-        startTimer(10);
-}
-
-void
-Frequencysweep::on_timeout()
-{
-    //killTimer(event->timerId());
-
-    qDebug("timerEvent");
-
-    if (wait_for_step) {
-        wait_for_step = 0;
-        step();
     }
 
-    else {
-        pending = 1;
-        try_to_start();
-    }
-}
-
-void
-Frequencysweep::try_to_start()
-{
-    /*
-    if (pending && lenlab->available()) {
-        pending = 0;
-        restart();
-    }
-    */
-}
-
-void
-Frequencysweep::restart()
-{
-    //qDebug() << "frequencysweep restart";
-
-    incoming.reset(new Waveform());
-
-    samplerate = 0;
+    uint32_t samplerate = 0;
     /*
     if (index >= 66)
         samplerate = 0;
@@ -160,47 +109,48 @@ Frequencysweep::restart()
     else
         samplerate = 3;
     */
-/*
-    auto transaction = board->startOscilloscope(samplerate);
-    connect(transaction.data(), &protocol::Transaction::succeeded,
-            this, &Frequencysweep::on_succeeded);*/
+
+    m_incoming.reset(new Waveform());
+    m_incoming->setSamplerate(1e6/(1<<(samplerate+2)));
+    m_samplerate = samplerate;
+
+    QVector<uint32_t> args;
+    args.append(samplerate + 2);
+
+    protocol::pMessage cmd(new protocol::Message);
+    cmd->setCommand(::startOscilloscope);
+    cmd->setUInt32Vector(args);
+
+    // TODO try
+
+    auto task = mBoard.startTask(cmd, m_task_timeout);
+    connect(task.data(), &protocol::Task::succeeded,
+            this, &Frequencysweep::on_succeeded);
+    connect(task.data(), &protocol::Task::failed,
+            this, &Frequencysweep::on_failed);
+
 }
 
 void
 Frequencysweep::on_succeeded(protocol::pTask const & task)
 {
-    Q_UNUSED(task);
+    if (!mActive) return;
 
-    // ByteArray Code
-    //qDebug("on_reply");
-/*
-    auto transaction = qobject_cast<protocol::Transaction *>(QObject::sender());
-
-    for (auto reply: transaction->replies) {
-        //uint8_t *buffer = reply->getByteBuffer();
+    for (auto reply: task->getReplies()) {
         uint16_t *data = reply->getUInt16Buffer();
-        //(int16_t *) (buffer + 22);
 
         uint16_t channel = data[0];//reply->getHead()[2];
         //uint8_t count = buffer[2];
         //qDebug() << "receive" << count << channel << last_package;
 
-        for (uint32_t i = 1; i < 500; i++) {
-            incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
+        for (uint32_t i = 1; i < 500; ++i) {
+            m_incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
         }
 
     }
 
-*/
-    //incoming->setView(incoming->getLength(0));
-
+    m_incoming->setView(m_incoming->getLength(0));
     emit calculate();
-
-}
-
-void Frequencysweep::on_failed(const protocol::pTask &)
-{
-
 }
 
 void
@@ -208,22 +158,22 @@ Frequencysweep::on_calculate()
 {
     //qDebug("on_calculate");
 
-    if (!active())
-        return;
+    if (!mActive) return;
 
-    auto current_samplerate = samplerate;
-    auto current_index = index;
+    auto index = m_index;
+    auto samplerate = m_samplerate;
+    auto incoming = m_incoming;
 
-    index++;
-    if (index < current->stop_index) {
-        step();
+    ++m_index;
+    if (m_index < m_current->stop_index) {
+        m_signalgenerator.setFrequency(m_index);
+        m_signalgenerator.setSine();
     }
     else {
         stop();
     }
 
-    /*
-    double f = lenlab->signalgenerator->getFrequency(current_index);
+    double f = m_signalgenerator.getFrequency(index);
 
     std::complex<double> sum0, sum1, y;
     double value, angle, x;
@@ -237,7 +187,7 @@ Frequencysweep::on_calculate()
     incoming->setTrigger(0);
 
     for (uint32_t idx = 0; idx < incoming->getDataLength(0); idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_samplerate) * ((double) idx - (incoming->getDataLength(0) / 2));
+        x = 2 * pi * f * 1e-6 * (1<<samplerate) * ((double) idx - (incoming->getDataLength(0) / 2));
         y = std::sin(x) + i * std::cos(x);
         sum0 += incoming->getY(idx, 0) * y;
         sum1 += incoming->getY(idx, 1) * y;
@@ -250,19 +200,33 @@ Frequencysweep::on_calculate()
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency" << current_index << f;
+    qDebug() << "frequency" << index << f;
 
-    current->append(0, f);
-    current->append(1, value);
-    current->append(2, angle);
-    */
+    m_current->append(0, f);
+    m_current->append(1, value);
+    m_current->append(2, angle);
+
     emit replot();
+}
+
+void Frequencysweep::on_failed(const protocol::pTask &)
+{
+    Q_ASSERT(false);
+}
+
+void
+Frequencysweep::stop()
+{
+    super::stop();
+
+    m_signalgenerator.stop();
+    m_signalgenerator.unlock();
 }
 
 QSharedPointer<FrequencySeries>
 Frequencysweep::getWaveform()
 {
-    return current;
+    return m_current;
 }
 
 void
@@ -281,8 +245,8 @@ Frequencysweep::save(const QString &fileName)
 
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
-    for (uint32_t i = 0; i < current->getLength(0); i++) {
-        stream << current->getX(i) << DELIMITER << current->getY(i, 1) << DELIMITER << current->getY(i, 2) << "\n";
+    for (uint32_t i = 0; i < m_current->getLength(0); i++) {
+        stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 1) << DELIMITER << m_current->getY(i, 2) << "\n";
     }
 
     file.commit();

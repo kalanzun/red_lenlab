@@ -36,7 +36,7 @@ uint32_t const Signalgenerator::BITS_PER_SAMPLE = 16;
 uint32_t const Signalgenerator::SYSCLK = 80000000;
 double const Signalgenerator::BASE_FREQUENCY = static_cast<double>(SYSCLK) / static_cast<double>(CHANNELS) / static_cast<double>(SAMPLES) / static_cast<double>(BITS_PER_SAMPLE) * OVERHEAD;
 
-std::array< std::array< uint8_t const, 3 > const, 130 > const Signalgenerator::sine = {{
+std::array< std::array< uint8_t const, 3 > const, 130 > const Signalgenerator::m_sine = {{
     {1, 2, 111}, // 0 20.59
     {1, 2, 106}, // 1 21.56
     {1, 2, 101}, // 2 22.63
@@ -172,7 +172,7 @@ std::array< std::array< uint8_t const, 3 > const, 130 > const Signalgenerator::s
 Signalgenerator::Signalgenerator(Lenlab & lenlab, protocol::Board & board)
     : Component(lenlab, board)
     , m_amplitudeIndex(18)
-    , m_frequencyIndex(sine.size())
+    , m_frequencyIndex(m_sine.size())
     , m_secondIndex(21)
 {
     double value;
@@ -218,7 +218,7 @@ Signalgenerator::getAmplitude(uint32_t index)
 double
 Signalgenerator::getFrequency(uint32_t index)
 {
-    return BASE_FREQUENCY * static_cast<double>(sine[index][0]) / static_cast<double>(sine[index][1] * sine[index][2]);
+    return BASE_FREQUENCY * static_cast<double>(m_sine[index][0]) / static_cast<double>(m_sine[index][1] * m_sine[index][2]);
 }
 
 bool
@@ -322,9 +322,9 @@ void Signalgenerator::on_set_sine()
     }
 
     QVector<uint32_t> args;
-    args.append(sine[m_frequency][0]); // multiplier
-    args.append(sine[m_frequency][1]); // predivider
-    args.append(sine[m_frequency][2]); // divider
+    args.append(m_sine[m_frequency][0]); // multiplier
+    args.append(m_sine[m_frequency][1]); // predivider
+    args.append(m_sine[m_frequency][2]); // divider
     args.append(static_cast<uint32_t>(std::round((1<<11) * getAmplitude(m_amplitude) / 1.65))); // amplitude
     args.append(m_second); // second
 
@@ -345,7 +345,7 @@ void Signalgenerator::on_set_sine()
 
 void Signalgenerator::on_set_sine_succeeded(protocol::pTask const & task)
 {
-
+    emit sine();
 }
 
 void Signalgenerator::on_set_sine_failed(protocol::pTask const & task)

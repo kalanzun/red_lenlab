@@ -60,6 +60,12 @@ FrequencyForm::FrequencyForm(QWidget * parent)
 
     //QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
     //ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
+
+    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
+    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
+    m_curves[1]->setYAxis(QwtPlot::yRight);
+
+    newGrid();
 }
 
 FrequencyForm::~FrequencyForm()
@@ -80,24 +86,18 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     m_lenlab = lenlab;
     m_frequencysweep = &lenlab->frequencysweep;
 
-    /*
-    curves[0] = newCurve(1, QColor("#729fcf"), true); // sky blue 0
-    curves[1] = newCurve(2, QColor("#ef2929"), true); // scarlet red 0
-    curves[1]->setYAxis(QwtPlot::yRight);
+    m_curves[0]->setSamples(new PointVectorSeriesData(m_frequencysweep->getWaveform(), 0)); // acquires ownership
+    m_curves[1]->setSamples(new PointVectorSeriesData(m_frequencysweep->getWaveform(), 1)); // acquires ownership
 
-    newGrid();
-
-    connect(frequencysweep, SIGNAL(replot()),
-            this, SLOT(on_replot()));
-            */
+    connect(m_frequencysweep, &model::Frequencysweep::replot,
+            this, &FrequencyForm::on_replot);
 }
 
 QwtPlotCurve *
-FrequencyForm::newCurve(uint32_t channel, const QColor &color, bool visible)
+FrequencyForm::newCurve(const QColor &color, bool visible)
 {
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
 
-    //curve->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), channel)); // acquires ownership
     curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     curve->setVisible(visible);
 

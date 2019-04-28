@@ -44,7 +44,7 @@ class Signalgenerator : public Component
     static uint32_t const SYSCLK;
     static double const BASE_FREQUENCY;
 
-    static std::array< std::array< uint8_t const, 3 > const, 130 > const sine;
+    static std::array< std::array< uint8_t const, 3 > const, 130 > const m_sine;
 
     static int const m_task_delay = 1;
     static int const m_task_timeout = 100;
@@ -92,6 +92,8 @@ public:
 
 signals:
     void lockedChanged(bool locked);
+
+    void sine();
 
 private slots:
     void on_set_sine();

@@ -27,10 +27,10 @@ namespace model {
 Lenlab::Lenlab(QObject * parent)
     : QObject(parent)
     , board()
-    , frequencysweep(*this, board)
     , voltmeter(*this, board)
-    , oscilloscope(*this, board)
     , signalgenerator(*this, board)
+    , oscilloscope(*this, board)
+    , frequencysweep(*this, board, signalgenerator)
 {
     connect(&board, &protocol::Board::ready,
             this, &Lenlab::on_ready);

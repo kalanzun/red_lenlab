@@ -41,10 +41,10 @@ class Lenlab : public QObject
     protocol::Board board;
 
 public:
-    Frequencysweep frequencysweep;
     Voltmeter voltmeter;
-    Oscilloscope oscilloscope;
     Signalgenerator signalgenerator;
+    Oscilloscope oscilloscope;
+    Frequencysweep frequencysweep;
 
     explicit Lenlab(QObject * parent = nullptr);
     Lenlab(Lenlab const & other) = delete;
