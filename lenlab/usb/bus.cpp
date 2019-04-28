@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "bus.h"
 #include "devicelist.h"
+#include "usberror.h"
 
 using namespace usb;
 
@@ -28,7 +29,7 @@ Bus::Bus() : context()
 
 }
 
-QSharedPointer<Device>
+pDevice
 Bus::query(uint16_t vid, uint16_t pid)
 {
     struct libusb_device_descriptor desc;
@@ -39,9 +40,9 @@ Bus::query(uint16_t vid, uint16_t pid)
 
         // Is it our device?
         if(desc.idVendor == vid && desc.idProduct == pid) {
-            return QSharedPointer<Device>(new Device(dev)); // may throw
+            return pDevice(new Device(dev)); // may throw
         }
     }
 
-    return QSharedPointer<Device>();
+    throw NotFound();
 }

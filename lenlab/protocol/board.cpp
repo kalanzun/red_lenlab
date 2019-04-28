@@ -1,33 +1,57 @@
 #include "board.h"
 
-#include <QMetaMethod>
+#include "usb/usberror.h"
+
+#include "lenlab_version.h"
 
 namespace protocol {
 
 static int p_board_type_id = qRegisterMetaType<pBoard>("pBoard");
 
-Board::Board(usb::pDevice &device, QObject *parent)
+Board::Board(QObject *parent)
     : QObject(parent)
-    , mDevice(device)
 {
-    connect(device.data(), &usb::Device::reply,
-            this, &Board::on_reply);
-
-    connect(device.data(), &usb::Device::error,
-            this, &Board::on_error);
-
+    connect(&mPollTimer, &QTimer::timeout,
+            this, &Board::on_poll_timeout);
+    connect(&mBootTimer, &QTimer::timeout,
+            this, &Board::on_boot_timeout);
     connect(&mWatchdog, &QTimer::timeout,
-            this, &Board::on_timeout);
+            this, &Board::on_watchdog_timeout);
 
-    mWatchdog.setInterval(100);
+    mPollTimer.setSingleShot(true);
+    mBootTimer.setSingleShot(true);
     mWatchdog.setSingleShot(true);
 }
 
+void
+Board::lookForBoard(int boottime)
+{
+    if (mDevice) throw AlreadyConnected();
+
+    try {
+        mDevice = mBus.query(LENLAB_VID, LENLAB_PID);
+        connect(mDevice.get(), &usb::Device::reply,
+                this, &Board::on_reply);
+        connect(mDevice.get(), &usb::Device::error,
+                this, &Board::on_error);
+        connect(mDevice.get(), &usb::Device::destroyed,
+                this, &Board::on_destroyed);
+        emit log("Lenlab-Board gefunden.");
+        // wait for the board to boot, it just got power
+        mBootTimer.start(boottime);
+    } catch (usb::NotFound const & e) {
+        mPollTimer.start(mPollTime);
+    } catch (usb::UsbErrorMessage const & e) {
+        emit error(e.getMsg());
+        mPollTimer.start(mErrorTime);
+    }
+}
 
 pTask const &
 Board::startTask(pMessage const & command, int timeout)
 {
-    Q_ASSERT(!mTask);
+    if (!mDevice) throw NotConnected();
+    if (mTask) throw Busy();
 
     mTask.reset(new Task(command, timeout));
 
@@ -37,21 +61,14 @@ Board::startTask(pMessage const & command, int timeout)
     return mTask;
 }
 
-void
-Board::setVersion(uint32_t major, uint32_t minor)
-{
-    mMajor = major;
-    mMinor = minor;
-}
-
 uint32_t
-Board::getMajor() const
+Board::getVersionMajor() const
 {
     return mMajor;
 }
 
 uint32_t
-Board::getMinor() const
+Board::getVersionMinor() const
 {
     return mMinor;
 }
@@ -59,11 +76,10 @@ Board::getMinor() const
 void
 Board::on_reply(usb::pPacket const & packet)
 {
-    auto message = pMessage::create(packet);
     auto task = mTask;
+    auto message = pMessage::create(packet);
 
     if (task) {
-        mWatchdog.start(); // restart
         if (message->getReply() == Error) {
             task->setError(message);
             mTask.clear();
@@ -75,32 +91,64 @@ Board::on_reply(usb::pPacket const & packet)
                 mTask.clear();
                 mWatchdog.stop();
                 emit task->succeeded(task);
+            } else {
+                mWatchdog.start(); // restart
             }
         }
     } else if (message->getReply() == LoggerData) {
-        emit logger(message);
+        emit logger_data(message);
     } else {
-        emit error("Unerwartetes Paket empfangen.");
+        emit log("Unerwartetes Paket empfangen.");
     }
 }
 
 void
 Board::on_error(const QString & message)
 {
+    auto device = mDevice;
     auto task = mTask;
+
+    mPollTimer.stop();
+    mBootTimer.stop();
+    mWatchdog.stop();
+
+    mTask.clear();
+    mDevice.clear();
 
     if (task) {
         task->setError(message);
-        mTask.clear();
         emit task->failed(task);
-    } else {
-        emit error(message);
     }
+
+    emit error(message);
 }
 
+void
+Board::on_destroyed()
+{
+    mPollTimer.start(mErrorTime);
+}
 
 void
-Board::on_timeout()
+Board::on_poll_timeout()
+{
+    lookForBoard(mBootTime);
+}
+
+void
+Board::on_boot_timeout()
+{
+    pMessage cmd(new Message());
+    cmd->setCommand(::init);
+    auto init = startTask(cmd);
+    connect(init.data(), &Task::succeeded,
+            this, &Board::on_init);
+    connect(init.data(), &Task::failed,
+            this, &Board::on_task_error);
+}
+
+void
+Board::on_watchdog_timeout()
 {
     auto task = mTask;
 
@@ -109,6 +157,67 @@ Board::on_timeout()
         mTask.clear();
         emit task->failed(task);
     }
+}
+
+void
+Board::on_init(pTask const & task)
+{
+    pMessage cmd(new Message());
+    cmd->setCommand(::getName);
+    auto name = startTask(cmd);
+    connect(name.data(), &Task::succeeded,
+            this, &Board::on_name);
+    connect(name.data(), &Task::failed,
+            this, &Board::on_task_error);
+}
+
+void
+Board::on_name(pTask const & task)
+{
+    pMessage cmd(new Message());
+    cmd->setCommand(::getVersion);
+    auto version = startTask(cmd);
+    connect(version.data(), &Task::succeeded,
+            this, &Board::on_version);
+    connect(version.data(), &Task::failed,
+            this, &Board::on_task_error);
+}
+
+void
+Board::on_version(pTask const & task)
+{
+    auto device = mDevice;
+
+    auto reply = task->getReply();
+    auto length = reply->getUInt32BufferLength();
+    if (length == 3 || length == 2) {
+        auto array = reply->getUInt32Buffer();
+
+        mMajor = array[0];
+        mMinor = array[1];
+
+        if (mMajor == MAJOR && mMinor == MINOR) {
+            emit ready();
+        }
+        else {
+            auto msg = QString("Ungültige Version %1.%2. Lenlab erwartet mindestens %3.%4.").arg(mMajor).arg(mMinor).arg(MAJOR).arg(MINOR);
+            mDevice.clear();
+            emit error(msg);
+        }
+    }
+    else {
+        auto msg = QString("Das Lenlab-Board antwortet mit einer ungültigen Version.");
+        mDevice.clear();
+        emit error(msg);
+    }
+}
+
+void
+Board::on_task_error(pTask const & task)
+{
+    auto device = mDevice;
+    mDevice.clear();
+    emit error(task->getErrorMessage());
 }
 
 /*

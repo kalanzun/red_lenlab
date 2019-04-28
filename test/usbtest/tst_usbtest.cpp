@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "lenlab_version.h"
 #include "usb/bus.h"
 #include "usb/device.h"
-#include "usb/exception.h"
+#include "usb/usberror.h"
 #include <QString>
 #include <QDebug>
 #include <QtTest>
@@ -120,7 +120,7 @@ void USBTest::test_device_construct_error()
         auto dev = bus.query(LENLAB_VID, LENLAB_PID);
         // fails, because the device is already open from initTestCase
         QVERIFY(false);
-    } catch (const usb::Exception &e) {
+    } catch (const usb::UsbErrorMessage &e) {
         //qDebug() << e.getMsg();
         QVERIFY(true);
     }

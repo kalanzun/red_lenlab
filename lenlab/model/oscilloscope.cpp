@@ -27,8 +27,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Oscilloscope::Oscilloscope(Lenlab const & lenlab)
-    : Component(lenlab),
+Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
+    : Component(lenlab, board),
       samplerateIndex(3)
 {
     double value;
@@ -83,7 +83,7 @@ Oscilloscope::restart()
 
     // TODO try
 
-    auto task = mLenlab.board()->startTask(cmd, m_task_timeout);
+    auto task = mBoard.startTask(cmd, m_task_timeout);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Oscilloscope::on_succeeded);
     connect(task.data(), &protocol::Task::failed,

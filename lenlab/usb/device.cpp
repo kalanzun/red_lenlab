@@ -19,8 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "device.h"
-#include "exception.h"
-#include <QDebug>
+#include "usberror.h"
 
 using namespace usb;
 
@@ -72,7 +71,7 @@ Device::on_reply_transfer_ready()
 {
     try {
         qobject_cast<Transfer *>(QObject::sender())->start(pPacket::create());
-    } catch (const Exception &e) {
+    } catch (const UsbErrorMessage &e) {
         emit error(e.getMsg());
     }
 }
@@ -83,7 +82,7 @@ Device::try_to_send()
     if (!send_queue->isEmpty() && !sender->isActive()) {
         try {
             sender->start(send_queue->takeFirst());
-        } catch (const Exception &e) {
+        } catch (const UsbErrorMessage &e) {
             emit error(e.getMsg());
         }
     }

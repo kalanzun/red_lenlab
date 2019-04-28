@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define DEVHANDLE_H
 
 #include "libusb.h"
+#include <memory>
 
 namespace usb {
 namespace resource {
@@ -31,6 +32,8 @@ namespace resource {
         libusb_device_handle *dev_handle;
 
     public:
+        typedef std::unique_ptr<DevHandle> Ptr;
+
         DevHandle(libusb_device *dev);
         ~DevHandle();
 

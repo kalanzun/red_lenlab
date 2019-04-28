@@ -34,13 +34,16 @@ double const Voltmeter::MSEC = 1000.0;
 
 double const Voltmeter::VOLT = 4096.0 / 3.3;
 
-Voltmeter::Voltmeter(Lenlab const & lenlab)
-    : Component(lenlab)
+Voltmeter::Voltmeter(Lenlab &lenlab, protocol::Board &board)
+    : Component(lenlab, board)
 {
     connect(&mAutoSaveTimer, &QTimer::timeout,
             this, &Voltmeter::on_autosave);
 
     mAutoSaveTimer.setInterval(3000);
+
+    connect(&mBoard, &protocol::Board::logger_data,
+            this, &Voltmeter::on_logger_data);
 }
 
 QString const &
@@ -55,15 +58,6 @@ Voltmeter::getNameAccusative() const
 {
     static QString name("das Spannungsmessgerät");
     return name;
-}
-
-void
-Voltmeter::setBoard(protocol::pBoard const & board)
-{
-    super::setBoard(board);
-
-    connect(board.data(), &protocol::Board::logger,
-            this, &Voltmeter::on_logger);
 }
 
 void
@@ -85,7 +79,7 @@ Voltmeter::start()
     cmd->setCommand(::startLogger);
     cmd->setUInt32Vector(args);
 
-    auto task = mLenlab.board()->startTask(cmd);
+    auto task = mBoard.startTask(cmd);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Voltmeter::on_start);
     connect(task.data(), &protocol::Task::failed,
@@ -98,7 +92,7 @@ Voltmeter::stop()
     protocol::pMessage cmd(new protocol::Message());
     cmd->setCommand(::stopLogger);
 
-    auto task = mLenlab.board()->startTask(cmd);
+    auto task = mBoard.startTask(cmd);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Voltmeter::on_stop);
     connect(task.data(), &protocol::Task::failed,
@@ -303,7 +297,7 @@ Voltmeter::do_save()
 }
 
 void
-Voltmeter::on_logger(protocol::pMessage const & reply)
+Voltmeter::on_logger_data(protocol::pMessage const & reply)
 {
     Q_ASSERT(reply->getUInt32BufferLength() == 2);
     uint32_t *buffer = reply->getUInt32Buffer();

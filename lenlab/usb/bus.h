@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "context.h"
 #include "device.h"
-#include <QSharedPointer>
+#include <memory>
 
 namespace usb {
 

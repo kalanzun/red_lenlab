@@ -30,6 +30,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "libusb.h"
 #include <QObject>
 #include <QSharedPointer>
+#include <QVector>
 #include <memory>
 
 namespace usb {

@@ -1,5 +1,4 @@
 #include "protocol/board.h"
-#include "protocol/factory.h"
 #include "protocol/message.h"
 
 #include "lenlab_protocol.h"
@@ -15,8 +14,7 @@ class MeasurementTest : public QObject
 {
     Q_OBJECT
 
-    protocol::Factory mFactory;
-    protocol::pBoard mBoard;
+    protocol::Board mBoard;
 
     static int const m_short_timeout = 100;
     static int const m_long_timeout = 800;
@@ -30,19 +28,16 @@ private slots:
 
 void MeasurementTest::initTestCase()
 {
-    QSignalSpy spy(&mFactory, &Factory::ready);
+    QSignalSpy spy(&mBoard, &Board::ready);
     QVERIFY(spy.isValid());
 
-    mFactory.connectToBoard();
+    mBoard.lookForBoard();
 
     QVERIFY(spy.wait(m_long_timeout));
-
-    mBoard = qvariant_cast<pBoard>(spy.at(0).at(0));
 }
 
 void MeasurementTest::cleanupTestCase()
 {
-    mBoard.clear();
 }
 
 void MeasurementTest::test_startOscilloscopeLinearTestData()
@@ -52,7 +47,7 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
     pMessage cmd(new Message());
     cmd->setCommand(::startOscilloscopeLinearTestData);
 
-    auto task = mBoard->startTask(cmd);
+    auto task = mBoard.startTask(cmd);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));
@@ -83,7 +78,7 @@ void MeasurementTest::test_startTriggerLinearTestData()
     pMessage cmd(new Message());
     cmd->setCommand(::startTriggerLinearTestData);
 
-    auto task = mBoard->startTask(cmd);
+    auto task = mBoard.startTask(cmd);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
     QVERIFY(spy.wait(m_short_timeout));

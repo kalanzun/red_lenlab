@@ -28,17 +28,18 @@ namespace model {
 
 Lenlab::Lenlab(QObject * parent)
     : QObject(parent)
-    , frequencysweep(*this)
-    , voltmeter(*this)
-    , oscilloscope(*this)
-    , signalgenerator(*this)
+    , board()
+    , frequencysweep(*this, board)
+    , voltmeter(*this, board)
+    , oscilloscope(*this, board)
+    , signalgenerator(*this, board)
 {
-    connect(&mFactory, &protocol::Factory::ready,
-            this, &Lenlab::on_factory_ready);
-    connect(&mFactory, &protocol::Factory::log,
-            this, &Lenlab::on_factory_log);
-    connect(&mFactory, &protocol::Factory::error,
-            this, &Lenlab::on_factory_error);
+    connect(&board, &protocol::Board::ready,
+            this, &Lenlab::on_ready);
+    connect(&board, &protocol::Board::log,
+            this, &Lenlab::on_log);
+    connect(&board, &protocol::Board::error,
+            this, &Lenlab::on_error);
     /*
     connect(signalgenerator, SIGNAL(updated()),
             frequencysweep, SLOT(on_updated()));
@@ -74,21 +75,12 @@ Lenlab::getActiveComponent()
     throw std::exception();
 }
 
-protocol::pBoard const &
-Lenlab::board() const
+void
+Lenlab::lookForBoard()
 {
-    if (mBoard)
-        return mBoard;
-    else {
-        throw Exception("Kein Lenlab-Board verbunden.");
-    }
+    board.lookForBoard();
 }
 
-void
-Lenlab::connectToBoard()
-{
-    mFactory.connectToBoard();
-}
 /*
 bool
 Lenlab::available()
@@ -99,17 +91,9 @@ Lenlab::available()
 */
 
 void
-Lenlab::on_factory_ready(protocol::pBoard const & board)
+Lenlab::on_ready()
 {
-    mBoard = board;
-
-    connect(mBoard.data(), &protocol::Board::error,
-            this, &Lenlab::on_board_error);
-
-    connect(mBoard.data(), &protocol::Board::logger,
-            &voltmeter, &Voltmeter::on_logger);
-
-    auto msg = QString("Lenlab-Board Version %1.%2 verbunden.").arg(board->getMajor()).arg(board->getMinor());
+    auto msg = QString("Lenlab-Board Version %1.%2 verbunden.").arg(board.getVersionMajor()).arg(board.getVersionMinor());
     emit logMessage(msg);
 
     /*
@@ -121,32 +105,15 @@ Lenlab::on_factory_ready(protocol::pBoard const & board)
 }
 
 void
-Lenlab::on_factory_log(QString const & msg)
+Lenlab::on_log(QString const & msg)
 {
     emit logMessage(msg);
 }
 
 void
-Lenlab::on_factory_error(QString const & msg)
+Lenlab::on_error(QString const & msg)
 {
     emit logMessage(msg);
-}
-
-void
-Lenlab::on_board_error(QString const & msg)
-{
-    auto board = mBoard;
-    mBoard.clear();
-    connect(board.data(), &protocol::Board::destroyed,
-            this, &Lenlab::on_board_destroyed);
-    emit logMessage(msg);
-}
-
-void
-Lenlab::on_board_destroyed()
-{
-    // attempt to connect again
-    QTimer::singleShot(mErrorTime, this, &Lenlab::connectToBoard);
 }
 
 /*

@@ -27,8 +27,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "signalgenerator.h"
 
 #include "protocol/board.h"
-#include "protocol/factory.h"
-#include "protocol/message.h"
 
 #include <QObject>
 
@@ -40,8 +38,7 @@ class Lenlab : public QObject
 
     static int const mErrorTime = 3000;
 
-    protocol::Factory mFactory;
-    protocol::pBoard mBoard;
+    protocol::Board board;
 
 public:
     Frequencysweep frequencysweep;
@@ -57,8 +54,6 @@ public:
     bool isActive() const;
     Component *getActiveComponent();
 
-    protocol::pBoard const & board() const;
-
     //bool available();
 
 signals:
@@ -69,15 +64,12 @@ signals:
     //void replot();
 
 public slots:
-    void connectToBoard();
+    void lookForBoard();
 
 private slots:
-    void on_factory_ready(protocol::pBoard const &);
-    void on_factory_log(QString const &);
-    void on_factory_error(QString const &);
-    void on_board_error(QString const &);
-    void on_board_destroyed();
-
+    void on_ready();
+    void on_log(QString const &);
+    void on_error(QString const &);
 };
 
 } // namespace model

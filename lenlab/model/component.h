@@ -37,22 +37,20 @@ class Component : public QObject
     bool mActive = 0;
 
 protected:
-    Lenlab const & mLenlab;
-    protocol::pBoard mBoard;
+    Lenlab & mLenlab;
+    protocol::Board & mBoard;
 
 public:
-    explicit Component(const Lenlab & lenlab);
-    Component(Component const & other) = delete;
+    explicit Component(Lenlab & lenlab, protocol::Board & board);
+    Component(Component const &) = delete;
 
-    Component & operator=(Component const & other) = delete;
+    Component & operator=(Component const &) = delete;
 
     bool active() const;
     void setActive(bool active);
 
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
-
-    virtual void setBoard(protocol::pBoard const & board);
 
     virtual void start();
     virtual void stop();

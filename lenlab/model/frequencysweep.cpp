@@ -30,8 +30,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Frequencysweep::Frequencysweep(Lenlab const & lenlab)
-    : Component(lenlab)
+Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board)
+    : Component(lenlab, board)
     , current(new FrequencySeries())
 {
     connect(this, SIGNAL(calculate()),

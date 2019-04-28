@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "transfer.h"
-#include "exception.h"
+#include "usberror.h"
 #include "notetoself.h"
 #include <QDebug>
 
@@ -30,7 +30,7 @@ Transfer::Transfer(libusb_device_handle *dev_handle, unsigned char endpoint, QOb
     active(),
     xfr(libusb_alloc_transfer(0), libusb_free_transfer)
 {
-    if (!xfr) throw Exception("Error allocating transfer");
+    if (!xfr) throw UsbErrorMessage("Error allocating transfer");
 
     xfr->dev_handle = dev_handle;
     xfr->endpoint = endpoint;
@@ -60,10 +60,10 @@ Transfer::start(const pPacket &packet)
     xfr->user_data = note.get();
     xfr->callback = callbackComplete;
 
-    if (packet->getMockSendError()) throw Exception("Mock send error");
+    if (packet->getMockSendError()) throw UsbErrorMessage("Mock send error");
 
     auto err = libusb_submit_transfer(xfr.get());
-    if (err) throw Exception(libusb_strerror(static_cast<libusb_error>(err)));
+    if (err) throw UsbErrorMessage(libusb_strerror(static_cast<libusb_error>(err)));
 
     note.release(); // release ownership
 }

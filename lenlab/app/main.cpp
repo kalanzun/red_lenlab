@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     main_window.setModel(&lenlab);
     main_window.show();
 
-    QTimer::singleShot(0, &lenlab, &model::Lenlab::connectToBoard);
+    QTimer::singleShot(0, &lenlab, &model::Lenlab::lookForBoard);
 
     return application.exec();
 }

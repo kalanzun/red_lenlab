@@ -61,15 +61,13 @@ class Voltmeter : public Component
 public:
     QSharedPointer<Loggerseries> loggerseries;
 
-    explicit Voltmeter(Lenlab const & lenlab);
-    Voltmeter(Voltmeter const & other) = delete;
+    explicit Voltmeter(Lenlab & lenlab, protocol::Board & board);
+    Voltmeter(Voltmeter const &) = delete;
 
-    Voltmeter & operator=(Voltmeter const & other) = delete;
+    Voltmeter & operator=(Voltmeter const &) = delete;
 
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
-
-    virtual void setBoard(protocol::pBoard const & board);
 
     virtual void start();
     virtual void stop();
@@ -121,8 +119,7 @@ private slots:
     void on_stop(protocol::pTask const &);
     void on_stop_failed(protocol::pTask const &);
 
-public slots:
-    void on_logger(protocol::pMessage const &);
+    void on_logger_data(protocol::pMessage const &);
 };
 
 } // namespace model

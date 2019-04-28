@@ -48,7 +48,7 @@ class Frequencysweep : public Component
     QSharedPointer<Waveform> incoming;
 
 public:
-    explicit Frequencysweep(Lenlab const & lenlab);
+    explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board);
     Frequencysweep(Frequencysweep const &) = delete;
 
     Frequencysweep & operator=(Frequencysweep const &) = delete;

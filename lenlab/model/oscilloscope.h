@@ -46,7 +46,7 @@ public:
     IndexParameter samplerateIndex;
     QSharedPointer<Waveform> waveform;
 
-    explicit Oscilloscope(Lenlab const & lenlab);
+    explicit Oscilloscope(Lenlab &lenlab, protocol::Board &board);
     Oscilloscope(Oscilloscope const &) = delete;
 
     Oscilloscope & operator=(Oscilloscope const &) = delete;

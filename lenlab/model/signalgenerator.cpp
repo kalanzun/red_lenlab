@@ -26,9 +26,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Signalgenerator::Signalgenerator(Lenlab const & lenlab)
+Signalgenerator::Signalgenerator(Lenlab & lenlab, protocol::Board & board)
     : QObject()
     , mLenlab(lenlab)
+    , mBoard(board)
     , amplitudeIndex(18)
     , frequencyIndex(sine_length)
     , secondIndex(21)

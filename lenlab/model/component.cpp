@@ -25,9 +25,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
-Component::Component(Lenlab const & lenlab)
+Component::Component(Lenlab & lenlab, protocol::Board & board)
     : QObject()
     , mLenlab(lenlab)
+    , mBoard(board)
 {
 
 }
@@ -59,12 +60,6 @@ Component::getNameAccusative() const
 {
     static QString name("die Komponente");
     return name;
-}
-
-void
-Component::setBoard(protocol::pBoard const & board)
-{
-    mBoard = board;
 }
 
 void

@@ -23,6 +23,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "indexparameter.h"
 
+#include "protocol/board.h"
+
 #include <QObject>
 
 namespace model {
@@ -168,7 +170,8 @@ class Signalgenerator : public QObject
         {9, 2, 2}, // 129 10285.71
     };
 
-    Lenlab const & mLenlab;
+    Lenlab & mLenlab;
+    protocol::Board & mBoard;
 
     bool m_locked;
     bool setSine_pending = 0;
@@ -183,7 +186,7 @@ class Signalgenerator : public QObject
     IndexParameter secondIndex;
 
 public:
-    explicit Signalgenerator(Lenlab const & lenlab);
+    explicit Signalgenerator(model::Lenlab & lenlab, protocol::Board & board);
     Signalgenerator(Signalgenerator const &) = delete;
 
     Signalgenerator & operator=(Signalgenerator const &) = delete;
