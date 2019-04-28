@@ -12,6 +12,18 @@ Task::Task(pMessage const & command, int timeout, QObject * parent)
 
 }
 
+pMessage const &
+Task::getCommand() const
+{
+    return mCommand;
+}
+
+int
+Task::getTimeout() const
+{
+    return mTimeout;
+}
+
 void
 Task::addReply(const pMessage & message)
 {

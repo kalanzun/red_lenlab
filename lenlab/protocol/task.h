@@ -34,6 +34,9 @@ public:
 
     Task & operator=(Task const & other) = delete;
 
+    pMessage const & getCommand() const;
+    int getTimeout() const;
+
     void addReply(pMessage const &);
     bool isComplete() const;
 
