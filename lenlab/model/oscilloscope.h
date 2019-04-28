@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "indexparameter.h"
 
 #include <QObject>
+#include <QTimer>
 
 namespace model {
 
@@ -35,12 +36,15 @@ class Oscilloscope : public Component
 
     typedef Component super;
 
+    static int const m_task_delay = 10; // shall not be faster than signal generator
     static int const m_task_timeout = 400;
 
     bool pending = 0;
 
     uint32_t samplerate = 0;
     QSharedPointer<Waveform> incoming;
+
+    QTimer startTimer;
 
 public:
     IndexParameter samplerateIndex;
@@ -57,9 +61,6 @@ public:
     virtual void start();
     virtual void stop();
 
-    void try_to_start();
-    void restart();
-
     void setSamplerate(uint32_t index);
 
     void save(const QString &fileName);
@@ -71,6 +72,7 @@ private:
     static double to_double(uint16_t state);
 
 private slots:
+    void on_start();
     void on_succeeded(protocol::pTask const &);
     void on_failed(protocol::pTask const &);
 };

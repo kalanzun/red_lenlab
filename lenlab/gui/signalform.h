@@ -61,7 +61,7 @@ private slots:
     void on_secondBox_activated(int index);
     void on_secondSlider_valueChanged(int index);
 
-    void signalgenerator_lockedDataChanged(bool locked);
+    void on_lockedChanged(bool locked);
 };
 
 } // namespace gui

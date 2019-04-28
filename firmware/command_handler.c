@@ -12,6 +12,7 @@
 #include "logger.h"
 #include "oscilloscope.h"
 #include "reply_handler.h"
+#include "signal.h"
 #include "trigger.h"
 
 
@@ -136,12 +137,14 @@ on_setSignalSine(tEvent *event)
     DEBUG_PRINT("setSignalSine\n");
 
     // this may need a long time
-    //SignalSetSine(multiplier, predivider, divider, amplitude, second);
+    SignalSetSine(&signal, multiplier, predivider, divider, amplitude, second);
+
+    if (!signal.lock) SignalStart(&signal);
 
     // send a reply
     reply = QueueAcquire(&reply_handler.reply_queue);
 
-    EventSetReply(reply, SignalSine);
+    EventSetReply(reply, Signal);
     EventSetBodyLength(reply, 0);
 
     QueueWrite(&reply_handler.reply_queue);
@@ -151,9 +154,19 @@ on_setSignalSine(tEvent *event)
 void
 on_stopSignal(tEvent *event)
 {
+    tEvent *reply;
+
     DEBUG_PRINT("stopSignal\n");
 
-    //SignalStop();
+    if (signal.lock) SignalStop(&signal);
+
+    // send a reply
+    reply = QueueAcquire(&reply_handler.reply_queue);
+
+    EventSetReply(reply, Signal);
+    EventSetBodyLength(reply, 0);
+
+    QueueWrite(&reply_handler.reply_queue);
 }
 
 
@@ -274,12 +287,8 @@ CommandHandlerMain(tCommandHandler *self)
         else if (command == startTrigger) on_startTrigger(event);
         else if (command == startOscilloscopeLinearTestData) on_startOscilloscopeLinearTestData(event);
         else if (command == startTriggerLinearTestData) on_startTriggerLinearTestData(event);
-        /*
         else if (command == setSignalSine) on_setSignalSine(event);
         else if (command == stopSignal) on_stopSignal(event);
-        else if (command == setSignalSine) on_setSignalSine(event);
-        else if (command == stopSignal) on_stopSignal(event);
-        */
         else on_error();
 
         QueueRelease(&self->command_queue);

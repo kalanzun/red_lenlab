@@ -39,6 +39,11 @@ Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
         value = 1000.0 / (1<<(i+2));
         samplerateIndex.labels << QString("%1 kHz").arg(german_double(value));
     }
+
+    startTimer.setInterval(m_task_delay);
+    startTimer.setSingleShot(true);
+    connect(&startTimer, &QTimer::timeout,
+            this, &Oscilloscope::on_start);
 }
 
 QString const &
@@ -60,18 +65,37 @@ Oscilloscope::start()
 {
     super::start();
 
-    restart();
+    startTimer.start();
 }
 
 void
 Oscilloscope::stop()
 {
     super::stop();
+
+    startTimer.stop();
 }
 
 void
-Oscilloscope::restart()
+Oscilloscope::setSamplerate(uint32_t index)
 {
+    samplerate = index;
+}
+
+void
+Oscilloscope::on_start()
+{
+    if (!mActive) return;
+
+    if (!mBoard.isOpen()) {
+        return;
+    }
+
+    if (!mBoard.isReady()) {
+        startTimer.start();
+        return;
+    }
+
     incoming.reset(new Waveform());
     incoming->setSamplerate(1e6/(1<<(samplerate+2)));
 
@@ -92,11 +116,6 @@ Oscilloscope::restart()
             this, &Oscilloscope::on_failed);
 }
 
-void
-Oscilloscope::setSamplerate(uint32_t index)
-{
-    samplerate = index;
-}
 
 void
 Oscilloscope::on_succeeded(protocol::pTask const & task)
@@ -130,8 +149,8 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
     waveform.swap(incoming);
     emit replot();
 
-    if (active()) {
-        restart();
+    if (mActive) {
+        startTimer.start();
     }
 }
 

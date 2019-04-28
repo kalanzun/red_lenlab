@@ -64,7 +64,7 @@ enum Reply {
     Init,
     Name,
     Version,
-    SignalSine,
+    Signal,
     OscilloscopeData,
     Oscilloscope,
     LoggerData,

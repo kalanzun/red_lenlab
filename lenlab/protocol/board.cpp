@@ -47,6 +47,19 @@ Board::lookForBoard(int boottime)
     }
 }
 
+bool
+Board::isOpen() const
+{
+    return mDevice;
+}
+
+bool
+Board::isReady() const
+{
+    // TODO rename ready signal open, maybe implement closed signal
+    return mDevice && !mTask;
+}
+
 pTask const &
 Board::startTask(pMessage const & command, int timeout)
 {

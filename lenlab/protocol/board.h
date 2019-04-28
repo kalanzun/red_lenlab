@@ -43,6 +43,8 @@ public:
 
     void lookForBoard(int boottime = 0);
 
+    bool isOpen() const;
+    bool isReady() const;
     const pTask & startTask(pMessage const & command, int timeout = mTaskTime);
 
     uint32_t getVersionMajor() const;

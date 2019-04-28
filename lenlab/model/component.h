@@ -34,11 +34,12 @@ class Component : public QObject
     Q_OBJECT
 
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
-    bool mActive = 0;
 
 protected:
     Lenlab & mLenlab;
     protocol::Board & mBoard;
+
+    bool mActive = 0;
 
 public:
     explicit Component(Lenlab & lenlab, protocol::Board & board);
