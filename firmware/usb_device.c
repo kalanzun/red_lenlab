@@ -158,6 +158,9 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
     uint32_t size;
     tEvent *event;
 
+    // Note: USB does not signal software disconnect. This function or the interrupt handler
+    // is not called, if Lenlab on the host disappears.
+
     //
     // Which event have we been sent?
     //

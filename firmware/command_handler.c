@@ -23,6 +23,11 @@ on_init(tEvent *event)
 
     //DEBUG_PRINT("Init");
 
+    LoggerStop(&logger);
+    OscilloscopeStop(&oscilloscope);
+    TriggerStop(&trigger);
+    SignalStop(&signal);
+
     reply = QueueAcquire(&reply_handler.reply_queue);
 
     EventSetReply(reply, Init);
