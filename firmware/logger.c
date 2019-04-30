@@ -13,7 +13,7 @@
 
 
 void
-ADC0SS3Handler(void)
+ADC0SS1Handler(void)
 {
     tLogSeq *self = &logger.seq_group.log_seq[0];
 
@@ -22,7 +22,7 @@ ADC0SS3Handler(void)
 
 
 void
-ADC1SS3Handler(void)
+ADC1SS1Handler(void)
 {
     tLogSeq *self = &logger.seq_group.log_seq[1];
 
@@ -88,12 +88,12 @@ LoggerMain(tLogger *self)
         EventSetReply(reply, LoggerData);
         EventSetType(reply, IntArray);
 
-        size = sizeof(uint32_t) * ADC_GROUP_SIZE;
+        size = sizeof(uint32_t) * 2 * ADC_GROUP_SIZE; // bytes; two channels per ADC
         ASSERT(size <= LENLAB_PACKET_BODY_LENGTH);
         EventSetBodyLength(reply, size);
 
         size = LogSeqGroupDataGet(&self->seq_group, (uint32_t *) (EventGetBody(reply)));
-        ASSERT(size == ADC_GROUP_SIZE);
+        ASSERT(size == 2 * ADC_GROUP_SIZE); // number of samples
 
         QueueWrite(&reply_handler.reply_queue);
 

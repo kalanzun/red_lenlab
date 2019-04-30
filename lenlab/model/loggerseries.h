@@ -19,7 +19,7 @@ class Loggerseries : public Series
     Q_PROPERTY(uint32_t interval READ interval WRITE setInterval)
     uint32_t m_interval = 0;
 
-    std::array< QVector<double>, 2 > data;
+    std::array< QVector<double>, 4 > data;
 
 public:
     explicit Loggerseries();

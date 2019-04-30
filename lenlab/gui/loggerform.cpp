@@ -51,20 +51,10 @@ LoggerForm::LoggerForm(QWidget * parent) :
     y_label.setFont(y_font);
     ui->plot->setAxisTitle(0, y_label);
 
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
+    m_curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
     m_curves[1] = newCurve(QColor("#8ae234"), false); // green 0
-    /*
-    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#edd400"), 2, true); // butter 1
-    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#73d216"), 2, false); // green 1
-    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#3465a4"), 2, false); // sky blue 1
-    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#cc0000"), 2, false); // scarlet red 1
-    */
-    /*
-    curves[0] = newCurve(&voltmeter->data[0], &voltmeter->data[1], QColor("#fce94f"), true); // butter 0
-    curves[1] = newCurve(&voltmeter->data[0], &voltmeter->data[2], QColor("#8ae234"), false); // green 0
-    curves[2] = newCurve(&voltmeter->data[0], &voltmeter->data[3], QColor("#729fcf"), false); // sky blue 0
-    curves[3] = newCurve(&voltmeter->data[0], &voltmeter->data[4], QColor("#ef2929"), false); // scarlet red 0
-    */
+    m_curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
+    m_curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
 
     newGrid();
 }

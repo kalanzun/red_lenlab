@@ -44,7 +44,7 @@ class LoggerForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
 
-    std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
+    std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
 
 public:
     explicit LoggerForm(QWidget * parent = nullptr);
