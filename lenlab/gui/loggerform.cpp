@@ -75,36 +75,6 @@ LoggerForm::~LoggerForm()
     delete ui;
 }
 
-void
-LoggerForm::setMainWindow(MainWindow * main_window)
-{
-    m_main_window = main_window;
-}
-
-void
-LoggerForm::setModel(model::Lenlab * lenlab)
-{
-    m_lenlab = lenlab;
-    m_voltmeter = &lenlab->voltmeter;
-
-    /*
-    connect(voltmeter, SIGNAL(measurementDataChanged(bool)),
-            this, SLOT(on_measurementDataChanged(bool)));
-    connect(voltmeter, SIGNAL(unsavedDataChanged(bool)),
-            this, SLOT(on_unsavedDataChanged(bool)));
-    connect(voltmeter, SIGNAL(autoSaveChanged(bool)),
-            this, SLOT(on_autoSaveChanged(bool)));
-    connect(voltmeter, SIGNAL(fileNameChanged(QString)),
-            this, SLOT(on_fileNameChanged(QString)));
-    connect(voltmeter, SIGNAL(channelsChanged(std::bitset<4>)),
-            this, SLOT(on_channelsChanged(std::bitset<4>)));
-    */
-    connect(m_voltmeter, &model::Voltmeter::replot,
-            this, &LoggerForm::on_replot);
-    connect(m_voltmeter, &model::Voltmeter::newplot,
-            this, &LoggerForm::on_newplot);
-}
-
 QwtPlotCurve *
 LoggerForm::newCurve(QColor const & color, bool visible)
 {
@@ -135,6 +105,37 @@ LoggerForm::newGrid()
 
     grid->attach(ui->plot); // acquires ownership
     return grid.release();
+}
+
+void
+LoggerForm::setMainWindow(MainWindow * main_window)
+{
+    m_main_window = main_window;
+}
+
+void
+LoggerForm::setModel(model::Lenlab * lenlab)
+{
+    m_lenlab = lenlab;
+    m_voltmeter = &lenlab->voltmeter;
+
+    connect(m_voltmeter, &model::Voltmeter::seriesChanged,
+            this, &LoggerForm::seriesChanged);
+    connect(m_voltmeter, &model::Voltmeter::seriesUpdated,
+            this, &LoggerForm::seriesUpdated);
+
+    seriesChanged(m_voltmeter->getSeries());
+
+    connect(m_voltmeter, &model::Voltmeter::measurementDataChanged,
+            this, &LoggerForm::on_measurementDataChanged);
+    connect(m_voltmeter, &model::Voltmeter::unsavedDataChanged,
+            this, &LoggerForm::on_unsavedDataChanged);
+    connect(m_voltmeter, &model::Voltmeter::autoSaveChanged,
+            this, &LoggerForm::on_autoSaveChanged);
+    connect(m_voltmeter, &model::Voltmeter::fileNameChanged,
+            this, &LoggerForm::on_fileNameChanged);
+    connect(m_voltmeter, &model::Voltmeter::channelsChanged,
+            this, &LoggerForm::on_channelsChanged);
 }
 
 void
@@ -222,24 +223,6 @@ LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
 }
 
 void
-LoggerForm::on_replot()
-{
-    qDebug("LoggerForm::on_replot");
-    ui->plot->replot();
-}
-
-void
-LoggerForm::on_newplot(QSharedPointer<model::Series> const & series)
-{
-    qDebug("LoggerForm::on_newplot");
-    for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        qDebug() << i;
-        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
-    }
-    ui->plot->replot();
-}
-
-void
 LoggerForm::on_measurementDataChanged(bool measurementData)
 {
     if (measurementData) {
@@ -282,7 +265,7 @@ LoggerForm::on_fileNameChanged(const QString &fileName)
 void
 LoggerForm::on_channelsChanged(const std::bitset<4> &channels)
 {
-    for (auto i = 0; i < 4; i++)
+    for (std::size_t i = 0; i < m_curves.size(); ++i)
         m_curves[i]->setVisible(channels[i]);
     ui->plot->replot();
 }
@@ -290,7 +273,7 @@ LoggerForm::on_channelsChanged(const std::bitset<4> &channels)
 void
 LoggerForm::on_intervalComboBox_activated(int index)
 {
-    static const int interval[] = {100, 200, 500, 1000, 2000, 5000};
+    static uint32_t const interval[] = {100, 200, 500, 1000, 2000, 5000};
     m_voltmeter->setInterval(interval[index]);
 }
 
@@ -299,6 +282,24 @@ LoggerForm::saveImage()
 {
     QwtPlotRenderer renderer;
     renderer.exportTo(ui->plot, "Logger_Graph");
+}
+
+void
+LoggerForm::seriesChanged(model::pSeries const & series)
+{
+    qDebug("LoggerForm::on_newplot");
+    for (unsigned int i = 0; i < m_curves.size(); ++i) {
+        qDebug() << i;
+        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
+    }
+    ui->plot->replot();
+}
+
+void
+LoggerForm::seriesUpdated()
+{
+    qDebug("LoggerForm::on_replot");
+    ui->plot->replot();
 }
 
 } // namespace gui

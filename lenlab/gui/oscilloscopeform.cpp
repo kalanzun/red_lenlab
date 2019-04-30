@@ -78,8 +78,8 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
 
     ui->samplerateBox->insertItems(0, m_oscilloscope->samplerateIndex.labels);
 
-    connect(m_oscilloscope, &model::Oscilloscope::replot,
-            this, &OscilloscopeForm::on_replot);
+    connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
+            this, &OscilloscopeForm::on_series_changed);
 }
 
 QwtPlotCurve *
@@ -133,10 +133,10 @@ OscilloscopeForm::on_stopButton_clicked()
 }
 
 void
-OscilloscopeForm::on_replot()
+OscilloscopeForm::on_series_changed(model::pSeries const & series)
 {
     for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        m_curves[i]->setSamples(new PointVectorSeriesData(m_oscilloscope->waveform, i)); // acquires ownership
+        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
     }
     ui->plot->replot();
 }

@@ -4,84 +4,88 @@
 
 namespace model {
 
-FrequencySeries::FrequencySeries() : Series()
+FrequencySeries::FrequencySeries()
+    : Series()
+    , index{0, 0, 0}
+    , MinY{100.0, -1.0, -90.0}
+    , MaxY{10.0e3, 1, 90}
 {
-    clear();
+
 }
 
 void
-FrequencySeries::append(uint32_t channel, double value)
+FrequencySeries::append(std::size_t channel, double value)
 {
-    Q_ASSERT(channel < channel_length);
-    Q_ASSERT(index[channel] < values_length);
+    Q_ASSERT(channel < m_channels);
+    Q_ASSERT(index[channel] < m_length);
     if (value < MinY[channel]) MinY[channel] = value;
     if (value > MaxY[channel]) MaxY[channel] = value;
     data[channel][index[channel]++] = value;
 }
 
-void
-FrequencySeries::clear()
+std::size_t
+FrequencySeries::getChannels() const
 {
-    Q_ASSERT(channel_length == 3);
-
-    index[0] = 0;
-    index[1] = 0;
-    index[2] = 0;
-
-    MinY[0] = 100.0;
-    MinY[1] = -1.0;
-    MinY[2] = -90.0;
-
-    MaxY[0] = 10.0e3;
-    MaxY[1] = 1;
-    MaxY[2] = 90;
+    return m_channels;
 }
 
-uint32_t
-FrequencySeries::getLength(uint32_t channel)
+std::size_t
+FrequencySeries::getLength(std::size_t channel) const
 {
-    Q_ASSERT(channel < channel_length);
+    Q_ASSERT(channel < m_channels);
     return index[channel];
 }
 
 double
-FrequencySeries::getX(uint32_t i)
+FrequencySeries::getX(std::size_t i) const
 {
     return getY(i, 0);
 }
 
 double
-FrequencySeries::getY(uint32_t i, uint32_t channel)
+FrequencySeries::getY(std::size_t i, std::size_t channel) const
 {
-    Q_ASSERT(channel < channel_length);
-    Q_ASSERT(i < values_length);
+    Q_ASSERT(channel < m_channels);
+    Q_ASSERT(i < m_length);
     return data[channel][i];
 }
 
 double
-FrequencySeries::getMinX()
+FrequencySeries::getMinX() const
 {
     return getMinY(0);
 }
 
 double
-FrequencySeries::getMaxX()
+FrequencySeries::getMaxX() const
 {
     return getMaxY(0);
 }
 
 double
-FrequencySeries::getMinY(uint32_t channel)
+FrequencySeries::getMinY(std::size_t channel) const
 {
-    Q_ASSERT(channel < channel_length);
+    Q_ASSERT(channel < m_channels);
     return MinY[channel];
 }
 
 double
-FrequencySeries::getMaxY(uint32_t channel)
+FrequencySeries::getMaxY(std::size_t channel) const
 {
-    Q_ASSERT(channel < channel_length);
+    Q_ASSERT(channel < m_channels);
     return MaxY[channel];
+}
+
+std::size_t
+FrequencySeries::startIndex() const
+{
+    return m_start_index;
+}
+
+std::size_t
+FrequencySeries::stopIndex() const
+{
+    return m_stop_index;
 }
 
 } // namespace model

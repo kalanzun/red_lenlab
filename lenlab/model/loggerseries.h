@@ -17,28 +17,31 @@ class Loggerseries : public Series
     typedef Series super;
 
     Q_PROPERTY(uint32_t interval READ interval WRITE setInterval)
+    uint32_t m_interval = 0;
 
     std::array< QVector<double>, 2 > data;
 
-    uint32_t m_interval = 0;
-
 public:
     explicit Loggerseries();
+    Loggerseries(Loggerseries const &) = delete;
+
+    Loggerseries & operator=(Loggerseries const &) = delete;
 
     void setInterval(uint32_t interval);
     uint32_t interval() const;
 
-    void append(uint32_t channel, double value);
+    void append(std::size_t channel, double value);
 
-    uint32_t getLength(uint32_t channel);
+    std::size_t getChannels() const;
+    std::size_t getLength(std::size_t channel) const;
 
-    double getX(uint32_t i);
-    double getY(uint32_t i, uint32_t channel);
+    double getX(std::size_t i) const;
+    double getY(std::size_t i, std::size_t channel) const;
 
-    double getMinX();
-    double getMaxX();
-    double getMinY(uint32_t channel);
-    double getMaxY(uint32_t channel);
+    double getMinX() const;
+    double getMaxX() const;
+    double getMinY(std::size_t channel) const;
+    double getMaxY(std::size_t channel) const;
 };
 
 } // namespace model

@@ -38,9 +38,6 @@ class LoggerForm : public QWidget
 {
     Q_OBJECT
 
-    //QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
-
     Ui::LoggerForm * ui;
 
     MainWindow * m_main_window = nullptr;
@@ -59,7 +56,9 @@ public:
     void saveImage();
     void save();
 
-    QwtPlotCurve *newCurve(QColor const & color, bool visible);
+private:
+    QwtPlotGrid * newGrid();
+    QwtPlotCurve * newCurve(QColor const & color, bool visible);
 
 private slots:
     void on_intervalComboBox_activated(int);
@@ -73,8 +72,9 @@ private slots:
     void on_autoSaveCheckBox_stateChanged(int);
     void on_clearButton_clicked();
 
-    void on_replot();
-    void on_newplot(QSharedPointer<model::Series> const &);
+    void seriesUpdated();
+    void seriesChanged(model::pSeries const &);
+
     void on_measurementDataChanged(bool);
     void on_unsavedDataChanged(bool);
     void on_autoSaveChanged(bool);

@@ -55,12 +55,12 @@ class Voltmeter : public Component
     std::bitset<4> mChannels = 1;
     uint32_t mInterval = 1000;
 
+    QSharedPointer<Loggerseries> m_loggerseries;
+
     QTimer mAutoSaveTimer;
     double mOffsetTime;
 
 public:
-    QSharedPointer<Loggerseries> loggerseries;
-
     explicit Voltmeter(Lenlab & lenlab, protocol::Board & board);
     Voltmeter(Voltmeter const &) = delete;
 
@@ -68,9 +68,6 @@ public:
 
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
-
-    virtual void start();
-    virtual void stop();
 
     void setMeasurementData(bool measurementData);
     bool measurementData() const;
@@ -90,6 +87,11 @@ public:
     void setInterval(uint32_t interval);
     uint32_t interval() const;
 
+    virtual pSeries getSeries() const;
+
+    virtual void start();
+    virtual void stop();
+
     void clear();
 
     //virtual void receive(const usb::pMessage &reply);
@@ -98,9 +100,6 @@ public:
     void save(QString const & fileName);
 
 signals:
-    void replot();
-    void newplot(QSharedPointer<Series> const &);
-
     void measurementDataChanged(bool);
     void unsavedDataChanged(bool);
     void autoSaveChanged(bool);

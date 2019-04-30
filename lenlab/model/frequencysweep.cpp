@@ -62,6 +62,12 @@ Frequencysweep::getNameAccusative() const
     return name;
 }
 
+pSeries
+Frequencysweep::getSeries() const
+{
+    return m_current;
+}
+
 void
 Frequencysweep::start()
 {
@@ -70,8 +76,9 @@ Frequencysweep::start()
     if (m_signalgenerator.active()) m_signalgenerator.stop();
     m_signalgenerator.lock();
 
-    m_current->clear();
-    m_index = m_current->start_index;
+    m_current.reset(new FrequencySeries());
+    emit seriesChanged(m_current);
+    m_index = m_current->startIndex();
 
     m_signalgenerator.setAmplitude(14);
     m_signalgenerator.setFrequency(m_index);
@@ -100,7 +107,6 @@ Frequencysweep::on_step()
         return;
     }
 
-    uint32_t samplerate = 0;
     /*
     if (index >= 66)
         samplerate = 0;
@@ -110,12 +116,10 @@ Frequencysweep::on_step()
         samplerate = 3;
     */
 
-    m_incoming.reset(new Waveform());
-    m_incoming->setSamplerate(1e6/(1<<(samplerate+2)));
-    m_samplerate = samplerate;
+    m_samplerate = 2;
 
     QVector<uint32_t> args;
-    args.append(samplerate + 2);
+    args.append(m_samplerate);
 
     protocol::pMessage cmd(new protocol::Message);
     cmd->setCommand(::startOscilloscope);
@@ -136,6 +140,9 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
 {
     if (!mActive) return;
 
+    std::array< std::size_t, m_channels > index = {0};
+    pWaveform waveform(new Waveform());
+
     for (auto reply: task->getReplies()) {
         uint16_t *data = reply->getUInt16Buffer();
 
@@ -143,29 +150,30 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
         //uint8_t count = buffer[2];
         //qDebug() << "receive" << count << channel << last_package;
 
-        for (uint32_t i = 1; i < 500; ++i) {
-            m_incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
-        }
+        Q_ASSERT(channel < m_channels);
 
+        for (uint32_t i = 1; i < 500; ++i) {
+            Q_ASSERT(index[channel] < waveform->at(channel).size());
+            waveform->at(channel).at(index[channel]) = (static_cast< double >(data[i] >> 2) / 1024.0 - 0.5) * 3.3;
+            ++index[channel];
+        }
     }
 
-    m_incoming->setView(m_incoming->getLength(0));
-    emit calculate();
+    emit calculate(waveform);
 }
 
 void
-Frequencysweep::on_calculate()
+Frequencysweep::on_calculate(pWaveform waveform)
 {
     //qDebug("on_calculate");
 
     if (!mActive) return;
 
     auto index = m_index;
-    auto samplerate = m_samplerate;
-    auto incoming = m_incoming;
+    //auto samplerate = m_samplerate;
 
     ++m_index;
-    if (m_index < m_current->stop_index) {
+    if (m_index < m_current->stopIndex()) {
         m_signalgenerator.setFrequency(m_index);
         m_signalgenerator.setSine();
     }
@@ -179,18 +187,17 @@ Frequencysweep::on_calculate()
     double value, angle, x;
 
     double pi = std::acos(-1);
-    std::complex<double> i(0, 1);
+    std::complex<double> j(0, 1);
 
     sum0 = 0;
     sum1 = 0;
 
-    incoming->setTrigger(0);
-
-    for (uint32_t idx = 0; idx < incoming->getDataLength(0); idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<samplerate) * ((double) idx - (incoming->getDataLength(0) / 2));
-        y = std::sin(x) + i * std::cos(x);
-        sum0 += incoming->getY(idx, 0) * y;
-        sum1 += incoming->getY(idx, 1) * y;
+    for (std::size_t i = 0; i < waveform->at(0).size(); ++i) {
+        //x = 2 * pi * f * 1e-6 * (1<<samplerate) * ((double) i - (waveform->at(0).size() / 2));
+        x = 2 * pi * f * 1e-6 * static_cast< double >(i - (waveform->at(0).size() / 2));
+        y = std::sin(x) + j * std::cos(x);
+        sum0 += waveform->at(0).at(i) * y;
+        sum1 += waveform->at(1).at(i) * y;
     }
 
     std::complex<double> transfer_fct = sum1 / sum0;
@@ -206,7 +213,7 @@ Frequencysweep::on_calculate()
     m_current->append(1, value);
     m_current->append(2, angle);
 
-    emit replot();
+    emit seriesUpdated();
 }
 
 void Frequencysweep::on_failed(const protocol::pTask &)
@@ -221,12 +228,6 @@ Frequencysweep::stop()
 
     m_signalgenerator.stop();
     m_signalgenerator.unlock();
-}
-
-QSharedPointer<FrequencySeries>
-Frequencysweep::getWaveform()
-{
-    return m_current;
 }
 
 void

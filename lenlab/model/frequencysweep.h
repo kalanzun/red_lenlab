@@ -24,7 +24,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "component.h"
 #include "frequencyseries.h"
 #include "signalgenerator.h"
-#include "waveform.h"
 
 #include <QObject>
 #include <QSharedPointer>
@@ -32,11 +31,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
+
 class Frequencysweep : public Component
 {
     Q_OBJECT
 
     typedef Component super;
+
+    static int const m_channels = 2;
+
+    typedef std::array< std::array < double, 10080 >, m_channels > Waveform;
+    typedef QSharedPointer< Waveform > pWaveform;
 
     static int const m_task_delay = 10;
     static int const m_task_timeout = 100;
@@ -44,10 +49,8 @@ class Frequencysweep : public Component
     Signalgenerator & m_signalgenerator;
     QSharedPointer<FrequencySeries> m_current;
 
-    uint8_t m_index;
+    std::size_t m_index;
     uint32_t m_samplerate;
-
-    QSharedPointer<Waveform> m_incoming;
 
     QTimer stepTimer;
 
@@ -60,23 +63,22 @@ public:
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
 
+    virtual pSeries getSeries() const;
+
     virtual void start();
     virtual void stop();
-
-    QSharedPointer<FrequencySeries> getWaveform();
 
     void save(const QString &fileName);
 
 signals:
-    void calculate();
-    void replot();
+    void calculate(pWaveform);
 
 private slots:
     void on_sine();
     void on_step();
     void on_succeeded(protocol::pTask const &);
     void on_failed(protocol::pTask const &);
-    void on_calculate();
+    void on_calculate(pWaveform);
 };
 
 } // namespace model

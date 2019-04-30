@@ -21,9 +21,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include "series.h"
+
 #include "protocol/board.h"
 
 #include <QObject>
+#include <QSharedPointer>
 
 namespace model {
 
@@ -53,11 +56,16 @@ public:
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
 
+    virtual pSeries getSeries() const;
+
     virtual void start();
     virtual void stop();
 
 signals:
     void activeChanged(bool);
+
+    void seriesChanged(pSeries const &);
+    void seriesUpdated();
 };
 
 } // namespace model

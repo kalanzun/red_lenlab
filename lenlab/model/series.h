@@ -31,23 +31,25 @@ class Series : public QObject
 
 public:
     explicit Series(QObject *parent = nullptr);
+    Series(Series const &) = delete;
 
-    virtual void append(uint32_t channel, double value) = 0;
+    Series & operator=(Series const &) = delete;
 
-    virtual uint32_t getLength(uint32_t channel) = 0;
+    virtual void append(std::size_t channel, double value) = 0;
 
-    virtual double getX(uint32_t i) = 0;
-    virtual double getY(uint32_t i, uint32_t channel) = 0;
+    virtual std::size_t getChannels() const = 0;
+    virtual std::size_t getLength(std::size_t channel) const = 0;
 
-    virtual double getMinX() = 0;
-    virtual double getMaxX() = 0;
-    virtual double getMinY(uint32_t channel) = 0;
-    virtual double getMaxY(uint32_t channel) = 0;
+    virtual double getX(std::size_t i) const = 0;
+    virtual double getY(std::size_t i, std::size_t channel) const = 0;
 
-signals:
-
-public slots:
+    virtual double getMinX() const = 0;
+    virtual double getMaxX() const = 0;
+    virtual double getMinY(std::size_t channel) const = 0;
+    virtual double getMaxY(std::size_t channel) const = 0;
 };
+
+typedef QSharedPointer<Series> pSeries;
 
 } // namespace model
 

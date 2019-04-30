@@ -30,8 +30,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace model {
 
 Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
-    : Component(lenlab, board),
-      samplerateIndex(3)
+    : Component(lenlab, board)
+    , waveform(new Waveform())
+    , samplerateIndex(3)
 {
     double value;
 
@@ -58,6 +59,12 @@ Oscilloscope::getNameAccusative() const
 {
     static QString name("das Oszilloskop");
     return name;
+}
+
+pSeries
+Oscilloscope::getSeries() const
+{
+    return waveform;
 }
 
 void
@@ -147,7 +154,7 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
     incoming->setView(8000);
 
     waveform.swap(incoming);
-    emit replot();
+    emit seriesChanged(incoming);
 
     if (mActive) {
         startTimer.start();

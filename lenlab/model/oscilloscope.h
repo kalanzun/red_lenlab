@@ -43,12 +43,12 @@ class Oscilloscope : public Component
 
     uint32_t samplerate = 0;
     QSharedPointer<Waveform> incoming;
+    QSharedPointer<Waveform> waveform;
 
     QTimer startTimer;
 
 public:
     IndexParameter samplerateIndex;
-    QSharedPointer<Waveform> waveform;
 
     explicit Oscilloscope(Lenlab &lenlab, protocol::Board &board);
     Oscilloscope(Oscilloscope const &) = delete;
@@ -58,15 +58,14 @@ public:
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
 
+    virtual pSeries getSeries() const;
+
     virtual void start();
     virtual void stop();
 
     void setSamplerate(uint32_t index);
 
     void save(const QString &fileName);
-
-signals:
-    void replot();
 
 private:
     static double to_double(uint16_t state);

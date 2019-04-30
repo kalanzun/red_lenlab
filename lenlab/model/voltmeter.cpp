@@ -36,10 +36,10 @@ double const Voltmeter::VOLT = 4096.0 / 3.3;
 
 Voltmeter::Voltmeter(Lenlab &lenlab, protocol::Board &board)
     : Component(lenlab, board)
+    , m_loggerseries(new Loggerseries)
 {
     connect(&mAutoSaveTimer, &QTimer::timeout,
             this, &Voltmeter::on_autosave);
-
     mAutoSaveTimer.setInterval(3000);
 
     connect(&mBoard, &protocol::Board::logger_data,
@@ -59,81 +59,6 @@ Voltmeter::getNameAccusative() const
     static QString name("das Spannungsmessgerät");
     return name;
 }
-
-void
-Voltmeter::start()
-{
-    super::start();
-
-    qDebug("start");
-
-    loggerseries.reset(new Loggerseries);
-    loggerseries->setInterval(mInterval);
-
-    emit newplot(loggerseries);
-
-    QVector<uint32_t> args;
-    args.append(mInterval);
-
-    protocol::pMessage cmd(new protocol::Message());
-    cmd->setCommand(::startLogger);
-    cmd->setUInt32Vector(args);
-
-    auto task = mBoard.startTask(cmd);
-    connect(task.data(), &protocol::Task::succeeded,
-            this, &Voltmeter::on_start);
-    connect(task.data(), &protocol::Task::failed,
-            this, &Voltmeter::on_start_failed);
-}
-
-void
-Voltmeter::stop()
-{
-    protocol::pMessage cmd(new protocol::Message());
-    cmd->setCommand(::stopLogger);
-
-    auto task = mBoard.startTask(cmd);
-    connect(task.data(), &protocol::Task::succeeded,
-            this, &Voltmeter::on_stop);
-    connect(task.data(), &protocol::Task::failed,
-            this, &Voltmeter::on_stop_failed);
-}
-
-/*
-void
-Voltmeter::receive(const usb::pMessage &reply)
-{
-    Q_UNUSED(reply);
-
-    qDebug("receive");
-
-    //uint32_t *buffer = (uint32_t *) reply->getBody();
-
-    //Q_ASSERT(reply->getBodyLength() == 4 * data.size());
-
-    // 4 bytes timestamp
-    //data[0].append(time_offset + (double) *buffer / MSEC);
-
-    // 4 channels, 4 bytes each
-    // old comment!
-    //for (size_t i = 1; i < data.size(); i++) {
-    //    data[i].append((double) buffer[i] / (double) reply->getBody()[0] / VOLT); // TODO Fix for new communictaion
-    //}
-
-    setMeasurementData(true);
-    setUnsavedData(true);
-
-    emit replot();
-}
-*/
-/*
-void
-Voltmeter::ready()
-{
-    if (m_active)
-        restart();
-}
-*/
 
 void
 Voltmeter::setMeasurementData(bool measurementData)
@@ -233,20 +158,102 @@ Voltmeter::interval() const
     return mInterval;
 }
 
+pSeries
+Voltmeter::getSeries() const
+{
+    return m_loggerseries;
+}
+
+void
+Voltmeter::start()
+{
+    if (mActive) return;
+
+    super::start();
+
+    qDebug("start");
+
+    // TODO interval locking
+    m_loggerseries->setInterval(mInterval);
+
+    QVector<uint32_t> args;
+    args.append(m_loggerseries->interval());
+
+    protocol::pMessage cmd(new protocol::Message());
+    cmd->setCommand(::startLogger);
+    cmd->setUInt32Vector(args);
+
+    auto task = mBoard.startTask(cmd);
+    connect(task.data(), &protocol::Task::succeeded,
+            this, &Voltmeter::on_start);
+    connect(task.data(), &protocol::Task::failed,
+            this, &Voltmeter::on_start_failed);
+}
+
+void
+Voltmeter::stop()
+{
+    if (!mActive) return;
+
+    protocol::pMessage cmd(new protocol::Message());
+    cmd->setCommand(::stopLogger);
+
+    auto task = mBoard.startTask(cmd);
+    connect(task.data(), &protocol::Task::succeeded,
+            this, &Voltmeter::on_stop);
+    connect(task.data(), &protocol::Task::failed,
+            this, &Voltmeter::on_stop_failed);
+}
+
+/*
+void
+Voltmeter::receive(const usb::pMessage &reply)
+{
+    Q_UNUSED(reply);
+
+    qDebug("receive");
+
+    //uint32_t *buffer = (uint32_t *) reply->getBody();
+
+    //Q_ASSERT(reply->getBodyLength() == 4 * data.size());
+
+    // 4 bytes timestamp
+    //data[0].append(time_offset + (double) *buffer / MSEC);
+
+    // 4 channels, 4 bytes each
+    // old comment!
+    //for (size_t i = 1; i < data.size(); i++) {
+    //    data[i].append((double) buffer[i] / (double) reply->getBody()[0] / VOLT); // TODO Fix for new communictaion
+    //}
+
+    setMeasurementData(true);
+    setUnsavedData(true);
+
+    emit replot();
+}
+*/
+/*
+void
+Voltmeter::ready()
+{
+    if (m_active)
+        restart();
+}
+*/
+
 void
 Voltmeter::clear()
 {
     if (active())
         stop();
 
-    //for (auto &vector : data) vector.clear();
-
     setAutoSave(false);
     setFileName(QString());
     setUnsavedData(false);
     setMeasurementData(false);
 
-    emit replot();
+    m_loggerseries.reset(new Loggerseries);
+    emit seriesChanged(m_loggerseries);
 }
 
 void
@@ -299,13 +306,15 @@ Voltmeter::do_save()
 void
 Voltmeter::on_logger_data(protocol::pMessage const & reply)
 {
-    Q_ASSERT(reply->getUInt32BufferLength() == 2);
+    Q_ASSERT(reply->getUInt32BufferLength() == m_loggerseries->getChannels());
     uint32_t *buffer = reply->getUInt32Buffer();
 
-    qDebug("Voltmeter::on_logger");
+    //qDebug("Voltmeter::on_logger");
 
-    for (uint32_t i = 0; i < 2; ++i)
-        loggerseries->append(i, static_cast<double>(buffer[i]) / VOLT);
+    // TODO Implement time stamp???
+
+    for (std::size_t i = 0; i < reply->getUInt32BufferLength(); ++i)
+        m_loggerseries->append(i, static_cast< double >(buffer[i]) / VOLT);
 
     /*
     for (int i = 0; i < 2; i++)
@@ -328,7 +337,7 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
     setMeasurementData(true);
     setUnsavedData(true);
 
-    emit replot();
+    emit seriesUpdated();
 
 }
 

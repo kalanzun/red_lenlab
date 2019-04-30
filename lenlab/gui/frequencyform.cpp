@@ -86,11 +86,10 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     m_lenlab = lenlab;
     m_frequencysweep = &lenlab->frequencysweep;
 
-    m_curves[0]->setSamples(new PointVectorSeriesData(m_frequencysweep->getWaveform(), 0)); // acquires ownership
-    m_curves[1]->setSamples(new PointVectorSeriesData(m_frequencysweep->getWaveform(), 1)); // acquires ownership
-
-    connect(m_frequencysweep, &model::Frequencysweep::replot,
-            this, &FrequencyForm::on_replot);
+    connect(m_frequencysweep, &model::Frequencysweep::seriesChanged,
+            this, &FrequencyForm::on_series_changed);
+    connect(m_frequencysweep, &model::Frequencysweep::seriesUpdated,
+            this, &FrequencyForm::on_series_updated);
 }
 
 QwtPlotCurve *
@@ -145,12 +144,6 @@ FrequencyForm::on_stopButton_clicked()
 }
 
 void
-FrequencyForm::on_replot()
-{
-    ui->plot->replot();
-}
-
-void
 FrequencyForm::on_saveButton_clicked()
 {
     save();
@@ -166,6 +159,19 @@ FrequencyForm::save()
     catch (std::exception) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
     }
+}
+
+void
+FrequencyForm::on_series_updated()
+{
+    ui->plot->replot();
+}
+
+void
+FrequencyForm::on_series_changed(model::pSeries const & series)
+{
+    m_curves[0]->setSamples(new PointVectorSeriesData(series, 0)); // acquires ownership
+    m_curves[1]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
 }
 
 } // namespace gui

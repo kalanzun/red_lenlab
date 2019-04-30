@@ -58,7 +58,8 @@ public:
     void save();
 
 private slots:
-    void on_replot();
+    void on_series_changed(model::pSeries const &);
+    void on_series_updated();
 
     void on_startButton_clicked();
     void on_stopButton_clicked();

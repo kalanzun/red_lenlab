@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+#include "model/series.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 #include <QWidget>
@@ -62,7 +63,7 @@ public:
     void save();
 
 private slots:
-    void on_replot();
+    void on_series_changed(model::pSeries const &);
 
     void on_startButton_clicked();
     void on_stopButton_clicked();

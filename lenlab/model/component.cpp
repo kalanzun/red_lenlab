@@ -63,6 +63,12 @@ Component::getNameAccusative() const
     return name;
 }
 
+pSeries
+Component::getSeries() const
+{
+    return nullptr;
+}
+
 void
 Component::start()
 {

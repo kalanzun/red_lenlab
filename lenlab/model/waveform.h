@@ -37,10 +37,10 @@ class Waveform : public Series
     typedef Series super;
 
     Q_PROPERTY(double samplerate READ samplerate WRITE setSamplerate)
-    Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger)
-    Q_PROPERTY(uint32_t view READ view WRITE setView)
+    Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger) // offset
+    Q_PROPERTY(uint32_t view READ view WRITE setView) // length
 
-    std::array< uint32_t, 2 > index{{0, 0}};
+    std::array< uint32_t, 2 > index;
     std::array< std::array< double, 10080 >, 2 > data;
 
     double m_samplerate = 0;
@@ -59,22 +59,18 @@ public:
     void setView(uint32_t view);
     uint32_t view();
 
-    void append(uint32_t channel, double value);
+    void append(std::size_t channel, double value);
 
-    uint32_t getLength(uint32_t channel);
-    uint32_t getDataLength(uint32_t channel);
+    std::size_t getChannels() const;
+    std::size_t getLength(std::size_t channel) const;
 
-    double getX(uint32_t i);
-    double getY(uint32_t i, uint32_t channel);
+    double getX(std::size_t i) const;
+    double getY(std::size_t i, std::size_t channel) const;
 
-    double getMinX();
-    double getMaxX();
-    double getMinY(uint32_t channel);
-    double getMaxY(uint32_t channel);
-
-signals:
-
-public slots:
+    double getMinX() const;
+    double getMaxX() const;
+    double getMinY(std::size_t channel) const;
+    double getMaxY(std::size_t channel) const;
 };
 
 } // namespace model
