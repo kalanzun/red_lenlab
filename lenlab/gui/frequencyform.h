@@ -56,6 +56,7 @@ public:
     void setModel(model::Lenlab * lenlab);
 
     void save();
+    void saveImage();
 
 private slots:
     void seriesChanged(model::pSeries const &);

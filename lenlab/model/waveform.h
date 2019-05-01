@@ -41,7 +41,8 @@ class Waveform : public Series
     Q_PROPERTY(uint32_t view READ view WRITE setView) // length
 
     std::array< uint32_t, 2 > index;
-    std::array< std::array< double, 10080 >, 2 > data;
+    // 18 packets a 504 samples
+    std::array< std::array< double, 18*504 >, 2 > data;
 
     double m_samplerate = 0;
     uint32_t m_trigger = 0;

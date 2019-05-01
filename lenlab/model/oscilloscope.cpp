@@ -153,7 +153,8 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         }
     }
 
-    incoming->setView(8000);
+    incoming->setView(504*17);
+    qDebug() << incoming->trigger();
 
     waveform.swap(incoming);
     emit seriesChanged(incoming);
@@ -181,7 +182,7 @@ void
 Oscilloscope::save(const QString &fileName)
 {
     QSaveFile file(fileName);
-    qDebug("save");
+    //qDebug("save");
 
     if (!file.open(QIODevice::WriteOnly)) {
         throw std::exception();

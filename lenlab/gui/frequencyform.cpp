@@ -160,6 +160,13 @@ FrequencyForm::save()
 }
 
 void
+FrequencyForm::saveImage()
+{
+    QwtPlotRenderer renderer;
+    renderer.exportTo(ui->plot, "bode.pdf"); // it asks for the filename
+}
+
+void
 FrequencyForm::seriesUpdated()
 {
     ui->plot->replot();

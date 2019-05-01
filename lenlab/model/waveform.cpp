@@ -58,6 +58,7 @@ Waveform::trigger()
 void
 Waveform::setView(uint32_t view)
 {
+    Q_ASSERT(view + m_trigger < data.at(0).size());
     m_view = view;
 }
 
@@ -82,16 +83,15 @@ Waveform::getChannels() const
 }
 
 std::size_t
-Waveform::getLength(std::size_t channel) const
+Waveform::getLength(std::size_t) const
 {
-    Q_ASSERT(channel < data.size());
     return m_view;
 }
 
 double
 Waveform::getX(std::size_t i) const
 {
-    return ((static_cast< double >(m_view) / -2) + i) / m_samplerate * 1000;
+    return static_cast< double >((static_cast< int >(m_view) / -2) + static_cast< int >(i)) / m_samplerate * 1000;
 }
 
 double
@@ -105,26 +105,24 @@ Waveform::getY(std::size_t i, std::size_t channel) const
 double
 Waveform::getMinX() const
 {
-    return static_cast< double >(m_view) / -2 / m_samplerate * 1000;
+    return static_cast< double >(static_cast< int >(m_view) / -2) / m_samplerate * 1000;
 }
 
 double
 Waveform::getMaxX() const
 {
-    return static_cast< double >(m_view) / 2 / m_samplerate * 1000;
+    return static_cast< double >(static_cast< int >(m_view) / 2) / m_samplerate * 1000;
 }
 
 double
-Waveform::getMinY(std::size_t channel) const
+Waveform::getMinY(std::size_t) const
 {
-    Q_UNUSED(channel);
     return -2;
 }
 
 double
-Waveform::getMaxY(std::size_t channel) const
+Waveform::getMaxY(std::size_t) const
 {
-    Q_UNUSED(channel);
     return 2;
 }
 

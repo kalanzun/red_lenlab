@@ -196,6 +196,13 @@ LoggerForm::save()
 }
 
 void
+LoggerForm::saveImage()
+{
+    QwtPlotRenderer renderer;
+    renderer.exportTo(ui->plot, "logger.pdf"); // it asks for the filename
+}
+
+void
 LoggerForm::on_clearButton_clicked()
 {
     m_voltmeter->clear();
@@ -263,13 +270,6 @@ LoggerForm::on_intervalComboBox_activated(int index)
 {
     static uint32_t const interval[] = {100, 200, 500, 1000, 2000, 5000};
     m_voltmeter->setInterval(interval[index]);
-}
-
-void
-LoggerForm::saveImage()
-{
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "Logger_Graph");
 }
 
 void

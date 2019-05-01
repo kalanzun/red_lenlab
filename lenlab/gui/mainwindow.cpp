@@ -145,6 +145,10 @@ MainWindow::on_actionSaveImage_triggered()
 
     if (index == 0)
         ui->loggerTab->saveImage();
+    else if (index == 1)
+        ui->oscilloscopeTab->saveImage();
+    else if (index == 2)
+        ui->FrequencyTab->saveImage();
 }
 
 void
@@ -154,6 +158,10 @@ MainWindow::on_actionSaveData_triggered()
 
     if (index == 0)
         ui->loggerTab->save();
+    else if (index == 1)
+        ui->oscilloscopeTab->save();
+    else if (index == 2)
+        ui->FrequencyTab->save();
 }
 
 void

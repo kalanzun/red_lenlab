@@ -176,6 +176,13 @@ OscilloscopeForm::save()
 }
 
 void
+OscilloscopeForm::saveImage()
+{
+    QwtPlotRenderer renderer;
+    renderer.exportTo(ui->plot, "oszilloskop.pdf"); // it asks for the filename
+}
+
+void
 OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
 {
     double timerange = 0.5 * (1<<index);

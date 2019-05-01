@@ -53,8 +53,8 @@ public:
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab * lenlab);
 
-    void saveImage();
     void save();
+    void saveImage();
 
 private:
     QwtPlotGrid * newGrid();
