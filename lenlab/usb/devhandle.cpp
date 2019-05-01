@@ -19,14 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "devhandle.h"
-#include "usberror.h"
+#include "usbexception.h"
 
 using namespace usb::resource;
 
 DevHandle::DevHandle(libusb_device *dev)
 {
     auto err = libusb_open(dev, &dev_handle);
-    if (err) throw UsbErrorMessage(libusb_strerror(static_cast<libusb_error>(err)));
+    if (err) throw USBException(libusb_strerror(static_cast<libusb_error>(err)));
 }
 
 DevHandle::~DevHandle()

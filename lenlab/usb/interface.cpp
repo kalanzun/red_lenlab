@@ -19,14 +19,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "interface.h"
-#include "usberror.h"
+#include "usbexception.h"
 
 using namespace usb::resource;
 
-Interface::Interface(libusb_device_handle *dev_handle) : dev_handle(dev_handle)
+Interface::Interface(libusb_device_handle *dev_handle)
+    : dev_handle(dev_handle)
 {
     auto err = libusb_claim_interface(dev_handle, 0);
-    if (err) throw UsbErrorMessage(libusb_strerror(static_cast<libusb_error>(err)));
+    if (err) throw USBException(libusb_strerror(static_cast<libusb_error>(err)));
 }
 
 Interface::~Interface()

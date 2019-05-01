@@ -20,11 +20,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "bus.h"
 #include "devicelist.h"
-#include "usberror.h"
 
 using namespace usb;
 
-Bus::Bus() : context()
+Bus::Bus()
+    : context()
 {
 
 }
@@ -44,5 +44,5 @@ Bus::query(uint16_t vid, uint16_t pid)
         }
     }
 
-    throw NotFound();
+    return nullptr;
 }

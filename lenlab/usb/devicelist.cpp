@@ -19,11 +19,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "devicelist.h"
-#include "usberror.h"
+#include "usbexception.h"
 
 using namespace usb::resource;
 
-DeviceListIterator::DeviceListIterator(libusb_device **list, int i) : list(list), i(i) {}
+DeviceListIterator::DeviceListIterator(libusb_device **list, int i)
+    : list(list)
+    , i(i)
+{
+
+}
 
 bool
 DeviceListIterator::operator !=(DeviceListIterator const &other)
@@ -46,7 +51,7 @@ DeviceListIterator::operator *()
 DeviceList::DeviceList()
 {
     auto err = libusb_get_device_list(nullptr, &list);
-    if (err < 0) throw UsbErrorMessage(libusb_strerror(static_cast<libusb_error>(err)));
+    if (err < 0) throw USBException(libusb_strerror(static_cast<libusb_error>(err)));
     count = static_cast<int>(err);
 }
 

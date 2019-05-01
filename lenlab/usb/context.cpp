@@ -19,14 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "context.h"
-#include "usberror.h"
+#include "usbexception.h"
 
 using namespace usb::resource;
 
 Context::Context()
 {
     auto err = libusb_init(&ctx);
-    if (err) throw UsbErrorMessage(libusb_strerror(static_cast<libusb_error>(err)));
+    if (err) throw USBException(libusb_strerror(static_cast<libusb_error>(err)));
 }
 
 Context::~Context()

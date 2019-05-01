@@ -35,7 +35,7 @@ SOURCES += \
     transfer.cpp \
     bus.cpp \
     packet.cpp \
-    usberror.cpp
+    usbexception.cpp
 
 HEADERS += \
     active.h \
@@ -51,7 +51,7 @@ HEADERS += \
     transfer.h \
     bus.h \
     packet.h \
-    usberror.h
+    usbexception.h
 
 unix {
     target.path = /usr/lib

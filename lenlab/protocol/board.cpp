@@ -1,6 +1,6 @@
 #include "board.h"
 
-#include "usb/usberror.h"
+#include "usb/usbexception.h"
 
 #include "lenlab_version.h"
 
@@ -30,19 +30,21 @@ Board::lookForBoard(int boottime)
 
     try {
         mDevice = mBus.query(LENLAB_VID, LENLAB_PID);
-        connect(mDevice.get(), &usb::Device::reply,
-                this, &Board::on_reply);
-        connect(mDevice.get(), &usb::Device::error,
-                this, &Board::on_error);
-        connect(mDevice.get(), &usb::Device::destroyed,
-                this, &Board::on_destroyed);
-        emit log("Lenlab-Board gefunden.");
-        // wait for the board to boot, it just got power
-        mBootTimer.start(boottime);
-    } catch (usb::NotFound const & e) {
-        mPollTimer.start(mPollTime);
-    } catch (usb::UsbErrorMessage const & e) {
-        emit error(e.getMsg());
+        if (mDevice) {
+            connect(mDevice.get(), &usb::Device::reply,
+                    this, &Board::on_reply);
+            connect(mDevice.get(), &usb::Device::error,
+                    this, &Board::on_error);
+            connect(mDevice.get(), &usb::Device::destroyed,
+                    this, &Board::on_destroyed);
+            emit log("Lenlab-Board gefunden.");
+            // wait for the board to boot, it just got power
+            mBootTimer.start(boottime);
+        } else {
+            mPollTimer.start(mPollTime);
+        }
+    } catch (usb::USBException const & e) {
+        emit error(e.msg());
         mPollTimer.start(mErrorTime);
     }
 }
@@ -173,7 +175,7 @@ Board::on_watchdog_timeout()
 }
 
 void
-Board::on_init(pTask const & task)
+Board::on_init(pTask const &)
 {
     pMessage cmd(new Message());
     cmd->setCommand(::getName);
@@ -185,7 +187,7 @@ Board::on_init(pTask const & task)
 }
 
 void
-Board::on_name(pTask const & task)
+Board::on_name(pTask const &)
 {
     pMessage cmd(new Message());
     cmd->setCommand(::getVersion);
