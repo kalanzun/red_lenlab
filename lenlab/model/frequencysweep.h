@@ -39,9 +39,7 @@ class Frequencysweep : public Component
     typedef Component super;
 
     static int const m_channels = 2;
-
-    typedef std::array< std::array < double, 10080 >, m_channels > Waveform;
-    typedef QSharedPointer< Waveform > pWaveform;
+    static int const m_uint16_offset = 6;
 
     static int const m_task_delay = 10;
     static int const m_task_timeout = 100;
@@ -55,6 +53,9 @@ class Frequencysweep : public Component
     QTimer stepTimer;
 
 public:
+    typedef std::array< std::array < double, 10080 >, m_channels > OscilloscopeData;
+    typedef QSharedPointer< OscilloscopeData > pOscilloscopeData;
+
     explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator);
     Frequencysweep(Frequencysweep const &) = delete;
 
@@ -71,14 +72,14 @@ public:
     void save(const QString &fileName);
 
 signals:
-    void calculate(pWaveform);
+    void calculate(pOscilloscopeData);
 
 private slots:
     void on_sine();
     void on_step();
     void on_succeeded(protocol::pTask const &);
     void on_failed(protocol::pTask const &);
-    void on_calculate(pWaveform);
+    void on_calculate(pOscilloscopeData);
 };
 
 } // namespace model

@@ -30,6 +30,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace model {
 
+static int p_oscilloscope_data_type_id = qRegisterMetaType<Frequencysweep::pOscilloscopeData>("pOscilloscopeData");
+
 Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator)
     : Component(lenlab, board)
     , m_signalgenerator(signalgenerator)
@@ -71,6 +73,8 @@ Frequencysweep::getSeries() const
 void
 Frequencysweep::start()
 {
+    //qDebug() << "Frequencysweep::start";
+
     super::start();
 
     if (m_signalgenerator.active()) m_signalgenerator.stop();
@@ -89,6 +93,8 @@ Frequencysweep::start()
 void
 Frequencysweep::on_sine()
 {
+    //qDebug() << "Frequencysweep::on_sine";
+
     if (!mActive) return;
 
     stepTimer.start(); // wait a little for the system to settle
@@ -97,6 +103,8 @@ Frequencysweep::on_sine()
 void
 Frequencysweep::on_step()
 {
+    //qDebug() << "Frequencysweep:on_step";
+
     if (!mActive) return;
 
     if (!mBoard.isOpen()) {
@@ -138,21 +146,23 @@ Frequencysweep::on_step()
 void
 Frequencysweep::on_succeeded(protocol::pTask const & task)
 {
+    //qDebug() << "Frequencysweep::on_succeeded";
+
     if (!mActive) return;
 
     std::array< std::size_t, m_channels > index = {0};
-    pWaveform waveform(new Waveform());
+    pOscilloscopeData waveform(new OscilloscopeData());
 
     for (auto reply: task->getReplies()) {
-        uint16_t *data = reply->getUInt16Buffer();
+        uint16_t *data = reply->getUInt16Buffer() + m_uint16_offset;
 
-        uint16_t channel = data[0];//reply->getHead()[2];
+        std::size_t channel = reply->getHead()[2];
         //uint8_t count = buffer[2];
         //qDebug() << "receive" << count << channel << last_package;
 
         Q_ASSERT(channel < m_channels);
 
-        for (uint32_t i = 1; i < 500; ++i) {
+        for (std::size_t i = 0; i < reply->getUInt16BufferLength() - m_uint16_offset; ++i) {
             Q_ASSERT(index[channel] < waveform->at(channel).size());
             waveform->at(channel).at(index[channel]) = (static_cast< double >(data[i] >> 2) / 1024.0 - 0.5) * 3.3;
             ++index[channel];
@@ -163,9 +173,9 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
 }
 
 void
-Frequencysweep::on_calculate(pWaveform waveform)
+Frequencysweep::on_calculate(pOscilloscopeData waveform)
 {
-    //qDebug("on_calculate");
+    //qDebug() << "Frequencysweep::on_calculate";
 
     if (!mActive) return;
 
