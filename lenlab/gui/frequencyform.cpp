@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "qwt_text.h"
 #include "qwt_plot_renderer.h"
 #include "qwt_scale_engine.h"
-#include <QDebug>
+//#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -34,7 +34,6 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::FrequencyForm)
 {
-    qDebug() << "FrequencyForm";
     ui->setupUi(this);
 
     ui->plot->enableAxis(QwtPlot::yRight);
@@ -70,7 +69,6 @@ FrequencyForm::FrequencyForm(QWidget * parent)
 
 FrequencyForm::~FrequencyForm()
 {
-    qDebug() << "~FrequencyForm";
     delete ui;
 }
 
@@ -87,9 +85,9 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     m_frequencysweep = &lenlab->frequencysweep;
 
     connect(m_frequencysweep, &model::Frequencysweep::seriesChanged,
-            this, &FrequencyForm::on_series_changed);
+            this, &FrequencyForm::seriesChanged);
     connect(m_frequencysweep, &model::Frequencysweep::seriesUpdated,
-            this, &FrequencyForm::on_series_updated);
+            this, &FrequencyForm::seriesUpdated);
 }
 
 QwtPlotCurve *
@@ -156,19 +154,19 @@ FrequencyForm::save()
     try {
         m_frequencysweep->save(fileName);
     }
-    catch (std::exception) {
+    catch (std::exception const &) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
     }
 }
 
 void
-FrequencyForm::on_series_updated()
+FrequencyForm::seriesUpdated()
 {
     ui->plot->replot();
 }
 
 void
-FrequencyForm::on_series_changed(model::pSeries const & series)
+FrequencyForm::seriesChanged(model::pSeries const & series)
 {
     m_curves[0]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
     m_curves[1]->setSamples(new PointVectorSeriesData(series, 2)); // acquires ownership

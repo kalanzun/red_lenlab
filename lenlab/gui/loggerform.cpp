@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "qwt_plot_renderer.h"
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QDebug>
+//#include <QDebug>
 #include <QPen>
 #include <QColor>
 
@@ -36,7 +36,6 @@ LoggerForm::LoggerForm(QWidget * parent) :
     QWidget(parent),
     ui(new Ui::LoggerForm)
 {
-    qDebug() << "LoggerForm";
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
@@ -61,7 +60,6 @@ LoggerForm::LoggerForm(QWidget * parent) :
 
 LoggerForm::~LoggerForm()
 {
-    qDebug() << "~LoggerForm";
     delete ui;
 }
 
@@ -117,15 +115,15 @@ LoggerForm::setModel(model::Lenlab * lenlab)
     seriesChanged(m_voltmeter->getSeries());
 
     connect(m_voltmeter, &model::Voltmeter::measurementDataChanged,
-            this, &LoggerForm::on_measurementDataChanged);
+            this, &LoggerForm::measurementDataChanged);
     connect(m_voltmeter, &model::Voltmeter::unsavedDataChanged,
-            this, &LoggerForm::on_unsavedDataChanged);
+            this, &LoggerForm::unsavedDataChanged);
     connect(m_voltmeter, &model::Voltmeter::autoSaveChanged,
-            this, &LoggerForm::on_autoSaveChanged);
+            this, &LoggerForm::autoSaveChanged);
     connect(m_voltmeter, &model::Voltmeter::fileNameChanged,
-            this, &LoggerForm::on_fileNameChanged);
+            this, &LoggerForm::fileNameChanged);
     connect(m_voltmeter, &model::Voltmeter::channelsChanged,
-            this, &LoggerForm::on_channelsChanged);
+            this, &LoggerForm::channelsChanged);
 }
 
 void
@@ -192,7 +190,7 @@ LoggerForm::save()
     try {
         m_voltmeter->save(fileName);
     }
-    catch (std::exception) {
+    catch (std::exception const &) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
     }
 }
@@ -213,7 +211,7 @@ LoggerForm::on_autoSaveCheckBox_stateChanged(int state)
 }
 
 void
-LoggerForm::on_measurementDataChanged(bool measurementData)
+LoggerForm::measurementDataChanged(bool measurementData)
 {
     if (measurementData) {
         ui->intervalComboBox->setEnabled(false);
@@ -224,13 +222,13 @@ LoggerForm::on_measurementDataChanged(bool measurementData)
 }
 
 void
-LoggerForm::on_unsavedDataChanged(bool unsavedData)
+LoggerForm::unsavedDataChanged(bool unsavedData)
 {
     Q_UNUSED(unsavedData);
 }
 
 void
-LoggerForm::on_autoSaveChanged(bool autoSave)
+LoggerForm::autoSaveChanged(bool autoSave)
 {
     if (autoSave && ui->autoSaveCheckBox->checkState() == Qt::Unchecked)
         ui->autoSaveCheckBox->setCheckState(Qt::Checked);
@@ -239,7 +237,7 @@ LoggerForm::on_autoSaveChanged(bool autoSave)
 }
 
 void
-LoggerForm::on_fileNameChanged(const QString &fileName)
+LoggerForm::fileNameChanged(const QString &fileName)
 {
     ui->autoSaveEdit->setText(fileName);
     if (fileName.isEmpty()) {
@@ -253,7 +251,7 @@ LoggerForm::on_fileNameChanged(const QString &fileName)
 }
 
 void
-LoggerForm::on_channelsChanged(const std::bitset<4> &channels)
+LoggerForm::channelsChanged(const std::bitset<4> &channels)
 {
     for (std::size_t i = 0; i < m_curves.size(); ++i)
         m_curves[i]->setVisible(channels[i]);

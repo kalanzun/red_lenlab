@@ -171,7 +171,7 @@ Voltmeter::start()
 
     super::start();
 
-    qDebug("start");
+    //qDebug("start");
 
     // TODO interval locking
     m_loggerseries->setInterval(mInterval);

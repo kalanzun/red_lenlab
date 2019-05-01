@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "config.h"
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QDebug>
+//#include <QDebug>
 
 namespace gui {
 
@@ -41,7 +41,6 @@ MainWindow::MainWindow(QWidget * parent)
 
 MainWindow::~MainWindow()
 {
-    qDebug("~MainWindow");
     delete ui;
 }
 

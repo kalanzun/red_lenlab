@@ -61,8 +61,8 @@ private slots:
     void on_secondBox_activated(int index);
     void on_secondSlider_valueChanged(int index);
 
-    void on_activeChanged(bool active);
-    void on_lockedChanged(bool locked);
+    void activeChanged(bool active);
+    void lockedChanged(bool locked);
 };
 
 } // namespace gui

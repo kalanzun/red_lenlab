@@ -75,11 +75,11 @@ private slots:
     void seriesUpdated();
     void seriesChanged(model::pSeries const &);
 
-    void on_measurementDataChanged(bool);
-    void on_unsavedDataChanged(bool);
-    void on_autoSaveChanged(bool);
-    void on_fileNameChanged(const QString &);
-    void on_channelsChanged(const std::bitset<4> &);
+    void measurementDataChanged(bool);
+    void unsavedDataChanged(bool);
+    void autoSaveChanged(bool);
+    void fileNameChanged(const QString &);
+    void channelsChanged(const std::bitset<4> &);
 };
 
 

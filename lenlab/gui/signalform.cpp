@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "signalform.h"
 #include "ui_signalform.h"
-#include <QDebug>
+//#include <QDebug>
 
 namespace gui {
 
@@ -28,7 +28,6 @@ SignalForm::SignalForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::SignalForm)
 {
-    //qDebug() << "SignalForm";
     ui->setupUi(this);
 
     //setUIConfiguration(false, false, false);
@@ -36,7 +35,6 @@ SignalForm::SignalForm(QWidget * parent)
 
 SignalForm::~SignalForm()
 {
-    //qDebug() << "~SignalForm";
     delete ui;
 }
 
@@ -53,9 +51,9 @@ SignalForm::setModel(model::Lenlab * lenlab)
     m_signalgenerator = &lenlab->signalgenerator;
 
     connect(m_signalgenerator, &model::Signalgenerator::activeChanged,
-            this, &SignalForm::on_activeChanged);
+            this, &SignalForm::activeChanged);
     connect(m_signalgenerator, &model::Signalgenerator::lockedChanged,
-            this, &SignalForm::on_lockedChanged);
+            this, &SignalForm::lockedChanged);
 
     ui->signalTypeBox->insertItem(0, "Aus");
     ui->signalTypeBox->insertItem(1, "Sinus");
@@ -142,7 +140,7 @@ SignalForm::on_signalTypeBox_activated(int index)
 }
 
 void
-SignalForm::on_activeChanged(bool active)
+SignalForm::activeChanged(bool active)
 {
     if (!active && m_active) {
         // reset
@@ -152,7 +150,7 @@ SignalForm::on_activeChanged(bool active)
 }
 
 void
-SignalForm::on_lockedChanged(bool locked)
+SignalForm::lockedChanged(bool locked)
 {
     if (locked) {
         ui->signalTypeBox->setCurrentIndex(0); // does not trigger activated

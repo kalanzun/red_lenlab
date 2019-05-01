@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "pointvectorseriesdata.h"
 #include "qwt_text.h"
 #include "qwt_plot_renderer.h"
-#include <QDebug>
+//#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -33,7 +33,6 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::OscilloscopeForm)
 {
-    qDebug() << "OscilloscopeForm";
     ui->setupUi(this);
 
     QwtText x_label("Zeit [ms]");
@@ -60,7 +59,6 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
 
 OscilloscopeForm::~OscilloscopeForm()
 {
-    qDebug() << "~OscilloscopeForm";
     delete ui;
 }
 
@@ -79,7 +77,7 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     ui->samplerateBox->insertItems(0, m_oscilloscope->samplerateIndex.labels);
 
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
-            this, &OscilloscopeForm::on_series_changed);
+            this, &OscilloscopeForm::seriesChanged);
 }
 
 QwtPlotCurve *
@@ -133,7 +131,7 @@ OscilloscopeForm::on_stopButton_clicked()
 }
 
 void
-OscilloscopeForm::on_series_changed(model::pSeries const & series)
+OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
     for (unsigned int i = 0; i < m_curves.size(); ++i) {
         m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
@@ -172,7 +170,7 @@ OscilloscopeForm::save()
     try {
         m_oscilloscope->save(fileName);
     }
-    catch (std::exception) {
+    catch (std::exception const &) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
     }
 }
