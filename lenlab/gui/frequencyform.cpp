@@ -170,8 +170,8 @@ FrequencyForm::on_series_updated()
 void
 FrequencyForm::on_series_changed(model::pSeries const & series)
 {
-    m_curves[0]->setSamples(new PointVectorSeriesData(series, 0)); // acquires ownership
-    m_curves[1]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
+    m_curves[0]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
+    m_curves[1]->setSamples(new PointVectorSeriesData(series, 2)); // acquires ownership
 }
 
 } // namespace gui

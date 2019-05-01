@@ -169,6 +169,9 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
         }
     }
 
+    Q_ASSERT(index[0] == waveform->at(0).size());
+    Q_ASSERT(index[0] == waveform->at(1).size());
+
     emit calculate(waveform);
 }
 
@@ -204,20 +207,21 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
 
     for (std::size_t i = 0; i < waveform->at(0).size(); ++i) {
         //x = 2 * pi * f * 1e-6 * (1<<samplerate) * ((double) i - (waveform->at(0).size() / 2));
-        x = 2 * pi * f * 1e-6 * static_cast< double >(i - (waveform->at(0).size() / 2));
+        x = 2 * pi * f * 1e-6 * static_cast< double >(i);
         y = std::sin(x) + j * std::cos(x);
-        sum0 += waveform->at(0).at(i) * y;
-        sum1 += waveform->at(1).at(i) * y;
+        sum0 += y * waveform->at(0).at(i);
+        sum1 += y * waveform->at(1).at(i);
     }
 
     std::complex<double> transfer_fct = sum1 / sum0;
+
     value = 20.0 * std::log10(std::abs(transfer_fct));
     angle = std::arg(transfer_fct) / pi * 180;
 
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency" << index << f;
+    //qDebug() << "frequency" << index << f;
 
     m_current->append(0, f);
     m_current->append(1, value);

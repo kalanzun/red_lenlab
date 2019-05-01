@@ -334,7 +334,7 @@ void Signalgenerator::on_set_sine()
 
     // TODO try
 
-    qDebug() << "Signalgenerator::on_set_sine";
+    //qDebug() << "Signalgenerator::on_set_sine";
 
     auto task = mBoard.startTask(cmd, m_task_timeout);
     connect(task.data(), &protocol::Task::succeeded,
@@ -371,7 +371,7 @@ void Signalgenerator::on_stop()
 
     // TODO try
 
-    qDebug() << "Signalgenerator::on_stop";
+    //qDebug() << "Signalgenerator::on_stop";
 
     auto task = mBoard.startTask(cmd, m_task_timeout);
     connect(task.data(), &protocol::Task::succeeded,

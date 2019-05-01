@@ -111,8 +111,8 @@ Oscilloscope::on_start()
 
     protocol::pMessage cmd(new protocol::Message);
     cmd->setCommand(::startTrigger);
-    //cmd->setCommand(::startTriggerLinearTestData);
     cmd->setUInt32Vector(args);
+    //cmd->setCommand(::startTriggerLinearTestData);
 
     // TODO try
 

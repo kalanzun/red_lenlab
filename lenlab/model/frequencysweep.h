@@ -42,7 +42,7 @@ class Frequencysweep : public Component
     static int const m_uint16_offset = 6;
 
     static int const m_task_delay = 10;
-    static int const m_task_timeout = 100;
+    static int const m_task_timeout = 200;
 
     Signalgenerator & m_signalgenerator;
     QSharedPointer<FrequencySeries> m_current;
@@ -53,7 +53,7 @@ class Frequencysweep : public Component
     QTimer stepTimer;
 
 public:
-    typedef std::array< std::array < double, 10080 >, m_channels > OscilloscopeData;
+    typedef std::array< std::array < double, 5040 >, m_channels > OscilloscopeData;
     typedef QSharedPointer< OscilloscopeData > pOscilloscopeData;
 
     explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator);
