@@ -193,7 +193,7 @@ Oscilloscope::save(const QString &fileName)
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
 
-    for (uint32_t i = 0; i < waveform->getLength(0); ++i) {
+    for (std::size_t i = 0; i < waveform->getLength(0); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
 
