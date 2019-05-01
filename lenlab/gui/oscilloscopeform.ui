@@ -77,11 +77,11 @@
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">#ch3CheckBox {
+         <string notr="true">#ch4CheckBox {
 	color: #edd400;
 	font-weight: bold;
 }
-#ch2CheckBox {
+#ch3CheckBox {
 	color: #73d216;
 	font-weight: bold;
 }
@@ -89,7 +89,7 @@
 	color: #3465a4;
 	font-weight: bold;
 }
-#ch4CheckBox {
+#ch2CheckBox {
 	color: #cc0000;
 	font-weight: bold;
 }</string>

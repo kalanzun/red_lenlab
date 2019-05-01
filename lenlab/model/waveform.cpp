@@ -82,7 +82,7 @@ Waveform::getChannels() const
 }
 
 std::size_t
-Waveform::getLength(uint32_t channel) const
+Waveform::getLength(std::size_t channel) const
 {
     Q_ASSERT(channel < data.size());
     return m_view;

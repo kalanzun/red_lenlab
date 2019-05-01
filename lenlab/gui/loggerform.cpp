@@ -51,10 +51,10 @@ LoggerForm::LoggerForm(QWidget * parent) :
     y_label.setFont(y_font);
     ui->plot->setAxisTitle(0, y_label);
 
-    m_curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
+    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
     m_curves[1] = newCurve(QColor("#8ae234"), false); // green 0
-    m_curves[2] = newCurve(QColor("#729fcf"), false); // sky blue 0
-    m_curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+    m_curves[2] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+    m_curves[3] = newCurve(QColor("#fce94f"), false); // butter 0
 
     newGrid();
 }

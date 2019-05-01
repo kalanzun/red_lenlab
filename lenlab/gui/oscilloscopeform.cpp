@@ -51,9 +51,9 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     ui->timerangeBox->setCurrentIndex(3);
 
     m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    m_curves[1] = newCurve(QColor("#8ae234"), true); // green 0
-    //m_curves[0] = newCurve(QColor("#fce94f"), true); // butter 0
-    //m_curves[3] = newCurve(QColor("#ef2929"), false); // scarlet red 0
+    //m_curves[0] = newCurve(QColor("#8ae234"), true); // green 0
+    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
+    //m_curves[1] = newCurve(QColor("#fce94f"), true); // butter 0
 
     newGrid();
 }

@@ -125,7 +125,7 @@
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">#ch1CheckBox {
+         <string notr="true">#ch4CheckBox {
 	color: #edd400;
 	font-weight: bold;
 }
@@ -133,11 +133,11 @@
 	color: #73d216;
 	font-weight: bold;
 }
-#ch3CheckBox {
+#ch1CheckBox {
 	color: #3465a4;
 	font-weight: bold;
 }
-#ch4CheckBox {
+#ch3CheckBox {
 	color: #cc0000;
 	font-weight: bold;
 }</string>
@@ -155,7 +155,7 @@
            <item row="0" column="1">
             <widget class="QCheckBox" name="ch3CheckBox">
              <property name="text">
-              <string>3 (PD2)</string>
+              <string>3 (PD1)</string>
              </property>
             </widget>
            </item>
@@ -169,7 +169,7 @@
            <item row="1" column="0">
             <widget class="QCheckBox" name="ch2CheckBox">
              <property name="text">
-              <string>2 (PD1)</string>
+              <string>2 (PD2)</string>
              </property>
             </widget>
            </item>

@@ -254,6 +254,8 @@ Voltmeter::clear()
 
     m_loggerseries.reset(new Loggerseries);
     emit seriesChanged(m_loggerseries);
+
+    setMeasurementData(false);
 }
 
 void

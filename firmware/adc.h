@@ -83,8 +83,8 @@ inline void
 ConfigureADC0(tADC *self)
 {
     self->base = ADC0_BASE;
-    self->channel = ADC_CTL_CH7;
-    self->channel1 = ADC_CTL_CH5;
+    self->channel = ADC_CTL_CH7; // Pin PD0
+    self->channel1 = ADC_CTL_CH5; // Pin PD2
     self->gpio_base = GPIO_PORTD_BASE;
     self->gpio_pin = GPIO_PIN_0;
 
@@ -96,8 +96,8 @@ inline void
 ConfigureADC1(tADC *self)
 {
     self->base = ADC1_BASE;
-    self->channel = ADC_CTL_CH6;
-    self->channel1 = ADC_CTL_CH4;
+    self->channel = ADC_CTL_CH6; // Pin PD1
+    self->channel1 = ADC_CTL_CH4; // Pin PD3
     self->gpio_base = GPIO_PORTD_BASE;
     self->gpio_pin = GPIO_PIN_1;
 
