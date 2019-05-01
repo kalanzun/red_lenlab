@@ -85,15 +85,17 @@ public:
     IndexParameter const & getFrequencyIndex() const;
     IndexParameter const & getSecondIndex() const;
 
-    void start();
-    void stop();
+    virtual void start();
+    virtual void stop();
+    virtual void reset();
 
     void setSine();
 
 signals:
     void lockedChanged(bool locked);
 
-    void sine();
+    void succeeded(protocol::pTask const &);
+    void failed(protocol::pTask const &);
 
 private slots:
     void on_set_sine();

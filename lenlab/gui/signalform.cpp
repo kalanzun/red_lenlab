@@ -52,6 +52,8 @@ SignalForm::setModel(model::Lenlab * lenlab)
     m_lenlab = lenlab;
     m_signalgenerator = &lenlab->signalgenerator;
 
+    connect(m_signalgenerator, &model::Signalgenerator::activeChanged,
+            this, &SignalForm::on_activeChanged);
     connect(m_signalgenerator, &model::Signalgenerator::lockedChanged,
             this, &SignalForm::on_lockedChanged);
 
@@ -119,23 +121,33 @@ SignalForm::on_signalTypeBox_activated(int index)
             ui->signalTypeBox->setCurrentIndex(0);
             m_active = 0;
         }
-        else {
+        else if (!m_active){
             m_signalgenerator->setAmplitude(static_cast<uint32_t>(ui->amplitudeBox->currentIndex()));
             m_signalgenerator->setFrequency(static_cast<uint32_t>(ui->frequencyBox->currentIndex()));
             m_signalgenerator->setSecond(static_cast<uint32_t>(ui->secondBox->currentIndex()));
-            m_signalgenerator->start();
             m_active = 1;
+            m_signalgenerator->start();
             //setUIConfiguration(true, true, true);
         }
     }
     else {
         if (m_signalgenerator->locked()) {
         }
-        else {
-            m_signalgenerator->stop();
+        else if (m_active) {
             m_active = 0;
+            m_signalgenerator->stop();
             //setUIConfiguration(false, false, false);
         }
+    }
+}
+
+void
+SignalForm::on_activeChanged(bool active)
+{
+    if (!active && m_active) {
+        // reset
+        ui->signalTypeBox->setCurrentIndex(0); // does not trigger activated
+        m_active = 0;
     }
 }
 

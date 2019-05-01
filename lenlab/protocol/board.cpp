@@ -68,10 +68,13 @@ Board::startTask(pTask const & task)
     if (!mDevice) {
         task->setError("Device not connected");
         emit task->failed(task);
+        return;
     }
+
     if (mTask) {
         task->setError("Device busy");
         emit task->failed(task);
+        return;
     }
 
     mTask = task;
@@ -145,6 +148,7 @@ Board::on_error(const QString & message)
 void
 Board::on_destroyed()
 {
+    emit log("Verbindung getrennt.");
     mPollTimer.start(mErrorTime);
 }
 

@@ -61,6 +61,8 @@ public:
     virtual void start();
     virtual void stop();
 
+    virtual void reset();
+
 signals:
     void activeChanged(bool);
 

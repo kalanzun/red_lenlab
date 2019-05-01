@@ -201,6 +201,12 @@ Voltmeter::stop()
     mBoard.startTask(task);
 }
 
+void
+Voltmeter::reset()
+{
+    super::reset();
+}
+
 /*
 void
 Voltmeter::receive(const usb::pMessage &reply)
@@ -314,24 +320,6 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
     for (std::size_t i = 0; i < reply->getUInt32BufferLength(); ++i)
         m_loggerseries->append(i, static_cast< double >(buffer[i]) / VOLT);
 
-    /*
-    for (int i = 0; i < 2; i++)
-        data[i].append(buffer[i] / VOLT);
-    */
-
-    //uint32_t *buffer = (uint32_t *) reply->getBody();
-
-    //Q_ASSERT(reply->getBodyLength() == 4 * data.size());
-
-    // 4 bytes timestamp
-    //data[0].append(time_offset + (double) *buffer / MSEC);
-
-    // 4 channels, 4 bytes each
-    // old comment!
-    //for (size_t i = 1; i < data.size(); i++) {
-    //    data[i].append((double) buffer[i] / (double) reply->getBody()[0] / VOLT); // TODO Fix for new communictaion
-    //}
-
     setMeasurementData(true);
     setUnsavedData(true);
 
@@ -347,7 +335,7 @@ Voltmeter::on_autosave()
             do_save();
             setUnsavedData(false);
         }
-        catch (std::exception) {
+        catch (std::exception const &) {
             setAutoSave(false);
             qDebug("Voltmeter: Fehler beim automatischen Speichern."); // TODO error signal and include reason
         }
@@ -355,32 +343,30 @@ Voltmeter::on_autosave()
 }
 
 void
-Voltmeter::on_start(protocol::pTask const & task)
+Voltmeter::on_start(protocol::pTask const &)
 {
-    Q_UNUSED(task);
+
 }
 
 void
 Voltmeter::on_start_failed(protocol::pTask const & task)
 {
-    Q_UNUSED(task);
-
-    Q_ASSERT(false); // TODO error signal and disconnect board
+    qDebug() << task->getErrorMessage();
+    emit mLenlab.logMessage(task->getErrorMessage());
+    super::stop();
 }
 
-void Voltmeter::on_stop(protocol::pTask const & task)
+void Voltmeter::on_stop(protocol::pTask const &)
 {
-    Q_UNUSED(task);
-
     super::stop();
 }
 
 void
 Voltmeter::on_stop_failed(protocol::pTask const & task)
 {
-    Q_UNUSED(task);
-
-    Q_ASSERT(false); // TODO error signal and disconnect board
+    qDebug() << task->getErrorMessage();
+    emit mLenlab.logMessage(task->getErrorMessage());
+    super::stop();
 }
 
 } // namespace model

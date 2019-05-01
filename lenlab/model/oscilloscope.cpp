@@ -83,6 +83,13 @@ Oscilloscope::stop()
     startTimer.stop();
 }
 
+void Oscilloscope::reset()
+{
+    super::reset();
+
+    startTimer.stop();
+}
+
 void
 Oscilloscope::setSamplerate(uint32_t index)
 {
@@ -159,11 +166,9 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
 void
 Oscilloscope::on_failed(protocol::pTask const & task)
 {
-    Q_UNUSED(task);
-
-    qDebug("Oscilloscope::on_failed");
-
-    Q_ASSERT(false);
+    qDebug() << task->getErrorMessage();
+    emit mLenlab.logMessage(task->getErrorMessage());
+    mLenlab.reset();
 }
 
 double

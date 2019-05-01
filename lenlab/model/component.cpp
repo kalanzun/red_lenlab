@@ -83,4 +83,10 @@ Component::stop()
     setActive(false);
 }
 
+void
+Component::reset()
+{
+    setActive(false);
+}
+
 } // namespace model

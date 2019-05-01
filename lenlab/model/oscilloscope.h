@@ -62,6 +62,7 @@ public:
 
     virtual void start();
     virtual void stop();
+    virtual void reset();
 
     void setSamplerate(uint32_t index);
 

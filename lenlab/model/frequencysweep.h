@@ -49,6 +49,8 @@ class Frequencysweep : public Component
 
     std::size_t m_index;
     uint32_t m_samplerate;
+    int m_error_counter;
+    int m_signalgenerator_error_counter;
 
     QTimer stepTimer;
 
@@ -68,6 +70,7 @@ public:
 
     virtual void start();
     virtual void stop();
+    virtual void reset();
 
     void save(const QString &fileName);
 
@@ -75,7 +78,8 @@ signals:
     void calculate(pOscilloscopeData);
 
 private slots:
-    void on_sine();
+    void on_signalgenerator_succeeded(protocol::pTask const &);
+    void on_signalgenerator_failed(protocol::pTask const &);
     void on_step();
     void on_succeeded(protocol::pTask const &);
     void on_failed(protocol::pTask const &);

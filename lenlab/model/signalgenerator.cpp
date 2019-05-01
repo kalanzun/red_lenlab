@@ -294,10 +294,18 @@ void Signalgenerator::start()
 void Signalgenerator::stop()
 {
     Q_ASSERT_X(mActive, "Signalgenerator::stop()", "Der Signalgenerator war nicht aktiv.");
-    setActive(false);
 
     m_setSineTimer.stop();
     m_stopSignalTimer.start();
+}
+
+void Signalgenerator::reset()
+{
+    super::reset();
+
+    m_locked = false;
+    m_setSineTimer.stop();
+    m_stopSignalTimer.stop();
 }
 
 void
@@ -339,17 +347,21 @@ void Signalgenerator::on_set_sine()
 
 void Signalgenerator::on_set_sine_succeeded(protocol::pTask const & task)
 {
-    emit sine();
+    if (m_locked) emit succeeded(task);
 }
 
 void Signalgenerator::on_set_sine_failed(protocol::pTask const & task)
 {
-    Q_ASSERT(false);
+    if (m_locked) emit failed(task);
+    else {
+        emit mLenlab.logMessage(task->getErrorMessage());
+        mLenlab.reset();
+    }
 }
 
 void Signalgenerator::on_stop()
 {
-    if (mActive) return;
+    if (!mActive) return;
 
     if (!mBoard.isOpen()) {
         return;
@@ -360,9 +372,6 @@ void Signalgenerator::on_stop()
         return;
     }
 
-    protocol::pMessage cmd(new protocol::Message);
-    cmd->setCommand(::stopSignal);
-
     protocol::pTask task(new protocol::Task(::stopSignal));
     connect(task.data(), &protocol::Task::succeeded,
             this, &Signalgenerator::on_stop_succeeded);
@@ -371,14 +380,15 @@ void Signalgenerator::on_stop()
     mBoard.startTask(task);
 }
 
-void Signalgenerator::on_stop_succeeded(protocol::pTask const & task)
+void Signalgenerator::on_stop_succeeded(protocol::pTask const &)
 {
-
+    setActive(false);
 }
 
 void Signalgenerator::on_stop_failed(protocol::pTask const & task)
 {
-    Q_ASSERT(false);
+    emit mLenlab.logMessage(task->getErrorMessage());
+    mLenlab.reset();
 }
 
 } // namespace model

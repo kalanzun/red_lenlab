@@ -38,20 +38,6 @@ Lenlab::Lenlab(QObject * parent)
             this, &Lenlab::on_log);
     connect(&board, &protocol::Board::error,
             this, &Lenlab::on_error);
-    /*
-    connect(signalgenerator, SIGNAL(updated()),
-            frequencysweep, SLOT(on_updated()));
-            */
-
-    // TODO Factory
-    /*
-    connect(&manager, &protocol::Manager::error,
-            this, &Lenlab::on_error);
-    connect(&manager, &protocol::Manager::ready,
-            this, &Lenlab::on_ready);
-
-    manager.start();
-    */
 }
 
 bool
@@ -73,20 +59,21 @@ Lenlab::getActiveComponent()
     throw std::exception();
 }
 
+void Lenlab::reset()
+{
+    emit logMessage("Reset.");
+
+    voltmeter.reset();
+    signalgenerator.reset();
+    oscilloscope.reset();
+    frequencysweep.reset();
+}
+
 void
 Lenlab::lookForBoard()
 {
     board.lookForBoard();
 }
-
-/*
-bool
-Lenlab::available()
-{
-    //TODO
-    return 1;//return m_ready;
-}
-*/
 
 void
 Lenlab::on_ready()
@@ -94,12 +81,6 @@ Lenlab::on_ready()
     auto msg = QString("Lenlab-Board Version %1.%2 verbunden.").arg(board.getVersionMajor()).arg(board.getVersionMinor());
     emit logMessage(msg);
 
-    /*
-    frequencysweep->setBoard(board);
-    voltmeter->setBoard(board);
-    oscilloscope->setBoard(board);
-    //signalgenerator->setBoard(board);
-    */
 }
 
 void
@@ -112,33 +93,7 @@ void
 Lenlab::on_error(QString const & msg)
 {
     emit logMessage(msg);
+    reset();
 }
-
-/*
-QPointer<Communication>
-Lenlab::initCommunication()
-{
-    if (!current_com.isNull())
-        throw std::exception();
-
-    current_com = new Communication(handler);
-    connect(current_com, SIGNAL(destroyed(QObject *)),
-            this, SLOT(on_comDestroyed(QObject *)));
-
-    return current_com;
-}
-
-void
-Lenlab::on_comDestroyed(QObject *obj)
-{
-    Q_UNUSED(obj);
-    signalgenerator->try_to_setSine();
-    signalgenerator->try_to_stop();
-    voltmeter->try_to_start();
-    oscilloscope->try_to_start();
-    frequencysweep->try_to_start();
-}
-*/
-
 
 } // namespace model

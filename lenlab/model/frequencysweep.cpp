@@ -37,8 +37,10 @@ Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalg
     , m_signalgenerator(signalgenerator)
     , m_current(new FrequencySeries())
 {
-    connect(&m_signalgenerator, &Signalgenerator::sine,
-            this, &Frequencysweep::on_sine);
+    connect(&m_signalgenerator, &Signalgenerator::succeeded,
+            this, &Frequencysweep::on_signalgenerator_succeeded);
+    connect(&m_signalgenerator, &Signalgenerator::failed,
+            this, &Frequencysweep::on_signalgenerator_failed);
 
     stepTimer.setInterval(m_task_delay);
     stepTimer.setSingleShot(true);
@@ -87,17 +89,36 @@ Frequencysweep::start()
     m_signalgenerator.setAmplitude(14);
     m_signalgenerator.setFrequency(m_index);
     m_signalgenerator.setSecond(1);
+
+    m_signalgenerator_error_counter = 0;
     m_signalgenerator.start();
 }
 
 void
-Frequencysweep::on_sine()
+Frequencysweep::on_signalgenerator_succeeded(protocol::pTask const &)
 {
     //qDebug() << "Frequencysweep::on_sine";
 
     if (!mActive) return;
 
     stepTimer.start(); // wait a little for the system to settle
+}
+
+void
+Frequencysweep::on_signalgenerator_failed(protocol::pTask const & task)
+{
+    if (!mActive) return;
+
+
+    if (m_signalgenerator_error_counter < 3) {
+        ++m_signalgenerator_error_counter;
+        auto msg = QString("%1. Wiederhole.").arg(task->getErrorMessage());
+        emit mLenlab.logMessage(msg);
+        m_signalgenerator.setSine();
+    } else {
+        emit mLenlab.logMessage(task->getErrorMessage());
+        mLenlab.reset();
+    }
 }
 
 void
@@ -124,7 +145,7 @@ Frequencysweep::on_step()
         samplerate = 3;
     */
 
-    m_samplerate = 2;
+    m_samplerate = 0;
 
     QVector<uint32_t> args;
     args.append(m_samplerate);
@@ -135,7 +156,7 @@ Frequencysweep::on_step()
             this, &Frequencysweep::on_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Frequencysweep::on_failed);
-
+    mBoard.startTask(task);
 }
 
 void
@@ -164,10 +185,19 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
         }
     }
 
-    Q_ASSERT(index[0] == waveform->at(0).size());
-    Q_ASSERT(index[0] == waveform->at(1).size());
-
-    emit calculate(waveform);
+    if (!(index[0] == waveform->at(0).size() && index[1] == waveform->at(1).size())) {
+        if (m_error_counter < 3) {
+            emit mLenlab.logMessage("Unvollständige Daten empfangen. Wiederhole.");
+            ++m_error_counter;
+            stepTimer.start();
+        } else {
+            emit mLenlab.logMessage("Unvollständige Daten empfangen.");
+            mLenlab.reset();
+        }
+    } else {
+        m_error_counter = 0;
+        emit calculate(waveform);
+    }
 }
 
 void
@@ -183,6 +213,8 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
     ++m_index;
     if (m_index < m_current->stopIndex()) {
         m_signalgenerator.setFrequency(m_index);
+
+        m_signalgenerator_error_counter = 0;
         m_signalgenerator.setSine();
     }
     else {
@@ -225,9 +257,11 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
     emit seriesUpdated();
 }
 
-void Frequencysweep::on_failed(const protocol::pTask &)
+void Frequencysweep::on_failed(protocol::pTask const & task)
 {
-    Q_ASSERT(false);
+    qDebug() << task->getErrorMessage();
+    emit mLenlab.logMessage(task->getErrorMessage());
+    mLenlab.reset();
 }
 
 void
@@ -235,8 +269,16 @@ Frequencysweep::stop()
 {
     super::stop();
 
-    m_signalgenerator.stop();
+    // unlock first, then signalgenerator handles an error on its own
     m_signalgenerator.unlock();
+    m_signalgenerator.stop();
+}
+
+void Frequencysweep::reset()
+{
+    super::reset();
+
+    stepTimer.stop();
 }
 
 void

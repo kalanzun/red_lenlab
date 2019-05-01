@@ -277,9 +277,7 @@ LoggerForm::saveImage()
 void
 LoggerForm::seriesChanged(model::pSeries const & series)
 {
-    qDebug("LoggerForm::on_newplot");
     for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        qDebug() << i;
         m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
     }
     ui->plot->replot();
@@ -288,7 +286,6 @@ LoggerForm::seriesChanged(model::pSeries const & series)
 void
 LoggerForm::seriesUpdated()
 {
-    qDebug("LoggerForm::on_replot");
     ui->plot->replot();
 }
 

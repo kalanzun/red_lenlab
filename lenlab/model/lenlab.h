@@ -54,6 +54,8 @@ public:
     bool isActive() const;
     Component *getActiveComponent();
 
+    void reset();
+
     //bool available();
 
 signals:
