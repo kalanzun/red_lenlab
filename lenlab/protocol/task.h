@@ -17,6 +17,8 @@ class Task : public QObject
 {
     Q_OBJECT
 
+    static int const mTaskTime = 100;
+
     pMessage mCommand;
     int mTimeout;
 
@@ -27,9 +29,8 @@ class Task : public QObject
     QString mErrorString;
     bool mTimeoutError = false;
 
-
 public:
-    explicit Task(pMessage const & command, int timeout, QObject *parent = nullptr);
+    explicit Task(Command code, int timeout = mTaskTime, QObject *parent = nullptr);
     Task(Task const & other) = delete;
 
     Task & operator=(Task const & other) = delete;

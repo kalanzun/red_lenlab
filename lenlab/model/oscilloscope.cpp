@@ -109,18 +109,13 @@ Oscilloscope::on_start()
     QVector<uint32_t> args;
     args.append(samplerate + 2);
 
-    protocol::pMessage cmd(new protocol::Message);
-    cmd->setCommand(::startTrigger);
-    cmd->setUInt32Vector(args);
-    //cmd->setCommand(::startTriggerLinearTestData);
-
-    // TODO try
-
-    auto task = mBoard.startTask(cmd, m_task_timeout);
+    protocol::pTask task(new protocol::Task(::startTrigger, m_task_timeout));
+    task->getCommand()->setUInt32Vector(args);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Oscilloscope::on_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Oscilloscope::on_failed);
+    mBoard.startTask(task);
 }
 
 

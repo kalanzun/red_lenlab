@@ -26,7 +26,7 @@ Board::Board(QObject *parent)
 void
 Board::lookForBoard(int boottime)
 {
-    if (mDevice) throw AlreadyConnected();
+    Q_ASSERT(!mDevice);
 
     try {
         mDevice = mBus.query(LENLAB_VID, LENLAB_PID);
@@ -62,18 +62,22 @@ Board::isReady() const
     return mDevice && !mTask;
 }
 
-pTask const &
-Board::startTask(pMessage const & command, int timeout)
+void
+Board::startTask(pTask const & task)
 {
-    if (!mDevice) throw NotConnected();
-    if (mTask) throw Busy();
+    if (!mDevice) {
+        task->setError("Device not connected");
+        emit task->failed(task);
+    }
+    if (mTask) {
+        task->setError("Device busy");
+        emit task->failed(task);
+    }
 
-    mTask.reset(new Task(command, timeout));
+    mTask = task;
 
-    mDevice->send(command->getPacket());
-    mWatchdog.start(timeout);
-
-    return mTask;
+    mDevice->send(task->getCommand()->getPacket());
+    mWatchdog.start(task->getTimeout());
 }
 
 uint32_t
@@ -153,13 +157,12 @@ Board::on_poll_timeout()
 void
 Board::on_boot_timeout()
 {
-    pMessage cmd(new Message());
-    cmd->setCommand(::init);
-    auto init = startTask(cmd);
+    pTask init(new Task(::init));
     connect(init.data(), &Task::succeeded,
             this, &Board::on_init);
     connect(init.data(), &Task::failed,
             this, &Board::on_task_error);
+    startTask(init);
 }
 
 void
@@ -177,25 +180,23 @@ Board::on_watchdog_timeout()
 void
 Board::on_init(pTask const &)
 {
-    pMessage cmd(new Message());
-    cmd->setCommand(::getName);
-    auto name = startTask(cmd);
+    pTask name(new Task(::getName));
     connect(name.data(), &Task::succeeded,
             this, &Board::on_name);
     connect(name.data(), &Task::failed,
             this, &Board::on_task_error);
+    startTask(name);
 }
 
 void
 Board::on_name(pTask const &)
 {
-    pMessage cmd(new Message());
-    cmd->setCommand(::getVersion);
-    auto version = startTask(cmd);
+    pTask version(new Task(::getVersion));
     connect(version.data(), &Task::succeeded,
             this, &Board::on_version);
     connect(version.data(), &Task::failed,
             this, &Board::on_task_error);
+    startTask(version);
 }
 
 void

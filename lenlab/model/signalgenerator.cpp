@@ -328,19 +328,13 @@ void Signalgenerator::on_set_sine()
     args.append(static_cast<uint32_t>(std::round((1<<11) * getAmplitude(m_amplitude) / 1.65))); // amplitude
     args.append(m_second); // second
 
-    protocol::pMessage cmd(new protocol::Message);
-    cmd->setCommand(::setSignalSine);
-    cmd->setUInt32Vector(args);
-
-    // TODO try
-
-    //qDebug() << "Signalgenerator::on_set_sine";
-
-    auto task = mBoard.startTask(cmd, m_task_timeout);
+    protocol::pTask task(new protocol::Task(::setSignalSine));
+    task->getCommand()->setUInt32Vector(args);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Signalgenerator::on_set_sine_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Signalgenerator::on_set_sine_failed);
+    mBoard.startTask(task);
 }
 
 void Signalgenerator::on_set_sine_succeeded(protocol::pTask const & task)
@@ -369,15 +363,12 @@ void Signalgenerator::on_stop()
     protocol::pMessage cmd(new protocol::Message);
     cmd->setCommand(::stopSignal);
 
-    // TODO try
-
-    //qDebug() << "Signalgenerator::on_stop";
-
-    auto task = mBoard.startTask(cmd, m_task_timeout);
+    protocol::pTask task(new protocol::Task(::stopSignal));
     connect(task.data(), &protocol::Task::succeeded,
             this, &Signalgenerator::on_stop_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Signalgenerator::on_stop_failed);
+    mBoard.startTask(task);
 }
 
 void Signalgenerator::on_stop_succeeded(protocol::pTask const & task)

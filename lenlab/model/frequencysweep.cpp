@@ -129,13 +129,8 @@ Frequencysweep::on_step()
     QVector<uint32_t> args;
     args.append(m_samplerate);
 
-    protocol::pMessage cmd(new protocol::Message);
-    cmd->setCommand(::startOscilloscope);
-    cmd->setUInt32Vector(args);
-
-    // TODO try
-
-    auto task = mBoard.startTask(cmd, m_task_timeout);
+    protocol::pTask task(new protocol::Task(::startOscilloscope));
+    task->getCommand()->setUInt32Vector(args);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Frequencysweep::on_succeeded);
     connect(task.data(), &protocol::Task::failed,

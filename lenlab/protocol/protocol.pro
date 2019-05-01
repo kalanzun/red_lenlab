@@ -24,14 +24,12 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += \
     board.cpp \
     message.cpp \
-    task.cpp \
-    protocolerror.cpp
+    task.cpp
 
 HEADERS += \
     board.h \
     message.h \
-    task.h \
-    protocolerror.h
+    task.h
 
 win32 {
     CONFIG(debug, debug|release) PRE_TARGETDEPS += ../usb/debug/libusb.a

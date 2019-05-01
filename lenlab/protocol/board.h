@@ -2,7 +2,6 @@
 #define BOARD_H
 
 #include "message.h"
-#include "protocolerror.h"
 #include "task.h"
 
 #include "usb/bus.h"
@@ -23,7 +22,6 @@ class Board : public QObject
     static int const mBootTime = 1200;
     static int const mErrorTime = 3000;
     static int const mWatchdogTime = 100;
-    static int const mTaskTime = 100;
 
     QTimer mPollTimer;
     QTimer mBootTimer;
@@ -45,7 +43,7 @@ public:
 
     bool isOpen() const;
     bool isReady() const;
-    const pTask & startTask(pMessage const & command, int timeout = mTaskTime);
+    void startTask(pTask const & task);
 
     uint32_t getVersionMajor() const;
     uint32_t getVersionMinor() const;

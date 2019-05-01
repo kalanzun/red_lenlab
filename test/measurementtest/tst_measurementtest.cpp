@@ -44,12 +44,10 @@ void MeasurementTest::test_startOscilloscopeLinearTestData()
 {
     uint16_t *short_buffer;
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startOscilloscopeLinearTestData);
-
-    auto task = mBoard.startTask(cmd);
+    pTask task(new Task(::startOscilloscopeLinearTestData));
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_short_timeout));
 
     QCOMPARE(task->getSize(), 20);
@@ -75,12 +73,10 @@ void MeasurementTest::test_startTriggerLinearTestData()
 {
     int8_t *byte_buffer;
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startTriggerLinearTestData);
-
-    auto task = mBoard.startTask(cmd);
+    pTask task(new Task(::startTriggerLinearTestData));
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_short_timeout));
 
     QCOMPARE(task->getSize(), 18);

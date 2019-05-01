@@ -57,13 +57,12 @@ void ProtocolTest::test_startLogger()
     QVector<uint32_t> args;
     args.append(100);
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startLogger);
-    cmd->setUInt32Vector(args);
+    pTask task(new Task(::startLogger));
+    task->getCommand()->setUInt32Vector(args);
 
-    auto task = mBoard.startTask(cmd);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_short_timeout));
 
     QSignalSpy logger_spy(&mBoard, &Board::logger_data);
@@ -75,12 +74,10 @@ void ProtocolTest::test_startLogger()
         QVERIFY(logger_spy.wait(m_logger_timeout));
     }
 
-    pMessage stop_cmd(new Message());
-    stop_cmd->setCommand(::stopLogger);
-
-    auto stop_task = mBoard.startTask(stop_cmd);
+    pTask stop_task(new Task(::stopLogger));
     QSignalSpy stop_spy(stop_task.data(), &Task::succeeded);
     QVERIFY(stop_spy.isValid());
+    mBoard.startTask(stop_task);
     QVERIFY(stop_spy.wait(m_short_timeout));
 
     // no additional data point after stop
@@ -92,13 +89,12 @@ void ProtocolTest::test_startOscilloscope()
     QVector<uint32_t> args;
     args.append(1);
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startOscilloscope);
-    cmd->setUInt32Vector(args);
+    pTask task(new Task(::startOscilloscope));
+    task->getCommand()->setUInt32Vector(args);
 
-    auto task = mBoard.startTask(cmd);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_short_timeout));
 
     QCOMPARE(task->getSize(), 20);
@@ -109,13 +105,12 @@ void ProtocolTest::test_startTrigger()
     QVector<uint32_t> args;
     args.append(2);
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startTrigger);
-    cmd->setUInt32Vector(args);
+    pTask task(new Task(::startTrigger, m_trigger_timeout));
+    task->getCommand()->setUInt32Vector(args);
 
-    auto task = mBoard.startTask(cmd, m_trigger_timeout);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_trigger_timeout + m_short_timeout));
 
     QCOMPARE(task->getSize(), 18);

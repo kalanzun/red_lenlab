@@ -179,15 +179,13 @@ Voltmeter::start()
     QVector<uint32_t> args;
     args.append(m_loggerseries->interval());
 
-    protocol::pMessage cmd(new protocol::Message());
-    cmd->setCommand(::startLogger);
-    cmd->setUInt32Vector(args);
-
-    auto task = mBoard.startTask(cmd);
+    protocol::pTask task(new protocol::Task(::startLogger));
+    task->getCommand()->setUInt32Vector(args);
     connect(task.data(), &protocol::Task::succeeded,
             this, &Voltmeter::on_start);
     connect(task.data(), &protocol::Task::failed,
             this, &Voltmeter::on_start_failed);
+    mBoard.startTask(task);
 }
 
 void
@@ -195,14 +193,12 @@ Voltmeter::stop()
 {
     if (!mActive) return;
 
-    protocol::pMessage cmd(new protocol::Message());
-    cmd->setCommand(::stopLogger);
-
-    auto task = mBoard.startTask(cmd);
+    protocol::pTask task(new protocol::Task(::stopLogger));
     connect(task.data(), &protocol::Task::succeeded,
             this, &Voltmeter::on_stop);
     connect(task.data(), &protocol::Task::failed,
             this, &Voltmeter::on_stop_failed);
+    mBoard.startTask(task);
 }
 
 /*

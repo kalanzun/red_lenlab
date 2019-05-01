@@ -4,12 +4,12 @@ namespace protocol {
 
 static int p_task_type_id = qRegisterMetaType<pTask>("pTask");
 
-Task::Task(pMessage const & command, int timeout, QObject * parent)
+Task::Task(Command code, int timeout, QObject * parent)
     : QObject(parent)
-    , mCommand(command)
+    , mCommand(new Message())
     , mTimeout(timeout)
 {
-
+    mCommand->setCommand(code);
 }
 
 pMessage const &
