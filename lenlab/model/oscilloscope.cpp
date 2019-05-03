@@ -153,8 +153,8 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         }
     }
 
-    incoming->setView(504*17);
-    qDebug() << incoming->trigger();
+    incoming->setView(504*16); // das letzte Paket wird nie verwendet, 17 würden ausreichen
+    //qDebug() << incoming->trigger();
 
     waveform.swap(incoming);
     emit seriesChanged(incoming);
