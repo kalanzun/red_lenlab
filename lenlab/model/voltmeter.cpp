@@ -49,14 +49,14 @@ Voltmeter::Voltmeter(Lenlab &lenlab, protocol::Board &board)
 QString const &
 Voltmeter::getNameNominative() const
 {
-    static QString name("das Spannungsmessgerät");
+    static QString name("der Logger");
     return name;
 }
 
 QString const &
 Voltmeter::getNameAccusative() const
 {
-    static QString name("das Spannungsmessgerät");
+    static QString name("den Logger");
     return name;
 }
 
