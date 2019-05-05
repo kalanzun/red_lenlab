@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace gui {
 
-PointVectorSeriesData::PointVectorSeriesData(QSharedPointer<model::Series> series, uint32_t channel) :
+PointVectorSeriesData::PointVectorSeriesData(model::pSeries const & series, std::size_t channel) :
     series(series),
     channel(channel)
 {

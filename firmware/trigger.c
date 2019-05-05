@@ -140,7 +140,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
 
     data = (int8_t *) (page->buffer + OSCILLOSCOPE_OFFSET);
 
-    if (self->count == 8) {
+    if (self->count == 9) {
         self->wait = 1;
     }
 
@@ -149,7 +149,7 @@ TriggerMain(tTrigger *self, bool enable_reply)
         state0 += data[2*i] = delta(state0, buffer0[i] >> 2);
         state1 += data[2*i+1] = delta(state1, buffer1[i] >> 2);
 
-        if (self->count == 7 || self->wait || self->active) {
+        if (self->count < 9 || self->wait || self->active) {
             self->state -= self->filter[self->index];
             self->state += state0;
             self->filter[self->index] = state0;
@@ -157,16 +157,23 @@ TriggerMain(tTrigger *self, bool enable_reply)
         }
 
         // pre trigger, wait for signal to be below the trigger level
-        if (self->wait && (self->state < (8*512))) {
+        if (self->wait && (self->state < (TRIGGER_FILTER_LENGTH*512))) {
             self->wait = 0;
             self->active = 1;
         }
 
         // trigger, wait for signal to cross the trigger level
-        if (self->active && (self->state > (8*512))) {
+        if (self->active && (self->state > (TRIGGER_FILTER_LENGTH*512))) {
             self->active = 0;
             self->save = 1;
-            short_head[2] = i; // trigger value
+            if (i < 4) {
+                // trigger happened during the end of the last packet
+                ++self->post_count;
+                short_head[2] = OSCILLOSCOPE_SAMPLES - (4 - i); // trigger value
+            }
+            else {
+                short_head[2] = i - 4; // trigger value
+            }
         }
     }
 

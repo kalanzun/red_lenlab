@@ -106,6 +106,11 @@ LogSeqGroupEnable(tLogSeqGroup *self, uint32_t interval)
     // interval in ms
 
     int i;
+    uint32_t buffer[8]; // max FIFO length of SS1
+
+    // clear data FIFO
+    LogSeqGroupDataGet(self, &buffer);
+
     FOREACH_ADC LogSeqEnable(&self->log_seq[i]);
 
     ADCTimerStart(&adc_group.timer, interval * 1000); // us
@@ -137,20 +142,22 @@ ConfigureLogSeq(tLogSeq *self, tADC *adc, uint32_t sequence_int)
 {
     self->adc = adc;
 
-    self->sequence_num = 3; // shall be different from osc_seq
+    self->sequence_num = 1; // shall be different from osc_seq
     self->sequence_int = sequence_int;
     self->priority = 1; // shall be different from osc_seq
 
     ADCSequenceConfigure(self->adc->base, self->sequence_num, ADC_TRIGGER_TIMER, self->priority);
-    ADCSequenceStepConfigure(self->adc->base, self->sequence_num, 0, self->adc->channel | ADC_CTL_IE | ADC_CTL_END);
+    //ADCSequenceStepConfigure(self->adc->base, self->sequence_num, 0, self->adc->channel | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceStepConfigure(self->adc->base, self->sequence_num, 0, self->adc->channel);
+    ADCSequenceStepConfigure(self->adc->base, self->sequence_num, 1, self->adc->channel1 | ADC_CTL_IE | ADC_CTL_END);
 }
 
 
 inline void
 LogSeqGroupInit(tLogSeqGroup *self)
 {
-    ConfigureLogSeq(&self->log_seq[0], &adc_group.adc[0], INT_ADC0SS3);
-    ConfigureLogSeq(&self->log_seq[1], &adc_group.adc[1], INT_ADC1SS3);
+    ConfigureLogSeq(&self->log_seq[0], &adc_group.adc[0], INT_ADC0SS1);
+    ConfigureLogSeq(&self->log_seq[1], &adc_group.adc[1], INT_ADC1SS1);
 }
 
 

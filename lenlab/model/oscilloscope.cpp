@@ -19,35 +19,52 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "oscilloscope.h"
-#include "lenlab.h"
+
 #include "config.h"
+#include "lenlab.h"
 #include "utils.h"
+
 #include <QDebug>
 #include <QSaveFile>
 
 namespace model {
 
-Oscilloscope::Oscilloscope(Lenlab *parent) : Component(parent), samplerateIndex(3)
+Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
+    : Component(lenlab, board)
+    , waveform(new Waveform())
+    , samplerateIndex(3)
 {
     double value;
 
-    for (uint32_t i = 0; i < samplerateIndex.length; i++) {
+    for (uint32_t i = 0; i < samplerateIndex.length; ++i) {
         value = 1000.0 / (1<<(i+2));
         samplerateIndex.labels << QString("%1 kHz").arg(german_double(value));
     }
 
+    startTimer.setInterval(m_task_delay);
+    startTimer.setSingleShot(true);
+    connect(&startTimer, &QTimer::timeout,
+            this, &Oscilloscope::on_start);
 }
 
-QString
-Oscilloscope::getNameNominative()
+QString const &
+Oscilloscope::getNameNominative() const
 {
-    return "as Oszilloskop";
+    static QString name("das Oszilloskop");
+    return name;
 }
 
-QString
-Oscilloscope::getNameAccusative()
+QString const &
+Oscilloscope::getNameAccusative() const
 {
-    return "as Oszilloskop";
+    static QString name("das Oszilloskop");
+    return name;
+}
+
+pSeries
+Oscilloscope::getSeries() const
+{
+    return waveform;
 }
 
 void
@@ -55,10 +72,7 @@ Oscilloscope::start()
 {
     super::start();
 
-    qDebug() << "start";
-
-    pending = 1;
-    try_to_start();
+    startTimer.start();
 }
 
 void
@@ -66,30 +80,14 @@ Oscilloscope::stop()
 {
     super::stop();
 
-    qDebug() << "stop";
-
-    pending = 0;
+    startTimer.stop();
 }
 
-void
-Oscilloscope::try_to_start()
+void Oscilloscope::reset()
 {
-    if (pending && lenlab->available()) {
-        pending = 0;
-        restart();
-    }
-}
+    super::reset();
 
-void
-Oscilloscope::restart()
-{
-    incoming.reset(new Waveform());
-    incoming->setSamplerate(1e6/(1<<(samplerate+2)));
-    /*
-    auto transaction = board->startOscilloscopeTrigger(samplerate+2);
-    connect(transaction.data(), &protocol::Transaction::succeeded,
-            this, &Oscilloscope::on_succeeded);
-            */
+    startTimer.stop();
 }
 
 void
@@ -99,53 +97,92 @@ Oscilloscope::setSamplerate(uint32_t index)
 }
 
 void
-Oscilloscope::on_succeeded(const protocol::pMessage &reply)
+Oscilloscope::on_start()
 {
-    Q_UNUSED(reply)
-/*
-    auto transaction = qobject_cast<protocol::Transaction *>(QObject::sender());
+    if (!mActive) return;
 
-    for (auto reply: transaction->replies) {
-        uint8_t *buffer = reply->getUInt8Buffer();
+    if (!mBoard.isOpen()) {
+        return;
+    }
 
-        uint16_t state0 = *reinterpret_cast<uint16_t *>(buffer + 0);
-        uint16_t state1 = *reinterpret_cast<uint16_t *>(buffer + 2);
-        uint16_t trigger = *reinterpret_cast<uint16_t *>(buffer + 4);
+    if (!mBoard.isReady()) {
+        startTimer.start();
+        return;
+    }
+
+    incoming.reset(new Waveform());
+    incoming->setSamplerate(1e6/(1<<(samplerate+2)));
+
+    QVector<uint32_t> args;
+    args.append(samplerate + 2);
+
+    protocol::pTask task(new protocol::Task(::startTrigger, m_task_timeout));
+    task->getCommand()->setUInt32Vector(args);
+    connect(task.data(), &protocol::Task::succeeded,
+            this, &Oscilloscope::on_succeeded);
+    connect(task.data(), &protocol::Task::failed,
+            this, &Oscilloscope::on_failed);
+    mBoard.queueTask(task);
+}
+
+
+void
+Oscilloscope::on_succeeded(protocol::pTask const & task)
+{
+    for (auto reply: task->getReplies()) {
+        uint16_t * buffer = reply->getUInt16Buffer();
+
+        uint16_t trigger = buffer[0];
+        uint16_t state0 = buffer[2];
+        uint16_t state1 = buffer[3];
 
         if (trigger) {
             incoming->setTrigger(trigger);
         }
 
-        incoming->append(0, ((static_cast<double>(state0)) / 1024.0 - 0.5) * 3.3);
-        incoming->append(1, ((static_cast<double>(state1)) / 1024.0 - 0.5) * 3.3);
+        incoming->append(0, to_double(state0));
+        incoming->append(1, to_double(state1));
 
-        int8_t *data = reinterpret_cast<int8_t *>(buffer + 8);
+        int8_t * data = reinterpret_cast<int8_t *>(buffer + 6);
 
-        for (uint32_t i = 1; i < 500; ++i) {
+        for (uint32_t i = 1; i < reply->getUInt16BufferLength() - 6; ++i) {
             state0 += data[2*i];
             state1 += data[2*i+1];
-            incoming->append(0, ((static_cast<double>(state0)) / 1024.0 - 0.5) * 3.3);
-            incoming->append(1, ((static_cast<double>(state1)) / 1024.0 - 0.5) * 3.3);
+            incoming->append(0, to_double(state0));
+            incoming->append(1, to_double(state1));
         }
     }
 
-    incoming->setView(8000);
+    incoming->setView(504*16); // das letzte Paket wird nie verwendet, 17 würden ausreichen
+    //qDebug() << incoming->trigger();
 
     waveform.swap(incoming);
-    emit replot();
-    */
+    emit seriesChanged(incoming);
 
-    if (m_active) {
-        pending = 1;
-        try_to_start();
+    if (mActive) {
+        startTimer.start();
     }
+}
+
+void
+Oscilloscope::on_failed(protocol::pTask const & task)
+{
+    qDebug() << task->getErrorMessage();
+    emit mLenlab.logMessage(task->getErrorMessage());
+    mLenlab.reset();
+}
+
+double
+Oscilloscope::to_double(uint16_t state)
+{
+    return ((static_cast<double>(state)) / 1024.0 - 0.5) * 3.3;
 }
 
 void
 Oscilloscope::save(const QString &fileName)
 {
     QSaveFile file(fileName);
-    qDebug("save");
+    //qDebug("save");
 
     if (!file.open(QIODevice::WriteOnly)) {
         throw std::exception();
@@ -157,7 +194,7 @@ Oscilloscope::save(const QString &fileName)
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
 
-    for (uint32_t i = 0; i < waveform->getLength(0); i++) {
+    for (std::size_t i = 0; i < waveform->getLength(0); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
 

@@ -19,21 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "device.h"
-#include "exception.h"
-#include <QDebug>
+#include "usbexception.h"
 
 using namespace usb;
 
-Device::Device(libusb_device *dev, QObject *parent) :
-    QObject(parent),
-    thread(new Thread()),
-    dev_handle(dev),
-    event_loop(thread.get()),
-    interface(dev_handle.get()),
-    send_queue(new QVector<pPacket>()),
-    sender(new Transfer(dev_handle.get(), 0x01)),
-    receiver0(new Transfer(dev_handle.get(), 0x81)),
-    receiver1(new Transfer(dev_handle.get(), 0x81))
+Device::Device(libusb_device *dev, QObject *parent)
+    : QObject(parent)
+    , thread(new Thread())
+    , dev_handle(dev)
+    , event_loop(thread.get())
+    , interface(dev_handle.get())
+    , send_queue(new QVector<pPacket>())
+    , sender(new Transfer(dev_handle.get(), 0x01))
+    , receiver0(new Transfer(dev_handle.get(), 0x81))
+    , receiver1(new Transfer(dev_handle.get(), 0x81))
 {
     connect(&*receiver0, SIGNAL(completed(pPacket)),
             this, SIGNAL(reply(pPacket)));
@@ -72,8 +71,8 @@ Device::on_reply_transfer_ready()
 {
     try {
         qobject_cast<Transfer *>(QObject::sender())->start(pPacket::create());
-    } catch (const Exception &e) {
-        emit error(e.getMsg());
+    } catch (USBException const & e) {
+        emit error(e.msg());
     }
 }
 
@@ -83,8 +82,8 @@ Device::try_to_send()
     if (!send_queue->isEmpty() && !sender->isActive()) {
         try {
             sender->start(send_queue->takeFirst());
-        } catch (const Exception &e) {
-            emit error(e.getMsg());
+        } catch (USBException const & e) {
+            emit error(e.msg());
         }
     }
 }

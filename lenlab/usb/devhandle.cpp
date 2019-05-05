@@ -19,21 +19,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "devhandle.h"
-#include "exception.h"
-#include <QDebug>
+#include "usbexception.h"
 
 using namespace usb::resource;
 
 DevHandle::DevHandle(libusb_device *dev)
 {
-    qDebug("open");
     auto err = libusb_open(dev, &dev_handle);
-    if (err) throw Exception(libusb_strerror(static_cast<libusb_error>(err)));
+    if (err) throw USBException(libusb_strerror(static_cast<libusb_error>(err)));
 }
 
 DevHandle::~DevHandle()
 {
-    qDebug("close");
     libusb_close(dev_handle);
 }
 

@@ -19,13 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "activeguard.h"
-#include <QDebug>
+//#include <QDebug>
 #include <memory>
 
 using namespace usb::resource;
 
-ActiveGuard::ActiveGuard(Active *active) :
-    active(active)
+ActiveGuard::ActiveGuard(Active *active)
+    : active(active)
 {
     active->lock();
 }

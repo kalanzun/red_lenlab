@@ -23,59 +23,67 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "component.h"
 #include "frequencyseries.h"
-#include "waveform.h"
+#include "signalgenerator.h"
+
 #include <QObject>
-#include <QTimerEvent>
+#include <QSharedPointer>
+#include <QTimer>
 
 namespace model {
 
-/**
- * @brief Lenlab Frequency Analysis component.
- */
+
 class Frequencysweep : public Component
 {
     Q_OBJECT
 
-    uint8_t index;
-    uint32_t samplerate;
+    typedef Component super;
 
-    QSharedPointer<FrequencySeries> current;
+    static int const m_channels = 2;
+    static int const m_uint16_offset = 6;
 
-    bool pending = 0;
-    bool wait_for_update = 0;
-    bool wait_for_step = 0;
+    static int const m_task_delay = 10;
+    static int const m_task_timeout = 200;
+
+    Signalgenerator & m_signalgenerator;
+    QSharedPointer<FrequencySeries> m_current;
+
+    std::size_t m_index;
+    uint32_t m_samplerate;
+    int m_error_counter;
+    int m_signalgenerator_error_counter;
+
+    QTimer stepTimer;
 
 public:
-    explicit Frequencysweep(Lenlab *parent);
+    typedef std::array< std::array < double, 5040 >, m_channels > OscilloscopeData;
+    typedef QSharedPointer< OscilloscopeData > pOscilloscopeData;
 
-    virtual QString getNameNominative();
-    virtual QString getNameAccusative();
+    explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator);
+    Frequencysweep(Frequencysweep const &) = delete;
+
+    Frequencysweep & operator=(Frequencysweep const &) = delete;
+
+    virtual QString const & getNameNominative() const;
+    virtual QString const & getNameAccusative() const;
+
+    virtual pSeries getSeries() const;
 
     virtual void start();
     virtual void stop();
-
-    void try_to_start();
-    void restart();
-    void step();
-    void timerEvent(QTimerEvent *event);
-
-    QSharedPointer<FrequencySeries> getWaveform();
+    virtual void reset();
 
     void save(const QString &fileName);
 
 signals:
-    void calculate();
-    void replot();
+    void calculate(pOscilloscopeData);
 
-public slots:
-    void on_succeeded(const protocol::pMessage &);
-    void on_calculate();
-    void on_updated();
-
-private:
-    typedef Component super;
-
-    QSharedPointer<Waveform> incoming;
+private slots:
+    void on_signalgenerator_succeeded(protocol::pTask const &);
+    void on_signalgenerator_failed(protocol::pTask const &);
+    void on_step();
+    void on_succeeded(protocol::pTask const &);
+    void on_failed(protocol::pTask const &);
+    void on_calculate(pOscilloscopeData);
 };
 
 } // namespace model

@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+#include "model/series.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 #include <QWidget>
@@ -41,17 +42,31 @@ class OscilloscopeForm : public QWidget
 {
     Q_OBJECT
 
+    Ui::OscilloscopeForm * ui;
+
+    bool pending = false;
+
+    MainWindow * m_main_window = nullptr;
+    model::Lenlab * m_lenlab = nullptr;
+    model::Oscilloscope * m_oscilloscope = nullptr;
+
+    std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
+
+    QwtPlotCurve *newCurve(const QColor &color, bool visible);
+    QwtPlotGrid *newGrid();
+
 public:
-    explicit OscilloscopeForm(QWidget *parent = nullptr);
+    explicit OscilloscopeForm(QWidget  *parent = nullptr);
     ~OscilloscopeForm();
 
-    void setMainWindow(MainWindow *main_window);
-    void setModel(model::Lenlab *lenlab);
+    void setMainWindow(MainWindow * main_window);
+    void setModel(model::Lenlab * lenlab);
 
     void save();
+    void saveImage();
 
 private slots:
-    void on_replot();
+    void seriesChanged(model::pSeries const &);
 
     void on_startButton_clicked();
     void on_stopButton_clicked();
@@ -65,17 +80,7 @@ private slots:
 
     void on_timerangeBox_currentIndexChanged(int index);
 
-private:
-    QwtPlotCurve *newCurve(const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
-
-    Ui::OscilloscopeForm *ui;
-
-    MainWindow *main_window;
-    model::Lenlab *lenlab;
-    model::Oscilloscope *oscilloscope;
-
-    std::array<QwtPlotCurve *, 2> curves; // pointer, no ownership
+    void activeChanged(bool);
 };
 
 

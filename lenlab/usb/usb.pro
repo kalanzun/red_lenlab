@@ -29,13 +29,13 @@ SOURCES += \
     device.cpp \
     devicelist.cpp \
     eventloop.cpp \
-    exception.cpp \
     interface.cpp \
     notetoself.cpp \
     thread.cpp \
     transfer.cpp \
     bus.cpp \
-    packet.cpp
+    packet.cpp \
+    usbexception.cpp
 
 HEADERS += \
     active.h \
@@ -45,13 +45,13 @@ HEADERS += \
     device.h \
     devicelist.h \
     eventloop.h \
-    exception.h \
     interface.h \
     notetoself.h \
     thread.h \
     transfer.h \
     bus.h \
-    packet.h
+    packet.h \
+    usbexception.h
 
 unix {
     target.path = /usr/lib

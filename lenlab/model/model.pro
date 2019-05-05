@@ -32,7 +32,8 @@ SOURCES += \
     series.cpp \
     frequencyseries.cpp \
     indexparameter.cpp \
-    utils.cpp
+    utils.cpp \
+    loggerseries.cpp
 
 HEADERS += \
     component.h \
@@ -45,7 +46,17 @@ HEADERS += \
     series.h \
     frequencyseries.h \
     indexparameter.h \
-    utils.h
+    utils.h \
+    loggerseries.h
+
+win32 {
+    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../protocol/debug/libprotocol.a
+    CONFIG(release, debug|release) PRE_TARGETDEPS += ../protocol/release/libprotocol.a
+}
+
+unix {
+    PRE_TARGETDEPS += ../protocol/libprotocol.a
+}
 
 unix {
     target.path = /usr/lib

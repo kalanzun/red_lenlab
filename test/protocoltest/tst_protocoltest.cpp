@@ -1,5 +1,4 @@
 #include "protocol/board.h"
-#include "protocol/factory.h"
 #include "protocol/message.h"
 
 #include "lenlab_protocol.h"
@@ -16,8 +15,7 @@ class ProtocolTest : public QObject
 {
     Q_OBJECT
 
-    Factory mFactory;
-    pBoard mBoard;
+    Board mBoard;
 
     static int const m_short_timeout = 100;
     static int const m_long_timeout = 800;
@@ -42,19 +40,16 @@ private slots:
 
 void ProtocolTest::initTestCase()
 {
-    QSignalSpy spy(&mFactory, &Factory::ready);
+    QSignalSpy spy(&mBoard, &Board::ready);
     QVERIFY(spy.isValid());
 
-    mFactory.start();
+    mBoard.lookForBoard();
 
     QVERIFY(spy.wait(m_long_timeout));
-
-    mBoard = qvariant_cast<pBoard>(spy.at(0).at(0));
 }
 
 void ProtocolTest::cleanupTestCase()
 {
-    mBoard.clear();
 }
 
 void ProtocolTest::test_startLogger()
@@ -62,16 +57,15 @@ void ProtocolTest::test_startLogger()
     QVector<uint32_t> args;
     args.append(100);
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startLogger);
-    cmd->setUInt32Vector(args);
+    pTask task(new Task(::startLogger));
+    task->getCommand()->setUInt32Vector(args);
 
-    auto task = mBoard->startTask(cmd);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_short_timeout));
 
-    QSignalSpy logger_spy(mBoard.data(), &Board::logger);
+    QSignalSpy logger_spy(&mBoard, &Board::logger_data);
     QVERIFY(logger_spy.isValid());
 
     // reply queue length in the firmware is 4, cycle at least once
@@ -80,12 +74,10 @@ void ProtocolTest::test_startLogger()
         QVERIFY(logger_spy.wait(m_logger_timeout));
     }
 
-    pMessage stop_cmd(new Message());
-    stop_cmd->setCommand(::stopLogger);
-
-    auto stop_task = mBoard->startTask(stop_cmd);
+    pTask stop_task(new Task(::stopLogger));
     QSignalSpy stop_spy(stop_task.data(), &Task::succeeded);
     QVERIFY(stop_spy.isValid());
+    mBoard.startTask(stop_task);
     QVERIFY(stop_spy.wait(m_short_timeout));
 
     // no additional data point after stop
@@ -97,13 +89,12 @@ void ProtocolTest::test_startOscilloscope()
     QVector<uint32_t> args;
     args.append(1);
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startOscilloscope);
-    cmd->setUInt32Vector(args);
+    pTask task(new Task(::startOscilloscope));
+    task->getCommand()->setUInt32Vector(args);
 
-    auto task = mBoard->startTask(cmd);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_short_timeout));
 
     QCOMPARE(task->getSize(), 20);
@@ -114,13 +105,12 @@ void ProtocolTest::test_startTrigger()
     QVector<uint32_t> args;
     args.append(2);
 
-    pMessage cmd(new Message());
-    cmd->setCommand(::startTrigger);
-    cmd->setUInt32Vector(args);
+    pTask task(new Task(::startTrigger, m_trigger_timeout));
+    task->getCommand()->setUInt32Vector(args);
 
-    auto task = mBoard->startTask(cmd, m_trigger_timeout);
     QSignalSpy spy(task.data(), &Task::succeeded);
     QVERIFY(spy.isValid());
+    mBoard.startTask(task);
     QVERIFY(spy.wait(m_trigger_timeout + m_short_timeout));
 
     QCOMPARE(task->getSize(), 18);

@@ -57,9 +57,10 @@ extern uint32_t __STACK_TOP;
 extern void Timer0AHandler();
 extern void ADC0SS0Handler();
 extern void ADC1SS0Handler();
-extern void ADC0SS3Handler();
-extern void ADC1SS3Handler();
+extern void ADC0SS1Handler();
+extern void ADC1SS1Handler();
 extern void USB0IntHandler();
+extern void SSI0IntHandler();
 #ifdef UART_BUFFERED
 extern void UARTStdioIntHandler();
 #endif
@@ -102,7 +103,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // UART0 Rx and Tx
 #endif
     IntDefaultHandler,                      // UART1 Rx and Tx
-    IntDefaultHandler,                      // SSI0 Rx and Tx
+    SSI0IntHandler,                         // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
     IntDefaultHandler,                      // PWM Fault
     IntDefaultHandler,                      // PWM Generator 0
@@ -110,9 +111,9 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 2
     IntDefaultHandler,                      // Quadrature Encoder 0
     ADC0SS0Handler,                         // ADC Sequence 0
-    IntDefaultHandler,                      // ADC Sequence 1
+    ADC0SS1Handler,                         // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
-    ADC0SS3Handler,                         // ADC Sequence 3
+    IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
     Timer0AHandler,                         // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
@@ -144,9 +145,9 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // uDMA Software Transfer
     IntDefaultHandler,                      // uDMA Error
     ADC1SS0Handler,                         // ADC1 Sequence 0
-    IntDefaultHandler,                      // ADC1 Sequence 1
+    ADC1SS1Handler,                         // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
-    ADC1SS3Handler,                         // ADC1 Sequence 3
+    IntDefaultHandler,                      // ADC1 Sequence 3
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // GPIO Port J

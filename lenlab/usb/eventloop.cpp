@@ -19,18 +19,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "eventloop.h"
-#include <QDebug>
+//#include <QDebug>
 
 using namespace usb::resource;
 
-EventLoop::EventLoop(Thread *thread) : thread(thread)
+EventLoop::EventLoop(Thread *thread)
+    : thread(thread)
 {
-    qDebug("start");
+    //qDebug("start");
     thread->start();
 }
 
 EventLoop::~EventLoop()
 {
-    qDebug("request interruption");
+    //qDebug("request interruption");
     thread->requestInterruption();
 }
