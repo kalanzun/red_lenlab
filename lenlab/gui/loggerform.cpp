@@ -124,6 +124,11 @@ LoggerForm::setModel(model::Lenlab * lenlab)
             this, &LoggerForm::fileNameChanged);
     connect(m_voltmeter, &model::Voltmeter::channelsChanged,
             this, &LoggerForm::channelsChanged);
+
+    connect(&m_lenlab->oscilloscope, &model::Oscilloscope::activeChanged,
+            this, &LoggerForm::activeChanged);
+    connect(&m_lenlab->frequencysweep, &model::Oscilloscope::activeChanged,
+            this, &LoggerForm::activeChanged);
 }
 
 void
@@ -131,9 +136,18 @@ LoggerForm::on_startButton_clicked()
 {
     if (!m_voltmeter->active()) {
         if (m_lenlab->isActive()) {
-            if (!m_main_window->askToCancelActiveComponent(m_voltmeter)) return;
+            if (m_main_window->askToCancelActiveComponent(m_voltmeter)) {
+                if (m_lenlab->isActive()) {
+                    // the component might have stopped while the dialog was visible
+                    pending = true;
+                    m_lenlab->getActiveComponent()->stop();
+                } else {
+                    m_voltmeter->start();
+                }
+            }
+        } else {
+            m_voltmeter->start();
         }
-        m_voltmeter->start();
     }
 }
 
@@ -263,6 +277,14 @@ LoggerForm::channelsChanged(const std::bitset<4> &channels)
     for (std::size_t i = 0; i < m_curves.size(); ++i)
         m_curves[i]->setVisible(channels[i]);
     ui->plot->replot();
+}
+
+void LoggerForm::activeChanged(bool)
+{
+    if (pending) {
+        pending = false;
+        if (!m_lenlab->isActive()) m_voltmeter->start();
+    }
 }
 
 void

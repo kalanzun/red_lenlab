@@ -197,16 +197,6 @@ Signalgenerator::Signalgenerator(Lenlab & lenlab, protocol::Board & board)
     for (uint32_t i = 0; i < m_secondIndex.length; ++i) {
         m_secondIndex.labels << QString("%1").arg(i);
     }
-
-    m_setSineTimer.setInterval(m_task_delay);
-    m_setSineTimer.setSingleShot(true);
-    connect(&m_setSineTimer, &QTimer::timeout,
-            this, &Signalgenerator::on_set_sine);
-
-    m_stopSignalTimer.setInterval(m_task_delay);
-    m_stopSignalTimer.setSingleShot(true);
-    connect(&m_stopSignalTimer, &QTimer::timeout,
-            this, &Signalgenerator::on_stop);
 }
 
 double
@@ -287,7 +277,6 @@ void Signalgenerator::start()
     Q_ASSERT_X(!mActive, "Signalgenerator::start()", "Der Signalgenerator ist bereits aktiv.");
     setActive(true);
 
-    m_stopSignalTimer.stop();
     setSine();
 }
 
@@ -295,8 +284,16 @@ void Signalgenerator::stop()
 {
     Q_ASSERT_X(mActive, "Signalgenerator::stop()", "Der Signalgenerator war nicht aktiv.");
 
-    m_setSineTimer.stop();
-    m_stopSignalTimer.start();
+    if (!mBoard.isOpen()) {
+        return;
+    }
+
+    protocol::pTask task(new protocol::Task(::stopSignal));
+    connect(task.data(), &protocol::Task::succeeded,
+            this, &Signalgenerator::on_stop_succeeded);
+    connect(task.data(), &protocol::Task::failed,
+            this, &Signalgenerator::on_stop_failed);
+    mBoard.queueTask(task);
 }
 
 void Signalgenerator::reset()
@@ -304,8 +301,6 @@ void Signalgenerator::reset()
     super::reset();
 
     m_locked = false;
-    m_setSineTimer.stop();
-    m_stopSignalTimer.stop();
 }
 
 void
@@ -313,19 +308,7 @@ Signalgenerator::setSine()
 {
     if (!mActive) return;
 
-    m_setSineTimer.start();
-}
-
-void Signalgenerator::on_set_sine()
-{
-    if (!mActive) return;
-
     if (!mBoard.isOpen()) {
-        return;
-    }
-
-    if (!mBoard.isReady()) {
-        m_setSineTimer.start();
         return;
     }
 
@@ -342,7 +325,7 @@ void Signalgenerator::on_set_sine()
             this, &Signalgenerator::on_set_sine_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Signalgenerator::on_set_sine_failed);
-    mBoard.startTask(task);
+    mBoard.queueTask(task);
 }
 
 void Signalgenerator::on_set_sine_succeeded(protocol::pTask const & task)
@@ -357,27 +340,6 @@ void Signalgenerator::on_set_sine_failed(protocol::pTask const & task)
         emit mLenlab.logMessage(task->getErrorMessage());
         mLenlab.reset();
     }
-}
-
-void Signalgenerator::on_stop()
-{
-    if (!mActive) return;
-
-    if (!mBoard.isOpen()) {
-        return;
-    }
-
-    if (!mBoard.isReady()) {
-        m_stopSignalTimer.start();
-        return;
-    }
-
-    protocol::pTask task(new protocol::Task(::stopSignal));
-    connect(task.data(), &protocol::Task::succeeded,
-            this, &Signalgenerator::on_stop_succeeded);
-    connect(task.data(), &protocol::Task::failed,
-            this, &Signalgenerator::on_stop_failed);
-    mBoard.startTask(task);
 }
 
 void Signalgenerator::on_stop_succeeded(protocol::pTask const &)

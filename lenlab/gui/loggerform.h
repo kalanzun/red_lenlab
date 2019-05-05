@@ -40,6 +40,8 @@ class LoggerForm : public QWidget
 
     Ui::LoggerForm * ui;
 
+    bool pending = false;
+
     MainWindow * m_main_window = nullptr;
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
@@ -80,6 +82,8 @@ private slots:
     void autoSaveChanged(bool);
     void fileNameChanged(const QString &);
     void channelsChanged(const std::bitset<4> &);
+
+    void activeChanged(bool);
 };
 
 

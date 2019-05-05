@@ -36,7 +36,7 @@ class Oscilloscope : public Component
 
     typedef Component super;
 
-    static int const m_task_delay = 10; // shall not be faster than signal generator
+    static int const m_task_delay = 100;
     static int const m_task_timeout = 400;
 
     bool pending = 0;

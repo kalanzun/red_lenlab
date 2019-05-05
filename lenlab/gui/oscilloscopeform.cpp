@@ -78,6 +78,11 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
 
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
             this, &OscilloscopeForm::seriesChanged);
+
+    connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
+            this, &OscilloscopeForm::activeChanged);
+    connect(&m_lenlab->frequencysweep, &model::Oscilloscope::activeChanged,
+            this, &OscilloscopeForm::activeChanged);
 }
 
 QwtPlotCurve *
@@ -116,9 +121,18 @@ OscilloscopeForm::on_startButton_clicked()
 {
     if (!m_oscilloscope->active()) {
         if (m_lenlab->isActive()) {
-            if (!m_main_window->askToCancelActiveComponent(m_oscilloscope)) return;
+            if (m_main_window->askToCancelActiveComponent(m_oscilloscope)) {
+                if (m_lenlab->isActive()) {
+                    // the component might have stopped while the dialog was visible
+                    pending = true;
+                    m_lenlab->getActiveComponent()->stop();
+                } else {
+                    m_oscilloscope->start();
+                }
+            }
+        } else {
+            m_oscilloscope->start();
         }
-        m_oscilloscope->start();
     }
 }
 
@@ -188,6 +202,14 @@ OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
     double timerange = 0.5 * (1<<index);
     ui->plot->setAxisScale(QwtPlot::xBottom, -timerange/2, timerange/2);
     ui->plot->replot();
+}
+
+void OscilloscopeForm::activeChanged(bool)
+{
+    if (pending) {
+        pending = false;
+        if (!m_lenlab->isActive()) m_oscilloscope->start();
+    }
 }
 
 } // namespace gui

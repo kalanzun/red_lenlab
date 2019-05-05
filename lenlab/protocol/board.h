@@ -27,6 +27,8 @@ class Board : public QObject
     QTimer mBootTimer;
     QTimer mWatchdog;
 
+    QVector<pTask> mTaskQueue; // this one needs to stay alive until mDevice is destroyed
+
     usb::Bus mBus;
     usb::pDevice mDevice;
     pTask mTask;
@@ -44,6 +46,7 @@ public:
     bool isOpen() const;
     bool isReady() const;
     void startTask(pTask const & task);
+    void queueTask(pTask const & task);
 
     uint32_t getVersionMajor() const;
     uint32_t getVersionMinor() const;
@@ -60,6 +63,10 @@ public:
     pTransaction startLogger(uint32_t interval);
     pTransaction stopLogger();
     */
+
+private:
+    void sendFromQueue();
+    void clearQueue();
 
 signals:
     void ready();

@@ -39,6 +39,8 @@ class FrequencyForm : public QWidget
 
     Ui::FrequencyForm * ui;
 
+    bool pending = false;
+
     MainWindow * m_main_window = nullptr;
     model::Lenlab * m_lenlab = nullptr;
     model::Frequencysweep * m_frequencysweep = nullptr;
@@ -66,6 +68,8 @@ private slots:
     void on_stopButton_clicked();
 
     void on_saveButton_clicked();
+
+    void activeChanged(bool);
 };
 
 

@@ -83,6 +83,15 @@ Board::startTask(pTask const & task)
     mWatchdog.start(task->getTimeout());
 }
 
+void
+Board::queueTask(pTask const & task)
+{
+    mTaskQueue.append(task);
+    sendFromQueue();
+}
+
+
+
 uint32_t
 Board::getVersionMajor() const
 {
@@ -93,6 +102,24 @@ uint32_t
 Board::getVersionMinor() const
 {
     return mMinor;
+}
+
+void
+Board::sendFromQueue()
+{
+    if (!mTaskQueue.isEmpty() && !mTask) {
+        pTask task = mTaskQueue.takeFirst();
+        startTask(task);
+    }
+}
+
+void Board::clearQueue()
+{
+    for (auto task: mTaskQueue) {
+        task->setError("Clear task queue");
+        emit task->failed(task);
+    }
+    mTaskQueue.clear();
 }
 
 void
@@ -113,6 +140,7 @@ Board::on_reply(usb::pPacket const & packet)
                 mTask.clear();
                 mWatchdog.stop();
                 emit task->succeeded(task);
+                sendFromQueue();
             } else {
                 mWatchdog.start(); // restart
             }
@@ -149,6 +177,7 @@ void
 Board::on_destroyed()
 {
     emit log("Verbindung getrennt.");
+    clearQueue();
     mPollTimer.start(mErrorTime);
 }
 

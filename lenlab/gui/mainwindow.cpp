@@ -79,13 +79,7 @@ MainWindow::askToCancelActiveComponent(model::Component *next_component)
             previous,
             next));
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    if (msgBox.exec() == QMessageBox::Ok) {
-        m_lenlab->getActiveComponent()->stop();
-        return true;
-    }
-    else {
-        return false;
-    }
+    return (msgBox.exec() == QMessageBox::Ok);
 }
 
 void

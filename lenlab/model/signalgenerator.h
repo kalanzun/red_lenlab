@@ -46,7 +46,6 @@ class Signalgenerator : public Component
 
     static std::array< std::array< uint8_t const, 3 > const, 130 > const m_sine;
 
-    static int const m_task_delay = 1;
     static int const m_task_timeout = 100;
 
     Q_PROPERTY(bool locked READ locked NOTIFY lockedChanged)
@@ -56,9 +55,6 @@ class Signalgenerator : public Component
     uint32_t m_amplitude = 0;
     uint32_t m_frequency = 0;
     uint32_t m_second = 0;
-
-    QTimer m_setSineTimer;
-    QTimer m_stopSignalTimer;
 
     IndexParameter m_amplitudeIndex;
     IndexParameter m_frequencyIndex;
@@ -98,10 +94,8 @@ signals:
     void failed(protocol::pTask const &);
 
 private slots:
-    void on_set_sine();
     void on_set_sine_succeeded(protocol::pTask const &);
     void on_set_sine_failed(protocol::pTask const &);
-    void on_stop();
     void on_stop_succeeded(protocol::pTask const &);
     void on_stop_failed(protocol::pTask const &);
 };

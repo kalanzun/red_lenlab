@@ -122,7 +122,7 @@ Oscilloscope::on_start()
             this, &Oscilloscope::on_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Oscilloscope::on_failed);
-    mBoard.startTask(task);
+    mBoard.queueTask(task);
 }
 
 

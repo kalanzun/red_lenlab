@@ -185,7 +185,7 @@ Voltmeter::start()
             this, &Voltmeter::on_start);
     connect(task.data(), &protocol::Task::failed,
             this, &Voltmeter::on_start_failed);
-    mBoard.startTask(task);
+    mBoard.queueTask(task);
 }
 
 void
@@ -198,7 +198,7 @@ Voltmeter::stop()
             this, &Voltmeter::on_stop);
     connect(task.data(), &protocol::Task::failed,
             this, &Voltmeter::on_stop_failed);
-    mBoard.startTask(task);
+    mBoard.queueTask(task);
 }
 
 void

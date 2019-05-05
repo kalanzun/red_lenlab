@@ -79,7 +79,6 @@ Frequencysweep::start()
 
     super::start();
 
-    if (m_signalgenerator.active()) m_signalgenerator.stop();
     m_signalgenerator.lock();
 
     m_current.reset(new FrequencySeries());
@@ -91,7 +90,11 @@ Frequencysweep::start()
     m_signalgenerator.setSecond(1);
 
     m_signalgenerator_error_counter = 0;
-    m_signalgenerator.start();
+    if (m_signalgenerator.active()) {
+        m_signalgenerator.setSine();
+    } else {
+        m_signalgenerator.start();
+    }
 }
 
 void
@@ -156,7 +159,7 @@ Frequencysweep::on_step()
             this, &Frequencysweep::on_succeeded);
     connect(task.data(), &protocol::Task::failed,
             this, &Frequencysweep::on_failed);
-    mBoard.startTask(task);
+    mBoard.queueTask(task);
 }
 
 void

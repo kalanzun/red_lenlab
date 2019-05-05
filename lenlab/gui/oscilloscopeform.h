@@ -44,6 +44,8 @@ class OscilloscopeForm : public QWidget
 
     Ui::OscilloscopeForm * ui;
 
+    bool pending = false;
+
     MainWindow * m_main_window = nullptr;
     model::Lenlab * m_lenlab = nullptr;
     model::Oscilloscope * m_oscilloscope = nullptr;
@@ -77,6 +79,8 @@ private slots:
     void on_saveButton_clicked();
 
     void on_timerangeBox_currentIndexChanged(int index);
+
+    void activeChanged(bool);
 };
 
 

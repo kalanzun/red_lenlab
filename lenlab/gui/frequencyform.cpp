@@ -88,6 +88,11 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
             this, &FrequencyForm::seriesChanged);
     connect(m_frequencysweep, &model::Frequencysweep::seriesUpdated,
             this, &FrequencyForm::seriesUpdated);
+
+    connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
+            this, &FrequencyForm::activeChanged);
+    connect(&m_lenlab->oscilloscope, &model::Oscilloscope::activeChanged,
+            this, &FrequencyForm::activeChanged);
 }
 
 QwtPlotCurve *
@@ -127,9 +132,18 @@ FrequencyForm::on_startButton_clicked()
 {
     if (!m_frequencysweep->active()) {
         if (m_lenlab->isActive()) {
-            if (!m_main_window->askToCancelActiveComponent(m_frequencysweep)) return;
+            if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {
+                if (m_lenlab->isActive()) {
+                    // the component might have stopped while the dialog was visible
+                    pending = true;
+                    m_lenlab->getActiveComponent()->stop();
+                } else {
+                    m_frequencysweep->start();
+                }
+            }
+        } else {
+            m_frequencysweep->start();
         }
-        m_frequencysweep->start();
     }
 }
 
@@ -145,6 +159,14 @@ void
 FrequencyForm::on_saveButton_clicked()
 {
     save();
+}
+
+void FrequencyForm::activeChanged(bool)
+{
+    if (pending) {
+        pending = false;
+        if (!m_lenlab->isActive()) m_frequencysweep->start();
+    }
 }
 
 void
