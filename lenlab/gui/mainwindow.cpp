@@ -180,7 +180,7 @@ const QString ABOUT(
         "</p>\n"
 
         R"_(
-        <p>Copyright 2017<br/>
+        <p>Copyright 2019<br/>
         Christoph Simon und das Lenlab-Entwicklerteam</p>
 
         <p>Homepage: <a href=\"https://git.scc.kit.edu/vq6936/red_lenlab\">https://git.scc.kit.edu/vq6936/red_lenlab</a></p>

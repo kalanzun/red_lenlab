@@ -63,8 +63,8 @@ class Pattern:
 class Version:
 
     version_h = Path("..", "include", "lenlab_version.h")
-    lenlab_config_h = Path("..", "lenlab", "config.h")
-    firmware_config_h = Path("..", "firmware", "config.h")
+    #lenlab_config_h = Path("..", "lenlab", "config.h")
+    #firmware_config_h = Path("..", "firmware", "config.h")
 
     major_pattern = Pattern("#define MAJOR (\d+)$")
     minor_pattern = Pattern("#define MINOR (\d+)$")
@@ -77,28 +77,28 @@ class Version:
         self.major = int(single(self.major_pattern(data), "No major version number found").group(1))
         self.minor = int(single(self.minor_pattern(data), "No minor version number found").group(1))
 
-        with open(self.lenlab_config_h) as file:
-            self.lenlab_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
+        # with open(self.lenlab_config_h) as file:
+        #     self.lenlab_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
+        #
+        # with open(self.firmware_config_h) as file:
+        #     self.firmware_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
 
-        with open(self.firmware_config_h) as file:
-            self.firmware_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
-
-        self.revision = max(self.lenlab_revision, self.firmware_revision)
+        #self.revision = max(self.lenlab_revision, self.firmware_revision)
 
         self.sys = platform.system()
 
         if self.sys == "Windows":
-            self.release_name = "lenlab_{}-{}-{}_win".format(self.major, self.minor, self.revision)
+            self.release_name = "lenlab_{}-{}_win".format(self.major, self.minor)#, self.revision)
         elif self.sys == "Linux":
-            self.release_name = "lenlab_{}-{}-{}_linux".format(self.major, self.minor, self.revision)
+            self.release_name = "lenlab_{}-{}_linux".format(self.major, self.minor)#, self.revision)
 
 
 class QtWindows:
 
     base_path = Path("C:", "/Qt")
-    arch = "mingw53_32"
+    arch = "mingw73_32"
 
-    version_pattern = Pattern("Qt(\d+\.\d+\.\d+)$")
+    version_pattern = Pattern("(\d+\.\d+\.\d+)$")
     qtenv2bat_pattern = Pattern("set PATH=(.*?);(.*?);%PATH%")
 
     def __init__(self):
@@ -109,7 +109,7 @@ class QtWindows:
 
         self.versions.sort()
         self.version = self.versions[-1]
-        self.path = self.base_path / "Qt{}".format(self.version) / str(self.version) / self.arch / "bin"
+        self.path = self.base_path / str(self.version) / self.arch / "bin"
 
         with open(self.path / "qtenv2.bat") as file:
             env_path = single(list(self.qtenv2bat_pattern(file)), "Qt tools path information from qtenv2.bat not found")
@@ -151,7 +151,7 @@ class Firmware:
     path = Path("..", "bin")
 
     def __init__(self, version):
-        self.firmware = "lenlab_firmware_{}-{}-{}.out".format(version.major, version.minor, version.firmware_revision)
+        self.firmware = "lenlab_firmware_{}-{}.out".format(version.major, version.minor)#, version.firmware_revision)
         assert access(self.path / self.firmware, R_OK), "No firmware found"
 
 
@@ -167,7 +167,7 @@ class Lenlab:
 class LenlabWindows:
 
     base_path = Path("..", "..")
-    arch = "MinGW_32bit"
+    arch = "MinGW_32_bit"
 
     def __init__(self, version, qt):
         self.path = self.base_path / "build-red_lenlab-Desktop_Qt_{}_{}_{}_{}-Release".format(
