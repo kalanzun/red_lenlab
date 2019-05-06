@@ -282,27 +282,26 @@ Voltmeter::do_save()
 
     stream << QString("Lenlab red %1.%2 Voltmeter-Daten\n").arg(MAJOR).arg(MINOR);
 
+
     stream << "Zeit";
-    /*
-    for (size_t i = 1; i < data.size(); i++) {
-        if (m_channels[i-1]) {
-            stream << DELIMITER << "Kanal_" << i;
+
+    for (size_t i = 0; i < m_loggerseries->getChannels(); ++i) {
+        if (mChannels[i]) {
+            stream << DELIMITER << "Kanal_" << (i + 1);
         }
     }
-    */
+
     stream << "\n";
 
-    /*
-    for (int t = 0; t < data[0].size(); t++) {
-        stream << data[0][t];
-        for (size_t i = 1; i < data.size(); i++) {
-            if (m_channels[i-1]) {
-                stream << DELIMITER << data[i][t];
+    for (size_t t = 0; t < m_loggerseries->getLength(0); ++t) {
+        stream << m_loggerseries->getX(t);
+        for (size_t i = 0; i < m_loggerseries->getChannels(); ++i) {
+            if (mChannels[i]) {
+                stream << DELIMITER << m_loggerseries->getY(t, i);
             }
         }
         stream << "\n";
     }
-    */
 
     file.commit();
 }
