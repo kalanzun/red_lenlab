@@ -48,7 +48,10 @@ def listdir(path="."):
 
 
 def mkdir(path, parents=False):
-    os.mkdir(str(path), parents=parents)
+    if parents:
+        os.makedirs(str(path))
+    else:
+        os.mkdir(str(path))
 
 
 def copy(src, dest):
@@ -273,7 +276,8 @@ def build():
         copy(Path("..", "linux", "lenlab.svg"), build / "lenlab" / "usr" / "share" / "icons" / "hicolor" / "scaleable" / "apps" / "lenlab.svg")
         
         cmd = ["../../linuxdeployqt-6-x86_64.AppImage", "lenlab/usr/share/applications/lenlab.desktop", "-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake", "-appimage"]
-        env = {"VERSION": "{}.{}".format(version.major, version.minor)}
+        env = dict(environ)
+        env["VERSION"] = "{}.{}".format(version.major, version.minor)
         call(cmd, env=env, cwd=str(build))
         rmtree(build / "lenlab")
 
