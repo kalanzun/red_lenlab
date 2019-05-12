@@ -22,14 +22,49 @@
 import platform
 
 from distutils.version import LooseVersion
-from os import chdir, environ, listdir, mkdir, system, walk, access, R_OK, W_OK, X_OK, remove
+import os
+from os import chdir, environ, system, R_OK, W_OK, X_OK
 from os.path import abspath, dirname, join, splitext
 from pathlib import Path
 from re import compile
-from shutil import rmtree, copy, copytree
+import shutil
 from subprocess import call, check_output
 from time import sleep
 from zipfile import ZipFile
+
+
+# In Python 3.5, these function do not accept pathlib.Path objects
+
+def rmtree(path, ignore_errors=False):
+    shutil.rmtree(str(path), ignore_errors=ignore_errors)
+
+
+def copytree(src, dest):
+    shutil.copytree(str(src), str(dest))
+
+
+def listdir(path="."):
+    return os.listdir(str(path))
+
+
+def mkdir(path, parents=False):
+    os.mkdir(str(path), parents=parents)
+
+
+def copy(src, dest):
+    shutil.copy(str(src), str(dest))
+
+
+def remove(path):
+    os.remove(str(path))
+
+
+def walk(path):
+    return os.walk(str(path))
+
+
+def access(path, mode):
+    return os.access(str(path), mode)
 
 
 def single(iterator, message):
@@ -71,7 +106,7 @@ class Version:
     revision_pattern = Pattern("#define REVISION (\d+)$")
 
     def __init__(self):
-        with open(self.version_h) as file:
+        with self.version_h.open() as file:
             data = file.readlines()
 
         self.major = int(single(self.major_pattern(data), "No major version number found").group(1))
@@ -205,7 +240,7 @@ def build():
     build = Path("build", version.release_name)
 
     if version.release_name in listdir("build"):
-        rmtree(build)
+        rmtree(str(build))
         sleep(0.1) # windows is not that quick
 
     mkdir(build)
@@ -228,39 +263,19 @@ def build():
         call(cmd, env=env)
 
     elif version.sys == "Linux":
-        mkdir(build / "lenlab" / "usr")
-        mkdir(build / "lenlab" / "usr" / "bin")
+        mkdir(build / "lenlab" / "usr" / "bin", parents=True)
         copy(lenlab.lenlab, Path("build", version.release_name, "lenlab", "usr", "bin", "lenlab"))
 
-        mkdir(build / "lenlab" / "usr" / "share")
-        mkdir(build / "lenlab" / "usr" / "share" / "applications")
+        mkdir(build / "lenlab" / "usr" / "share" / "applications", parents=True)
         copy(Path("..", "linux", "lenlab.desktop"), build / "lenlab" / "usr" / "share" / "applications" / "lenlab.desktop")
         
+        mkdir(build / "lenlab" / "usr" / "share" / "icons" / "hicolor" / "scaleable" / "apps", parents=True)
+        copy(Path("..", "linux", "lenlab.svg"), build / "lenlab" / "usr" / "share" / "icons" / "hicolor" / "scaleable" / "apps" / "lenlab.svg")
         
-
-        #ldd_parser = compile("\t([^ ]*) => ([^ ]*) \(0x[0-9a-f]*\)$")
-        #library_selectors = (
-        #    compile("libqwt\.so\.6$"),
-        #    compile("libQt5.*$"),
-        #    compile("libpng\d+\.so\.\d+$"),
-        #    compile("libicui18n\.so\.\d+$"),
-        #    compile("libpcre\d+\.so\.\d+$"),
-        #    compile("libicuuc\.so\.\d+$"),
-        #    compile("libicudata\.so\.\d+$")
-        #)
-        #libraries = check_output(["ldd", join("build", version.release_name, "lenlab", "lenlab")], universal_newlines=True)
-        #for line in libraries.split("\n"):
-        #    data = ldd_parser.match(line)
-        #    if data:
-        #        lib, libpath = data.groups()
-        #        for selector in library_selectors:
-        #            if selector.match(lib):
-        #                copy(libpath, join("build", version.release_name, "lenlab", lib))
-        #                break
-        #mkdir(join("build", version.release_name, "lenlab", "platforms"))
-        #copy(join("/usr/lib/qt/plugins/platforms/libqxcb.so"), join("build", version.release_name, "lenlab", "platforms", "libqxcb.so"))
-        #for lib in ["libQt5DBus.so.5", "libQt5XcbQpa.so.5", "libstdc++.so.6", "libxcb-xinerama.so.0"]:
-        #    copy(join("/usr/lib", lib), join("build", version.release_name, "lenlab", lib))
+        cmd = ["../../linuxdeployqt-6-x86_64.AppImage", "lenlab/usr/share/applications/lenlab.desktop", "-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake", "-appimage"]
+        env = {"VERSION": "{}.{}".format(version.major, version.minor)}
+        call(cmd, env=env, cwd=str(build))
+        rmtree(build / "lenlab")
 
     else:
         raise Exception("Unknown system.")
@@ -292,10 +307,10 @@ def build():
         copy(Path("..", "linux", "20-lenlab.rules"), build / "linux" / "20-lenlab.rules")
 
     # Package
-    with ZipFile(Path("build", "{}.zip".format(version.release_name)), "w") as package:
+    with ZipFile(str(Path("build", "{}.zip".format(version.release_name))), "w") as package:
         for root, dirs, files in walk(build):
             for name in files:
-                package.write(Path(root, name), Path(root, name).relative_to("build"))
+                package.write(str(Path(root, name)), str(Path(root, name).relative_to("build")))
 
 
 def main():
