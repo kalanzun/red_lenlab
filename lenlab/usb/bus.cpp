@@ -44,5 +44,5 @@ Bus::query(uint16_t vid, uint16_t pid)
         }
     }
 
-    return nullptr;
+    return pDevice();
 }

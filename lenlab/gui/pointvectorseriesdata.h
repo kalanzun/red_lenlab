@@ -24,7 +24,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "model/series.h"
 #include "qwt_series_data.h"
 
-
 namespace gui {
 
 class PointVectorSeriesData : public QwtSeriesData<QPointF>

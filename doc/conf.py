@@ -33,7 +33,7 @@ from os.path import join, splitext
 # ones.
 extensions = [
     #'breathe',
-    'sphinxcontrib.mermaid',
+    #'sphinxcontrib.mermaid',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
