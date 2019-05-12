@@ -31,11 +31,11 @@ Board::lookForBoard(int boottime)
     try {
         mDevice = mBus.query(LENLAB_VID, LENLAB_PID);
         if (mDevice) {
-            connect(mDevice.get(), &usb::Device::reply,
+            connect(mDevice.data(), &usb::Device::reply,
                     this, &Board::on_reply);
-            connect(mDevice.get(), &usb::Device::error,
+            connect(mDevice.data(), &usb::Device::error,
                     this, &Board::on_error);
-            connect(mDevice.get(), &usb::Device::destroyed,
+            connect(mDevice.data(), &usb::Device::destroyed,
                     this, &Board::on_destroyed);
             emit log("Lenlab-Board gefunden.");
             // wait for the board to boot, it just got power
