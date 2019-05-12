@@ -228,31 +228,39 @@ def build():
         call(cmd, env=env)
 
     elif version.sys == "Linux":
-        copy(lenlab.lenlab, Path("build", version.release_name, "lenlab", "lenlab"))
+        mkdir(build / "lenlab" / "usr")
+        mkdir(build / "lenlab" / "usr" / "bin")
+        copy(lenlab.lenlab, Path("build", version.release_name, "lenlab", "usr", "bin", "lenlab"))
 
-        ldd_parser = compile("\t([^ ]*) => ([^ ]*) \(0x[0-9a-f]*\)$")
-        library_selectors = (
-            compile("libqwt\.so\.6$"),
-            compile("libQt5.*$"),
-            compile("libpng\d+\.so\.\d+$"),
-            compile("libicui18n\.so\.\d+$"),
-            compile("libpcre\d+\.so\.\d+$"),
-            compile("libicuuc\.so\.\d+$"),
-            compile("libicudata\.so\.\d+$")
-        )
-        libraries = check_output(["ldd", join("build", version.release_name, "lenlab", "lenlab")], universal_newlines=True)
-        for line in libraries.split("\n"):
-            data = ldd_parser.match(line)
-            if data:
-                lib, libpath = data.groups()
-                for selector in library_selectors:
-                    if selector.match(lib):
-                        copy(libpath, join("build", version.release_name, "lenlab", lib))
-                        break
-        mkdir(join("build", version.release_name, "lenlab", "platforms"))
-        copy(join("/usr/lib/qt/plugins/platforms/libqxcb.so"), join("build", version.release_name, "lenlab", "platforms", "libqxcb.so"))
-        for lib in ["libQt5DBus.so.5", "libQt5XcbQpa.so.5", "libstdc++.so.6", "libxcb-xinerama.so.0"]:
-            copy(join("/usr/lib", lib), join("build", version.release_name, "lenlab", lib))
+        mkdir(build / "lenlab" / "usr" / "share")
+        mkdir(build / "lenlab" / "usr" / "share" / "applications")
+        copy(Path("..", "linux", "lenlab.desktop"), build / "lenlab" / "usr" / "share" / "applications" / "lenlab.desktop")
+        
+        
+
+        #ldd_parser = compile("\t([^ ]*) => ([^ ]*) \(0x[0-9a-f]*\)$")
+        #library_selectors = (
+        #    compile("libqwt\.so\.6$"),
+        #    compile("libQt5.*$"),
+        #    compile("libpng\d+\.so\.\d+$"),
+        #    compile("libicui18n\.so\.\d+$"),
+        #    compile("libpcre\d+\.so\.\d+$"),
+        #    compile("libicuuc\.so\.\d+$"),
+        #    compile("libicudata\.so\.\d+$")
+        #)
+        #libraries = check_output(["ldd", join("build", version.release_name, "lenlab", "lenlab")], universal_newlines=True)
+        #for line in libraries.split("\n"):
+        #    data = ldd_parser.match(line)
+        #    if data:
+        #        lib, libpath = data.groups()
+        #        for selector in library_selectors:
+        #            if selector.match(lib):
+        #                copy(libpath, join("build", version.release_name, "lenlab", lib))
+        #                break
+        #mkdir(join("build", version.release_name, "lenlab", "platforms"))
+        #copy(join("/usr/lib/qt/plugins/platforms/libqxcb.so"), join("build", version.release_name, "lenlab", "platforms", "libqxcb.so"))
+        #for lib in ["libQt5DBus.so.5", "libQt5XcbQpa.so.5", "libstdc++.so.6", "libxcb-xinerama.so.0"]:
+        #    copy(join("/usr/lib", lib), join("build", version.release_name, "lenlab", lib))
 
     else:
         raise Exception("Unknown system.")
