@@ -3,5 +3,6 @@ Type=Application
 Name=Lenlab
 Comment=Lenlab 7.3
 Exec=lenlab
+Icon=lenlab
 Categories=Utilities;
 
