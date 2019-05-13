@@ -8,6 +8,7 @@
 #include <QString>
 #include <QVector>
 
+#include <array>
 #include <stdint.h>
 
 namespace protocol {

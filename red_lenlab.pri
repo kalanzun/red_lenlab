@@ -13,9 +13,22 @@ unix {
     LIBS += -L../../lenlab/protocol -lprotocol
     LIBS += -L../../lenlab/usb -lusb
 
+    # qwt
+    # or create a symlink during installation of qwt
+    #macx {
+    #    # there is an error in qwt, CONFIG += qwt should set this
+    #    # but it sets a wrong path (/usr/local/qwt-6.1.5-svn/include
+    #    INCLUDEPATH += /usr/local/qwt-6.1.5-svn/lib/qwt.framework/Headers
+    #}
+
     # libusb
-    CONFIG += link_pkgconfig
-    PKGCONFIG += libusb-1.0
+    macx {
+        LIBS += -L/usr/local/lib -lusb-1.0
+        INCLUDEPATH += /usr/local/include/libusb-1.0
+    } else {
+        CONFIG += link_pkgconfig
+        PKGCONFIG += libusb-1.0
+    }
 }
 
 win32 {
