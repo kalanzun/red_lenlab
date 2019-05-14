@@ -301,11 +301,17 @@ def build():
         copy(Path("..", "linux", "20-lenlab.rules"), build / "linux" / "20-lenlab.rules")
 
     # Package
-    with zipfile.ZipFile(os.path.join("build", "%s.zip" % version.release_name), "w") as package:
-        for root, dirs, files in os.walk(build):
-            for name in files:
-                assert root.startswith(build)
-                package.write(os.path.join(root, name), os.path.join(root[len(build):], name))
+    if version.sys == "Darwin":
+        cmd = ["hdiutil", "create", "-volname", version.release_name, "-srcFolder", build,
+               "-ov", "-format", "UDZO",
+               os.path.join("build", "%s.dmg" % version.release_name)]
+        subprocess.call(cmd)
+    else:
+        with zipfile.ZipFile(os.path.join("build", "%s.zip" % version.release_name), "w") as package:
+            for root, dirs, files in os.walk(build):
+                for name in files:
+                    assert root.startswith(build)
+                    package.write(os.path.join(root, name), os.path.join(root[len(build):], name))
 
 
 def main():
