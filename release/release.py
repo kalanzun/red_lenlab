@@ -108,6 +108,12 @@ class Version:
     minor_pattern = Pattern("#define MINOR (\d+)$")
     revision_pattern = Pattern("#define REVISION (\d+)$")
 
+    sys_pattern = {
+        "Windows": "win",
+        "Linux": "linux",
+        "Darwin": "mac",
+    }
+
     def __init__(self):
         with self.version_h.open() as file:
             data = file.readlines()
@@ -124,11 +130,9 @@ class Version:
         #self.revision = max(self.lenlab_revision, self.firmware_revision)
 
         self.sys = platform.system()
+        self.sys_name = self.sys_pattern[self.sys]
 
-        if self.sys == "Windows":
-            self.release_name = "lenlab_{}-{}_win".format(self.major, self.minor)#, self.revision)
-        elif self.sys == "Linux":
-            self.release_name = "lenlab_{}-{}_linux".format(self.major, self.minor)#, self.revision)
+        self.release_name = "lenlab_{}-{}_{}".format(self.major, self.minor, self.sys_name)#, self.revision)
 
 
 class QtWindows:
@@ -152,6 +156,24 @@ class QtWindows:
         with open(self.path / "qtenv2.bat") as file:
             env_path = single(list(self.qtenv2bat_pattern(file)), "Qt tools path information from qtenv2.bat not found")
         self.tools_path = env_path.group(2)
+
+
+class QtDarwin:
+
+    base_path = Path("~", "Qt")
+    arch = "clang_64"
+
+    version_pattern = Pattern("(\d+\.\d+\.\d+)$")
+
+    def __init__(self):
+        assert access(self.base_path, R_OK), "Qt base path '{}' not found".format(self.base_path)
+
+        self.versions = [LooseVersion(res.group(1)) for res in self.version_pattern(listdir(self.base_path))]
+        assert len(self.versions) > 0, "No Qt versions found"
+
+        self.versions.sort()
+        self.version = self.versions[-1]
+        self.path = self.base_path / str(self.version) / self.arch / "bin"
 
 
 class QwtWindows:
@@ -214,6 +236,18 @@ class LenlabWindows:
         assert access(self.lenlab, R_OK), "No lenlab found"
 
 
+class LenlabDarwin:
+
+    base_path = Path("..", "..")
+    arch = "clang_64bit"
+
+    def __init__(self, version, qt):
+        self.path = self.base_path / "build-red_lenlab-Desktop_Qt_{}_{}_{}_{}-Release".format(
+            qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch) / "lenlab" / "app"
+        self.lenlab = self.path / "lenlab.app"
+        assert access(self.lenlab, R_OK), "No lenlab found"
+
+
 class Doc:
 
     path = Path("..", "doc", "_build", "html")
@@ -231,6 +265,9 @@ def build():
         qwt = QwtWindows()
         libusb = LibusbWindows()
         lenlab = LenlabWindows(version, qt)
+    elif version.sys == "Darwin":
+        qt = QtDarwin()
+        lenlab = LenlabDarwin(version, qt)
     else:
         lenlab = Lenlab(version)
 
@@ -280,6 +317,21 @@ def build():
         env["VERSION"] = "{}.{}".format(version.major, version.minor)
         call(cmd, env=env, cwd=str(build))
         rmtree(build / "lenlab")
+
+    elif version.sys == "Darwin":
+        copytree(lenlab.lenlab, build / "lenlab.app")
+
+        env = dict(environ)
+        env["PATH"] = "{}:{}".format(qt.path, env["PATH"])
+
+        cmd = [
+            "install_name_tool", "-change", "qwt.framework/Versions/6/qwt",
+            "/usr/local/qwt-6.1.5-svn/lib/qwt.framework/Versions/6/qwt",
+            "lenlab.app/Contents/MacOS/lenlab"]
+        call(cmd, env=env, cwd=str(build))
+
+        cmd = ["macdeployqt", "lenlab.app"]
+        call(cmd, env=env, cwd=str(build))
 
     else:
         raise Exception("Unknown system.")
