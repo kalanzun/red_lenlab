@@ -20,7 +20,7 @@
 """
 
 import platform
-import distutils.version.LooseVersion
+import distutils.version
 import os
 import re
 import shutil
@@ -75,7 +75,7 @@ class Version:
 
 class QtWindows:
 
-    base_path = Path("C:", "/Qt")
+    base_path = os.path.join("C:", "/Qt")
     arch = "mingw73_32"
 
     version_pattern = Pattern(r"(\d+\.\d+\.\d+)$")
@@ -152,7 +152,7 @@ class Firmware:
 
     def __init__(self, version):
         self.firmware = "lenlab_firmware_{}-{}.out".format(version.major, version.minor)#, version.firmware_revision)
-        assert access(self.path / self.firmware, R_OK), "No firmware found"
+        assert os.access(os.path.join(self.path, self.firmware), os.R_OK), "No firmware found"
 
 
 class Lenlab:
@@ -160,8 +160,8 @@ class Lenlab:
     path = os.path.join("..", "..", "build-red_lenlab-Desktop-Release", "lenlab", "app")
 
     def __init__(self, version):
-        self.lenlab = self.path / "lenlab"
-        assert access(self.lenlab, R_OK), "No lenlab found"
+        self.lenlab = os.path.join(self.path, "lenlab")
+        assert os.access(self.lenlab, os.R_OK), "No lenlab found"
 
 
 class LenlabWindows:
@@ -312,7 +312,7 @@ def build():
 
 
 def main():
-    os.chdir(os.dirname(os.abspath(__file__)))
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     build()
 
