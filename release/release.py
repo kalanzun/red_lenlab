@@ -244,20 +244,27 @@ def build():
         call(cmd, env=env)
 
     elif version.sys == "Linux":
-        mkdir(build / "lenlab" / "usr" / "bin", parents=True)
-        copy(lenlab.lenlab, Path("build", version.release_name, "lenlab", "usr", "bin", "lenlab"))
+        path = os.path.join(build, "lenlab", "usr", "bin")
+        os.makedirs(path)
+        shutil.copy(lenlab.lenlab, os.path.join(path, "lenlab"))
 
-        mkdir(build / "lenlab" / "usr" / "share" / "applications", parents=True)
-        copy(Path("..", "linux", "lenlab.desktop"), build / "lenlab" / "usr" / "share" / "applications" / "lenlab.desktop")
+        path = os.path.join(build, "lenlab", "usr", "share", "applications")
+        os.makedirs(path)
+        shutil.copy(os.path.join("..", "linux", "lenlab.desktop"), os.path.join(path, "lenlab.desktop"))
+
+        path = os.path.join(build, "lenlab", "usr", "share", "icons", "hicolor", "scaleable", "apps")
+        os.makedirs(path)
+        shutil.copy(os.path.join("..", "linux", "lenlab.svg"), os.path.join(path, "lenlab.svg"))
         
-        mkdir(build / "lenlab" / "usr" / "share" / "icons" / "hicolor" / "scaleable" / "apps", parents=True)
-        copy(Path("..", "linux", "lenlab.svg"), build / "lenlab" / "usr" / "share" / "icons" / "hicolor" / "scaleable" / "apps" / "lenlab.svg")
-        
-        cmd = ["../../linuxdeployqt-6-x86_64.AppImage", "lenlab/usr/share/applications/lenlab.desktop", "-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake", "-appimage"]
-        env = dict(environ)
+        cmd = [
+            "../../linuxdeployqt-6-x86_64.AppImage",
+            "lenlab/usr/share/applications/lenlab.desktop",
+            "-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake",
+            "-appimage"]
+        env = dict(os.environ)
         env["VERSION"] = "{}.{}".format(version.major, version.minor)
-        call(cmd, env=env, cwd=str(build))
-        rmtree(build / "lenlab")
+        subprocess.call(cmd, env=env, cwd=build)
+        shutil.rmtree(os.path.join(build, "lenlab"))
 
     elif version.sys == "Darwin":
         shutil.copytree(lenlab.lenlab, os.path.join(build, "lenlab.app"))
@@ -265,6 +272,7 @@ def build():
         env = dict(os.environ)
         env["PATH"] = "%s:%s" % (qt.path, env["PATH"])
 
+        # TODO find qwt installation version and generate path
         cmd = [
             "install_name_tool", "-change", "qwt.framework/Versions/6/qwt",
             "/usr/local/qwt-6.1.5-svn/lib/qwt.framework/Versions/6/qwt",
@@ -297,8 +305,8 @@ def build():
 
     # Linux
     if version.sys == "Linux":
-        mkdir(build / "linux")
-        copy(Path("..", "linux", "20-lenlab.rules"), build / "linux" / "20-lenlab.rules")
+        os.mkdir(os.path.join(build, "linux"))
+        shutil.copy(os.path.join("..", "linux", "20-lenlab.rules"), os.path.join(build, "linux", "20-lenlab.rules"))
 
     # Package
     if version.sys == "Darwin":
