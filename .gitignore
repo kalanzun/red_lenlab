@@ -3,4 +3,4 @@ libusb/
 *.wp[ru]
 .ipynb_checkpoints/
 red_lenlab.pro.user
-
+.idea/

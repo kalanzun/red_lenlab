@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="de" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="de" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Vorbereitung &mdash; Lenlab 7.3 Dokumentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script type="text/javascript" src="_static/translations.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Stichwortverzeichnis" href="genindex.html" />
+    <link rel="search" title="Suche" href="search.html" />
+    <link rel="next" title="Logger" href="logger.html" />
+    <link rel="prev" title="Lenlab red (Version 7)" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Lenlab
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                7.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Inhaltsverzeichnis:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vorbereitung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#flashen-der-firmware">Flashen der Firmware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#windows-64-bit-systeme">Windows 64-bit Systeme</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#andere-systeme">Andere Systeme</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lenlab-ausfuhren">Lenlab ausführen</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">Logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oscilloscope.html">Oszilloskop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signal.html">Signalgenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frequency.html">Frequenzanalyse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Mitwirkende</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">GNU General Public License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Lenlab</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Vorbereitung</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/preparation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="vorbereitung">
+<h1>Vorbereitung<a class="headerlink" href="#vorbereitung" title="Link zu dieser Überschrift">¶</a></h1>
+<img alt="_images/launchpad_usb_ports.svg" src="_images/launchpad_usb_ports.svg" /><p>Das Launchpad hat zwei USB-Anschlüsse, einen für das Programmieren und Testen
+der Firmware (DEBUG) und einen für die Kommunikation zwischen der Firmware und
+Lenlab auf dem Computer (DEVICE). Der POWER-Schalter wählt, von welchem
+USB-Anschluss die Versorgungsspannung bezogen wird. Wenn die Stromversorgung
+eingeschaltet ist, leuchtet die grüne POWER-LED, welche sich ebenfalls in dem
+Bereich links oben befindet.</p>
+<div class="section" id="flashen-der-firmware">
+<h2>Flashen der Firmware<a class="headerlink" href="#flashen-der-firmware" title="Link zu dieser Überschrift">¶</a></h2>
+<p>Lenlab benötigt eine eigene Firmware auf dem LaunchPad. Das LaunchPad besitzt
+ein integriertes Programmiergerät, um die Firmware in den Microcontroller zu
+laden. Das Programm <a class="reference external" href="https://www.ti.com/tool/UNIFLASH">Uniflash</a> von Texas
+Instruments kann dieses Programmiergerät ansprechen.</p>
+<p>Das Programmiergerät befindet sich auf der Oberseite des Launchpad und hat dort
+einen eigenen USB-Anschluss, der mit DEBUG beschriftet ist. Zum Programmieren bitte
+den DEBUG-Anschluss an der schmalen Seite des Launchpad mit dem Computer verbinden
+und den Power-Schalter ebenfalls auf DEBUG umstellen. Das Launchpad wird dann
+über den DEBUG-Anschluss mit Strom versorgt und die grüne Power-LED leuchtet.</p>
+<p>Das Lenlab-Softwarepaket für Windows enthält eine Kopie von Uniflash für
+64-bit Systeme (z.B. die meisten Windows 8 und 10). Die Anleitung dafür befindet
+im folgenden Abschnitt <a class="reference internal" href="#flash-windows-64"><span class="std std-ref">Windows 64-bit Systeme</span></a>. Für andere Betriebssysteme oder
+Windows 32-bit Systeme erhalten Sie Uniflash direkt von Texas Instruments und
+eine Anleitung zur Verwendung im Abschnitt <a class="reference internal" href="#flash-other-systems"><span class="std std-ref">Andere Systeme</span></a>.</p>
+<div class="section" id="windows-64-bit-systeme">
+<span id="flash-windows-64"></span><h3>Windows 64-bit Systeme<a class="headerlink" href="#windows-64-bit-systeme" title="Link zu dieser Überschrift">¶</a></h3>
+<p>Im Unterverzeichnis <cite>uniflash_windows_64</cite> im Lenlab-Softwarepaket befindet sich
+das Programm zum Flashen der Firmware mit fertig eingestellten Parametern für
+die Lenlab Firmware und das LaunchPad.</p>
+<ul class="simple">
+<li>Öffnen Sie das Verzeichnis <cite>uniflash_windows_64</cite> im Explorer.</li>
+<li>Installieren Sie die Treiber durch Starten der <cite>one_time_setup.bat</cite>. Das ist
+pro Computer nur einmal nötig.</li>
+<li>Starten Sie die Programmierung mit der Datei <cite>dslite.bat</cite>. Die Programmierung
+dauert einen Moment. Am Ende steht in der vorletzten Zeile „Success“ wenn die
+Programmierung erfolgreich war oder „Failed“ bei Misserfolg.</li>
+</ul>
+</div>
+<div class="section" id="andere-systeme">
+<span id="flash-other-systems"></span><h3>Andere Systeme<a class="headerlink" href="#andere-systeme" title="Link zu dieser Überschrift">¶</a></h3>
+<p>Laden Sie <a class="reference external" href="https://www.ti.com/tool/UNIFLASH">Uniflash</a> von Texas Instruments
+herunter, installieren Sie es und starten Sie es.</p>
+<ul class="simple">
+<li>Wählen Sie EK-TM4C123GXL (Launchpad) bei „Choose your device“.</li>
+<li>Stellaris In-Circuit Debug Interface ist richtig</li>
+<li>Browse, wählen Sie das passende Firmware Binary aus dem Lenlab-Softwarepaket,
+Unterverzeichnis <cite>firmware</cite>.</li>
+<li>Starten Sie die Programmierung mit „Load Image“.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="lenlab-ausfuhren">
+<h2>Lenlab ausführen<a class="headerlink" href="#lenlab-ausfuhren" title="Link zu dieser Überschrift">¶</a></h2>
+<p>Das PC Programm befindet sich im Unterordner <cite>lenlab</cite>. Starten Sie <cite>lenlab.exe</cite>.</p>
+<p>Verbinden Sie den DEVICE USB-Anschluss an der Seite des Launchpad mit dem Computer.
+Stellen Sie den Power-Schalter auf DEVICE. Die grüne Power-LED leuchtet.</p>
+<p>Lenlab sucht nach dem Board und verbindet sich, wenn es eines findet. Es meldet
+dann im Nachrichten-Fenster „Lenlab-Board bereit.“</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="logger.html" class="btn btn-neutral float-right" title="Logger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Lenlab red (Version 7)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Christoph Simon
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
