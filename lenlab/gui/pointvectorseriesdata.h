@@ -24,22 +24,23 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "model/series.h"
 #include "qwt_series_data.h"
 
-
 namespace gui {
 
 class PointVectorSeriesData : public QwtSeriesData<QPointF>
 {
+    model::pSeries series;
+    std::size_t channel;
+
 public:
-    PointVectorSeriesData(QSharedPointer<model::Series> series, uint32_t channel);
+    PointVectorSeriesData(model::pSeries const & series, std::size_t channel);
+    PointVectorSeriesData(PointVectorSeriesData const &) = delete;
+
+    PointVectorSeriesData & operator=(PointVectorSeriesData const &) = delete;
 
     virtual QRectF boundingRect() const;
 
     virtual size_t size() const;
     virtual QPointF sample( size_t i ) const;
-
-private:
-    QSharedPointer<model::Series> series;
-    uint32_t channel;
 };
 
 } // namespace gui

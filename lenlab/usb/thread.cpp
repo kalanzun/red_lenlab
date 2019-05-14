@@ -20,27 +20,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "thread.h"
 #include "libusb.h"
-#include <QDebug>
+//#include <QDebug>
 
 using namespace usb;
 
-Thread::Thread(QObject *parent) : QThread(parent)
+Thread::Thread(QObject *parent)
+    : QThread(parent)
 {
-    qDebug("thread");
+    //qDebug("thread");
 }
 
 Thread::~Thread()
 {
-    qDebug("~thread");
+    //qDebug("~thread");
     wait();
 }
 
 void
 Thread::run()
 {
-    qDebug("thread start");
+    //qDebug("thread start");
     while(!isInterruptionRequested()) {
         libusb_handle_events(nullptr);
     }
-    qDebug("thread stop");
+    //qDebug("thread stop");
 }

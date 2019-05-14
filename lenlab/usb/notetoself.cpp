@@ -22,10 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using namespace usb;
 
-NoteToSelf::NoteToSelf(Transfer *transfer, Active *active, pMessage message) :
-    transfer(transfer),
-    active_guard(active),
-    message(message)
+NoteToSelf::NoteToSelf(Transfer *transfer, Active *active, pPacket packet)
+    : transfer(transfer)
+    , active_guard(active)
+    , packet(packet)
 {
 
 }

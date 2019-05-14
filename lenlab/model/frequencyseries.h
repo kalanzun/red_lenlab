@@ -22,7 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define FREQUENCYSERIES_H
 
 #include "series.h"
+
 #include <QObject>
+
 #include <array>
 
 namespace model {
@@ -31,36 +33,40 @@ class FrequencySeries : public Series
 {
     Q_OBJECT
 
-public:
-    FrequencySeries();
-
-    static const uint32_t start_index = 34;
-    static const uint32_t stop_index = 129;
-
-    static const uint32_t channel_length = 3;
-    static const uint32_t values_length = stop_index - start_index;
-
-    void append(uint32_t channel, double value);
-    void clear();
-
-    uint32_t getLength(uint32_t channel);
-
-    double getX(uint32_t i);
-    double getY(uint32_t i, uint32_t channel);
-
-    double getMinX();
-    double getMaxX();
-    double getMinY(uint32_t channel);
-    double getMaxY(uint32_t channel);
-
-private:
     typedef Series super;
 
-    std::array< uint32_t, channel_length > index;
-    std::array< double, channel_length > MinY;
-    std::array< double, channel_length > MaxY;
-    std::array< std::array< double, values_length >, channel_length > data;
+    static const std::size_t m_start_index = 34;
+    static const std::size_t m_stop_index = 129;
 
+    static const std::size_t m_channels = 3;
+    static const std::size_t m_length = m_stop_index - m_start_index;
+
+    std::array< std::size_t, m_channels > index;
+    std::array< double, m_channels > MinY;
+    std::array< double, m_channels > MaxY;
+    std::array< std::array< double, m_length >, m_channels > data;
+
+public:
+    FrequencySeries();
+    FrequencySeries(FrequencySeries const &) = delete;
+
+    FrequencySeries & operator=(FrequencySeries const &) = delete;
+
+    void append(std::size_t channel, double value);
+
+    std::size_t getChannels() const;
+    std::size_t getLength(std::size_t channel) const;
+
+    double getX(std::size_t i) const;
+    double getY(std::size_t i, std::size_t channel) const;
+
+    double getMinX() const;
+    double getMaxX() const;
+    double getMinY(std::size_t channel) const;
+    double getMaxY(std::size_t channel) const;
+
+    std::size_t startIndex() const;
+    std::size_t stopIndex() const;
 };
 
 } // namespace model

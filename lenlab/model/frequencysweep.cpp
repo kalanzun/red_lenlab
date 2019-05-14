@@ -19,129 +19,126 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "frequencysweep.h"
-#include "lenlab.h"
+
 #include "config.h"
+#include "lenlab.h"
+
 #include <QDebug>
-#include <QTimerEvent>
-#include <complex>
 #include <QSaveFile>
+
+#include <complex>
 
 namespace model {
 
-Frequencysweep::Frequencysweep(Lenlab *parent) : Component(parent), current(new FrequencySeries())
+static int p_oscilloscope_data_type_id = qRegisterMetaType<Frequencysweep::pOscilloscopeData>("pOscilloscopeData");
+
+Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator)
+    : Component(lenlab, board)
+    , m_signalgenerator(signalgenerator)
+    , m_current(new FrequencySeries())
 {
-    connect(this, SIGNAL(calculate()),
-            this, SLOT(on_calculate()),
+    connect(&m_signalgenerator, &Signalgenerator::succeeded,
+            this, &Frequencysweep::on_signalgenerator_succeeded);
+    connect(&m_signalgenerator, &Signalgenerator::failed,
+            this, &Frequencysweep::on_signalgenerator_failed);
+
+    stepTimer.setInterval(m_task_delay);
+    stepTimer.setSingleShot(true);
+    connect(&stepTimer, &QTimer::timeout,
+            this, &Frequencysweep::on_step);
+
+    connect(this, &Frequencysweep::calculate,
+            this, &Frequencysweep::on_calculate,
             Qt::QueuedConnection);
-
 }
 
-QString
-Frequencysweep::getNameNominative()
+QString const &
+Frequencysweep::getNameNominative() const
 {
-    return "ie Frequenzanalyse";
+    static QString name("die Frequenzanalyse");
+    return name;
 }
 
-QString
-Frequencysweep::getNameAccusative()
+QString const &
+Frequencysweep::getNameAccusative() const
 {
-    return "ie Frequenzanalyse";
+    static QString name("die Frequenzanalyse");
+    return name;
+}
+
+pSeries
+Frequencysweep::getSeries() const
+{
+    return m_current;
 }
 
 void
 Frequencysweep::start()
 {
+    //qDebug() << "Frequencysweep::start";
+
     super::start();
 
-    pending = 0;
-    wait_for_update = 0;
-    lenlab->signalgenerator->lock();
+    m_signalgenerator.lock();
 
-    current->clear();
-    index = current->start_index;
-    lenlab->signalgenerator->stop();
-    lenlab->signalgenerator->setAmplitude(14);
-    lenlab->signalgenerator->setSecond(1);
+    m_current.reset(new FrequencySeries());
+    emit seriesChanged(m_current);
+    m_index = m_current->startIndex();
 
-    wait_for_step = 1;
-    startTimer(100);
+    m_signalgenerator.setAmplitude(14);
+    m_signalgenerator.setFrequency(m_index);
+    m_signalgenerator.setSecond(1);
+
+    m_signalgenerator_error_counter = 0;
+    if (m_signalgenerator.active()) {
+        m_signalgenerator.setSine();
+    } else {
+        m_signalgenerator.start();
+    }
 }
 
 void
-Frequencysweep::stop()
+Frequencysweep::on_signalgenerator_succeeded(protocol::pTask const &)
 {
-    super::stop();
+    //qDebug() << "Frequencysweep::on_sine";
 
-    pending = 0;
-    wait_for_update = 0;
-    lenlab->signalgenerator->stop();
-    lenlab->signalgenerator->unlock();
+    if (!mActive) return;
+
+    stepTimer.start(); // wait a little for the system to settle
 }
 
 void
-Frequencysweep::step()
+Frequencysweep::on_signalgenerator_failed(protocol::pTask const & task)
 {
-    if (!m_active)
+    if (!mActive) return;
+
+
+    if (m_signalgenerator_error_counter < 3) {
+        ++m_signalgenerator_error_counter;
+        auto msg = QString("%1. Wiederhole.").arg(task->getErrorMessage());
+        emit mLenlab.logMessage(msg);
+        m_signalgenerator.setSine();
+    } else {
+        emit mLenlab.logMessage(task->getErrorMessage());
+        mLenlab.reset();
+    }
+}
+
+void
+Frequencysweep::on_step()
+{
+    //qDebug() << "Frequencysweep:on_step";
+
+    if (!mActive) return;
+
+    if (!mBoard.isOpen()) {
         return;
+    }
 
-    qDebug() << "step";
-
-    lenlab->signalgenerator->setFrequency(index);
-    wait_for_update = 1;
-    lenlab->signalgenerator->setSine();
-}
-
-void
-Frequencysweep::on_updated()
-{
-    if (!wait_for_update)
+    if (!mBoard.isReady()) {
         return;
-
-    wait_for_update = 0;
-
-    // wait a little for the signalgenerator to settle
-    qDebug("startTimer");
-    if (index == current->start_index)
-        startTimer(500);
-    else
-        startTimer(10);
-}
-
-void
-Frequencysweep::timerEvent(QTimerEvent *event)
-{
-    killTimer(event->timerId());
-
-    qDebug("timerEvent");
-
-    if (wait_for_step) {
-        wait_for_step = 0;
-        step();
     }
 
-    else {
-        pending = 1;
-        try_to_start();
-    }
-}
-
-void
-Frequencysweep::try_to_start()
-{
-    if (pending && lenlab->available()) {
-        pending = 0;
-        restart();
-    }
-}
-
-void
-Frequencysweep::restart()
-{
-    //qDebug() << "frequencysweep restart";
-
-    incoming.reset(new Waveform());
-
-    samplerate = 0;
     /*
     if (index >= 66)
         samplerate = 0;
@@ -151,102 +148,140 @@ Frequencysweep::restart()
         samplerate = 3;
     */
 
-    auto com = lenlab->initCommunication();
-    connect(com, SIGNAL(reply(pCommunication, usb::pMessage)),
-            this, SLOT(on_reply(pCommunication, usb::pMessage)));
-    auto cmd = usb::newCommand(startOscilloscope);
-    cmd->setBodyLength(0);
-    cmd->setType(IntArray);
-    cmd->setInt(samplerate);
-    com->send(cmd);
+    m_samplerate = 0;
+
+    QVector<uint32_t> args;
+    args.append(m_samplerate);
+
+    protocol::pTask task(new protocol::Task(::startOscilloscope));
+    task->getCommand()->setUInt32Vector(args);
+    connect(task.data(), &protocol::Task::succeeded,
+            this, &Frequencysweep::on_succeeded);
+    connect(task.data(), &protocol::Task::failed,
+            this, &Frequencysweep::on_failed);
+    mBoard.queueTask(task);
 }
 
 void
-Frequencysweep::on_reply(const pCommunication &com, const usb::pMessage &reply)
+Frequencysweep::on_succeeded(protocol::pTask const & task)
 {
-    //qDebug("receive");
-    uint8_t *buffer = reply->getBody();
-    int16_t *data = (int16_t *) (reply->getBody() + 22);
+    //qDebug() << "Frequencysweep::on_succeeded";
 
-    uint8_t channel = buffer[0];
-    uint8_t last_package = buffer[1];
-    //uint8_t count = buffer[2];
-    //qDebug() << "receive" << count << channel << last_package;
+    if (!mActive) return;
 
-    for (uint32_t i = 1; i < 500; i++) {
-        incoming->append(channel, (((double) (data[i] >> 2)) / 1024.0 - 0.5) * 3.3);
+    std::array< std::size_t, m_channels > index = {0};
+    pOscilloscopeData waveform(new OscilloscopeData());
+
+    for (auto reply: task->getReplies()) {
+        uint16_t *data = reply->getUInt16Buffer() + m_uint16_offset;
+
+        std::size_t channel = reply->getHead()[2];
+        //uint8_t count = buffer[2];
+        //qDebug() << "receive" << count << channel << last_package;
+
+        Q_ASSERT(channel < m_channels);
+
+        for (std::size_t i = 0; i < reply->getUInt16BufferLength() - m_uint16_offset; ++i) {
+            Q_ASSERT(index[channel] < waveform->at(channel).size());
+            waveform->at(channel).at(index[channel]) = (static_cast< double >(data[i] >> 2) / 1024.0 - 0.5) * 3.3;
+            ++index[channel];
+        }
     }
 
-    if (last_package) {
-        //qDebug() << "last package" << incoming->getLength(0) << incoming->getLength(1);
-
-        //incoming->setView(incoming->getLength(0));
-
-        com->deleteLater();
-        emit calculate();
-
+    if (!(index[0] == waveform->at(0).size() && index[1] == waveform->at(1).size())) {
+        if (m_error_counter < 3) {
+            emit mLenlab.logMessage("Unvollständige Daten empfangen. Wiederhole.");
+            ++m_error_counter;
+            stepTimer.start();
+        } else {
+            emit mLenlab.logMessage("Unvollständige Daten empfangen.");
+            mLenlab.reset();
+        }
+    } else {
+        m_error_counter = 0;
+        emit calculate(waveform);
     }
-
 }
 
 void
-Frequencysweep::on_calculate()
+Frequencysweep::on_calculate(pOscilloscopeData waveform)
 {
-    //qDebug("on_calculate");
+    //qDebug() << "Frequencysweep::on_calculate";
 
-    if (!m_active)
-        return;
+    if (!mActive) return;
 
-    auto current_samplerate = samplerate;
-    auto current_index = index;
+    auto index = m_index;
+    //auto samplerate = m_samplerate;
 
-    index++;
-    if (index < current->stop_index) {
-        step();
+    ++m_index;
+    if (m_index < m_current->stopIndex()) {
+        m_signalgenerator.setFrequency(m_index);
+
+        m_signalgenerator_error_counter = 0;
+        m_signalgenerator.setSine();
     }
     else {
         stop();
     }
 
-    double f = lenlab->signalgenerator->getFrequency(current_index);
+    double f = m_signalgenerator.getFrequency(index);
 
     std::complex<double> sum0, sum1, y;
     double value, angle, x;
 
     double pi = std::acos(-1);
-    std::complex<double> i(0, 1);
+    std::complex<double> j(0, 1);
 
     sum0 = 0;
     sum1 = 0;
 
-    incoming->setTrigger(0);
-
-    for (uint32_t idx = 0; idx < incoming->getDataLength(0); idx++) {
-        x = 2 * pi * f * 1e-6 * (1<<current_samplerate) * ((double) idx - (incoming->getDataLength(0) / 2));
-        y = std::sin(x) + i * std::cos(x);
-        sum0 += incoming->getY(idx, 0) * y;
-        sum1 += incoming->getY(idx, 1) * y;
+    for (std::size_t i = 0; i < waveform->at(0).size(); ++i) {
+        //x = 2 * pi * f * 1e-6 * (1<<samplerate) * ((double) i - (waveform->at(0).size() / 2));
+        x = 2 * pi * f * 1e-6 * static_cast< double >(i);
+        y = std::sin(x) + j * std::cos(x);
+        sum0 += y * waveform->at(0).at(i);
+        sum1 += y * waveform->at(1).at(i);
     }
 
     std::complex<double> transfer_fct = sum1 / sum0;
+
     value = 20.0 * std::log10(std::abs(transfer_fct));
     angle = std::arg(transfer_fct) / pi * 180;
 
     if (angle > 180) angle = 360 - angle;
     if (angle < -180) angle = 360 + angle;
 
-    qDebug() << "frequency" << current_index << f;
+    //qDebug() << "frequency" << index << f;
 
-    current->append(0, f);
-    current->append(1, value);
-    current->append(2, angle);
+    m_current->append(0, f);
+    m_current->append(1, value);
+    m_current->append(2, angle);
 
-    emit replot();
+    emit seriesUpdated();
 }
 
-QSharedPointer<FrequencySeries> Frequencysweep::getWaveform()
+void Frequencysweep::on_failed(protocol::pTask const & task)
 {
-    return current;
+    qDebug() << task->getErrorMessage();
+    emit mLenlab.logMessage(task->getErrorMessage());
+    mLenlab.reset();
+}
+
+void
+Frequencysweep::stop()
+{
+    super::stop();
+
+    // unlock first, then signalgenerator handles an error on its own
+    m_signalgenerator.unlock();
+    m_signalgenerator.stop();
+}
+
+void Frequencysweep::reset()
+{
+    super::reset();
+
+    stepTimer.stop();
 }
 
 void
@@ -265,8 +300,8 @@ Frequencysweep::save(const QString &fileName)
 
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
-    for (uint32_t i = 0; i < current->getLength(0); i++) {
-        stream << current->getX(i) << DELIMITER << current->getY(i, 1) << DELIMITER << current->getY(i, 2) << "\n";
+    for (uint32_t i = 0; i < m_current->getLength(0); i++) {
+        stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 1) << DELIMITER << m_current->getY(i, 2) << "\n";
     }
 
     file.commit();

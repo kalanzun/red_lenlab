@@ -1,4 +1,6 @@
 /*
+ * lenlab_protocol.h
+ *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -30,14 +32,16 @@ command packets, up to 64 bytes, from host to device
 reply packets, up to 64 bytes, from device to host
 data packets, 1024 bytes, from device to host only
 
-packet header, 2 bytes
+packet header, 4 bytes
 - one byte packet id (command name or reply name)
 - one byte argument type (this is a helper for checking of programming errors during encoding and decoding)
-
+- two bytes for custom use, int alignment
  */
 
-#define LENLAB_PACKET_HEAD_LENGTH 2
-#define LENLAB_PACKET_BODY_LENGTH 62
+#define LENLAB_PACKET_HEAD_LENGTH 4
+#define LENLAB_PACKET_BODY_LENGTH 60 // command and reply packet
+
+// in case of changes, please also update lenlab/protocol/message.cpp
 
 enum Command {
     noCommand,
@@ -47,7 +51,11 @@ enum Command {
     setSignalSine,
     stopSignal,
     startOscilloscope,
-    startOscilloscopeTrigger,
+    startTrigger,
+    startLogger,
+    stopLogger,
+    startOscilloscopeLinearTestData,
+    startTriggerLinearTestData,
     NUM_COMMANDS
 };
 
@@ -56,8 +64,12 @@ enum Reply {
     Init,
     Name,
     Version,
-    SignalSine,
+    Signal,
     OscilloscopeData,
+    Oscilloscope,
+    LoggerData,
+    Logger,
+    Error,
     NUM_REPLIES
 };
 
@@ -71,4 +83,3 @@ enum Type {
 };
 
 #endif // LENLAB_PROTOCOL_H
-

@@ -1,22 +1,26 @@
-/*
-
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
+//*****************************************************************************
+//
+// Startup code for use with TI's Code Composer Studio.
+//
+// Copyright (c) 2011-2014 Texas Instruments Incorporated.  All rights reserved.
+// Software License Agreement
+// 
+// Software License Agreement
+//
+// Texas Instruments (TI) is supplying this software for use solely and
+// exclusively on TI's microcontroller products. The software is owned by
+// TI and/or its suppliers, and is protected under applicable copyright
+// laws. You may not combine this software with "viral" open-source
+// software in order to form a larger program.
+//
+// THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
+// NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
+// NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
+// CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+// DAMAGES, FOR ANY REASON WHATSOEVER.
+//
+//*****************************************************************************
 
 #include <stdint.h>
 
@@ -50,15 +54,16 @@ extern uint32_t __STACK_TOP;
 // External declarations for the interrupt handlers used by the application.
 //
 //*****************************************************************************
-#ifdef DEBUG
-extern void UARTStdioIntHandler(void);
+extern void Timer0AHandler();
+extern void ADC0SS0Handler();
+extern void ADC1SS0Handler();
+extern void ADC0SS1Handler();
+extern void ADC1SS1Handler();
+extern void USB0IntHandler();
+extern void SSI0IntHandler();
+#ifdef UART_BUFFERED
+extern void UARTStdioIntHandler();
 #endif
-extern void USBIntHandler(void);
-extern void uDMAErrorHandler(void);
-extern void ADC0IntHandler(void);
-extern void ADC1IntHandler(void);
-extern void Timer0IntHandler(void);
-extern void SSI0IntHandler(void);
 
 //*****************************************************************************
 //
@@ -92,7 +97,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
-#ifdef DEBUG
+#ifdef UART_BUFFERED
     UARTStdioIntHandler,                    // UART0 Rx and Tx
 #else
     IntDefaultHandler,                      // UART0 Rx and Tx
@@ -105,12 +110,12 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM Generator 1
     IntDefaultHandler,                      // PWM Generator 2
     IntDefaultHandler,                      // Quadrature Encoder 0
-    ADC0IntHandler,                         // ADC Sequence 0
-    IntDefaultHandler,                      // ADC Sequence 1
+    ADC0SS0Handler,                         // ADC Sequence 0
+    ADC0SS1Handler,                         // ADC Sequence 1
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    Timer0IntHandler,                       // Timer 0 subtimer A
+    Timer0AHandler,                         // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
     IntDefaultHandler,                      // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B
@@ -135,12 +140,12 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // Hibernate
-    USBIntHandler,                          // USB0
+    USB0IntHandler,                         // USB0
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
-    uDMAErrorHandler,                       // uDMA Error
-    ADC1IntHandler,                         // ADC1 Sequence 0
-    IntDefaultHandler,                      // ADC1 Sequence 1
+    IntDefaultHandler,                      // uDMA Error
+    ADC1SS0Handler,                         // ADC1 Sequence 0
+    ADC1SS1Handler,                         // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2
     IntDefaultHandler,                      // ADC1 Sequence 3
     0,                                      // Reserved

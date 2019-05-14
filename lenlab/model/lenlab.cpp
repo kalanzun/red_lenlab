@@ -19,94 +19,81 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "lenlab.h"
+
 #include <QDebug>
 
 namespace model {
 
-Lenlab::Lenlab(QObject *parent) :
-    QObject(parent),
-    frequencysweep(new Frequencysweep(this)),
-    voltmeter(new Voltmeter(this)),
-    oscilloscope(new Oscilloscope(this)),
-    signalgenerator(new Signalgenerator(this))
+Lenlab::Lenlab(QObject * parent)
+    : QObject(parent)
+    , board()
+    , voltmeter(*this, board)
+    , signalgenerator(*this, board)
+    , oscilloscope(*this, board)
+    , frequencysweep(*this, board, signalgenerator)
 {
-    qDebug() << "Lenlab";
-
-    connect(signalgenerator, SIGNAL(updated()),
-            frequencysweep, SLOT(on_updated()));
-}
-
-Lenlab::~Lenlab()
-{
-    qDebug() << "~Lenlab";
-}
-
-void
-Lenlab::setHandler(usb::Handler *handler)
-{
-    this->handler = handler;
-
-    connect(handler, SIGNAL(ready()),
-            this, SLOT(on_ready()));
+    connect(&board, &protocol::Board::ready,
+            this, &Lenlab::on_ready);
+    connect(&board, &protocol::Board::log,
+            this, &Lenlab::on_log);
+    connect(&board, &protocol::Board::error,
+            this, &Lenlab::on_error);
 }
 
 bool
-Lenlab::isActive()
+Lenlab::isActive() const
 {
-    return frequencysweep->active() || voltmeter->active() || oscilloscope->active();
+    return frequencysweep.active() || voltmeter.active() || oscilloscope.active();
 }
 
 Component *
 Lenlab::getActiveComponent()
 {
-    if (frequencysweep->active())
-        return frequencysweep;
-    if (voltmeter->active())
-        return voltmeter;
-    if (oscilloscope->active())
-        return oscilloscope;
+    if (frequencysweep.active())
+        return &frequencysweep;
+    if (voltmeter.active())
+        return &voltmeter;
+    if (oscilloscope.active())
+        return &oscilloscope;
 
     throw std::exception();
 }
 
-bool
-Lenlab::available()
+void Lenlab::reset()
 {
-    return m_ready && current_com.isNull();
-}
+    emit logMessage("Reset.");
 
-QPointer<Communication>
-Lenlab::initCommunication()
-{
-    if (!current_com.isNull())
-        throw std::exception();
-
-    current_com = new Communication(handler);
-    connect(current_com, SIGNAL(destroyed(QObject *)),
-            this, SLOT(on_comDestroyed(QObject *)));
-
-    return current_com;
+    voltmeter.reset();
+    signalgenerator.reset();
+    oscilloscope.reset();
+    frequencysweep.reset();
 }
 
 void
-Lenlab::on_comDestroyed(QObject *obj)
+Lenlab::lookForBoard()
 {
-    Q_UNUSED(obj);
-    signalgenerator->try_to_setSine();
-    signalgenerator->try_to_stop();
-    oscilloscope->try_to_start();
-    frequencysweep->try_to_start();
+    board.lookForBoard();
 }
 
 void
 Lenlab::on_ready()
 {
-    frequencysweep->ready();
-    voltmeter->ready();
-    oscilloscope->ready();
-    //signalgenerator->ready();
+    auto msg = QString("Lenlab-Board Version %1.%2 verbunden.").arg(board.getVersionMajor()).arg(board.getVersionMinor());
+    emit logMessage(msg);
 
-    m_ready = 1;
+}
+
+void
+Lenlab::on_log(QString const & msg)
+{
+    emit logMessage(msg);
+}
+
+void
+Lenlab::on_error(QString const & msg)
+{
+    emit logMessage(msg);
+    reset();
 }
 
 } // namespace model

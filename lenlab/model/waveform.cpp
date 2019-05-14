@@ -19,21 +19,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "waveform.h"
+
 #include <QDebug>
 
 namespace model {
 
-Waveform::Waveform() : Series()
+Waveform::Waveform()
+    : Series()
+    , index{0, 0}
 {
 
-}
-
-void
-Waveform::append(uint32_t channel, double value)
-{
-    Q_ASSERT(channel < 2);
-    Q_ASSERT(index[channel] < 9000);
-    data[channel][index[channel]++] = value;
 }
 
 void
@@ -42,7 +37,8 @@ Waveform::setSamplerate(double samplerate)
     m_samplerate = samplerate;
 }
 
-double Waveform::samplerate()
+double
+Waveform::samplerate()
 {
     return m_samplerate;
 }
@@ -62,6 +58,7 @@ Waveform::trigger()
 void
 Waveform::setView(uint32_t view)
 {
+    Q_ASSERT(view + m_trigger < data.at(0).size());
     m_view = view;
 }
 
@@ -71,60 +68,61 @@ Waveform::view()
     return m_view;
 }
 
-uint32_t
-Waveform::getLength(uint32_t channel)
+void
+Waveform::append(std::size_t channel, double value)
 {
-    Q_ASSERT(channel < 2);
+    Q_ASSERT(channel < index.size());
+    Q_ASSERT(index[channel] < data[channel].size());
+    data[channel][index[channel]++] = value;
+}
+
+std::size_t
+Waveform::getChannels() const
+{
+    return data.size();
+}
+
+std::size_t
+Waveform::getLength(std::size_t) const
+{
     return m_view;
 }
 
-uint32_t
-Waveform::getDataLength(uint32_t channel)
+double
+Waveform::getX(std::size_t i) const
 {
-    Q_ASSERT(channel < 2);
-    return index[channel];
+    return static_cast< double >((static_cast< int >(m_view) / -2) + static_cast< int >(i)) / m_samplerate * 1000;
 }
 
 double
-Waveform::getX(uint32_t i)
+Waveform::getY(std::size_t i, std::size_t channel) const
 {
-    return (((double) m_view / -2) + i) / m_samplerate * 1000;
+    Q_ASSERT(channel < data.size());
+    Q_ASSERT(m_trigger + i < data[channel].size());
+    return data[channel][m_trigger + i];
 }
 
 double
-Waveform::getY(uint32_t i, uint32_t channel)
+Waveform::getMinX() const
 {
-    if (!(channel < 2))
-        Q_ASSERT(0);
-    if (!((m_trigger + i) < 9000)) {
-        Q_ASSERT(0);
-    }
-    return data[channel][m_trigger+i];
+    return static_cast< double >(static_cast< int >(m_view) / -2) / m_samplerate * 1000;
 }
 
 double
-Waveform::getMinX()
+Waveform::getMaxX() const
 {
-    return (double) m_view / -2 / m_samplerate * 1000;
+    return static_cast< double >(static_cast< int >(m_view) / 2) / m_samplerate * 1000;
 }
 
 double
-Waveform::getMaxX()
+Waveform::getMinY(std::size_t) const
 {
-    return (double) m_view / 2 / m_samplerate * 1000;
-}
-
-double
-Waveform::getMinY(uint32_t channel)
-{
-    Q_UNUSED(channel);
     return -2;
 }
 
 double
-Waveform::getMaxY(uint32_t channel)
+Waveform::getMaxY(std::size_t) const
 {
-    Q_UNUSED(channel);
     return 2;
 }
 

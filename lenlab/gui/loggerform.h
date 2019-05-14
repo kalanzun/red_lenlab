@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+#include "model/series.h"
 #include "qwt_plot_curve.h"
 #include "qwt_plot_grid.h"
 #include <QWidget>
@@ -33,23 +34,33 @@ namespace Ui {
 class LoggerForm;
 }
 
-/**
- * @brief Controls for the Lenlab Logger component.
- */
-
 class LoggerForm : public QWidget
 {
     Q_OBJECT
 
+    Ui::LoggerForm * ui;
+
+    bool pending = false;
+
+    MainWindow * m_main_window = nullptr;
+    model::Lenlab * m_lenlab = nullptr;
+    model::Voltmeter * m_voltmeter = nullptr;
+
+    std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
+
 public:
-    explicit LoggerForm(QWidget *parent = 0);
+    explicit LoggerForm(QWidget * parent = nullptr);
     ~LoggerForm();
 
     void setMainWindow(MainWindow *main_window);
-    void setModel(model::Lenlab *lenlab);
+    void setModel(model::Lenlab * lenlab);
 
-    void saveImage();
     void save();
+    void saveImage();
+
+private:
+    QwtPlotGrid * newGrid();
+    QwtPlotCurve * newCurve(QColor const & color, bool visible);
 
 private slots:
     void on_intervalComboBox_activated(int);
@@ -63,24 +74,16 @@ private slots:
     void on_autoSaveCheckBox_stateChanged(int);
     void on_clearButton_clicked();
 
-    void on_replot();
-    void on_measurementDataChanged(bool);
-    void on_unsavedDataChanged(bool);
-    void on_autoSaveChanged(bool);
-    void on_fileNameChanged(const QString &);
-    void on_channelsChanged(const std::bitset<4> &);
+    void seriesUpdated();
+    void seriesChanged(model::pSeries const &);
 
-private:
-    //QwtPlotCurve *newCurve(model::MinMaxVector *time, model::MinMaxVector *value, const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
+    void measurementDataChanged(bool);
+    void unsavedDataChanged(bool);
+    void autoSaveChanged(bool);
+    void fileNameChanged(const QString &);
+    void channelsChanged(const std::bitset<4> &);
 
-    Ui::LoggerForm *ui;
-
-    MainWindow *main_window;
-    model::Lenlab *lenlab;
-    model::Voltmeter *voltmeter;
-
-    std::array<QwtPlotCurve *, 4> curves; // pointer, no ownership
+    void activeChanged(bool);
 };
 
 

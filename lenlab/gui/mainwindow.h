@@ -22,8 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define GUI_MAINWINDOW_H
 
 #include "model/lenlab.h"
-#include "usb/handler.h"
+
 #include <QMainWindow>
+#include <QPointer>
 
 namespace gui {
 
@@ -31,20 +32,20 @@ namespace Ui {
 class MainWindow;
 }
 
-/**
- * @brief Lenlab main window.
- */
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    Ui::MainWindow * ui;
+    model::Lenlab * m_lenlab = nullptr;
+
+    bool m_signal_checked = false;
+
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget * parent = nullptr);
     ~MainWindow();
 
-    void setModel(model::Lenlab *lenlab);
-    void setHandler(usb::Handler *handler);
+    void setModel(model::Lenlab * lenlab);
 
     bool askToCancelActiveComponent(model::Component *next_component);
 
@@ -53,18 +54,11 @@ private slots:
     void on_signalButton_toggled(bool);
     void on_logButton_toggled(bool);
     void on_tabWidget_currentChanged(int);
-    void on_logMessage(const QString &);
+    void on_logMessage(QString const &);
     void on_actionSaveData_triggered();
     void on_actionSaveImage_triggered();
     void on_actionQuit_triggered();
     void on_actionAbout_triggered();
-
-private:
-    Ui::MainWindow *ui;
-    model::Lenlab *lenlab;
-    usb::Handler *handler;
-
-    bool signal_checked = false;
 };
 
 } // namespace gui

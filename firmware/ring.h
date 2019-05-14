@@ -1,15 +1,33 @@
 /*
  * ring.h
  *
- *  Created on: 17.01.2018
- *      Author: christoph
  */
 
 #ifndef RING_H_
 #define RING_H_
 
 
-#include "memory.h"
+#include "driverlib/debug.h"
+
+
+#define MEMORY_LENGTH 22
+
+#define PAGE_LENGTH 256
+
+
+typedef struct Page {
+    // 4 bytes alignment for uDMA
+    uint32_t buffer[PAGE_LENGTH];
+} tPage;
+
+
+typedef struct Memory {
+    tPage pages[MEMORY_LENGTH];
+    volatile uint32_t lock; // count of pages, which are locked
+} tMemory;
+
+
+extern tMemory memory;
 
 
 typedef struct Ring {
@@ -19,39 +37,83 @@ typedef struct Ring {
     volatile uint32_t write;
     volatile uint32_t read;
     volatile uint32_t release;
-    volatile bool empty;
-    volatile bool full;
-    volatile bool content;
+    volatile unsigned char empty;
+    volatile unsigned char full;
+    volatile unsigned char content;
 } tRing;
+
+
+typedef struct RingIter {
+    tRing *ring;
+    volatile uint32_t read;
+    volatile unsigned char content;
+} tRingIter;
+
+
+inline tPage*
+MemoryLock(tMemory *self, uint32_t length)
+{
+    tPage *page;
+
+    ASSERT(self->lock + length <= MEMORY_LENGTH);
+    page = self->pages + self->lock;
+    self->lock = self->lock + length;
+    return page;
+}
+
+
+inline void
+MemoryUnlock(tMemory *self, uint32_t length)
+{
+    ASSERT(length <= self->lock);
+    self->lock = self->lock - length;
+}
+
+
+inline void
+MemoryInit(tMemory *self)
+{
+    self->lock = 0;
+}
 
 
 inline void
 RingAllocate(tRing *self, uint32_t length)
 {
-    self->pages = MemoryAllocate(&memory, length);
+    self->pages = MemoryLock(&memory, length);
     self->length = length;
     self->acquire = 0;
     self->write = 0;
     self->read = 0;
     self->release = 0;
     self->empty = 1;
+    self->full = 0;
     self->content = 0;
 }
 
-inline bool
+
+inline void
+RingFree(tRing *self)
+{
+    MemoryUnlock(&memory, self->length);
+}
+
+
+inline unsigned char
 RingEmpty(tRing *self)
 {
     return self->empty;
 }
 
-inline bool
+
+inline unsigned char
 RingContent(tRing *self)
 {
     return self->content;
 }
 
 
-inline bool
+inline unsigned char
 RingFull(tRing *self)
 {
     return self->full;
@@ -96,10 +158,27 @@ RingRelease(tRing *self)
 }
 
 
-inline tPage*
-RingGet(tRing *self, uint32_t index)
+inline void
+RingIterInit(tRingIter *self, tRing *ring)
 {
-    return self->pages + index;
+    self->ring = ring;
+    self->read = ring->read;
+    self->content = ring->content;
+}
+
+
+inline tPage*
+RingIterGet(tRingIter *self)
+{
+    return self->ring->pages + self->read;
+}
+
+
+inline void
+RingIterNext(tRingIter *self)
+{
+    self->read = (self->read + 1) % self->ring->length;
+    if (self->read == self->ring->write) self->content = 0;
 }
 
 

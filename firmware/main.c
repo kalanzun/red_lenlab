@@ -1,48 +1,34 @@
-
 /*
  * main.c
  *
-
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
+ */
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "inc/hw_memmap.h"
-#include "inc/hw_ints.h"
+#include "driverlib/debug.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
-#include "driverlib/uart.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/udma.h"
 #include "driverlib/systick.h"
+#include "driverlib/uart.h"
+#include "utils/uartstdio.h"
+
+#include "tests/tests.h"
+#include "adc.h"
+#include "debug.h"
+#include "clock.h"
+#include "int_timer.h"
+#include "logger.h"
+#include "ring.h"
+#include "signal.h"
+#include "ssi.h"
+#include "oscilloscope.h"
+#include "trigger.h"
 #include "command_handler.h"
 #include "reply_handler.h"
-#include "debug.h"
 #include "usb_device.h"
-#include "peripherals.h"
-#include "adc.h"
-#include "timer.h"
-#include "logger.h"
-#include "oscilloscope.h"
-#include "ssi.h"
-#include "signal.h"
 
 
 //*****************************************************************************
@@ -64,19 +50,44 @@ uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
 
 //*****************************************************************************
 //
-// The error routine that is called if an ASSERT fails. (driverlib/debug.h)
+// Peripherals
 //
 //*****************************************************************************
-#ifdef DEBUG
-void
-__error__(char *pcFilename, uint32_t ui32Line)
+const uint32_t peripherals[] = {
+    SYSCTL_PERIPH_GPIOA,
+    SYSCTL_PERIPH_GPIOB,
+    SYSCTL_PERIPH_GPIOC,
+    SYSCTL_PERIPH_GPIOD,
+    SYSCTL_PERIPH_GPIOE,
+    SYSCTL_PERIPH_GPIOF,
+
+    SYSCTL_PERIPH_TIMER0, // int_timer
+    SYSCTL_PERIPH_TIMER1, // adc_timer
+
+    SYSCTL_PERIPH_ADC0,
+    SYSCTL_PERIPH_ADC1,
+
+    SYSCTL_PERIPH_SSI0,
+
+    SYSCTL_PERIPH_UDMA,
+};
+
+#define NUM_PERIPHERALS (sizeof(peripherals) / sizeof(uint32_t))
+
+
+inline void
+ConfigurePeripherals(void)
 {
-    UARTprintf("Error at line %d of %s\n", ui32Line, pcFilename);
-    while(1)
-    {
-    }
+    uint8_t i;
+
+    for (i=0; i<NUM_PERIPHERALS; i++)
+        SysCtlPeripheralEnable(peripherals[i]);
+
+    for (i=0; i<NUM_PERIPHERALS; i++)
+        while(!SysCtlPeripheralReady(peripherals[i]))
+        {
+        }
 }
-#endif
 
 
 //*****************************************************************************
@@ -84,8 +95,7 @@ __error__(char *pcFilename, uint32_t ui32Line)
 // Configure the UART and its pins.  This must be called before UARTprintf().
 //
 //*****************************************************************************
-inline void
-ConfigureUART(void)
+inline void ConfigureUART(void)
 {
 #ifdef DEBUG
     //
@@ -100,6 +110,37 @@ ConfigureUART(void)
     //
     UARTStdioConfig(0, 115200, 80000000);
 #endif
+}
+
+
+//*****************************************************************************
+//
+// The error routine that is called if an ASSERT fails. (driverlib/debug.h)
+//
+//*****************************************************************************
+#ifdef DEBUG
+void __error__(char *pcFilename, uint32_t ui32Line)
+{
+    UARTprintf("Error at line %d of %s\n", ui32Line, pcFilename);
+    while (1)
+    {
+    }
+}
+#endif
+
+
+//*****************************************************************************
+//
+// uDMA
+//
+//*****************************************************************************
+void
+uDMAErrorHandler(void)
+{
+    //uint32_t status;
+    //status = uDMAErrorStatusGet();
+    DEBUG_PRINT("uDMA Error\n");
+    uDMAErrorStatusClear();
 }
 
 
@@ -127,26 +168,45 @@ ConfigureuDMA(void)
 
 //*****************************************************************************
 //
+// Modules
+//
+//*****************************************************************************
+tClock clock;
+tIntTimer int_timer;
+tMemory memory;
+tADCGroup adc_group;
+tLogger logger;
+tOscSeqGroup osc_seq_group;
+tOscilloscope oscilloscope;
+tTrigger trigger;
+tSSI ssi;
+tSignal signal;
+tCommandHandler command_handler;
+tReplyHandler reply_handler;
+tUSBDevice usb_device;
+
+
+//*****************************************************************************
+//
 // This is the main application entry function.
 //
 //*****************************************************************************
-int
-main(void) {
+int main(void)
+{
     //
     // System Clock 80 MHz
     //
-    SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
     //
-    // Enable Systick for timing
+    // clock module
     //
-    SysTickPeriodSet(16777216);
-    SysTickEnable();
+    ClockInit(&clock);
 
     //
-    // GPIO Pin Configuration
+    // Configure peripherals
     //
-    ConfigurePins();
+    ConfigurePeripherals();
 
     //
     // Configure UART for DEBUG_PRINT
@@ -154,51 +214,86 @@ main(void) {
     ConfigureUART();
 
     //
+    // Print a welcome message
+    //
+    DEBUG_PRINT("Red Firmware TDD");
+    DEBUG_PRINT("Tiva C Series @ %u MHz", clock.cycles_per_us);
+
+    //
     // Configure uDMA
     //
     ConfigureuDMA();
 
     //
-    // Configure USB Device
+    // int_timer module
     //
-    USBDeviceInit();
+    IntTimerInit(&int_timer);
 
     //
-    // Configure ADC
+    // memory module
     //
-    ADCInit();
+    MemoryInit(&memory);
 
     //
-    // Configure SSI
+    // adc_group module
     //
-    SSIInit();
+    ADCGroupInit(&adc_group);
 
     //
-    // Configure Timer
+    // logger module
     //
-    TimerInit();
+    LoggerInit(&logger);
 
     //
-    // Initialize Command, Data and Reply Handler
+    // osc_seq_group module
     //
-    CommandHandlerInit();
-    ReplyHandlerInit();
-    SignalInit();
-    LoggerInit();
+    OscSeqGroupInit(&osc_seq_group);
+
+    //
+    // oscilloscope module
+    //
     OscilloscopeInit(&oscilloscope);
 
     //
-    // Print a string.
+    // trigger module
     //
-    DEBUG_PRINT("Red Firmware\n");
-    DEBUG_PRINT("Tiva C Series @ %u MHz\n", SysCtlClockGet() / 1000000);
+    TriggerInit(&trigger);
 
-    while(1)
-    {
-        CommandHandlerMain();
-        OscilloscopeMain(&oscilloscope);
-        ReplyHandlerMain();
-        USBDeviceMain();
+    //
+    // ssi module
+    //
+    SSIInit(&ssi);
+
+    //
+    // signal module
+    //
+    SignalInit(&signal);
+
+    //
+    // usb_device module
+    //
+    USBDeviceInit(&usb_device);
+
+    //
+    // command handler module
+    //
+    CommandHandlerInit(&command_handler);
+
+    //
+    // reply handler module
+    //
+    ReplyHandlerInit(&reply_handler);
+
+    //
+    // Run tests
+    //
+    tests();
+
+    while (1) {
+        CommandHandlerMain(&command_handler);
+        LoggerMain(&logger);
+        OscilloscopeMain(&oscilloscope, true);
+        TriggerMain(&trigger, true);
+        USBDeviceMain(&usb_device);
     }
-
 }

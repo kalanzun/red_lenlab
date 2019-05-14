@@ -24,17 +24,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "qwt_text.h"
 #include "qwt_plot_renderer.h"
 #include "qwt_scale_engine.h"
-#include <QDebug>
+//#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 
 namespace gui {
 
-FrequencyForm::FrequencyForm(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::FrequencyForm)
+FrequencyForm::FrequencyForm(QWidget * parent)
+    : QWidget(parent)
+    , ui(new Ui::FrequencyForm)
 {
-    qDebug() << "FrequencyForm";
     ui->setupUi(this);
 
     ui->plot->enableAxis(QwtPlot::yRight);
@@ -60,42 +59,47 @@ FrequencyForm::FrequencyForm(QWidget *parent) :
 
     //QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
     //ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
+
+    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
+    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
+    m_curves[1]->setYAxis(QwtPlot::yRight);
+
+    newGrid();
 }
 
 FrequencyForm::~FrequencyForm()
 {
-    qDebug() << "~FrequencyForm";
     delete ui;
 }
 
 void
 FrequencyForm::setMainWindow(MainWindow *main_window)
 {
-    this->main_window = main_window;
+    m_main_window = main_window;
 }
 
 void
 FrequencyForm::setModel(model::Lenlab *lenlab)
 {
-    this->lenlab = lenlab;
-    this->frequencysweep = lenlab->frequencysweep;
+    m_lenlab = lenlab;
+    m_frequencysweep = &lenlab->frequencysweep;
 
-    curves[0] = newCurve(1, QColor("#729fcf"), true); // sky blue 0
-    curves[1] = newCurve(2, QColor("#ef2929"), true); // scarlet red 0
-    curves[1]->setYAxis(QwtPlot::yRight);
+    connect(m_frequencysweep, &model::Frequencysweep::seriesChanged,
+            this, &FrequencyForm::seriesChanged);
+    connect(m_frequencysweep, &model::Frequencysweep::seriesUpdated,
+            this, &FrequencyForm::seriesUpdated);
 
-    newGrid();
-
-    connect(frequencysweep, SIGNAL(replot()),
-            this, SLOT(on_replot()));
+    connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
+            this, &FrequencyForm::activeChanged);
+    connect(&m_lenlab->oscilloscope, &model::Oscilloscope::activeChanged,
+            this, &FrequencyForm::activeChanged);
 }
 
 QwtPlotCurve *
-FrequencyForm::newCurve(uint32_t channel, const QColor &color, bool visible)
+FrequencyForm::newCurve(const QColor &color, bool visible)
 {
     std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
 
-    curve->setSamples(new PointVectorSeriesData(frequencysweep->getWaveform(), channel)); // acquires ownership
     curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     curve->setVisible(visible);
 
@@ -126,26 +130,29 @@ FrequencyForm::newGrid()
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!frequencysweep->active()) {
-        if (lenlab->isActive()) {
-            if (!main_window->askToCancelActiveComponent(frequencysweep)) return;
+    if (!m_frequencysweep->active()) {
+        if (m_lenlab->isActive()) {
+            if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {
+                if (m_lenlab->isActive()) {
+                    // the component might have stopped while the dialog was visible
+                    pending = true;
+                    m_lenlab->getActiveComponent()->stop();
+                } else {
+                    m_frequencysweep->start();
+                }
+            }
+        } else {
+            m_frequencysweep->start();
         }
-        frequencysweep->start();
     }
 }
 
 void
 FrequencyForm::on_stopButton_clicked()
 {
-    if (frequencysweep->active()) {
-        frequencysweep->stop();
+    if (m_frequencysweep->active()) {
+        m_frequencysweep->stop();
     }
-}
-
-void
-FrequencyForm::on_replot()
-{
-    ui->plot->replot();
 }
 
 void
@@ -154,16 +161,44 @@ FrequencyForm::on_saveButton_clicked()
     save();
 }
 
+void FrequencyForm::activeChanged(bool)
+{
+    if (pending) {
+        pending = false;
+        if (!m_lenlab->isActive()) m_frequencysweep->start();
+    }
+}
+
 void
 FrequencyForm::save()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
     try {
-        frequencysweep->save(fileName);
+        m_frequencysweep->save(fileName);
     }
-    catch (std::exception) {
+    catch (std::exception const &) {
         QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
     }
+}
+
+void
+FrequencyForm::saveImage()
+{
+    QwtPlotRenderer renderer;
+    renderer.exportTo(ui->plot, "bode.pdf"); // it asks for the filename
+}
+
+void
+FrequencyForm::seriesUpdated()
+{
+    ui->plot->replot();
+}
+
+void
+FrequencyForm::seriesChanged(model::pSeries const & series)
+{
+    m_curves[0]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
+    m_curves[1]->setSamples(new PointVectorSeriesData(series, 2)); // acquires ownership
 }
 
 } // namespace gui

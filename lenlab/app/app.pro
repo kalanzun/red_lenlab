@@ -26,12 +26,12 @@ SOURCES += \
         main.cpp \
 
 win32 {
-    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../gui/debug/libgui.a ../model/debug/libmodel.a ../usb/debug/libusb.a
-    CONFIG(release, debug|release) PRE_TARGETDEPS += ../gui/release/libgui.a ../model/release/libmodel.a ../usb/release/libusb.a
+    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../gui/debug/libgui.a
+    CONFIG(release, debug|release) PRE_TARGETDEPS += ../gui/release/libgui.a
 }
 
 unix {
-    PRE_TARGETDEPS += ../gui/libgui.a ../model/libmodel.a ../usb/libusb.a
+    PRE_TARGETDEPS += ../gui/libgui.a
 }
 
 include(../../red_lenlab.pri)

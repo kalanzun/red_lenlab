@@ -1,4 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    firmware \
+    protocoltest \
+    usbtest \
+    measurementtest

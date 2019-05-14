@@ -1,0 +1,10 @@
+qtcreator
+qtbase5-dev
+libusb-1.0-0-dev
+libqwt-qt5-dev
+libqt5svg5-dev
+pkgconf
+python3-sphinx
+python3-pip
+python3-sphinx-rtd-theme
+

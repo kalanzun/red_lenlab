@@ -1,50 +1,28 @@
 /*
  * usb_device.c
  *
+ */
 
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
-
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
+#include "usb_device.h"
+
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
 #include "driverlib/debug.h"
+
 #include "usblib/usb-ids.h"
+#include "usblib/usblib.h"
+#include "usblib/device/usbdevice.h"
+#include "usblib/device/usbdbulk.h"
+
 #include "lenlab_protocol.h"
-#include "usb_device.h"
 #include "command_handler.h"
 #include "reply_handler.h"
-//#include "oscilloscope.h"
-#include "debug.h"
-
-/*
-#include "inc/hw_ints.h"
-#include "inc/hw_types.h"
-#include "usblib/usb-ids.h"
-*/
-
-
-//uint8_t lorem_data[] = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis a";
-
 
 //*****************************************************************************
 //
@@ -174,13 +152,14 @@ tUSBDBulkDevice bulk_device = {
     NUM_STRING_DESCRIPTORS
 };
 
-tUSBDevice usb_device;
-
 uint32_t
 YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
     uint32_t size;
     tEvent *event;
+
+    // Note: USB does not signal software disconnect. This function or the interrupt handler
+    // is not called, if Lenlab on the host disappears.
 
     //
     // Which event have we been sent?
@@ -194,12 +173,14 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         {
             size = USBDBulkRxPacketAvailable(&bulk_device);
             //DEBUG_PRINT("USB_EVENT_RX_AVAILABLE %d\n", size);
-            if (size > LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH) size = LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH;
+            if (size > LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH)
+                size = LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH;
             if (size) {
                 if (!QueueFull(&command_handler.command_queue)) {
                     event = QueueAcquire(&command_handler.command_queue);
                     event->length = size;
                     USBDBulkPacketRead(&bulk_device, event->payload, size, true);
+                    //DEBUG_PRINT("put command\n");
                     QueueWrite(&command_handler.command_queue);
                 }
                 else {
@@ -211,11 +192,8 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
             return size;
         }
     }
-
     return 0;
-
 }
-
 
 uint32_t
 YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
@@ -249,77 +227,11 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
     return 0;
 }
 
-
-void USBIntHandler(void)
-{
-    if ((usb_device.dma_pending) && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
-    {
-        //
-        // Handle the DMA complete case.
-        //
-        usb_device.dma_pending = 0;
-
-        if (usb_device.send_ring_buffer)
-        {
-            RingRelease(usb_device.ring);
-            if (RingEmpty(usb_device.ring)) usb_device.send_ring_buffer = 0;
-        }
-        else if (usb_device.send_ring_buffer_interleaved)
-        {
-            //DEBUG_PRINT("usb int %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
-            RingRelease(usb_device.pingpong_ring[usb_device.pingpong]);
-            usb_device.pingpong = !usb_device.pingpong;
-            if (RingEmpty(usb_device.pingpong_ring[usb_device.pingpong])) usb_device.send_ring_buffer_interleaved = 0;
-
-        }
-        else
-        {
-            USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
-        }
-
-        //MemoryRelease(&memory);
-    }
-    else
-    {
-        USB0DeviceIntHandler();
-    }
-}
-
-
-/*
-void
-Lorem(void)
-{
-    //
-    // Configure and enable DMA for the IN transfer.
-    //
-    //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
-    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
-    // does not work if moved up into the config section
-    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, lorem_data,
-                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), 1024);
-    //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
-    //                                  2048/64);
-    // offenbar nicht nötig
-
-    //
-    // Start the DMA transfer.
-    //
-    //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
-
-    dma_pending = 1;
-    USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-    uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
-    // both are needed here
-
-}
-*/
-
 inline void
-USBDeviceStartuDMA(uint8_t *payload, uint32_t length)
+USBDeviceStartuDMA(tUSBDevice *self, uint8_t *payload, uint32_t length)
 {
-    //ASSERT(!usb_device.dma_pending);
-    usb_device.dma_pending = 1;
+    ASSERT(!usb_device.dma_pending);
+    self->dma_pending = true;
     //
     // Configure and enable DMA for the IN transfer.
     //
@@ -334,7 +246,7 @@ USBDeviceStartuDMA(uint8_t *payload, uint32_t length)
 
     //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
     //                                  2048/64);
-    // offenbar nicht nötig
+    // offenbar nicht noetig
 
     //
     // Start the DMA transfer.
@@ -346,87 +258,92 @@ USBDeviceStartuDMA(uint8_t *payload, uint32_t length)
     // both are needed here
 }
 
-
-void
-USBDeviceSend(tRing *ring)
-{
-    //DEBUG_PRINT("USBDeviceSend\n");
-
-    usb_device.ring = ring;
-    usb_device.send_ring_buffer = 1;
-}
-
-void
-USBDeviceSendInterleaved(tRing *ring0, tRing *ring1)
-{
-    //DEBUG_PRINT("USBDeviceSendInterleaved\n");
-
-    usb_device.pingpong = 0;
-    usb_device.pingpong_ring[0] = ring0;
-    usb_device.pingpong_ring[1] = ring1;
-    usb_device.send_ring_buffer_interleaved = 1;
-}
-
-void
-USBDeviceMain()
+inline void
+USBDeviceIntHandler(tUSBDevice *self)
 {
     tEvent *event;
     tPage *page;
 
-    if (!usb_device.dma_pending)// && USBDBulkTxPacketAvailable(&bulk_device) == 64)
+    if ((self->dma_pending) && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
     {
-        if (!QueueEmpty(&reply_handler.reply_queue)) {
-            event = QueueRead(&reply_handler.reply_queue);
-            USBDeviceStartuDMA(event->payload, event->length);
-            //ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
+        //
+        // Handle the DMA complete case.
+        //
+        self->dma_pending = false;
+
+        event = QueueRead(&reply_handler.reply_queue);
+        if (event->ring) {
+            RingRelease(event->ring);
+            // Free memory, if this was the last page
+            if (RingEmpty(event->ring)) {
+                RingFree(event->ring);
+                QueueRelease(&reply_handler.reply_queue);
+            }
+            else {
+                page = RingRead(event->ring);
+                USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+                // because of immediate restart, it does not receive commands meanwhile
+                // commands wait, till the ring is through
+                // TODO command waiting during DMA transfer seems handy for a simpler state machine
+                // no special memory locking while DMA transfer necessary
+                // how fast is it?
+            }
+        }
+        else {
+            USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
             QueueRelease(&reply_handler.reply_queue);
-            //DEBUG_PRINT("send reply\n");
+            // Main will start a new DMA transfer eventually
         }
-        else if (usb_device.send_ring_buffer)
-        {
-            page = RingRead(usb_device.ring);
-            USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
-        }
-        else if (usb_device.send_ring_buffer_interleaved)
-        {
-            //DEBUG_PRINT("usb %d %d\n", usb_device.pingpong_ring[usb_device.pingpong]->acquire, usb_device.pingpong_ring[usb_device.pingpong]->release);
-            page = RingRead(usb_device.pingpong_ring[usb_device.pingpong]);
-            USBDeviceStartuDMA(page->buffer, PAGE_LENGTH);
-        }
-        /*
-        else if (MemorySend(&memory)) {
-            page = MemoryRead(&memory);
-            USBDeviceStartuDMA(page->buffer, 1024);
-            //ASSERT(USBDBulkPacketWrite(&bulk_device, page->buffer, 64, true));
-            MemoryRelease(&memory);
-            //DEBUG_PRINT("send memory page %d\n", page->buffer[0]);
-        }
-        */
-        /*
-        else if (oscilloscope.send) {
-            USBDeviceStartuDMA(oscilloscope.queue[oscilloscope.read]);
-            oscilloscope.read = (oscilloscope.read + 1) % OSCILLOSCOPE_QUEUE_LENGTH;
-            if (oscilloscope.read == 0)
-                oscilloscope.send = 0;
-        }
-        */
+    }
+    else
+    {
+        USB0DeviceIntHandler();
     }
 }
 
+void
+USB0IntHandler()
+{
+    USBDeviceIntHandler(&usb_device);
+}
+
+void
+USBDeviceMain(tUSBDevice *self)
+{
+    tEvent *event;
+    tPage *page;
+
+    if (!self->dma_pending)// && USBDBulkTxPacketAvailable(&bulk_device) == 64)
+    {
+        if (!QueueEmpty(&reply_handler.reply_queue)) {
+            //ASSERT(!self->send_reply);
+            event = QueueRead(&reply_handler.reply_queue);
+            //self->send_reply = true;
+            if (event->ring) {
+                page = RingRead(event->ring);
+                USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+            }
+            else {
+                USBDeviceStartuDMA(self, event->payload, event->length);
+            }
+            //ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
+            //QueueRelease(&reply_handler.reply_queue);
+            //DEBUG_PRINT("send reply\n");
+        }
+    }
+}
 
 inline void
-ConfigureUSBDevice(void)
+ConfigureUSBDevice(tUSBDevice *self)
 {
     GPIOPinTypeUSBAnalog(GPIO_PORTD_BASE, GPIO_PIN_4 | GPIO_PIN_5);
 }
 
-
 void
-USBDeviceInit(void)
+USBDeviceInit(tUSBDevice *self)
 {
-    usb_device.dma_pending = 0;
-
-    ConfigureUSBDevice();
+    self->dma_pending = false;
+    ConfigureUSBDevice(self);
 
     //
     // Set the USB stack mode to Device mode with VBUS monitoring.
@@ -448,9 +365,9 @@ USBDeviceInit(void)
     uDMAChannelAttributeEnable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_USEBURST);
     // manual says to set burst mode, the DMA code of usblib doesn't. Both work.
     uDMAChannelControlSet(UDMA_CHANNEL_USBEP1TX, UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_64);
-    // FIFO byte-weise befüllen, UDMA_SIZE_32 funktioniert nicht
+    // FIFO byte-weise befuellen, UDMA_SIZE_32 funktioniert nicht
     // USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-    // offenbar nicht nötig
+    // offenbar nicht noetig
 
     //USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
 

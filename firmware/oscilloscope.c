@@ -1,260 +1,161 @@
 /*
  * oscilloscope.c
  *
+ */
 
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
-
-#include <stdint.h>
 #include <stdbool.h>
-#include "driverlib/debug.h"
+#include <stdint.h>
+
 #include "oscilloscope.h"
-#include "debug.h"
-#include "adc.h"
+
+#include "driverlib/debug.h"
+
 #include "lenlab_protocol.h"
-#include "memory.h"
-#include "usb_device.h"
-
-
-tOscilloscope oscilloscope;
-
+#include "reply_handler.h"
 
 
 void
+ADC0SS0Handler(void)
+{
+    tOscSeq *self = &osc_seq_group.osc_seq[0];
+
+    OscSeqIntHandler(self);
+}
+
+
+void
+ADC1SS0Handler(void)
+{
+    tOscSeq *self = &osc_seq_group.osc_seq[1];
+
+    OscSeqIntHandler(self);
+}
+
+
+tError
 OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 {
-    //DEBUG_PRINT("OscilloscopeStart %d\n", samplerate);
+    if (self->lock) return LOCK_ERROR;
 
-    if (self->active)// || self->send)
-        return;
+    if (adc_group.lock) return ADC_ERROR;
 
-    ADCRelease();
-    self->active = 1;
-    self->trigger = 0;
-    self->count = 0;
+    if (memory.lock) return MEMORY_ERROR;
 
-    MemoryInit(&memory);
-    ADCSingle(8, samplerate);
+    self->lock = 1;
+
+    ADCGroupLock(&adc_group);
+
+    ADCGroupSetHardwareOversample(&adc_group, samplerate);
+
+    // 2 rings of 10 pages each (osc_seq want's an even number)
+    OscSeqGroupAllocate(&osc_seq_group, 10);
+
+    OscSeqGroupEnable(&osc_seq_group);
+
+    return OK;
 }
 
 
-void
-OscilloscopeStartTrigger(tOscilloscope *self, uint32_t samplerate)
+tError
+OscilloscopeLinearTestData(tOscilloscope *self)
 {
-    uint32_t i;
-
-    //DEBUG_PRINT("OscilloscopeStartTrigger %d\n", samplerate);
-
-    if (self->active)// || self->send)
-        return;
-
-    self->filter_state = 0;
-    self->filter_index = 0;
-    for (i = 0; i < OSCILLOSCOPE_FILTER_LENGTH; i++) self->filter[i] = 0;
-
-    self->trigger_wait = 0;
-    self->trigger_active = 0;
-    self->trigger_save = 0;
-    self->trigger_post_count = 0;
-
-    self->active = 1;
-    self->trigger = 1;
-    self->count = 0;
-
-    MemoryInit(&memory);
-    RingAllocate(&self->ring, 18);
-    ADCPingPong(samplerate); // Allocates 4
-}
-
-inline int8_t
-delta(uint16_t previous, uint16_t next)
-{
-    int16_t delta = next - previous;
-    if (delta > 127)
-        return 127;
-    else if (delta < -127)
-        return -127;
-    else
-        return (int8_t) delta;
-}
-
-
-void
-OscilloscopeMain(tOscilloscope *self)
-{
-    uint32_t i;
-    tRing *ring0;
-    tRing *ring1;
+    unsigned int i, j, k;
+    tRing *ring;
     tPage *page;
+    uint16_t *short_buffer;
 
-    tPage *adc_page0;
-    tPage *adc_page1;
-    uint16_t *buffer0;
-    uint16_t *buffer1;
+    if (self->lock) return LOCK_ERROR;
 
-    uint16_t state0, state1;
-    int8_t *data;
+    if (adc_group.lock) return ADC_ERROR;
 
-    if (!self->active)
-        return;
+    if (memory.lock) return MEMORY_ERROR;
 
-    if (!self->trigger)
-    {
-        if (ADCReady()) // single done
-        {
-            //DEBUG_PRINT("OscilloscopeReady\n");
+    self->lock = 1;
 
-            ring0 = ADCGetRing(0);
-            ring1 = ADCGetRing(1);
+    ADCGroupLock(&adc_group);
 
-            //DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
+    // 2 rings of 10 pages each (osc_seq want's an even number)
+    OscSeqGroupAllocate(&osc_seq_group, 10);
 
-            for (i = 0; i < ring0->length; i++)
-            {
-                page = RingRead(ring0);
+    // write linear test data into the DMA buffer
+    FOREACH_ADC {
+        ring = &osc_seq_group.osc_seq[i].ring;
+        j = 0;
+        while (!RingFull(ring)) {
+            page = RingAcquire(ring);
+            short_buffer = (uint16_t *) &page->buffer;
 
-                page->buffer[0] = OscilloscopeData; // reply
-                page->buffer[1] = ShortArray; // type
-                page->buffer[2] = 0; // channel
-                page->buffer[3] = 0; // last
-                page->buffer[4] = i;
+            for (k = 0; k < OSCILLOSCOPE_SAMPLES; k++) {
+                short_buffer[2 * OSCILLOSCOPE_OFFSET + k] = k + (j * OSCILLOSCOPE_SAMPLES);
             }
 
-            for (i = 0; i < ring1->length; i++)
-            {
-                page = RingRead(ring1);
-
-                page->buffer[0] = OscilloscopeData; // reply
-                page->buffer[1] = ShortArray; // type
-                page->buffer[2] = 1; // channel
-                page->buffer[3] = 0; // last
-                page->buffer[4] = 10+i;
-            }
-            page->buffer[3] = 1;
-
-            //DEBUG_PRINT("%d, %d\n", ring0->read, ring1->read);
-
-            USBDeviceSendInterleaved(ring0, ring1);
-            self->active = 0;
+            RingWrite(ring);
+            j++;
         }
     }
-    else
-    {
-        ring0 = ADCGetRing(0);
-        ring1 = ADCGetRing(1);
 
-        if (RingContent(ring0) && RingContent(ring1))
-        {
-            adc_page0 = RingRead(ring0);
-            adc_page1 = RingRead(ring1);
+    return OK;
+}
 
-            buffer0 = (uint16_t *) (adc_page0->buffer + 24);
-            buffer1 = (uint16_t *) (adc_page1->buffer + 24);
 
-            if (RingFull(&self->ring)) {
-                RingRead(&self->ring);
-                RingRelease(&self->ring);
-            }
+tError
+OscilloscopeStop(tOscilloscope *self)
+{
+    if (!self->lock) return LOCK_ERROR;
 
-            page = RingAcquire(&self->ring);
+    self->lock = 0;
 
-            page->buffer[0] = OscilloscopeData;
-            page->buffer[1] = ByteArray;
-            page->buffer[2] = 0;
-            page->buffer[3] = 0;
+    OscSeqGroupDisable(&osc_seq_group);
 
-            state0 = buffer0[0] >> 2;
-            state1 = buffer1[0] >> 2;
-            *(uint16_t *) (page->buffer + 4) = state0;
-            *(uint16_t *) (page->buffer + 6) = state1;
-            *(uint16_t *) (page->buffer + 8) = 0; // trigger value
+    ADCGroupUnlock(&adc_group);
 
-            data = (int8_t *) (page->buffer + OSCILLOSCOPE_HEADER_LENGTH);
+    return OK;
+}
 
-            if (self->count == 8) {
-                self->trigger_wait = 1;
-            }
 
-            for (i = 1; i < ADC_SAMPLES; i++)
+void
+OscilloscopeMain(tOscilloscope *self, bool enable_reply)
+{
+    unsigned int i;
+    tEvent *reply;
+    tRing *ring;
+    tPage *page;
+    uint8_t *head;
+    tRingIter iter;
+
+    if (!self->lock) return;
+
+    if (OscSeqGroupReady(&osc_seq_group)) {
+
+        FOREACH_ADC {
+
+            ring = &osc_seq_group.osc_seq[i].ring;
+
+            for (RingIterInit(&iter, ring); iter.content; RingIterNext(&iter))
             {
-                data[2*i] = delta(state0, buffer0[i] >> 2);
-                state0 += data[2*i];
-                data[2*i+1] = delta(state1, buffer1[i] >> 2);
-                state1 += data[2*i+1];
-
-                if (self->count == 7 || self->trigger_wait || self->trigger_active) {
-                    self->filter_state -= self->filter[self->filter_index];
-                    self->filter_state += state0;
-                    self->filter[self->filter_index] = state0;
-                    self->filter_index = (self->filter_index + 1) % OSCILLOSCOPE_FILTER_LENGTH;
-                }
-
-                // pre trigger, wait for signal to be below the trigger level
-                if (self->trigger_wait
-                        && (self->filter_state < (8*512))
-                        ) {
-                    self->trigger_wait = 0;
-                    self->trigger_active = 1;
-                }
-
-                // trigger, wait for signal to cross the trigger level
-                if (self->trigger_active
-                        && (self->filter_state > (8*512))
-                        ) {
-                    self->trigger_active = 0;
-                    self->trigger_save = 1;
-                    *(uint16_t *) (page->buffer + 8) = i;
-                }
-
-                // trigger timeout after 5 full cycles of the ring buffer
-                if ((self->trigger_wait || self->trigger_active) && self->count == 5*18) {
-                    self->trigger_wait = 0;
-                    self->trigger_active = 0;
-                    self->trigger_save = 1;
-                }
-
+                page = RingIterGet(&iter);
+                head = (uint8_t *) page->buffer;
+                head[0] = OscilloscopeData; // reply
+                head[1] = ShortArray; // type
+                head[2] = i; // channel
+                head[3] = 0; // last
             }
 
-            RingRelease(ring0);
-            RingRelease(ring1);
+        }
 
-            self->count++;
+        head[3] = 255; // last packet
 
-            /*
-            if (self->count == 12) {
-                page->buffer[3] = 1; // mark this the last package
-                ADCStop();
-                USBDeviceSend(&self->ring);
-                self->active = 0;
-            }
-            */
-            if (self->trigger_save) {
-                self->trigger_post_count++;
-                if (self->trigger_post_count == 10) {
-                    //DEBUG_PRINT("%d\n", self->count);
-                    self->trigger_save = 0;
-                    page->buffer[3] = 1; // mark this the last package
-                    //ADCDisable();
-                    USBDeviceSend(&self->ring);
-                    self->active = 0;
-                }
+        // Note: It does not call RingFree, when enable_reply is false
+        if (enable_reply) {
+            // usb_device will call RingFree when done
+            FOREACH_ADC {
+                reply = QueueAcquire(&reply_handler.reply_queue);
+                EventSetRing(reply, &osc_seq_group.osc_seq[i].ring);
+                QueueWrite(&reply_handler.reply_queue);
             }
         }
+
+        OscilloscopeStop(self);
 
     }
 }
@@ -263,5 +164,5 @@ OscilloscopeMain(tOscilloscope *self)
 void
 OscilloscopeInit(tOscilloscope *self)
 {
-    self->active = 0;
+    self->lock = 0;
 }

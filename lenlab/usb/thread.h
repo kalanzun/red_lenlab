@@ -30,7 +30,7 @@ namespace usb {
         Q_OBJECT
     public:
         explicit Thread(QObject *parent = nullptr);
-        virtual ~Thread();
+        ~Thread() override;
 
         void run() override;
 

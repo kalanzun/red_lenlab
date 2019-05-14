@@ -29,13 +29,13 @@ SOURCES += \
     device.cpp \
     devicelist.cpp \
     eventloop.cpp \
-    exception.cpp \
-    handler.cpp \
     interface.cpp \
-    message.cpp \
     notetoself.cpp \
     thread.cpp \
     transfer.cpp \
+    bus.cpp \
+    packet.cpp \
+    usbexception.cpp
 
 HEADERS += \
     active.h \
@@ -45,17 +45,17 @@ HEADERS += \
     device.h \
     devicelist.h \
     eventloop.h \
-    exception.h \
-    handler.h \
     interface.h \
-    message.h \
     notetoself.h \
     thread.h \
     transfer.h \
-
-include(../../red_lenlab.pri)
+    bus.h \
+    packet.h \
+    usbexception.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+include(../../red_lenlab.pri)

@@ -25,55 +25,53 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "voltmeter.h"
 #include "oscilloscope.h"
 #include "signalgenerator.h"
-#include "communication.h"
-#include "usb/handler.h"
-#include "usb/message.h"
+
+#include "protocol/board.h"
+
 #include <QObject>
-#include <QPointer>
 
 namespace model {
-
-/**
- * @brief Root object of the Lenlab data model.
- */
 
 class Lenlab : public QObject
 {
     Q_OBJECT
+
+    static int const mErrorTime = 3000;
+
+    protocol::Board board;
+
 public:
-    explicit Lenlab(QObject *parent = nullptr);
-    virtual ~Lenlab();
+    Voltmeter voltmeter;
+    Signalgenerator signalgenerator;
+    Oscilloscope oscilloscope;
+    Frequencysweep frequencysweep;
 
-    void setHandler(usb::Handler *handler);
+    explicit Lenlab(QObject * parent = nullptr);
+    Lenlab(Lenlab const & other) = delete;
 
-    bool isActive();
+    Lenlab & operator=(Lenlab const & other) = delete;
+
+    bool isActive() const;
     Component *getActiveComponent();
 
-    bool available();
-    QPointer<Communication> initCommunication();
+    void reset();
 
-    Frequencysweep *frequencysweep;
-    Voltmeter *voltmeter;
-    Oscilloscope *oscilloscope;
-    Signalgenerator *signalgenerator;
+    //bool available();
 
 signals:
-    void receive(const usb::pMessage &);
+    void logMessage(QString const &);
+    //void receive(const protocol::pMessage &);
 
-    void logMessage(const QString &);
 
-    void replot();
+    //void replot();
 
 public slots:
+    void lookForBoard();
 
 private slots:
-    void on_comDestroyed(QObject *obj = nullptr);
     void on_ready();
-
-private:
-    usb::Handler *handler;
-    QPointer<Communication> current_com;
-    bool m_ready = 0;
+    void on_log(QString const &);
+    void on_error(QString const &);
 };
 
 } // namespace model

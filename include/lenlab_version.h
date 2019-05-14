@@ -1,4 +1,6 @@
 /*
+ * lenlab_version.h
+ *
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 Copyright (C) 2017 Christoph Simon and the Lenlab developer team
@@ -22,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define LENLAB_VERSION_H
 
 #define MAJOR 7
-#define MINOR 2
+#define MINOR 3
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)

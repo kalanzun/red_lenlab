@@ -32,8 +32,8 @@ SOURCES += \
     series.cpp \
     frequencyseries.cpp \
     indexparameter.cpp \
-    communication.cpp \
-    utils.cpp
+    utils.cpp \
+    loggerseries.cpp
 
 HEADERS += \
     component.h \
@@ -46,12 +46,21 @@ HEADERS += \
     series.h \
     frequencyseries.h \
     indexparameter.h \
-    communication.h \
-    utils.h
+    utils.h \
+    loggerseries.h
 
-include(../../red_lenlab.pri)
+win32 {
+    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../protocol/debug/libprotocol.a
+    CONFIG(release, debug|release) PRE_TARGETDEPS += ../protocol/release/libprotocol.a
+}
+
+unix {
+    PRE_TARGETDEPS += ../protocol/libprotocol.a
+}
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+include(../../red_lenlab.pri)

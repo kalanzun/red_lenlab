@@ -1,73 +1,38 @@
 /*
  * ssi.c
  *
+ */
 
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
-
-//#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
-//#include "driverlib/rom.h"
+#include <stdint.h>
+
+#include "ssi.h"
+
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_ssi.h"
-//#include "driverlib/debug.h"
-#include "driverlib/interrupt.h"
-//#include "driverlib/rom_map.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/adc.h"
-//#include "driverlib/uart.h"
-#include "driverlib/gpio.h"
-//#include "driverlib/timer.h"
 #include "driverlib/debug.h"
-#include "driverlib/usb.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/gpio.h"
 #include "driverlib/udma.h"
 #include "driverlib/ssi.h"
 #include "driverlib/pin_map.h"
-#include "ssi.h"
-#include "debug.h"
-
-
-tSSI ssi;
 
 
 inline void
-SSIStartuDMAChannel(uint32_t select)
+SSIStartuDMAChannel(tSSI *self, uint32_t select)
 {
     uDMAChannelTransferSet(UDMA_CHANNEL_SSI0TX | select,
             UDMA_MODE_PINGPONG,
-            ssi.buffer,
+            self->buffer,
             (void *)(SSI0_BASE + SSI_O_DR),
-            ssi.length);
+            self->length);
 }
 
 
-//*****************************************************************************
-//
-// The interrupt handler for ADC0, sequence 0.  This interrupt will occur when
-// a DMA transfer is complete using the first sequencer on ADC0.  It will also
-// be triggered if the peripheral signals an error.
-//
-//*****************************************************************************
 void
-SSI0IntHandler(void)
+SSI0IntHandler()
 {
     uint32_t ui32Status;
 
@@ -77,47 +42,47 @@ SSI0IntHandler(void)
 
     if(uDMAChannelModeGet(UDMA_CHANNEL_SSI0TX | UDMA_PRI_SELECT) == UDMA_MODE_STOP)
     {
-        SSIStartuDMAChannel(UDMA_PRI_SELECT);
+        SSIStartuDMAChannel(&ssi, UDMA_PRI_SELECT);
     }
     else if(uDMAChannelModeGet(UDMA_CHANNEL_SSI0TX | UDMA_ALT_SELECT) == UDMA_MODE_STOP)
     {
-        SSIStartuDMAChannel(UDMA_ALT_SELECT);
+        SSIStartuDMAChannel(&ssi, UDMA_ALT_SELECT);
     }
 }
 
 
 uint32_t
-SSIGetLength(void)
+SSIGetLength(tSSI *self)
 {
-    return ssi.length;
+    return self->length;
 }
 
 
 void
-SSISetLength(uint32_t length)
+SSISetLength(tSSI *self, uint32_t length)
 {
     ASSERT(length <= SSI_BUFFER_LENGTH);
-    ssi.length = length;
+    self->length = length;
 }
 
 
 uint16_t *
-SSIGetBuffer(void)
+SSIGetBuffer(tSSI *self)
 {
-    return ssi.buffer;
+    return self->buffer;
 }
 
 
 void
-SSISetDivider(uint8_t predivider, uint8_t divider)
+SSISetDivider(tSSI *self, uint8_t predivider, uint8_t divider)
 {
     // SSInClk = SysClk / (CPSDVSR * (1 + SCR))
     // SSInClk = SysClk / predivider / divider
     // SSISetDivider takes care of the +1
 
-    // SSI überträgt 16 bit Daten und dann ein Frame End Singnal (FSS)
-    // Das Frame End dauert 1,5 Clock-Schritte, so dass die Datenrate
-    // um den Faktor 16/17,5 verlangsamt ist
+    // SSI transfers 16 bits data and then a frame end signal (FSS)
+    // The frame end singal takes 1.5 clock steps, so that the data rate
+    // is reduced by a factor of 16/17,5
 
     //
     // Set the clock predivider.
@@ -132,17 +97,17 @@ SSISetDivider(uint8_t predivider, uint8_t divider)
 
 
 void
-SSIStart(void)
+SSIStart(tSSI *self)
 {
-    SSIStartuDMAChannel(UDMA_PRI_SELECT);
-    SSIStartuDMAChannel(UDMA_ALT_SELECT);
+    SSIStartuDMAChannel(self, UDMA_PRI_SELECT);
+    SSIStartuDMAChannel(self, UDMA_ALT_SELECT);
 
     uDMAChannelEnable(UDMA_CHANNEL_SSI0TX);
 }
 
 
 void
-SSIStop(void)
+SSIStop(tSSI *self)
 {
     uDMAChannelDisable(UDMA_CHANNEL_SSI0TX);
 
@@ -153,7 +118,7 @@ SSIStop(void)
 
 
 inline void
-SSIConfigure()
+SSIConfigure(tSSI *self)
 {
     //
     // Configure Pins
@@ -171,11 +136,11 @@ SSIConfigure()
     //
     // Configure SSI Frequency and Protocol
     //
-    SSISetDivider(2, 2);
+    SSISetDivider(self, 2, 2);
 
     SSIEnable(SSI0_BASE);
 
-    SSIStop();
+    SSIStop(self);
 
     //
     // Configure SSI with uDMA
@@ -201,8 +166,8 @@ SSIConfigure()
 }
 
 void
-SSIInit(void)
+SSIInit(tSSI *self)
 {
-    SSIConfigure();
+    SSIConfigure(self);
 }
 

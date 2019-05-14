@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>red_firmware</name>
+	<name>red_firmware_tdd</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -26,29 +26,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>driverlib.lib</name>
-			<type>1</type>
-			<locationURI>TIVAWARE_INSTALL/driverlib/ccs/Debug/driverlib.lib</locationURI>
-		</link>
-		<link>
-			<name>lenlab_protocol.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/include/lenlab_protocol.h</locationURI>
-		</link>
-		<link>
-			<name>lenlab_version.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/include/lenlab_version.h</locationURI>
-		</link>
-		<link>
 			<name>uartstdio.c</name>
 			<type>1</type>
 			<locationURI>TIVAWARE_INSTALL/utils/uartstdio.c</locationURI>
-		</link>
-		<link>
-			<name>ustdlib.c</name>
-			<type>1</type>
-			<locationURI>TIVAWARE_INSTALL/utils/ustdlib.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

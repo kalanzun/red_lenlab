@@ -19,34 +19,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "device.h"
-#include "exception.h"
-#include <QDebug>
+#include "usbexception.h"
 
 using namespace usb;
 
-Device::Device(libusb_device *dev, QObject *parent) :
-    QObject(parent),
-    thread(new Thread()),
-    dev_handle(dev),
-    event_loop(thread.get()),
-    interface(dev_handle.get()),
-    send_queue(new QVector<pMessage>()),
-    sender(new Transfer(dev_handle.get(), 0x01)),
-    receiver0(new Transfer(dev_handle.get(), 0x81)),
-    receiver1(new Transfer(dev_handle.get(), 0x81))
+Device::Device(libusb_device *dev, QObject *parent)
+    : QObject(parent)
+    , thread(new Thread())
+    , dev_handle(dev)
+    , event_loop(thread.get())
+    , interface(dev_handle.get())
+    , send_queue(new QVector<pPacket>())
+    , sender(new Transfer(dev_handle.get(), 0x01))
+    , receiver0(new Transfer(dev_handle.get(), 0x81))
+    , receiver1(new Transfer(dev_handle.get(), 0x81))
 {
-    connect(&*receiver0, SIGNAL(completed(pMessage)),
-            this, SIGNAL(reply(pMessage)));
-    connect(&*receiver1, SIGNAL(completed(pMessage)),
-            this, SIGNAL(reply(pMessage)));
-    connect(this, SIGNAL(reply(pMessage)),
-            this, SLOT(on_reply(pMessage)));
+    connect(&*receiver0, SIGNAL(completed(pPacket)),
+            this, SIGNAL(reply(pPacket)));
+    connect(&*receiver1, SIGNAL(completed(pPacket)),
+            this, SIGNAL(reply(pPacket)));
 
-    connect(&*sender, SIGNAL(completed(pMessage)),
+    connect(&*sender, SIGNAL(completed(pPacket)),
             this, SLOT(on_send_transfer_ready()));
-    connect(&*receiver0, SIGNAL(completed(pMessage)),
+    connect(&*receiver0, SIGNAL(completed(pPacket)),
             this, SLOT(on_reply_transfer_ready()));
-    connect(&*receiver1, SIGNAL(completed(pMessage)),
+    connect(&*receiver1, SIGNAL(completed(pPacket)),
             this, SLOT(on_reply_transfer_ready()));
 
     connect(&*sender, SIGNAL(error(QString)),
@@ -56,37 +53,38 @@ Device::Device(libusb_device *dev, QObject *parent) :
     connect(&*receiver1, SIGNAL(error(QString)),
             this, SIGNAL(error(QString)));
 
-    receiver0->start(newReply());
-    receiver1->start(newReply());
+    receiver0->start(pPacket::create()); // may throw
+    receiver1->start(pPacket::create()); // may throw
 
     thread->start();
 }
 
 void
-Device::send(const pMessage &cmd)
+Device::send(const pPacket &cmd)
 {
-    //qDebug() << "send" << cmd->getCommand();
     send_queue->append(cmd);
     try_to_send();
 }
 
 void
-Device::on_reply(const pMessage &reply)
-{
-    //qDebug() << "reply" << reply->getReply() << reply->getPacketLength();
-}
-
-void
 Device::on_reply_transfer_ready()
 {
-    qobject_cast<Transfer *>(QObject::sender())->start(newReply());
+    try {
+        qobject_cast<Transfer *>(QObject::sender())->start(pPacket::create());
+    } catch (USBException const & e) {
+        emit error(e.msg());
+    }
 }
 
 void
 Device::try_to_send()
 {
     if (!send_queue->isEmpty() && !sender->isActive()) {
-        sender->start(send_queue->takeFirst());
+        try {
+            sender->start(send_queue->takeFirst());
+        } catch (USBException const & e) {
+            emit error(e.msg());
+        }
     }
 }
 

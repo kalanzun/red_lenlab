@@ -45,9 +45,18 @@ FORMS += \
     oscilloscopeform.ui \
     signalform.ui \
 
-include(../../red_lenlab.pri)
+win32 {
+    CONFIG(debug, debug|release) PRE_TARGETDEPS += ../model/debug/libmodel.a
+    CONFIG(release, debug|release) PRE_TARGETDEPS += ../model/release/libmodel.a
+}
+
+unix {
+    PRE_TARGETDEPS += ../model/libmodel.a
+}
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+include(../../red_lenlab.pri)
