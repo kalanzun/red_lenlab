@@ -82,28 +82,30 @@ class QtWindows:
     qtenv2bat_pattern = Pattern(r"set PATH=(.*?);(.*?);%PATH%")
 
     def __init__(self):
-        assert access(self.base_path, R_OK), "Qt base path '{}' not found".format(self.base_path)
+        assert os.access(self.base_path, os.R_OK), "Qt base path '%s' not found" % self.base_path
 
-        self.versions = [LooseVersion(res.group(1)) for res in self.version_pattern(listdir(self.base_path))]
+        self.versions = [
+            distutils.version.LooseVersion(res.group(1))
+            for res in self.version_pattern(os.listdir(self.base_path))]
         assert len(self.versions) > 0, "No Qt versions found"
 
         self.versions.sort()
         self.version = self.versions[-1]
-        self.path = self.base_path / str(self.version) / self.arch / "bin"
+        self.path = os.path.join(self.base_path, str(self.version), self.arch, "bin")
 
-        with open(self.path / "qtenv2.bat") as file:
+        with open(os.path.join(self.path, "qtenv2.bat")) as file:
             env_path = single(list(self.qtenv2bat_pattern(file)), "Qt tools path information from qtenv2.bat not found")
         self.tools_path = env_path.group(2)
 
 
 class QtDarwin:
 
-    base_path = os.path.join(os.environ["HOME"], "Qt")
     arch = "clang_64"
 
     version_pattern = Pattern(r"(\d+\.\d+\.\d+)$")
 
     def __init__(self):
+        self.base_path = os.path.join(os.environ["HOME"], "Qt")  # fails on windows
         assert os.access(self.base_path, os.R_OK), "Qt base path '%s' not found" % self.base_path
 
         self.versions = [
@@ -120,18 +122,19 @@ class QwtWindows:
 
     base_path = os.path.join("C:", "/")
 
-    version_pattern = Pattern("Qwt-(\d+\.\d+\.\d+)")
+    version_pattern = Pattern(r"Qwt-(\d+\.\d+\.\d+)")
 
     def __init__(self):
-        self.versions = [LooseVersion(res.group(1)) for res in self.version_pattern(listdir(self.base_path))]
+        self.versions = [
+            distutils.version.LooseVersion(res.group(1))
+            for res in self.version_pattern(os.listdir(self.base_path))]
         assert len(self.versions) > 0, "No Qwt found"
         self.versions.sort()
         self.version = self.versions[-1]
 
-        self.path = self.base_path / "Qwt-{}".format(self.version)
-
-        self.dll = self.path / "lib" / "qwt.dll"
-        assert access(self.dll, R_OK), "No qwt.dll found"
+        self.path = os.path.join(self.base_path, "Qwt-{}".format(self.version))
+        self.dll = os.path.join(self.path, "lib", "qwt.dll")
+        assert os.access(self.dll, os.R_OK), "No qwt.dll found"
 
 
 class LibusbWindows:
@@ -141,9 +144,9 @@ class LibusbWindows:
 
     def __init__(self):
         self.path = self.base_path
-        assert access(self.path, R_OK), "No libusb found"
-        self.dll = join(self.base_path, self.arch, "dll", "libusb-1.0.dll")
-        assert access(self.dll, R_OK), "No libusb-1.0.dll found"
+        assert os.access(self.path, os.R_OK), "No libusb found"
+        self.dll = os.path.join(self.base_path, self.arch, "dll", "libusb-1.0.dll")
+        assert os.access(self.dll, os.R_OK), "No libusb-1.0.dll found"
 
 
 class Firmware:
@@ -151,7 +154,7 @@ class Firmware:
     path = os.path.join("..", "bin")
 
     def __init__(self, version):
-        self.firmware = "lenlab_firmware_{}-{}.out".format(version.major, version.minor)#, version.firmware_revision)
+        self.firmware = "lenlab_firmware_{}-{}.out".format(version.major, version.minor)
         assert os.access(os.path.join(self.path, self.firmware), os.R_OK), "No firmware found"
 
 
@@ -170,10 +173,10 @@ class LenlabWindows:
     arch = "MinGW_32_bit"
 
     def __init__(self, version, qt):
-        self.path = self.base_path / "build-red_lenlab-Desktop_Qt_{}_{}_{}_{}-Release".format(
-            qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch) / "lenlab" / "app" / "release"
-        self.lenlab = self.path / "lenlab.exe"
-        assert access(self.lenlab, R_OK), "No lenlab found"
+        self.path = os.path.join(self.base_path, "build-red_lenlab-Desktop_Qt_%s_%s_%s_%s-Release" % (
+            qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch), "lenlab", "app", "release")
+        self.lenlab = os.path.join(self.path, "lenlab.exe")
+        assert os.access(self.lenlab, os.R_OK), "No lenlab found"
 
 
 class LenlabDarwin:
@@ -230,18 +233,18 @@ def build():
     if version.sys == "Windows":
         os.mkdir(os.path.join(build, "lenlab"))
 
-        copy(lenlab.lenlab, build / "lenlab" / "lenlab.exe")
-        copy(libusb.dll,    build / "lenlab" / "libusb-1.0.dll")
-        copy(qwt.dll,       build / "lenlab" / "qwt.dll")
+        shutil.copy(lenlab.lenlab, os.path.join(build, "lenlab", "lenlab.exe"))
+        shutil.copy(libusb.dll,    os.path.join(build, "lenlab", "libusb-1.0.dll"))
+        shutil.copy(qwt.dll,       os.path.join(build, "lenlab", "qwt.dll"))
 
         # qt
         # windeployqt does not work, when called directly. It does work when called through cmd
         cmd = ["C:\Windows\System32\cmd.exe", "/C", "windeployqt",
                "-opengl", "-printsupport",
-               str(build / "lenlab" / "lenlab.exe")]
-        env = dict(environ)
+               os.path.join(build, "lenlab", "lenlab.exe")]
+        env = dict(os.environ)
         env["PATH"] = "{};{};{}".format(qt.path, qt.tools_path, env["PATH"])
-        call(cmd, env=env)
+        subprocess.call(cmd, env=env)
 
     elif version.sys == "Linux":
         path = os.path.join(build, "lenlab", "usr", "bin")
@@ -299,9 +302,10 @@ def build():
 
     # uniflash_windows_64
     if version.sys == "Windows":
-        copytree(Path("..", "uniflash_windows_64"), build / "uniflash_windows_64")
-        mkdir(build / "uniflash_windows_64" / "user_files" / "images")
-        copy(firmware.path / firmware.firmware, build / "uniflash_windows_64" / "user_files" / "images" / "red_firmware.out")
+        shutil.copytree(os.path.join("..", "uniflash_windows_64"), os.path.join(build, "uniflash_windows_64"))
+        path = os.path.join(build, "uniflash_windows_64", "user_files", "images")
+        os.mkdir(path)
+        shutil.copy(os.path.join(firmware.path, firmware.firmware), os.path.join(path, "red_firmware.out"))
 
     # Linux
     if version.sys == "Linux":
@@ -324,15 +328,8 @@ def build():
 
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
     build()
-
-    #try:
-        #build()
-    #except Exception as detail:
-        #print(detail)
 
 
 if __name__ == "__main__":
     main()
-
