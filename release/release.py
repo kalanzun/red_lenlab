@@ -213,7 +213,7 @@ def build():
         lenlab = Lenlab(version)
 
     firmware = Firmware(version)
-    doc = Doc()
+    if 0: doc = Doc()
 
     if "build" not in os.listdir():
         os.mkdir("build")
