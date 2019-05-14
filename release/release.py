@@ -20,54 +20,13 @@
 """
 
 import platform
-
-from distutils.version import LooseVersion
+import distutils.version.LooseVersion
 import os
-from os import chdir, environ, system, R_OK, W_OK, X_OK
-from os.path import abspath, dirname, join, splitext
-from pathlib import Path
-from re import compile
+import re
 import shutil
-from subprocess import call, check_output
-from time import sleep
-from zipfile import ZipFile
-
-
-# In Python 3.5, these function do not accept pathlib.Path objects
-
-def rmtree(path, ignore_errors=False):
-    shutil.rmtree(str(path), ignore_errors=ignore_errors)
-
-
-def copytree(src, dest):
-    shutil.copytree(str(src), str(dest))
-
-
-def listdir(path="."):
-    return os.listdir(str(path))
-
-
-def mkdir(path, parents=False):
-    if parents:
-        os.makedirs(str(path))
-    else:
-        os.mkdir(str(path))
-
-
-def copy(src, dest):
-    shutil.copy(str(src), str(dest))
-
-
-def remove(path):
-    os.remove(str(path))
-
-
-def walk(path):
-    return os.walk(str(path))
-
-
-def access(path, mode):
-    return os.access(str(path), mode)
+import subprocess
+import time
+import zipfile
 
 
 def single(iterator, message):
@@ -79,7 +38,7 @@ def single(iterator, message):
 class Pattern:
 
     def __init__(self, pattern):
-        self.pattern = compile(pattern)
+        self.pattern = re.compile(pattern)
 
     def __call__(self, data_iterator):
         for data in data_iterator:
@@ -88,25 +47,12 @@ class Pattern:
                 yield res
 
 
-#class Version:
-
-    #def __init__(self, res):
-        #self.res = res
-        #self.version = [int(x) for x in res.groups()]
-
-    #def __str__(self):
-        #return ".".join(str(x) for x in self.version)
-
-
 class Version:
 
-    version_h = Path("..", "include", "lenlab_version.h")
-    #lenlab_config_h = Path("..", "lenlab", "config.h")
-    #firmware_config_h = Path("..", "firmware", "config.h")
+    version_h = os.path.join("..", "include", "lenlab_version.h")
 
-    major_pattern = Pattern("#define MAJOR (\d+)$")
-    minor_pattern = Pattern("#define MINOR (\d+)$")
-    revision_pattern = Pattern("#define REVISION (\d+)$")
+    major_pattern = Pattern(r"#define MAJOR (\d+)$")
+    minor_pattern = Pattern(r"#define MINOR (\d+)$")
 
     sys_pattern = {
         "Windows": "win",
@@ -115,24 +61,16 @@ class Version:
     }
 
     def __init__(self):
-        with self.version_h.open() as file:
+        with open(self.version_h) as file:
             data = file.readlines()
 
         self.major = int(single(self.major_pattern(data), "No major version number found").group(1))
         self.minor = int(single(self.minor_pattern(data), "No minor version number found").group(1))
 
-        # with open(self.lenlab_config_h) as file:
-        #     self.lenlab_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
-        #
-        # with open(self.firmware_config_h) as file:
-        #     self.firmware_revision = int(single(self.revision_pattern(file), "No lenlab revision number found").group(1))
-
-        #self.revision = max(self.lenlab_revision, self.firmware_revision)
-
         self.sys = platform.system()
         self.sys_name = self.sys_pattern[self.sys]
 
-        self.release_name = "lenlab_{}-{}_{}".format(self.major, self.minor, self.sys_name)#, self.revision)
+        self.release_name = "lenlab_{}-{}_{}".format(self.major, self.minor, self.sys_name)
 
 
 class QtWindows:
@@ -140,8 +78,8 @@ class QtWindows:
     base_path = Path("C:", "/Qt")
     arch = "mingw73_32"
 
-    version_pattern = Pattern("(\d+\.\d+\.\d+)$")
-    qtenv2bat_pattern = Pattern("set PATH=(.*?);(.*?);%PATH%")
+    version_pattern = Pattern(r"(\d+\.\d+\.\d+)$")
+    qtenv2bat_pattern = Pattern(r"set PATH=(.*?);(.*?);%PATH%")
 
     def __init__(self):
         assert access(self.base_path, R_OK), "Qt base path '{}' not found".format(self.base_path)
@@ -160,25 +98,27 @@ class QtWindows:
 
 class QtDarwin:
 
-    base_path = Path("~", "Qt")
+    base_path = os.path.join(os.environ["HOME"], "Qt")
     arch = "clang_64"
 
-    version_pattern = Pattern("(\d+\.\d+\.\d+)$")
+    version_pattern = Pattern(r"(\d+\.\d+\.\d+)$")
 
     def __init__(self):
-        assert access(self.base_path, R_OK), "Qt base path '{}' not found".format(self.base_path)
+        assert os.access(self.base_path, os.R_OK), "Qt base path '%s' not found" % self.base_path
 
-        self.versions = [LooseVersion(res.group(1)) for res in self.version_pattern(listdir(self.base_path))]
+        self.versions = [
+            distutils.version.LooseVersion(res.group(1))
+            for res in self.version_pattern(os.listdir(self.base_path))]
         assert len(self.versions) > 0, "No Qt versions found"
 
         self.versions.sort()
         self.version = self.versions[-1]
-        self.path = self.base_path / str(self.version) / self.arch / "bin"
+        self.path = os.path.join(self.base_path, str(self.version), self.arch, "bin")
 
 
 class QwtWindows:
 
-    base_path = Path("C:", "/")
+    base_path = os.path.join("C:", "/")
 
     version_pattern = Pattern("Qwt-(\d+\.\d+\.\d+)")
 
@@ -196,7 +136,7 @@ class QwtWindows:
 
 class LibusbWindows:
 
-    base_path = join("..", "libusb")
+    base_path = os.path.join("..", "libusb")
     arch = "MinGW32"
 
     def __init__(self):
@@ -208,7 +148,7 @@ class LibusbWindows:
 
 class Firmware:
 
-    path = Path("..", "bin")
+    path = os.path.join("..", "bin")
 
     def __init__(self, version):
         self.firmware = "lenlab_firmware_{}-{}.out".format(version.major, version.minor)#, version.firmware_revision)
@@ -217,7 +157,7 @@ class Firmware:
 
 class Lenlab:
 
-    path = Path("..", "..", "build-red_lenlab-Desktop-Release", "lenlab", "app")
+    path = os.path.join("..", "..", "build-red_lenlab-Desktop-Release", "lenlab", "app")
 
     def __init__(self, version):
         self.lenlab = self.path / "lenlab"
@@ -226,7 +166,7 @@ class Lenlab:
 
 class LenlabWindows:
 
-    base_path = Path("..", "..")
+    base_path = os.path.join("..", "..")
     arch = "MinGW_32_bit"
 
     def __init__(self, version, qt):
@@ -238,23 +178,24 @@ class LenlabWindows:
 
 class LenlabDarwin:
 
-    base_path = Path("..", "..")
+    base_path = os.path.join("..", "..")
     arch = "clang_64bit"
 
     def __init__(self, version, qt):
-        self.path = self.base_path / "build-red_lenlab-Desktop_Qt_{}_{}_{}_{}-Release".format(
-            qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch) / "lenlab" / "app"
-        self.lenlab = self.path / "lenlab.app"
-        assert access(self.lenlab, R_OK), "No lenlab found"
+        self.path = os.path.join(
+            self.base_path, "build-red_lenlab-Desktop_Qt_%s_%s_%s_%s-Release" % (
+                qt.version.version[0], qt.version.version[1], qt.version.version[2], self.arch),
+            "lenlab", "app")
+        self.lenlab = os.path.join(self.path, "lenlab.app")
+        assert os.access(self.lenlab, os.R_OK), "No lenlab found"
 
 
 class Doc:
 
-    path = Path("..", "doc", "_build", "html")
+    path = os.path.join("..", "doc", "_build", "html")
 
     def __init__(self):
-        assert access(self.path, R_OK), "No documentation found"
-
+        assert os.access(self.path, os.R_OK), "No documentation found"
 
 
 def build():
@@ -274,21 +215,21 @@ def build():
     firmware = Firmware(version)
     doc = Doc()
 
-    if not "build" in listdir():
-        mkdir("build")
+    if "build" not in os.listdir():
+        os.mkdir("build")
 
-    build = Path("build", version.release_name)
+    build = os.path.join("build", version.release_name)
 
-    if version.release_name in listdir("build"):
-        rmtree(str(build))
-        sleep(0.1) # windows is not that quick
+    if version.release_name in os.listdir("build"):
+        shutil.rmtree(build)
+        time.sleep(0.1)  # windows is not that quick
 
-    mkdir(build)
+    os.mkdir(build)
 
     # Lenlab
-    mkdir(build / "lenlab")
-
     if version.sys == "Windows":
+        os.mkdir(os.path.join(build, "lenlab"))
+
         copy(lenlab.lenlab, build / "lenlab" / "lenlab.exe")
         copy(libusb.dll,    build / "lenlab" / "libusb-1.0.dll")
         copy(qwt.dll,       build / "lenlab" / "qwt.dll")
@@ -319,37 +260,37 @@ def build():
         rmtree(build / "lenlab")
 
     elif version.sys == "Darwin":
-        copytree(lenlab.lenlab, build / "lenlab.app")
+        shutil.copytree(lenlab.lenlab, os.path.join(build, "lenlab.app"))
 
-        env = dict(environ)
-        env["PATH"] = "{}:{}".format(qt.path, env["PATH"])
+        env = dict(os.environ)
+        env["PATH"] = "%s:%s" % (qt.path, env["PATH"])
 
         cmd = [
             "install_name_tool", "-change", "qwt.framework/Versions/6/qwt",
             "/usr/local/qwt-6.1.5-svn/lib/qwt.framework/Versions/6/qwt",
             "lenlab.app/Contents/MacOS/lenlab"]
-        call(cmd, env=env, cwd=str(build))
+        subprocess.call(cmd, env=env, cwd=build)
 
         cmd = ["macdeployqt", "lenlab.app"]
-        call(cmd, env=env, cwd=str(build))
+        subprocess.call(cmd, env=env, cwd=build)
 
     else:
         raise Exception("Unknown system.")
 
     # Firmware
-    mkdir(build / "firmware")
-    copy(firmware.path / firmware.firmware, build / "firmware" / firmware.firmware)
+    os.mkdir(build, "firmware")
+    shutil.copy(os.path.join(firmware.path, firmware.firmware), os.path.join(build, "firmware", firmware.firmware))
 
     # Documentation
-    copytree(doc.path, build / "doc")
-    rmtree(build / "doc" / ".doctrees", ignore_errors=True)
-    rmtree(build / "doc" / "breathe", ignore_errors=True)
-    remove(build / "doc" / ".buildinfo")
+    shutil.copytree(doc.path, os.path.join(build, "doc"))
+    shutil.rmtree(os.path.join(build, "doc", ".doctrees"), ignore_errors=True)
+    shutil.rmtree(os.path.join(build, "doc", "breathe"), ignore_errors=True)
+    shutil.remove(os.path.join(build, "doc", ".buildinfo"))
 
     # Readme and License
-    copy(Path("..", "README.md"), build / "README.md")
-    copy(Path("..", "README.pdf"), build / "README.pdf")
-    copy(Path("..", "LICENSE.md"), build / "LICENSE.md")
+    shutil.copy(os.path.join("..", "README.md"), os.path.join(build, "README.md"))
+    shutil.copy(os.path.join("..", "README.pdf"), os.path.join(build, "README.pdf"))
+    shutil.copy(os.path.join("..", "LICENSE.md"), os.path.join(build, "LICENSE.md"))
 
     # uniflash_windows_64
     if version.sys == "Windows":
@@ -363,14 +304,15 @@ def build():
         copy(Path("..", "linux", "20-lenlab.rules"), build / "linux" / "20-lenlab.rules")
 
     # Package
-    with ZipFile(str(Path("build", "{}.zip".format(version.release_name))), "w") as package:
-        for root, dirs, files in walk(build):
+    with zipfile.ZipFile(os.path.join("build", "%s.zip" % version.release_name), "w") as package:
+        for root, dirs, files in os.walk(build):
             for name in files:
-                package.write(str(Path(root, name)), str(Path(root, name).relative_to("build")))
+                assert root.startswith(build)
+                package.write(os.path.join(root, name), os.path.join(root[len(build):], name))
 
 
 def main():
-    chdir(dirname(abspath(__file__)))
+    os.chdir(os.dirname(os.abspath(__file__)))
 
     build()
 
