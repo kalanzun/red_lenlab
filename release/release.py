@@ -282,10 +282,11 @@ def build():
     shutil.copy(os.path.join(firmware.path, firmware.firmware), os.path.join(build, "firmware", firmware.firmware))
 
     # Documentation
-    shutil.copytree(doc.path, os.path.join(build, "doc"))
-    shutil.rmtree(os.path.join(build, "doc", ".doctrees"), ignore_errors=True)
-    shutil.rmtree(os.path.join(build, "doc", "breathe"), ignore_errors=True)
-    shutil.remove(os.path.join(build, "doc", ".buildinfo"))
+    if 0:
+        shutil.copytree(doc.path, os.path.join(build, "doc"))
+        shutil.rmtree(os.path.join(build, "doc", ".doctrees"), ignore_errors=True)
+        shutil.rmtree(os.path.join(build, "doc", "breathe"), ignore_errors=True)
+        shutil.remove(os.path.join(build, "doc", ".buildinfo"))
 
     # Readme and License
     shutil.copy(os.path.join("..", "README.md"), os.path.join(build, "README.md"))
