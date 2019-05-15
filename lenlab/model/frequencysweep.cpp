@@ -20,8 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "frequencysweep.h"
 
-#include "config.h"
 #include "lenlab.h"
+
+#include "lenlab_version.h"
 
 #include <QDebug>
 #include <QSaveFile>
@@ -31,6 +32,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace model {
 
 static int p_oscilloscope_data_type_id = qRegisterMetaType<Frequencysweep::pOscilloscopeData>("pOscilloscopeData");
+
+char const * const Frequencysweep::DELIMITER = ";";
 
 Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator)
     : Component(lenlab, board)

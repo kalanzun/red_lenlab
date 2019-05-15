@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "config.h"
+#include "lenlab_version.h"
 #include <QMessageBox>
 #include <QFileDialog>
 //#include <QDebug>
@@ -160,6 +160,11 @@ MainWindow::on_actionSaveData_triggered()
         ui->FrequencyTab->save();
 }
 
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+
 void
 MainWindow::on_actionQuit_triggered()
 {
@@ -169,14 +174,12 @@ MainWindow::on_actionQuit_triggered()
 const QString ABOUT(
         "<h1>Lenlab " STR(MAJOR) "." STR(MINOR) "</h1>\n"
 
-        "<p>Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) ", "
-
+        "<p>"
 #ifdef QT_NO_DEBUG
         "release build"
 #else
         "debug build"
 #endif
-
         "</p>\n"
 
         R"_(

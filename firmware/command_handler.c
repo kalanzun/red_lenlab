@@ -37,6 +37,10 @@ on_init(tEvent *event)
 }
 
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+
 const uint8_t name[] = "Lenlab red Firmware Version " STR(MAJOR) "." STR(MINOR);
 
 #define NAME_LENGTH (sizeof(name)-1)

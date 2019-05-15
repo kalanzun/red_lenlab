@@ -20,14 +20,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "oscilloscope.h"
 
-#include "config.h"
 #include "lenlab.h"
 #include "utils.h"
+
+#include "lenlab_version.h"
 
 #include <QDebug>
 #include <QSaveFile>
 
 namespace model {
+
+char const * const Oscilloscope::DELIMITER = ";";
 
 Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
     : Component(lenlab, board)

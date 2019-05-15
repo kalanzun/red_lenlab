@@ -38,6 +38,8 @@ class Voltmeter : public Component
 
     typedef Component super;
 
+    static char const * const DELIMITER;
+
     Q_PROPERTY(bool measurementData READ measurementData WRITE setMeasurementData NOTIFY measurementDataChanged)
     Q_PROPERTY(bool unsavedData READ unsavedData WRITE setUnsavedData NOTIFY unsavedDataChanged)
     Q_PROPERTY(bool autoSave READ autoSave WRITE setAutoSave NOTIFY autoSaveChanged)
