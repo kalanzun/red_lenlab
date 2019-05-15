@@ -11,7 +11,8 @@ Die Dokumentation befindet sich im Unterverzeichnis `doc`; die Einstiegsdatei is
 ## Lizenz
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
+
+Copyright (C) 2019 Christoph Simon and the Lenlab developer team
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
