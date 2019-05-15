@@ -26,7 +26,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAJOR 7
 #define MINOR 3
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
 #endif // LENLAB_VERSION_H

@@ -20,8 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "voltmeter.h"
 
-#include "config.h"
 #include "lenlab.h"
+
+#include "lenlab_version.h"
 
 #include <QDebug>
 #include <QIODevice>
@@ -33,6 +34,8 @@ namespace model {
 double const Voltmeter::MSEC = 1000.0;
 
 double const Voltmeter::VOLT = 4096.0 / 3.3;
+
+char const * const Voltmeter::DELIMITER = ";";
 
 Voltmeter::Voltmeter(Lenlab &lenlab, protocol::Board &board)
     : Component(lenlab, board)

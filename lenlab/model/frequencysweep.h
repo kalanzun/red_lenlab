@@ -38,6 +38,8 @@ class Frequencysweep : public Component
 
     typedef Component super;
 
+    static char const * const DELIMITER;
+
     static int const m_channels = 2;
     static int const m_uint16_offset = 6;
 

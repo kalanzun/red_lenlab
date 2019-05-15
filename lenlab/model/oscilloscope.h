@@ -36,6 +36,8 @@ class Oscilloscope : public Component
 
     typedef Component super;
 
+    static char const * const DELIMITER;
+
     static int const m_task_delay = 100;
     static int const m_task_timeout = 400;
 
