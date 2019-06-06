@@ -17,10 +17,10 @@ addons:
       - libqt5opengl5-dev
       - libusb-1.0-0-dev
 script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; export VERSION=7_4-Linux; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; export VERSION=7_4-Mac; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; export RELEASE_FILE_NAME=Lenlab-$VERSION-x86_64.AppImage; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; export RELEASE_FILE_NAME=Lenlab-$VERSION.dmg; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export VERSION=7_4-Linux; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export VERSION=7_4-Mac; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export RELEASE_FILE_NAME=Lenlab-$VERSION-x86_64.AppImage; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export RELEASE_FILE_NAME=Lenlab-$VERSION.dmg; fi
   - python build.py
 deploy:
   provider: releases
