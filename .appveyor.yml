@@ -1,0 +1,17 @@
+version: 7.4.{build}
+image: Visual Studio 2015
+environment:
+  QTDIR: C:\Qt\latest\mingw73_32
+  TOOLCHAIN_VERSION: 730_32
+  MINGWDIR: C:\Qt\Tools\mingw%TOOLCHAIN_VERSION%
+  PATH: '%QTDIR%\bin;%MINGWDIR%\bin;%PATH%'
+  QWTDIR: C:\Qwt-6.1.4
+  VERSION: 7_4-Win
+  RELEASE_FILE_NAME: Lenlab-%VERSION%.zip
+cache: '%QWTDIR%'
+build_script:
+  - cmd: >-
+    python build.py
+test: off
+artifacts:
+  - path: %RELEASE_FILE_NAME%
