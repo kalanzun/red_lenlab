@@ -10,8 +10,7 @@ environment:
   RELEASE_FILE_NAME: Lenlab-%VERSION%.zip
 cache: '%QWTDIR%'
 build_script:
-  - cmd: >-
-    python build.py
+  - cmd: python build.py
 test: off
 artifacts:
   - path: %RELEASE_FILE_NAME%
