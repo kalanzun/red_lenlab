@@ -21,7 +21,7 @@ def build_osx():
     run(["qmake", "red_lenlab.pro"], env=env)
     run(["make"], env=env)
 
-    run(["mkdir", "build"])
+    os.mkdir("build")
     run(["cp", "-r", "lenlab/app/lenlab.app", "build/"])
     run(["macdeployqt", "build/lenlab.app"], env=env)
 
@@ -55,13 +55,13 @@ def build_linux():
     )
     run(["chmod", "a+x", "linuxdeployqt-continuous-x86_64.AppImage"])
 
-    run(["mkdir", "-p", "build/usr/share/applications"])
+    os.makedirs("build/usr/share/applications")
     run(["cp", "linux/lenlab.desktop", "build/usr/share/applications/"])
 
-    run(["mkdir", "-p", "build/usr/share/icons/hicolor/scaleable/"])
+    os.makedirs("build/usr/share/icons/hicolor/scaleable/")
     run(["cp", "linux/lenlab.svg", "build/usr/share/icons/hicolor/scaleable/"])
 
-    run(["mkdir", "-p", "build/usr/bin"])
+    os.makedirs("build/usr/bin")
     run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
 
     run(
