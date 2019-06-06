@@ -1,3 +1,7 @@
+branches:
+  only:
+    - master
+    - develop
 language: cpp
 compiler: gcc
 os:
@@ -31,4 +35,4 @@ deploy:
   draft: true
   on:
     repo: kalanzun/red_lenlab
-    branch: feature/ci
+    branch: develop

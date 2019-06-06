@@ -1,4 +1,5 @@
 import os
+import shutil
 from subprocess import call as run
 
 
@@ -104,31 +105,15 @@ def build_windows():
     run(["mingw32-make"])
 
     os.makedirs("Lenlab-7_4-Win/lenlab")
-    run(
-        [
-            "copy",
-            r"lenlab\app\release\lenlab.exe",
-            r"Lenlab-7_4-Win\lenlab\lenlab.exe",
-        ]
+    shutil.copy("lenlab/app/release/lenlab.exe", "Lenlab-7_4-Win/lenlab/lenlab.exe")
+    shutil.copy(
+        "libusb/MinGW32/dll/libusb-1.0.dll", "Lenlab-7_4-Win/lenlab/libusb-1.0.dll"
     )
-    run(
-        [
-            "copy",
-            r"libusb\MinGW32\dll\libusb-1.0.dll",
-            r"Lenlab-7_4-Win\lenlab\libusb-1.0.dll",
-        ]
-    )
-    run(
-        [
-            "copy",
-            os.environ["QWTDIR"] + r"\lib\qwt.dll",
-            r"Lenlab-7_4-Win\lenlab\qwt.dll",
-        ]
-    )
+    shutil.copy(os.environ["QWTDIR"] + "/lib/qwt.dll", "Lenlab-7_4-Win/lenlab/qwt.dll")
 
     run(
         ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
-        cwd=r"Lenlab-7_4-Win\lenlab",
+        cwd="Lenlab-7_4-Win/lenlab",
     )
     run(["7z", "a", os.environ["RELEASE_FILE_NAME"], "Lenlab-7_4-Win"])
 
