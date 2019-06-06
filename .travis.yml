@@ -31,4 +31,4 @@ deploy:
   draft: true
   on:
     repo: kalanzun/red_lenlab
-    branch: features/ci
+    branch: feature/ci
