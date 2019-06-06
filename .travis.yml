@@ -1,0 +1,34 @@
+language: cpp
+compiler: gcc
+os:
+  - linux
+  - osx
+dist: xenial
+addons:
+  homebrew:
+    packages:
+      - qt5
+      - qwt
+  apt:
+    packages:
+      - qt5-default
+      - libqwt-qt5-dev
+      - libqt5svg5-dev
+      - libqt5opengl5-dev
+      - libusb-1.0-0-dev
+script:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; export VERSION=7_4-Linux; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; export VERSION=7_4-Mac; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; export RELEASE_FILE_NAME=Lenlab-$VERSION-x86_64.AppImage; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; export RELEASE_FILE_NAME=Lenlab-$VERSION.dmg; fi
+  - python build.py
+deploy:
+  provider: releases
+  api_key:
+    secure: e2LahrxnHvVRzA22mBCkVqiMK+lAGB9lW/p9bC6DxnLLojKwkCLWJIvhoKhxaE6W0nBnD7ms5in6tiEW3zkoDI0hIaNAaNe05oSrRXEiqORxx+pN3CUT9aAGhNdwaN5e3VkT6l7bryaJylBs8D/+fsrle+ujo8dcZi5tpy/AEbE56mR6lJS5clpHoY/nF3XhnFq78LE1upJT+jQAP17Uc49SKSfSDCNbIwtSa8tuL23b5oHSNWUVmdf9dztNPvdIN6SdasSSAgTXsqVGp6szOZIjAja4dxf88vuabCj171zvSz7HrV3YeqelmFycoJVsu59El+wJXON1TFK7wUMstqTRZIPTXaH59dbhFyT7ZJhP0Ajd8QAny5WA7yHppn/tuTI/4koU72GhzvtFcyHF2Kl9ig/meK6iyvb29kO9/Hc7uXQ+uKbwL6l7aR9/M0yH8Pba6a6M9I8GBLaR4Q4JtE48z5quET/6xwJH2rhs+gVSluy8luN8V+jACdDNirSZ1iUmWeSw5+l4jlpIeT/gsoQXJ07uoz7h+zBs8iGWk+Ia1dJt3BxsB+3ByUm8ackw+AQIk/YvPK2HroJt0z+6eA8LHpOUI3QLQ5UmfIqeZ1xtR7dtNCTJOyLfRoJ8NYqAdywQwxFIb+bNfhLYPugFaBq4AN4dwvVI1+BxxUMNpZs=
+  file: RELEASE_FILE_NAME
+  skip_cleanup: true
+  draft: true
+  on:
+    repo: kalanzun/red_lenlab
+    branch: features/ci
