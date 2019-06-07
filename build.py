@@ -104,18 +104,20 @@ def build_windows():
     run(["qmake", "red_lenlab.pro"])
     run(["mingw32-make"])
 
-    os.makedirs("Lenlab-7_4-Win/lenlab")
-    shutil.copy("lenlab/app/release/lenlab.exe", "Lenlab-7_4-Win/lenlab/lenlab.exe")
+    release_dir_name = "Lenlab-" + os.environ["VERSION"] + "-win32"
+
+    os.makedirs(release_dir_name + "/lenlab")
+    shutil.copy("lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe")
     shutil.copy(
-        "libusb/MinGW32/dll/libusb-1.0.dll", "Lenlab-7_4-Win/lenlab/libusb-1.0.dll"
+        "libusb/MinGW32/dll/libusb-1.0.dll", release_dir_name + "/lenlab/libusb-1.0.dll"
     )
-    shutil.copy(os.environ["QWTDIR"] + "/lib/qwt.dll", "Lenlab-7_4-Win/lenlab/qwt.dll")
+    shutil.copy(os.environ["QWTDIR"] + "/lib/qwt.dll", release_dir_name + "/lenlab/qwt.dll")
 
     run(
         ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
-        cwd="Lenlab-7_4-Win/lenlab",
+        cwd=release_dir_name+"/lenlab",
     )
-    run(["7z", "a", os.environ["RELEASE_FILE_NAME"], "Lenlab-7_4-Win"])
+    run(["7z", "a", os.environ["RELEASE_FILE_NAME"], release_dir_name])
 
 
 def main():
