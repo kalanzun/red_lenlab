@@ -65,6 +65,7 @@ def build_linux():
     os.makedirs("build/usr/bin")
     run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
 
+    # linuxdeployqt uses VERSION environment variable for the filename
     run(
         [
             "./linuxdeployqt-continuous-x86_64.AppImage",
