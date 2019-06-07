@@ -1,7 +1,3 @@
-branches:
-  only:
-    - master
-    - develop
 image: Visual Studio 2015
 environment:
   QTDIR: C:\Qt\latest\mingw73_32

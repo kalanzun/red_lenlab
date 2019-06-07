@@ -1,7 +1,3 @@
-branches:
-  only:
-    - master
-    - develop
 language: cpp
 compiler: gcc
 os:
