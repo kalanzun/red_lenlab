@@ -22,6 +22,10 @@ def build_osx():
     run(["qmake", "red_lenlab.pro"], env=env)
     run(["make"], env=env)
 
+    tag = env["TRAVIS_TAG"]
+    if not tag:
+        return
+
     os.mkdir("build")
     run(["cp", "-r", "lenlab/app/lenlab.app", "build/"])
     run(["macdeployqt", "build/lenlab.app"], env=env)
@@ -37,7 +41,7 @@ def build_osx():
             "-ov",
             "-format",
             "UDZO",
-            env["RELEASE_FILE_NAME"],
+            "Lenlab-" + tag + "-mac.dmg",
         ]
     )
 
@@ -45,6 +49,11 @@ def build_osx():
 def build_linux():
     run(["qmake", "red_lenlab.pro"])
     run(["make"])
+
+    env = dict(os.environ)
+    tag = env["TRAVIS_TAG"]
+    if not tag:
+        return
 
     run(
         [
@@ -66,12 +75,14 @@ def build_linux():
     run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
 
     # linuxdeployqt uses VERSION environment variable for the filename
+    env["VERSION"] = tag + "-linux"
     run(
         [
             "./linuxdeployqt-continuous-x86_64.AppImage",
             "build/usr/share/applications/lenlab.desktop",
             "-appimage",
-        ]
+        ],
+        env=env,
     )
 
 
@@ -105,7 +116,12 @@ def build_windows():
     run(["qmake", "red_lenlab.pro"])
     run(["mingw32-make"])
 
-    release_dir_name = "Lenlab-" + os.environ["VERSION"] + "-win32"
+    env = dict(os.environ)
+    tag = env.get("APPVEYOR_REPO_TAG_NAME", None)
+    if not tag:
+        return
+
+    release_dir_name = "Lenlab-" + tag + "-win32"
 
     os.makedirs(release_dir_name + "/lenlab")
     shutil.copy("lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe")
@@ -118,13 +134,15 @@ def build_windows():
         ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
         cwd=release_dir_name+"/lenlab",
     )
-    run(["7z", "a", os.environ["RELEASE_FILE_NAME"], release_dir_name])
+    run(["7z", "a", release_dir_name + ".zip", release_dir_name])
 
 
 def main():
-    if "TRAVIS_OS_NAME" in os.environ:
+    env = dict(os.environ)
+
+    if "TRAVIS_OS_NAME" in env:
         os_name = os.environ["TRAVIS_OS_NAME"]
-    elif "APPVEYOR" in os.environ:
+    elif "APPVEYOR" in env:
         os_name = "windows"
     else:
         raise ValueError("Unknown CI service")

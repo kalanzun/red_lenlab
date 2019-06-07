@@ -17,16 +17,13 @@ addons:
       - libqt5opengl5-dev
       - libusb-1.0-0-dev
 script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export VERSION=$TRAVIS_TAG-linux; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export VERSION=$TRAVIS_TAG-mac; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export RELEASE_FILE_NAME=Lenlab-$VERSION-x86_64.AppImage; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export RELEASE_FILE_NAME=Lenlab-$VERSION.dmg; fi
   - python build.py
 deploy:
   provider: releases
   api_key:
     secure: uHjzhdJGbx16tZbl50E+wWOn7RFgdBUGtiFWMKp+M85gQRQsxuYBYayoNLRpqXrQ9t8mX2p0nJtYXnu9UxlYdGDfgVHyuSjQ/6/N3UwQwE7z3wF+/14gA3as3cJoNSXQGV98UKcdLV4jxJmzZDEt/V735Ti8K47BaRTKd9EjcJVH6+gVA61ITPa6K1YEOeZoLbMRxVqgYME+xbc7XhdEefD3ZaITWXt9WGTeesNWa+BMt1MNYPKZbKu+WnhAf2RKbBtahscEqLy6WlD3YPJabaOHy+aYsNyghhLPwOzwJNkwFpfvPG5eWreYiNbo7ltlJzCwasRNW4yznuOXhl3Gvz0VWJmY9YW5TwAal4uHzVwQ50RIXRXLNGUoy8g2kWZr3mErknlcQqDN2O723k51E6IVDgQmpwSJvkI8jojNtfHUZncEH7sBp1V9P/e7D3P0udgjtHhlkSQKktjz7S2MI5ZQc3gm/GbS/WFurRFAMWoKzv8UIoks7t+l37lKrm6bHziRhL/v/aSSBKhwyv7GD1uFQp8V4C3JABWBLuiyPlsCg0lRImxQL8r6M61LrmAThSJOF3vNYIVtFj677E8TodNrCGC+viyS6K/KOeASxZcyaYWG7oLg7PvWgkbf0rw3csIrB2xyFmvnP5nNvAm8b7Rq5XNaALP30AsdpK2veng=
-  file: "$RELEASE_FILE_NAME"
+  file_glob: true
+  file: "Lenlab-*"
   skip_cleanup: true
   on:
     tags: true
