@@ -1,7 +1,4 @@
-branches:
-  only:
-    - develop
-    - master
+if: tag IS present
 language: cpp
 compiler: gcc
 os:
@@ -22,8 +19,6 @@ addons:
       - libusb-1.0-0-dev
 script:
   - python build.py
-before_deploy:
-  - export TRAVIS_TAG=$(cat VERSION)
 deploy:
   provider: releases
   api_key:
@@ -31,5 +26,3 @@ deploy:
   file_glob: true
   file: "Lenlab-*"
   skip_cleanup: true
-  on:
-    branch: master
