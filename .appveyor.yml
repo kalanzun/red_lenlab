@@ -1,0 +1,25 @@
+branches:
+  only:
+    - develop
+    - master
+image: Visual Studio 2015
+environment:
+  QTDIR: C:\Qt\latest\mingw73_32
+  TOOLCHAIN_VERSION: 730_32
+  MINGWDIR: C:\Qt\Tools\mingw%TOOLCHAIN_VERSION%
+  PATH: '%QTDIR%\bin;%MINGWDIR%\bin;%PATH%'
+  QWTDIR: C:\Qwt-6.1.4
+cache: '%QWTDIR%'
+build_script:
+  - cmd: python build.py
+  - cmd: set /P APPVEYOR_REPO_TAG_NAME=<VERSION
+test: off
+artifacts:
+  - path: 'Lenlab-*-win32.zip'
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: apLhdh44RWN9bwzp+QyuFCvZmDPeE+UeVK2zns9ubHu7amq2rhKDeib3wOE5Nf/v
+  force_update: true
+  on:
+    branch: master

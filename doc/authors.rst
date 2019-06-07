@@ -1,6 +1,5 @@
-.. Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-
-    Copyright (C) 2017 Christoph Simon and the Lenlab developer team
+..  Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
+    Copyright (C) 2017-2019 Christoph Simon and the Lenlab developer team
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

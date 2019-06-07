@@ -1,26 +1,24 @@
 /*
-
-Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-Copyright (C) 2017 Christoph Simon and the Lenlab developer team
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-*/
+ * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
+ * Copyright (C) 2017-2019 Christoph Simon and the Lenlab developer team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "config.h"
+#include "lenlab_version.h"
 #include <QMessageBox>
 #include <QFileDialog>
 //#include <QDebug>
@@ -160,6 +158,11 @@ MainWindow::on_actionSaveData_triggered()
         ui->FrequencyTab->save();
 }
 
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+
 void
 MainWindow::on_actionQuit_triggered()
 {
@@ -169,14 +172,12 @@ MainWindow::on_actionQuit_triggered()
 const QString ABOUT(
         "<h1>Lenlab " STR(MAJOR) "." STR(MINOR) "</h1>\n"
 
-        "<p>Version: " STR(MAJOR) "." STR(MINOR) "." STR(REVISION) ", "
-
+        "<p>"
 #ifdef QT_NO_DEBUG
         "release build"
 #else
         "debug build"
 #endif
-
         "</p>\n"
 
         R"_(
