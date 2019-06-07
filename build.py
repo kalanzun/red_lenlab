@@ -1,9 +1,58 @@
 import os
+import re
 import shutil
 from subprocess import call as run
 
 
-def build_osx():
+def single(iterator, message):
+    result = list(iterator)
+    assert len(result) == 1, message
+    return result[0]
+
+
+class Pattern:
+
+    def __init__(self, pattern):
+        self.pattern = re.compile(pattern)
+
+    def __call__(self, data_iterator):
+        for data in data_iterator:
+            res = self.pattern.match(data)
+            if res:
+                yield res
+
+
+class Version:
+
+    def __init__(self, major, minor):
+        self.major = major
+        self.minor = minor
+
+    def __str__(self):
+        return "%i.%i" % (self.major, self.minor)
+
+
+def version():
+    version_h = os.path.join("include", "lenlab_version.h")
+
+    major_pattern = Pattern(r"#define MAJOR (\d+)$")
+    minor_pattern = Pattern(r"#define MINOR (\d+)$")
+
+    with open(version_h) as file:
+        data = file.readlines()
+
+    major = int(single(major_pattern(data), "No major version number found").group(1))
+    minor = int(single(minor_pattern(data), "No minor version number found").group(1))
+
+    with open("VERSION", "w") as file:
+        file.write(str(major))
+        file.write(".")
+        file.write(str(minor))
+
+    return Version(major, minor)
+
+
+def build_osx(version):
     # qwt config uses this (false) include path
     run(
         [
@@ -22,9 +71,9 @@ def build_osx():
     run(["qmake", "red_lenlab.pro"], env=env)
     run(["make"], env=env)
 
-    tag = env["TRAVIS_TAG"]
-    if not tag:
-        return
+    #tag = env["TRAVIS_TAG"]
+    #if not tag:
+    #    return
 
     os.mkdir("build")
     run(["cp", "-r", "lenlab/app/lenlab.app", "build/"])
@@ -41,19 +90,19 @@ def build_osx():
             "-ov",
             "-format",
             "UDZO",
-            "Lenlab-" + tag + "-mac.dmg",
+            "Lenlab-" + str(version) + "-mac.dmg",
         ]
     )
 
 
-def build_linux():
+def build_linux(version):
     run(["qmake", "red_lenlab.pro"])
     run(["make"])
 
     env = dict(os.environ)
-    tag = env["TRAVIS_TAG"]
-    if not tag:
-        return
+    #tag = env["TRAVIS_TAG"]
+    #if not tag:
+    #    return
 
     run(
         [
@@ -75,7 +124,7 @@ def build_linux():
     run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
 
     # linuxdeployqt uses VERSION environment variable for the filename
-    env["VERSION"] = tag + "-linux"
+    env["VERSION"] = str(version) + "-linux"
     run(
         [
             "./linuxdeployqt-continuous-x86_64.AppImage",
@@ -86,7 +135,7 @@ def build_linux():
     )
 
 
-def build_windows():
+def build_windows(version):
     run(
         [
             "appveyor",
@@ -117,11 +166,11 @@ def build_windows():
     run(["mingw32-make"])
 
     env = dict(os.environ)
-    tag = env.get("APPVEYOR_REPO_TAG_NAME", None)
-    if not tag:
-        return
+    #tag = env.get("APPVEYOR_REPO_TAG_NAME", None)
+    #if not tag:
+    #    return
 
-    release_dir_name = "Lenlab-" + tag + "-win32"
+    release_dir_name = "Lenlab-" + str(version) + "-win32"
 
     os.makedirs(release_dir_name + "/lenlab")
     shutil.copy("lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe")
@@ -147,12 +196,14 @@ def main():
     else:
         raise ValueError("Unknown CI service")
 
+    v = version()
+
     if os_name == "linux":
-        build_linux()
+        build_linux(v)
     elif os_name == "osx":
-        build_osx()
+        build_osx(v)
     elif os_name == "windows":
-        build_windows()
+        build_windows(v)
     else:
         raise ValueError("Unknown operating system")
 
