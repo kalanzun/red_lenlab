@@ -26,3 +26,5 @@ deploy:
   file_glob: true
   file: "Lenlab-*"
   skip_cleanup: true
+  on:
+    tags: true
