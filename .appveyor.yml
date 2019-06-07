@@ -12,7 +12,7 @@ environment:
 cache: '%QWTDIR%'
 build_script:
   - cmd: python build.py
-  - cmd: set /P APPVEYOR_REPO_TAG_NAME=<VERSION
+  - cmd: set /P RELEASE_NAME=<VERSION
 test: off
 artifacts:
   - path: 'Lenlab-*-win32.zip'
@@ -20,6 +20,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: apLhdh44RWN9bwzp+QyuFCvZmDPeE+UeVK2zns9ubHu7amq2rhKDeib3wOE5Nf/v
+  tag: '%RELEASE_NAME%'
   force_update: true
   on:
     branch: master
