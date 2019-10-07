@@ -7,7 +7,7 @@ from subprocess import call as run
 def build_osx(env):
     # TODO detect qwt version
     # qwt config uses this (false) include path
-    run(["ls", "/usr/local/Cellar/"])
+    run(["ls", "/usr/local/Cellar/qwt"])
     run(
         [
             "ln",

@@ -10,6 +10,7 @@ addons:
     packages:
       - qt5
       - qwt
+    update: true
   apt:
     packages:
       - qt5-default
