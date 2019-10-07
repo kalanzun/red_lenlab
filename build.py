@@ -111,6 +111,9 @@ def build_windows(env):
     run(["mingw32-make"])
 
     tag = env["APPVEYOR_REPO_TAG_NAME"]
+    result = re.compile(r"(%d)\.(%d)").match(tag)
+    major = int(result.group(1))
+    minor = int(result.group(2))
 
     release_dir_name = "Lenlab-" + tag + "-win32"
 
@@ -125,6 +128,24 @@ def build_windows(env):
         ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
         cwd=release_dir_name+"/lenlab",
     )
+
+    # Firmware
+    firmware_name = "lenlab_firmware_%s-%s.out" % (major, minor)
+    os.makedirs(release_dir_name + "/firmware")
+    shutil.copy("bin/" + firmware_name, release_dir_name + "/firmware/" + firmware_name)
+
+    # Readme and License
+    shutil.copy("README.md", release_dir_name + "/README.md")
+    shutil.copy("README.pdf", release_dir_name + "/README.pdf")
+    shutil.copy("LICENSE.md", release_dir_name + "/LICENSE.md")
+    shutil.copy("LICENSE.pdf", release_dir_name + "/LICENSE.pdf")
+
+    # uniflash_windows_64
+    shutil.copytree("uniflash_windows_64", release_dir_name + "/uniflash_windows_64")
+    path = os.path.join(release_dir_name, "uniflash_windows_64", "user_files", "images")
+    os.mkdir(path)
+    shutil.copy("bin/" + firmware_name, os.path.join(path, "red_firmware.out"))
+
     run(["7z", "a", release_dir_name + ".zip", release_dir_name])
 
 
