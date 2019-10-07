@@ -16,7 +16,7 @@ def build_osx(env):
             "ln",
             "-s",
             "/usr/local/lib/qwt.framework/Headers",
-            "/usr/local/Cellar/qwt/"+qwt_version+"/include",
+            "/usr/local/Cellar/qwt/" + qwt_version + "/include",
         ]
     )
 
@@ -124,15 +124,19 @@ def build_windows(env):
     release_dir_name = "Lenlab-" + tag + "-win32"
 
     os.makedirs(release_dir_name + "/lenlab")
-    shutil.copy("lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe")
+    shutil.copy(
+        "lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe"
+    )
     shutil.copy(
         "libusb/MinGW32/dll/libusb-1.0.dll", release_dir_name + "/lenlab/libusb-1.0.dll"
     )
-    shutil.copy(os.environ["QWTDIR"] + "/lib/qwt.dll", release_dir_name + "/lenlab/qwt.dll")
+    shutil.copy(
+        os.environ["QWTDIR"] + "/lib/qwt.dll", release_dir_name + "/lenlab/qwt.dll"
+    )
 
     run(
         ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
-        cwd=release_dir_name+"/lenlab",
+        cwd=release_dir_name + "/lenlab",
     )
 
     # Firmware
@@ -145,6 +149,17 @@ def build_windows(env):
     shutil.copy("README.pdf", release_dir_name + "/README.pdf")
     shutil.copy("LICENSE.md", release_dir_name + "/LICENSE.md")
     shutil.copy("LICENSE.pdf", release_dir_name + "/LICENSE.pdf")
+
+    # Documentation
+    run(
+        [
+            "appveyor",
+            "DownloadFile",
+            "https://readthedocs.org/projects/red-lenlab/downloads/htmlzip/latest/",
+        ]
+    )
+    run(["7z", "x", "red-lenlab.zip"])
+    shutil.copytree("red-lenlab/red-lenlab-latest", release_dir_name + "/doc")
 
     # uniflash_windows_64
     shutil.copytree("uniflash_windows_64", release_dir_name + "/uniflash_windows_64")
