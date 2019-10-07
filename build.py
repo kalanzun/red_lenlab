@@ -114,7 +114,7 @@ def build_windows(env):
     run(["mingw32-make"])
 
     tag = env["APPVEYOR_REPO_TAG_NAME"]
-    result = re.compile(r"(%d)\.(%d)").match(tag)
+    result = re.compile(r"(\d)\.(\d)").match(tag)
     major = int(result.group(1))
     minor = int(result.group(2))
 
