@@ -93,6 +93,29 @@ def build_linux(env):
 
 
 def build_windows(env):
+    tag = env["APPVEYOR_REPO_TAG_NAME"]
+    result = re.compile(r"(\d)\.(\d)").match(tag)
+    major = int(result.group(1))
+    minor = int(result.group(2))
+
+    release_dir_name = "Lenlab-" + tag + "-win32"
+
+    os.makedirs(release_dir_name + "/lenlab")
+
+    # Documentation
+    # Note: Do not collide with the repository directory 'red-lenlab'
+    run(
+        [
+            "appveyor",
+            "DownloadFile",
+            "-FileName", "doc.zip",
+            "https://readthedocs.org/projects/red-lenlab/downloads/htmlzip/latest/",
+        ]
+    )
+    run(["7z", "x", "doc.zip", "-odoc"])
+    run(["ls", "doc"])
+    shutil.move("/doc/red-lenlab-latest", release_dir_name + "/doc")
+
     run(
         [
             "appveyor",
@@ -122,14 +145,8 @@ def build_windows(env):
     run(["qmake", "red_lenlab.pro"])
     run(["mingw32-make"])
 
-    tag = env["APPVEYOR_REPO_TAG_NAME"]
-    result = re.compile(r"(\d)\.(\d)").match(tag)
-    major = int(result.group(1))
-    minor = int(result.group(2))
+    # release_dir
 
-    release_dir_name = "Lenlab-" + tag + "-win32"
-
-    os.makedirs(release_dir_name + "/lenlab")
     shutil.copy(
         "lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe"
     )
@@ -155,19 +172,6 @@ def build_windows(env):
     shutil.copy("README.pdf", release_dir_name + "/README.pdf")
     shutil.copy("LICENSE.md", release_dir_name + "/LICENSE.md")
     shutil.copy("LICENSE.pdf", release_dir_name + "/LICENSE.pdf")
-
-    # Documentation
-    # Note: Do not collide with the repository directory 'red-lenlab'
-    run(
-        [
-            "appveyor",
-            "DownloadFile",
-            "-FileName", "doc.zip",
-            "https://readthedocs.org/projects/red-lenlab/downloads/htmlzip/latest/",
-        ]
-    )
-    run(["7z", "x", "doc.zip", "-odoc"])
-    shutil.move("/doc/red-lenlab/red-lenlab-latest", release_dir_name + "/doc")
 
     # uniflash_windows_64
     shutil.copytree("uniflash_windows_64", release_dir_name + "/uniflash_windows_64")
