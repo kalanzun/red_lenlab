@@ -33,6 +33,12 @@ def build_osx(env):
     run(["cp", "-r", "lenlab/app/lenlab.app", "build/"])
     run(["macdeployqt", "build/lenlab.app"], env=env)
 
+    # Readme and License
+    shutil.copy("README.md", "build/README.md")
+    shutil.copy("README.pdf", "build/README.pdf")
+    shutil.copy("LICENSE.md", "build/LICENSE.md")
+    shutil.copy("LICENSE.pdf", "build/LICENSE.pdf")
+
     run(
         [
             "hdiutil",
