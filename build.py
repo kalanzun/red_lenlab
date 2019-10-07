@@ -5,15 +5,18 @@ from subprocess import call as run
 
 
 def build_osx(env):
-    # TODO detect qwt version
+    # detect qwt version
+    contents = os.listdir("/usr/local/Cellar/qwt")
+    assert len(contents) == 1
+    qwt_version = contents[0]
+
     # qwt config uses this (false) include path
-    run(["ls", "/usr/local/Cellar/qwt"])
     run(
         [
             "ln",
             "-s",
             "/usr/local/lib/qwt.framework/Headers",
-            "/usr/local/Cellar/qwt/6.1.4/include",
+            "/usr/local/Cellar/qwt/"+qwt_version+"/include",
         ]
     )
 
@@ -35,7 +38,7 @@ def build_osx(env):
             "hdiutil",
             "create",
             "-volname",
-            "Lenlab-7.4",
+            "Lenlab-" + tag,
             "-srcFolder",
             "build",
             "-ov",
