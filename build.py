@@ -5,13 +5,15 @@ from subprocess import call as run
 
 
 def build_osx(env):
+    # TODO detect qwt version
     # qwt config uses this (false) include path
+    run(["ls", "/usr/local/Cellar/qwt/"])
     run(
         [
             "ln",
             "-s",
             "/usr/local/lib/qwt.framework/Headers",
-            "/usr/local/Cellar/qwt/6.1.3_4/include",
+            "/usr/local/Cellar/qwt/6.1.4/include",
         ]
     )
 
