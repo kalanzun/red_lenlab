@@ -157,15 +157,17 @@ def build_windows(env):
     shutil.copy("LICENSE.pdf", release_dir_name + "/LICENSE.pdf")
 
     # Documentation
+    # Note: Do not collide with the repository directory 'red-lenlab'
     run(
         [
             "appveyor",
             "DownloadFile",
+            "-FileName", "doc.zip",
             "https://readthedocs.org/projects/red-lenlab/downloads/htmlzip/latest/",
         ]
     )
-    run(["7z", "x", "red-lenlab.zip"])
-    shutil.copytree("red-lenlab/red-lenlab-latest", release_dir_name + "/doc")
+    run(["7z", "x", "doc.zip", "-odoc"])
+    shutil.move("/doc/red-lenlab/red-lenlab-latest", release_dir_name + "/doc")
 
     # uniflash_windows_64
     shutil.copytree("uniflash_windows_64", release_dir_name + "/uniflash_windows_64")
