@@ -103,18 +103,17 @@ def build_windows(env):
     os.makedirs(release_dir_name + "/lenlab")
 
     # Documentation
-    # Note: Do not collide with the repository directory 'red-lenlab'
+    # Note: Do not collide with the repository directory 'red-lenlab' or with 'doc'
     run(
         [
             "appveyor",
             "DownloadFile",
-            "-FileName", "doc.zip",
+            "-FileName", "html.zip",
             "https://readthedocs.org/projects/red-lenlab/downloads/htmlzip/latest/",
         ]
     )
-    run(["7z", "x", "doc.zip", "-odoc"])
-    run(["ls", "doc"])
-    shutil.move("/doc/red-lenlab-latest", release_dir_name + "/doc")
+    run(["7z", "x", "html.zip", "-ohtml"])
+    shutil.move("html/red-lenlab-latest", release_dir_name + "/doc")
 
     run(
         [
