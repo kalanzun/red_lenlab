@@ -21,7 +21,9 @@ Lenlab ist eine Software für den PC und eine Firmware für das TI Tiva C series
 Launchpad EK-TM4C123GXL für den Workshop Elektrotechnik und Informationstechnik
 am Karlsruher Institut für Technologie.
 
-Homepage: `https://git.scc.kit.edu/vq6936/red_lenlab <https://git.scc.kit.edu/vq6936/red_lenlab>`_
+Homepage: `https://github.com/kalanzun/red_lenlab <https://github.com/kalanzun/red_lenlab>`_
+
+Dokumentation: `https://red-lenlab.readthedocs.io <https://red-lenlab.readthedocs.io>`_
 
 .. toctree::
     :maxdepth: 2
@@ -47,7 +49,7 @@ Lizenz
 
 Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 
-Copyright (C) 2017 Christoph Simon und das :doc:`Lenlab-Entwicklerteam <authors>`
+Copyright (C) 2017-2019 Christoph Simon und das :doc:`Lenlab-Entwicklerteam <authors>`
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
