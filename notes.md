@@ -2,21 +2,6 @@
 
 ## Project Configuration
 
-### Variables
-
-New path variable TIVAWARE_INSTALL
-New build variable TIVAWARE_INSTALL
-
-or
-
-vars.ini in workspace
-
-TIVAWARE_INSTALL = C:\ti\TivaWare_C_Series-2.1.4.178
-
-and in code composer studio File/Import/Code Composer Studio/Build Variables
-
-Scope: Workspace
-
 ### Including TivaWare
 
 Code composer studio project link to driverlib.lib relative to path variable TIVAWARE_INSTALL
@@ -185,29 +170,4 @@ The old Lenlab won't find the new device, the new Lenlab won't find the old ones
 ## Microsoft OS Descriptor
 
 https://e2e.ti.com/support/microcontrollers/tiva_arm/f/908/t/481401
-
-# Release Script
-
-## Lenlab
-
-* Build, dependencies are installed
-* copy lenlab, qwt and libusb to release
-* copy qt with windeployqt
-
-## Firmware
-
-* Build, ccs is installed, TivaWare is installed
-  * http://processors.wiki.ti.com/index.php/Projects_-_Command_Line_Build/Create
-  * create new workspace
-  * create new ccs project, importing the source code
-  * build it
-* copy uniflash skeleton into release
-* copy out file into release
-
-The uniflash tool does not generate the skeleton from a command line. Easiest to have the skeleton checked in right now.
-
-## Documentation
-
-* Build, dependencies and build tools are available
-* copy html and pdf to release
 

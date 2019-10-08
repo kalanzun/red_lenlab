@@ -1,10 +1,74 @@
 # Build
 
+This file describes the build environment on the build servers for release builds and instructions for the setup of a local build environment for development. Your local environment should follow the settings of the build servers.
+
 ## Dependencies
+
+- Qt (and MinGW on Windows)
+- qwt
+- libusb
+- Python (for the build scripts) and Sphinx (for the documentation)
+- TI Code Composer Studio
+- TI TivaWare for TM4C Series
+
+## Build servers
+
+- Windows: https://ci.appveyor.com/project/ChristophSimon/red-lenlab
+- Linux, Mac: https://travis-ci.org/kalanzun/red_lenlab
+- Documentation: https://red-lenlab.readthedocs.io
 
 ### Windows
 
-#### Qt 5.9
+Build environment configuration in `.appveyor.yml`
+
+Virtual Machine Image: Visual Studio 2015
+
+Note: We use the MinGW compiler of the Qt package
+
+Third party software download and install in `build.py`. The versions are defined there.
+
+- Qt: Latest and MinGW 7.3.0 32 bit compiler
+- qwt: Own build from source, version 6.1.4, hard coded in `build.py`
+- libusb: Binary download from project home http://libusb.info (SourceForge), version 1.0.22, hard coded in `build.py`
+- Python: Build environment default is version 2.7.16
+
+### Linux
+
+Build environment configuration in `.travis.yml`
+
+Virtual Machine Image: Ubuntu Xenial Xerus 16.04
+
+The virtual machine image is specified within the configuration. It will use the default version of each software of that distribution.
+
+Compiler: gcc
+
+Note: AppImages require the oldest supported Ubuntu LTS
+
+- qt5-default: Version 5.5.1
+- libqwt-qt5-dev: Version 6.1.2
+- libusb-1.0-0-dev: Version 1.0.20
+- Python: Build environment default is version 2.7.11
+
+### Mac
+
+Build environment configuration in `.travis.yml`
+
+Compiler: clang
+
+The versions are not specified within the configuration. If Travis CI or Homebrew update the default version, the build environment will use the updated version.
+
+Currently:
+
+Travis CI uses macOS 10.13 and Xcode 9.4.1 by default. 
+
+- qt5: Homebrew latest version is 5.13.1
+- qwt: Homebrew latest version is 6.1.4
+
+## Local build environment
+
+### Windows
+
+#### Qt
 
 Download and run windows Installer
 
@@ -14,24 +78,26 @@ Note: Open source version - you may skip account creation
 
 Select
 
-* Qt 5.9.2 / MinGW 5.3.0 32 bit
-* Tools / MinGW 5.3.0
+* Qt / MinGW 7.3.0 32 bit
+* Tools / MinGW 7.3.0 32 bit
 
-#### qwt 6.1.3
+To build and run lenlab or the tests, open `red_lenlab.pro` in Qt Creator and click the play button (after installing the rest of the dependencies).
+
+#### qwt
 
 Download windows source files (the zip archive)
 
 https://sourceforge.net/projects/qwt/files/qwt/
 
-Qt -> Command Prompt
+Start Menu -> Qt -> MinGW 7.3.0 32 bit Command Prompt
 
-qwt will install to C:\Qwt-6.1.3, default settings are fine
+qwt will install to C:\Qwt-$VERSION by default
 
-Installation instructions http://qwt.sourceforge.net/qwtinstall.html
+Installation instructions: http://qwt.sourceforge.net/qwtinstall.html
 
 - unzip
 
-- cd qwt-6.1.3 
+- cd qwt-$VERSION
 
 - qmake qwt.pro
 
@@ -39,16 +105,13 @@ Installation instructions http://qwt.sourceforge.net/qwtinstall.html
 
 - mingw32-make install
 
+**register qwt with the qt build system**
 
-**register qwt with qt build system**
+`qmake -set QMAKEFEATURES C:\Qwt-$VERSION\features`
 
-qmake -set QMAKEFEATURES C:\Qwt-6.1.3\features
+This allows the project file to get all build settings with `CONFIG += qwt`.
 
-This allows the project file to get all build settings with CONFIG += qwt
-
-For running, Qt Creator additionally needs the library paths
-
-Qwt path to run lenlab in Qt Creator is hard coded in lenlab.pro
+For running lenlab, Qt Creator additionally needs the library paths. The Qwt path to run lenlab in Qt Creator is hard coded in `lenlab.pro`.
 
 You may delete the source directory after installing.
 
@@ -58,37 +121,29 @@ http://libusb.info
 
 Downloads -> Latest Windows Binaries
 
-Extract file to project directory, name libusb, remove version number
-
-```
-/libusb
-```
+Extract file to the project directory (repository root), name `libusb`, remove the version number.
 
 #### Python
 
-Anaconda or standard python
+Anaconda or standard python.
 
 #### Anaconda
 
 https://www.anaconda.com/download/
 
-sphinx, breathe, doxygen, 
-
-`conda install -c conda-forge breathe`
-
 `conda install sphinx_rtd_theme`
-
-`pip install sphinxcontrib-mermaid`
-
-doxygen.org, download and install
 
 #### Standard Python
 
-`pip install sphinx breathe sphinx_rtd_theme sphinxcontrib-mermaid`
+`pip install sphinx sphinx_rtd_theme`
 
-doxygen.org, download and install
+### Linux
 
-#### TI Code Composer Studio
+Lenlab builds should work with the default development packages of qt5, qwt and libusb and default compiler of the distribution.
+
+### TI Code Composer Studio
+
+It runs on Windows, Linux and Mac.
 
 Download von www.ti.com/tool/CCSTUDIO
 
@@ -104,7 +159,7 @@ TI XDS Debug Probe Support
 
 Tiva/Stellaris ICDI Debug Probe
 
-##### Tiva Ware
+#### Tiva Ware
 
 http://www.ti.com/tool/SW-TM4C
 
@@ -116,70 +171,37 @@ TI Account notwendig
 
 Installieren im Standard-Pfad
 
-After installation, register Tiva Ware in the Code Composer Studio. Create a file vars.ini in the workspace directory:
+After installation, register the TivaWare library in the Code Composer Studio Workspace.
 
-```
-TIVAWARE_INSTALL = C:\ti\TivaWare_C_Series-2.1.4.178
-```
+red lenlab reads the TivaWare path from a variable named TIVAWARE_INSTALL.
 
-Import it in Code Composer Studio with File/Import/Code Composer Studio/Build Variables
+See "Creating Variable at Workspace Level" in [Portable Projects](http://software-dl.ti.com/ccs/esd/documents/ccs_portable-projects.html)
 
-Scope: Workspace
+To create a workspace level Build or Path variable:
 
-### Linux
+- Go to menu **Window → Preferences → Code Composer Studio → Build → Variables**.
+- Click the **Add** button to define a new variable.
+- Specify the **Variable name**: TIVAWARE_INSTALL
+- **Type**: Directory
+- and **Value**: `c:\ti\TivaWare...`
+- Click **Apply and Close**.
 
-#### Qt 5.9
+#### Red lenlab firmware project import
 
-System installation on
+To work on the firmware, import the firmware project into Code Composer Studio.
 
-Arch Linux, 
-
-#### qwt
-
-System installation on
-
-Arch Linux,
-
-## Documentation
-
-* Sphinx http://www.sphinx-doc.org
-* Breathe https://github.com/michaeljones/breathe
-* Doxygen http://doxygen.org
-* sphinxcontrib-mermaid https://github.com/mgaitan/sphinxcontrib-mermaid
-
-## Build
-
-### Lenlab
-
-Open `/red_lenlab.pro` in Qt Creator
-
-Click build or run
-
-### Firmware
-
-Code Composer Studio
-
-#### Import Project
-
-File/Import/Code Composer Studio/CCS Projects
+File / Import / Code Composer Studio / CCS Projects
 
 Directory `red_lenlab/firmware`
 
-do not tick copy
+Do not tick copy.
 
-The build settings use `TIVAWARE_INSTALL` to link files and should work right away
+The build settings use `TIVAWARE_INSTALL` to link files and should work right away.
 
 If it complains about target configuration not set, right click on target Configurations/Tiva TM4C1230H6PM.ccxml and select set as default target Configuration.
 
 #### UART terminal for debug messages
 
-View->Terminal
+View / Terminal
 
 In the terminal window select Open Terminal, 115200 baud, no parity bit, 1 stop bit.
-
-## Deploy
-
-Build packages for distribution
-
-deploy script
-
