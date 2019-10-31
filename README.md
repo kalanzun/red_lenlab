@@ -4,6 +4,8 @@ Lenlab ist eine Oszilloskop-Software für das TI LaunchPad EK-TM4C123GXL.
 
 Homepage: https://github.com/kalanzun/red_lenlab
 
+Download: https://github.com/kalanzun/red_lenlab/releases
+
 Dokumentation: https://red-lenlab.readthedocs.io
 
 ## Lizenz

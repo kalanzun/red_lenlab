@@ -27,6 +27,12 @@ USB-Anschluss die Versorgungsspannung bezogen wird. Wenn die Stromversorgung
 eingeschaltet ist, leuchtet die grüne POWER-LED, welche sich ebenfalls in dem
 Bereich links oben befindet.
 
+Download des Lenlab-Softwarepakets
+==================================
+
+Sie finden die Softwarepakete unter "Releases" auf github:
+`Lenlab releases <https://github.com/kalanzun/red_lenlab/releases>`_.
+
 Flashen der Firmware
 ====================
 
@@ -68,6 +74,9 @@ die Lenlab Firmware und das LaunchPad.
 Andere Systeme
 --------------
 
+Laden Sie `die Firmware <https://github.com/kalanzun/red_lenlab/tree/master/bin>`_ direkt von github herunter.
+Die benötigte Datei heißt `lenlab_firmware_[VERSION].out`. Verwenden Sie die selbe Version wie Ihr Release Download.
+
 Laden Sie `Uniflash <https://www.ti.com/tool/UNIFLASH>`_ von Texas Instruments
 herunter, installieren Sie es und starten Sie es.
 
@@ -80,10 +89,30 @@ herunter, installieren Sie es und starten Sie es.
 Lenlab ausführen
 ================
 
-Das PC Programm befindet sich im Unterordner `lenlab`. Starten Sie `lenlab.exe`.
-
-Verbinden Sie den DEVICE USB-Anschluss an der Seite des Launchpad mit dem Computer.
+Verbinden Sie den DEVICE USB-Anschluss an der langen Seite des Launchpad mit dem Computer.
 Stellen Sie den Power-Schalter auf DEVICE. Die grüne Power-LED leuchtet.
 
 Lenlab sucht nach dem Board und verbindet sich, wenn es eines findet. Es meldet
 dann im Nachrichten-Fenster "Lenlab-Board bereit."
+
+Windows
+-------
+
+Das Windows-Programm befindet sich im Unterordner `lenlab` im Lenlab-Softwarepaket. Starten Sie `lenlab.exe`.
+
+Mac
+---
+
+Im Lenlab-Softwarepaket befindet sich das Mac-Programm `lenlab`. Starten Sie es.
+
+Linux
+-----
+
+Der Download ist ein AppImage. Die meisten modernen Distributionen können die Datei direkt ausführen.
+Aktivieren Sie dafür das Dateiattribut für "ausführbar" und starten Sie die Datei.
+
+Im Terminal:
+
+- Wechseln Sie in das Verzeichnis, in dem das AppImage liegt: `cd ...`
+- Aktivieren Sie das Dateiattribut "Ausführbar": `chmod +x Lenlab*`
+- Führen Sie die Datei aus: `./Lenlab*`
