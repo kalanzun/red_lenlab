@@ -23,6 +23,8 @@ am Karlsruher Institut für Technologie.
 
 Homepage: `https://github.com/kalanzun/red_lenlab <https://github.com/kalanzun/red_lenlab>`_
 
+Download: `https://github.com/kalanzun/red_lenlab/releases <https://github.com/kalanzun/red_lenlab/releases>`_
+
 Dokumentation: `https://red-lenlab.readthedocs.io <https://red-lenlab.readthedocs.io>`_
 
 .. toctree::
