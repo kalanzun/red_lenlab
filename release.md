@@ -45,7 +45,8 @@ A tag on a git commit triggers a build. The tag label defines the version. The f
 
 You may create the tag on the github releases page with "Draft a new release".
 
-Note on pre-release: Appveyor will set pre-release to false, when finished. But you can set it again.
+Note on pre-release: Appveyor will set pre-release to true, when finished. If everything is fine,
+remove the setting on github.
 
 ReadTheDocs builds on every master commit. The windows build will download the documentation
 from readthedocs, which should be finished by the time the tag is created and the compiler is done.

@@ -17,3 +17,4 @@ deploy:
   auth_token:
     secure: apLhdh44RWN9bwzp+QyuFCvZmDPeE+UeVK2zns9ubHu7amq2rhKDeib3wOE5Nf/v
   force_update: true
+  prerelease: true
