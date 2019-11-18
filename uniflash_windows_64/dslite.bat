@@ -40,6 +40,7 @@ if "%1" EQU "" (
 	echo.
 	
 	CMD /S /C "%EXECUTABLE% !MODE! !GENERATED_COMMAND! !ADDITIONALS!"
+	pause
 	exit /b !errorlevel!
 )
 
