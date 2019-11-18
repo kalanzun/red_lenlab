@@ -93,11 +93,11 @@ herunter, Version 5, installieren Sie es und starten Sie es.
 Windows 7
 ---------
 
-**Windows 7 64bit**: Flashen Sie die Firmware, wie unter :ref:`flash_windows_64` beschrieben.
+**Windows 7 64 bit**: Flashen Sie die Firmware, wie unter :ref:`flash_windows_64` beschrieben.
 
-**Windows 7 32bit**: Laden Sie in diesem Fall Version 4 von
-`Uniflash v4 Releases<https://software-dl.ti.com/ccs/esd/uniflash/docs/release_archive.html#uniflash-v4-releases>`_
-herunter. Version 5 funktioniert auf 32bit-Systemen nicht. Nach der Installation, aber bevor Uniflash gestartet wird,
+**Windows 7 32 bit**: Laden Sie in diesem Fall Version 4 von
+`Uniflash v4 Releases <https://software-dl.ti.com/ccs/esd/uniflash/docs/release_archive.html#uniflash-v4-releases>`_
+herunter. Version 5 funktioniert auf 32-bit Systemen nicht. Nach der Installation, aber bevor Uniflash gestartet wird,
 muss noch der Treiber installiert werden.
 
 * Das Lenlab-Board ist über den DEBUG-Anschluss verbunden, der Schalter steht auf DEBUG, die grüne Power-LED leuchtet.
@@ -106,26 +106,28 @@ muss noch der Treiber installiert werden.
 * Doppelklick auf ein "In-Circuit Debug Interface".
 * "Treiber aktualisieren" anklicken.
 * "Auf dem Computer nach Treibersoftware suchen".
-* Als Ort "C:\ti" eintragen, oder das Verzeichnis, in dem Sie Uniflash installiert haben.
+* Als Ort `C:\\ti` eintragen, oder das Verzeichnis, in dem Sie Uniflash installiert haben.
 * Unterordner einbeziehen: Ja.
 * Weiter.
-* Treiber-Installation für alle drei "In-Circuit Debug Interface" ausführen.
+* Windows sucht und installiert den Treiber von Uniflash.
+* Führen Sie die Treiber-Installation für alle drei "In-Circuit Debug Interface" aus.
 * Nach der Installation heißen die Geräte "Stellaris ..." und haben keine gelbe Markierung mehr.
 
 Flashen Sie dann die Firmware mit Version 4, wie unter :ref:`flash_other_systems` beschrieben.
-Die Firmware-Datei ist auch im Lenlab-Softwarepaket enthalten, im Unterordner `firmware`.
+Die Firmware-Datei ist auch im Lenlab-Softwarepaket enthalten, im Unterordner `firmware`. Danach muss noch ein
+Treiber installiert werden. Siehe unten.
 
-**Windows 7 ?bit**: Wenn Sie nicht wissen, wie viel Bit Ihr Windows hat, versuchen Sie zunächst
-die einfachere Methode für 64bit.
-Falls Sie doch ein 32bit System haben, dann passiert bei der `one_time_setup.bat` nichts,
+**Windows 7 ? bit**: Wenn Sie nicht wissen, wie viel Bit Ihr Windows hat, versuchen Sie zunächst
+die einfachere Methode für 64 bit.
+Falls Sie doch ein 32-bit System haben, dann passiert bei der `one_time_setup.bat` nichts,
 es blinkt nur ganz kurz ein Fenster auf, die Fehlermeldung ist nicht lesbar. Die `dslite.bat`
 startet und arbeitet eine Weile, bricht dann aber ab. Die Fehlermeldung lautet:
 "error: CORTEX_M4_0: Error connecting to the target: Unable to communicate with
 the device. Please check your connection. Failed: Operation was aborted"
 Versuchen Sie dann die Methode für 32bit. Achten Sie darauf, Version 4 von Uniflash zu verwenden,
-Version 5 funktioniert auf 32bit-Systemen nicht.
+Version 5 funktioniert auf 32-bit Systemen nicht.
 
-**Windows 7 64bit und 32bit:** Nach dem Flashen ist bei Windows 7 noch die Installation eines weiteren Treibers notwendig
+**Windows 7 64 bit und 32 bit:** Nach dem Flashen ist bei Windows 7 noch die Installation eines weiteren Treibers notwendig
 für die Kommunikation zwischen der Lenlab-Software auf dem PC und dem Lenlab-Board.
 Das Programm "Zadig" führt die Treiberinstallation aus.
 
@@ -135,7 +137,7 @@ Das Programm "Zadig" führt die Treiberinstallation aus.
 * Starten Sie Zadig.
 * Wählen Sie in der Liste das "Lenlab Red Board".
 * Wählen Sie in der Zeile "Driver" den WinUSB-Treiber. In der Zeile steht dann:
-  Driver (NONE) -> WinUSB (...)
+  "Driver (NONE) -> WinUSB (...)"
 * Klicken Sie auf "Install WCID Driver"
 * Zadig löst die Treiberinstallation in Windows aus.
 * Zadig meldet gleich Erfolg, Windows braucht danach aber noch eine Weile,
