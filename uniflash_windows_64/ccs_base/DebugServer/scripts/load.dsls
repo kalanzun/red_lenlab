@@ -26,5 +26,6 @@
 {"command":"logMessage", "data":["Running...\n"]}
 {"command":"targetState.run","data":[true]}
 {"command":"switchToDebugger"}
+{"command":"waitForIdle"}
 {"command":"deConfigure"}
 {"command":"logMessage", "data":["Success\n"]}

@@ -1,4 +1,8 @@
 <FlashDLLDB>
+	<FlashDLL name="FlashMSPSLBootloader" needFlashProperties="true" needFlashUtility="true" backupType="100">
+		<interface>Flash Only</interface>
+		<partnum contains="Bootloader" />
+	</FlashDLL>
 	<FlashDLL name="FlashPython" needFlashProperties="true" needFlashUtility="true" backupType="100">
 		<interface>Flash Only</interface>
 		<partnum beginsWith="AWR" />
@@ -41,9 +45,11 @@
 		<targetType>TMS320C28XX</targetType>
 		<partnum beginsWith="F28M3" />
 		<partnum contains="F2837" />
+		<partnum contains="F2838" />
 		<partnum contains="F2847" />
 		<partnum contains="F2807" />
 		<partnum contains="F28004" />
+		<partnum contains="F28002" />
 	</FlashDLL>
 	<FlashDLL name="Flash28xx" needFlashProperties="true" needFlashUtility="true" backupType="0">
 		<interface>JTAG</interface>
@@ -99,5 +105,15 @@
 		<interface>JTAG</interface>
 		<targetType>TMS470REX</targetType>
 		<partnum beginsWith="CC3220SF" />
+	</FlashDLL>
+	<FlashDLL name="FlashCC3230SF" needFlashProperties="true" needFlashUtility="true">
+		<interface>JTAG</interface>
+		<targetType>TMS470REX</targetType>
+		<partnum beginsWith="CC3230SF" />
+	</FlashDLL>
+	<FlashDLL name="FlashCC3235SF" needFlashProperties="true" needFlashUtility="true">
+		<interface>JTAG</interface>
+		<targetType>TMS470REX</targetType>
+		<partnum beginsWith="CC3235SF" />
 	</FlashDLL>
 </FlashDLLDB>

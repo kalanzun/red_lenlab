@@ -44,16 +44,11 @@
 	<node id="MSP430PropertiesNode">
 		<name>MSP43x Options</name>
 		<children>
-			<child>MSPDeviceInfoGroup</child>
 			<child>ClockControlNode</child>
 			<child>DisableBreakpointsOnFreeRun</child>
 			<child>DefaultBreakpointType</child>
-			<child>TargetVoltage</child>
 			<child>MSP430ConnectOptionsGroup</child>
-			<child>MSP430DownloadOptionsGroup</child>
 			<child>LowPowerModeGroup</child>
-			<child>MSP430FlashEraseGroup</child>
-			<child>MSP430SecurityGroup</child>
 		</children>
 	</node>
 	
@@ -311,15 +306,6 @@
 		</children>
 	</group>
 	
-	<group id="MSP430DownloadOptionsGroup">
-		<name>Download Options</name>
-		<children>
-			<child>L092ExternalMemoryDL</child>
-			<child>MSP430UnlockBSLMode</child>
-			<child>MSP430DownloadOptions</child>
-		</children>
-	</group>
-	
 	<group id="GeneralClockControlGroup">
 		<name>General</name>
 		<children>
@@ -388,39 +374,6 @@
 		<name>Low Power Mode Settings</name>
 		<children>
 			<child>MSP430LPMx5Mode</child>
-		</children>
-	</group>
-	
-	<group id="MSP430FlashEraseGroup">
-		<name>Erase Settings</name>
-		<children>
-			<child>MSP430EraseText</child>
-			<child>MSP430EraseStartAddress</child>
-			<child>MSP430EraseEndAddress</child>
-			<child>MSP430AddressEraseButton</child>
-			<child>MSP430EraseButton</child>
-			<child>MSP432EraseButton</child>
-		</children>
-	</group>
-	
-	<group id="MSP430SecurityGroup">
-		<name>Security</name>
-		<children>
-			<child>MSP430SecureDeviceText</child>
-			<child>MSP430SecureDeviceButton</child>
-		</children>
-	</group>
-	
-	<group id="MSPDeviceInfoGroup">
-		<name>Device Information</name>
-		<children>
-			<!--<child>DeviceInfoID</child>-->
-			<!--<child>DeviceInfoRevision</child>-->
-			<child>DeviceInfoFlashSize</child>
-			<child>DeviceInfoSectorSize</child>
-			<child>DeviceInfoRAMSize</child>
-			<!--<child>DeviceInfoProtectedSectors</child>-->
-			<!--<child>DeviceInfoJTAGLock</child>-->
 		</children>
 	</group>
 	
@@ -557,7 +510,7 @@
 	
 	<property id="AddCEXITbreakpointAfterLoad">
 		<target>generic</target>
-		<name>Halt at program termination (requires setting a breakpoint)</name>
+		<name>Halt at program exit for TI compilers (requires a breakpoint)</name>
 		<valueType>Boolean</valueType>
 		<defaultValue>1</defaultValue>
 		<uniqueDefault value="0">
@@ -1313,33 +1266,6 @@ Note: only available under "Tools->Debugger Options->MSP430 Debugger Options"</n
 		<hidden />
 	</property>
 	
-	<property id="TargetVoltage">
-		<target>MSP430</target>
-		<target>TMS470REX</target>
-		<name>Target Voltage (mV)</name>
-		<valueType>Numeric</valueType>
-		<defaultValue>3000</defaultValue>
-		<uniqueDefault value="FROM_DEVICE">
-			<target_vcc_default></target_vcc_default>
-		</uniqueDefault>
-		<categories>
-			<category>Download</category>
-		</categories>
-	</property>
-	
-	<property id="L092ExternalMemoryDL">
-		<target>MSP430</target>
-		<name>Copy application to external SPI memory after program load</name>
-		<valueType>Boolean</valueType>
-		<defaultValue>0</defaultValue>
-		<enableIf>
-			<supportExtMemDL>true</supportExtMemDL>
-		</enableIf>
-		<categories>
-			<category>Download</category>
-		</categories>
-	</property>
-	
 	<property id="MSP430LPMx5Mode">
 		<target>MSP430</target>
 		<name>Enable Ultra Low Power debug / LPMx.5 debug</name>
@@ -1351,182 +1277,6 @@ Note: only available under "Tools->Debugger Options->MSP430 Debugger Options"</n
 		<enableIf>
 			<supportLPMx5>true</supportLPMx5>
 		</enableIf>
-	</property>
-	
-	<property id="MSP430UnlockBSLMode">
-		<target>MSP430</target>
-		<target>TMS470REX</target>
-		<name>Allow Read/Write/Erase access to BSL memory</name>
-		<valueType>Boolean</valueType>
-		<defaultValue>0</defaultValue>
-		<enableIf>
-			<supportBSLMemory>true</supportBSLMemory>
-		</enableIf>
-		<categories>
-			<category>Download</category>
-		</categories>
-	</property>
-	
-	<property id="MSP430DownloadOptions">
-		<target>MSP430</target>
-		<target>TMS470REX</target>
-		<name>Erase Options</name>
-		<valueType>ChoiceList</valueType>
-		<values>
-			<value>Erase main memory only</value>
-			<value>Erase main and information memory</value>
-			<value>Erase main, information and protected information memory</value>
-			<value>Erase and download necessary segments only (Differential Download)</value>
-			<value>Replace written memory locations, retain unwritten memory locations</value>
-			<value>By Address Range (specify below)</value>
-		</values>
-		<defaultValue>Erase main memory only</defaultValue>
-		<categories>
-			<category>Download</category>
-		</categories>
-	</property>
-
-	<property id="MSP430EraseText">
-		<target>MSP430</target>
-		<name>Note: 'Mass Erase' erases main, information, and Bootstrap loader memory</name>
-		<valueType>Text</valueType>
-		<categories>
-			<category>Erase</category>
-		</categories>
-	</property>
-
-	<property id="MSP430EraseStartAddress">
-		<target>MSP430</target>
-		<name>Start Address: 0x</name>
-		<valueType>String</valueType>
-		<defaultValue>0</defaultValue>
-		<categories>
-			<category>Erase</category>
-		</categories>
-	</property>
-	
-	<property id="MSP430EraseEndAddress">
-		<target>MSP430</target>
-		<name>End Address: 0x</name>
-		<valueType>String</valueType>
-		<defaultValue>0</defaultValue>
-		<categories>
-			<category>Erase</category>
-		</categories>
-	</property>
-	
-	<property id="MSP430AddressEraseButton">
-		<target>MSP430</target>
-		<name>Erase By Address</name>
-		<valueType>Button</valueType>
-		<action>DPActiveDebugSession.flash.performOperation("EraseByAddress")</action>
-		<categories>
-			<category>Erase</category>
-		</categories>
-	</property>
-	
-	<property id="MSP430EraseButton">
-		<target>MSP430</target>
-		<name>Mass Erase</name>
-		<valueType>Button</valueType>
-		<action>DPActiveDebugSession.flash.performOperation("Erase")</action>
-		<categories>
-			<category>Erase</category>
-		</categories>
-	</property>
-	
-	<!--
-	<property id="MSP432EraseButton">
-		<target>TMS470REX</target>
-		<name>Factory Reset</name>
-		<valueType>Button</valueType>
-		<action>DPActiveDebugSession.flash.performOperation("FactoryReset")</action>
-	</property>
-	-->
-
-	<property id="MSP430SecureDeviceText">
-		<target>MSP430</target>
-		<name>!! Connection to the device will not be possible after the device is secured !!</name>
-		<valueType>Text</valueType>
-		<categories>
-			<category>Security</category>
-		</categories>
-	</property>
-	
-	<property id="MSP430SecureDeviceButton">
-		<target>MSP430</target>
-		<target>TMS470REX</target>
-		<name>Make Device Secure</name>
-		<valueType>Button</valueType>
-		<action>DPActiveDebugSession.expression.evaluate("GEL_SecureDevice()")</action>
-		<categories>
-			<category>Security</category>
-		</categories>
-	</property>
-	
-	<property id="DeviceInfoID">
-		<target>MSP430</target>
-		<name>Device ID</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
-	</property>
-	
-	<property id="DeviceInfoRevision">
-		<target>MSP430</target>
-		<name>Device Revision</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
-	</property>
-	
-	<property id="DeviceInfoFlashSize">
-		<target>MSP430</target>
-		<name>Flash Size</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
-		<categories>
-            <category>Device Info</category>
-        </categories>
-	</property>
-	
-	<property id="DeviceInfoSectorSize">
-		<target>MSP430</target>
-		<name>Flash Sector Size</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
-		<categories>
-            <category>Device Info</category>
-        </categories>
-	</property>
-	
-	<property id="DeviceInfoRAMSize">
-		<target>MSP430</target>
-		<name>RAM Size</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
-		<categories>
-            <category>Device Info</category>
-        </categories>
-	</property>
-
-	<property id="DeviceInfoProtectedSectors">
-		<target>MSP430</target>
-		<name>Protected Sectors</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
-	</property>
-
-	<property id="DeviceInfoJTAGLock">
-		<target>MSP430</target>
-		<name>JTAG Lock Status</name>
-		<valueType>String</valueType>
-		<defaultValue>--</defaultValue>
-		<readOnly>1</readOnly>
 	</property>
 	
 	<!-- End MSP430 Property Definitions -->

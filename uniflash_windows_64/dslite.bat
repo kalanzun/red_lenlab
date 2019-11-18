@@ -11,7 +11,8 @@ set DEBUGSERVER_ROOT=%~dp0ccs_base\DebugServer\
 set MODE=flash
 set EXECUTABLE="!DEBUGSERVER_ROOT!bin\DSLite"
 
-set GENERATED_COMMAND=-c user_files/configs/tm4c123gh6pm.ccxml -l user_files/settings/generated.ufsettings -e -f -v user_files/images/red_firmware.out 
+set GENERATED_COMMAND=-c user_files/configs/tm4c123gh6pm.ccxml -l user_files/settings/generated.ufsettings -s VerifyAfterProgramLoad="No verification" -e -f -v "user_files/images/red_firmware.out"
+set ADDITIONALS=
 
 REM list available modes
 if "%1"=="--listMode" (
@@ -35,11 +36,10 @@ if exist !DEBUGSERVER_ROOT!drivers\MSP430Flasher.exe (
 REM no parameters given, use the default generated command
 if "%1" EQU "" (
 	echo Executing default command:
-	echo ^> dslite --mode !MODE! !GENERATED_COMMAND!
+	echo ^> dslite --mode !MODE! !GENERATED_COMMAND! !ADDITIONALS!
 	echo.
 	
-	CMD /S /C "%EXECUTABLE% !MODE! !GENERATED_COMMAND!"
-	pause
+	CMD /S /C "%EXECUTABLE% !MODE! !GENERATED_COMMAND! !ADDITIONALS!"
 	exit /b !errorlevel!
 )
 
@@ -77,11 +77,14 @@ if "%MODE%" EQU "mspflasher" (
 REM execute with given user parameters
 echo Executing the following command:
 if "!MODE!" EQU "" (
-	echo ^> !EXECUTABLE! !USEROPTIONS!
+	echo ^> !EXECUTABLE! !USEROPTIONS! !ADDITIONALS!
 ) else (
-	echo ^> !EXECUTABLE! !MODE! !USEROPTIONS!
+	echo ^> !EXECUTABLE! !MODE! !USEROPTIONS! !ADDITIONALS!
 )
 echo.
 
-CMD /S /C "%EXECUTABLE% !MODE! !USEROPTIONS!"
+echo For more details and examples, please visit http://processors.wiki.ti.com/index.php/UniFlash_v4_Quick_Guide#Command_Line_Interface
+echo.
+
+CMD /S /C "%EXECUTABLE% !MODE! !USEROPTIONS! !ADDITIONALS!"
 exit /b !errorlevel!
