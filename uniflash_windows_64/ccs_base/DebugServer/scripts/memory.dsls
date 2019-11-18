@@ -27,5 +27,6 @@
 {"command":"memory.exportAsBin", "data":[@range@, @size@, "@output@"], "enableIf":[@not_coff@]}
 {"command":"memory.exportAsCoff", "data":[@range@, "@output@"], "enableIf":[@coff@]}
 {"command":"switchToDebugger"}
+{"command":"waitForIdle"}
 {"command":"deConfigure"}
 {"command":"logMessage", "data":["Success\n"],"enableIf":[@verbose@]}

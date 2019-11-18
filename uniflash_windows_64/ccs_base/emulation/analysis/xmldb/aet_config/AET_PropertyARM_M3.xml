@@ -280,10 +280,10 @@
 	</PROPERTY_INTEGER>
 
 <!--****************************************************************************************-->
-<!--                            Event hierarchy for System Event                            -->
+<!--                            Event hierarchy for Event to Count                          -->
 <!--****************************************************************************************-->
 	<PROPERTY_STRING>
-	  <NAME>System Event</NAME>	
+	  <NAME>Event to Count</NAME>	
  	  <DESCRIPTION>Select the event for profile</DESCRIPTION>		
 	  <KEYITEM>
 		  <KEYNAME>COUNT EVT</KEYNAME>	

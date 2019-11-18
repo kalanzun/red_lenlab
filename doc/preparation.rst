@@ -33,6 +33,9 @@ Download des Lenlab-Softwarepakets
 Sie finden die Softwarepakete unter "Releases" auf github:
 `Lenlab releases <https://github.com/kalanzun/red_lenlab/releases>`_.
 
+Für Windows ist das Softwarepaket ein zip-Archiv. Bitte entpacken Sie es.
+(Im Explorer, Rechtsklick auf das Archiv, "Alle extrahieren...")
+
 Flashen der Firmware
 ====================
 
@@ -68,7 +71,7 @@ die Lenlab Firmware und das LaunchPad.
 * Starten Sie die Programmierung mit der Datei `dslite.bat`. Die Programmierung
   dauert einen Moment. Am Ende steht in der vorletzten Zeile "Success" wenn die
   Programmierung erfolgreich war oder "Failed" bei Misserfolg.
-  
+
 .. _flash_other_systems:
 
 Andere Systeme
@@ -78,13 +81,72 @@ Laden Sie `die Firmware <https://github.com/kalanzun/red_lenlab/tree/master/bin>
 Die benötigte Datei heißt `lenlab_firmware_[VERSION].out`. Verwenden Sie die selbe Version wie Ihr Release Download.
 
 Laden Sie `Uniflash <https://www.ti.com/tool/UNIFLASH>`_ von Texas Instruments
-herunter, installieren Sie es und starten Sie es.
+herunter, Version 5, installieren Sie es und starten Sie es.
 
 * Wählen Sie EK-TM4C123GXL (Launchpad) bei "Choose your device".
-* Stellaris In-Circuit Debug Interface ist richtig
-* Browse, wählen Sie das passende Firmware Binary aus dem Lenlab-Softwarepaket,
-  Unterverzeichnis `firmware`.
+* Stellaris In-Circuit Debug Interface ist richtig.
+* Klicken Sie auf "Start".
+* Browse, wählen Sie die Firmware-Datei.
+* Binary darf keinen Haken haben.
 * Starten Sie die Programmierung mit "Load Image".
+
+Windows 7
+---------
+
+**Windows 7 64bit**: Flashen Sie die Firmware, wie unter :ref:`flash_windows_64` beschrieben.
+
+**Windows 7 32bit**: Laden Sie in diesem Fall Version 4 von
+`Uniflash v4 Releases<https://software-dl.ti.com/ccs/esd/uniflash/docs/release_archive.html#uniflash-v4-releases>`_
+herunter. Version 5 funktioniert auf 32bit-Systemen nicht. Nach der Installation, aber bevor Uniflash gestartet wird,
+muss noch der Treiber installiert werden.
+
+* Das Lenlab-Board ist über den DEBUG-Anschluss verbunden, der Schalter steht auf DEBUG, die grüne Power-LED leuchtet.
+* Systemsteuerung -> System -> Geräte-Manager.
+* Unter "Andere Geräte" gibt es drei "In-Circuit Debug Interface", welche mit einem kleinen, gelben Ausrufezeichen markiert sind.
+* Doppelklick auf ein "In-Circuit Debug Interface".
+* "Treiber aktualisieren" anklicken.
+* "Auf dem Computer nach Treibersoftware suchen".
+* Als Ort "C:\ti" eintragen, oder das Verzeichnis, in dem Sie Uniflash installiert haben.
+* Unterordner einbeziehen: Ja.
+* Weiter.
+* Treiber-Installation für alle drei "In-Circuit Debug Interface" ausführen.
+* Nach der Installation heißen die Geräte "Stellaris ..." und haben keine gelbe Markierung mehr.
+
+Flashen Sie dann die Firmware mit Version 4, wie unter :ref:`flash_other_systems` beschrieben.
+Die Firmware-Datei ist auch im Lenlab-Softwarepaket enthalten, im Unterordner `firmware`.
+
+**Windows 7 ?bit**: Wenn Sie nicht wissen, wie viel Bit Ihr Windows hat, versuchen Sie zunächst
+die einfachere Methode für 64bit.
+Falls Sie doch ein 32bit System haben, dann passiert bei der `one_time_setup.bat` nichts,
+es blinkt nur ganz kurz ein Fenster auf, die Fehlermeldung ist nicht lesbar. Die `dslite.bat`
+startet und arbeitet eine Weile, bricht dann aber ab. Die Fehlermeldung lautet:
+"error: CORTEX_M4_0: Error connecting to the target: Unable to communicate with
+the device. Please check your connection. Failed: Operation was aborted"
+Versuchen Sie dann die Methode für 32bit. Achten Sie darauf, Version 4 von Uniflash zu verwenden,
+Version 5 funktioniert auf 32bit-Systemen nicht.
+
+**Windows 7 64bit und 32bit:** Nach dem Flashen ist bei Windows 7 noch die Installation eines weiteren Treibers notwendig
+für die Kommunikation zwischen der Lenlab-Software auf dem PC und dem Lenlab-Board.
+Das Programm "Zadig" führt die Treiberinstallation aus.
+
+* Laden Sie "Zadig" von `https://zadig.akeo.ie <https://zadig.akeo.ie>`_ herunter.
+* Verbinden Sie den DEVICE-Anschluss des Lenlab-Boards mit dem Computer.
+* Schalten Sie den Schalter auf DEVICE, so dass die grüne Power-LED leuchtet.
+* Starten Sie Zadig.
+* Wählen Sie in der Liste das "Lenlab Red Board".
+* Wählen Sie in der Zeile "Driver" den WinUSB-Treiber. In der Zeile steht dann:
+  Driver (NONE) -> WinUSB (...)
+* Klicken Sie auf "Install WCID Driver"
+* Zadig löst die Treiberinstallation in Windows aus.
+* Zadig meldet gleich Erfolg, Windows braucht danach aber noch eine Weile,
+  bis der Treiber fertig installiert ist.
+* Windows meldet später auch Erfolg, mit einer Meldung unten rechts im Bildschirm über ein "Generic WinUSB Driver".
+* Windows fordert zum Neustart auf. Starten Sie Windows neu.
+
+Der Treiber ist nun installiert und Lenlab kann mit dem Board kommunizieren.
+
+Lenlab stürzt auf Windows 7 manchmal ab, wenn es gestartet wird und das Board bereits verbunden ist.
+Es funktioniert, wenn Lenlab zuerst gestartet wird und dann das Board verbunden wird.
 
 Lenlab ausführen
 ================
@@ -113,6 +175,6 @@ Aktivieren Sie dafür das Dateiattribut für "ausführbar" und starten Sie die D
 
 Im Terminal:
 
-- Wechseln Sie in das Verzeichnis, in dem das AppImage liegt: `cd ...`
-- Aktivieren Sie das Dateiattribut "Ausführbar": `chmod +x Lenlab*`
+- Wechseln Sie in das Verzeichnis, in dem das AppImage liegt: `cd [Verzeichnisname]`
+- Aktivieren Sie das Dateiattribut "ausführbar": `chmod +x Lenlab*`
 - Führen Sie die Datei aus: `./Lenlab*`

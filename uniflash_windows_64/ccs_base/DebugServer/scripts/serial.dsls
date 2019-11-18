@@ -35,5 +35,6 @@
 {"command":"flash.performOperation","data":["@after...@"]}
 {"command":"logMessage", "data":["Running...\n"],"enableIf":[@verbose@]}
 {"command":"switchToDebugger"}
+{"command":"waitForIdle"}
 {"command":"deConfigure"}
 {"command":"logMessage", "data":["Success\n"],"enableIf":[@verbose@]}

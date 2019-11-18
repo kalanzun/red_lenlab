@@ -184,7 +184,9 @@ const QString ABOUT(
         <p>Copyright 2019<br/>
         Christoph Simon und das Lenlab-Entwicklerteam</p>
 
-        <p>Homepage: <a href=\"https://git.scc.kit.edu/vq6936/red_lenlab\">https://git.scc.kit.edu/vq6936/red_lenlab</a></p>
+        <p>Homepage: <a href='https://github.com/kalanzun/red_lenlab'>https://github.com/kalanzun/red_lenlab</a></p>
+
+        <p>Dokumentation: <a href='https://red-lenlab.readthedocs.io'>https://red-lenlab.readthedocs.io</a></p>
 
         <p>This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -198,7 +200,7 @@ const QString ABOUT(
 
         <p>You should have received a copy of the GNU General Public License
         along with this program.  If not, see
-        <a href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</a>.</p>
+        <a href='https://www.gnu.org/licenses/'>https://www.gnu.org/licenses/</a>.</p>
         )_");
 
 
