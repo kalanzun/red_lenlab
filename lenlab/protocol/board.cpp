@@ -146,7 +146,9 @@ Board::on_reply(usb::pPacket const & packet)
     auto task = mTask;
     auto message = pMessage::create(packet);
 
-    if (task) {
+    if (packet->getByteLength() < LENLAB_PACKET_HEAD_LENGTH) {
+        emit log("Leeres Paket empfangen.");
+    } else if (task) {
         if (message->getReply() == Error) {
             task->setError(message);
             mTask.clear();
