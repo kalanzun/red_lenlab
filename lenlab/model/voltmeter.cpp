@@ -327,10 +327,13 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
     auto num_buried_replies = (reply->getUInt32BufferLength() - m_loggerseries->getChannels()) / 5;
     for (std::size_t j = 0; j < num_buried_replies; ++j)
     {
-        qDebug() << "Buried reply" << j;
-        Q_ASSERT(buffer[4 + 5*j] == 0xFF000407); // header for LoggerData (little endian)
-        for (std::size_t i = 0; i < m_loggerseries->getChannels(); ++i)
-            m_loggerseries->append(i, static_cast< double >(buffer[4 + 5*j + 1 + i]) / VOLT);
+        emit mLenlab.logMessage("Mehrfach-Paket empfangen.");
+        if (buffer[4 + 5*j] == 0xFF000407) // header for LoggerData (little endian)
+            for (std::size_t i = 0; i < m_loggerseries->getChannels(); ++i)
+                m_loggerseries->append(i, static_cast< double >(buffer[4 + 5*j + 1 + i]) / VOLT);
+        else
+            emit mLenlab.logMessage("Ungültiges Mehrfach-Paket.");
+
     }
 
     setMeasurementData(true);
