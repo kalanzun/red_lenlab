@@ -310,15 +310,28 @@ Voltmeter::do_save()
 void
 Voltmeter::on_logger_data(protocol::pMessage const & reply)
 {
-    Q_ASSERT(reply->getUInt32BufferLength() == m_loggerseries->getChannels());
+    // The OS may have combined several replies in one packet
+    Q_ASSERT(reply->getUInt32BufferLength() >= m_loggerseries->getChannels());
+
     uint32_t *buffer = reply->getUInt32Buffer();
 
     //qDebug("Voltmeter::on_logger");
 
     // TODO Implement time stamp???
 
-    for (std::size_t i = 0; i < reply->getUInt32BufferLength(); ++i)
+    for (std::size_t i = 0; i < m_loggerseries->getChannels(); ++i)
         m_loggerseries->append(i, static_cast< double >(buffer[i]) / VOLT);
+
+    // A buried reply contains the header in the buffer and is therefore 5 elements, not 4
+    // TODO hard coded 5
+    auto num_buried_replies = (reply->getUInt32BufferLength() - m_loggerseries->getChannels()) / 5;
+    for (std::size_t j = 0; j < num_buried_replies; ++j)
+    {
+        qDebug() << "Buried reply" << j;
+        Q_ASSERT(buffer[4 + 5*j] == 0xFF000407); // header for LoggerData (little endian)
+        for (std::size_t i = 0; i < m_loggerseries->getChannels(); ++i)
+            m_loggerseries->append(i, static_cast< double >(buffer[4 + 5*j + 1 + i]) / VOLT);
+    }
 
     setMeasurementData(true);
     setUnsavedData(true);
