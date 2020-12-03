@@ -134,6 +134,7 @@ def build_windows(env):
         run(["mingw32-make", "install"], cwd="qwt-6.1.5")
 
     run(["qmake", "-set", "QMAKEFEATURES", r"C:\Qwt-6.1.5\features"])
+    # Note: This path is also in .appveyor.yml, in an environment variable QWTDIR
 
     run(["qmake", "red_lenlab.pro"])
     run(["mingw32-make"])

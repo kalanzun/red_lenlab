@@ -5,7 +5,7 @@ environment:
   TOOLCHAIN_VERSION: 730_32
   MINGWDIR: C:\Qt\Tools\mingw%TOOLCHAIN_VERSION%
   PATH: '%QTDIR%\bin;%MINGWDIR%\bin;%PATH%'
-  QWTDIR: C:\Qwt-6.1.4
+  QWTDIR: C:\Qwt-6.1.5
 cache: '%QWTDIR%'
 build_script:
   - cmd: python build.py
