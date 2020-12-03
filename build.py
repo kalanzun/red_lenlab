@@ -113,27 +113,27 @@ def build_windows(env):
         [
             "appveyor",
             "DownloadFile",
-            "https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.7z",
+            "https://github.com/libusb/libusb/releases/download/v1.0.23/libusb-1.0.23.7z",
         ]
     )
     os.mkdir("libusb")
-    run(["7z", "x", r"..\libusb-1.0.22.7z"], cwd="libusb")
+    run(["7z", "x", r"..\libusb-1.0.23.7z"], cwd="libusb")
 
-    if not os.path.exists(r"C:\Qwt-6.1.4\features"):
+    if not os.path.exists(r"C:\Qwt-6.1.5\features"):
         run(
             [
                 "appveyor",
                 "DownloadFile",
-                "https://sourceforge.net/projects/qwt/files/qwt/6.1.4/qwt-6.1.4.tar.bz2",
+                "https://sourceforge.net/projects/qwt/files/qwt/6.1.5/qwt-6.1.5.tar.bz2",
             ]
         )
-        run(["7z", "x", "qwt-6.1.4.tar.bz2"])
-        run(["7z", "x", "qwt-6.1.4.tar"])
-        run(["qmake", "qwt.pro"], cwd="qwt-6.1.4")
-        run(["mingw32-make"], cwd="qwt-6.1.4")
-        run(["mingw32-make", "install"], cwd="qwt-6.1.4")
+        run(["7z", "x", "qwt-6.1.5.tar.bz2"])
+        run(["7z", "x", "qwt-6.1.5.tar"])
+        run(["qmake", "qwt.pro"], cwd="qwt-6.1.5")
+        run(["mingw32-make"], cwd="qwt-6.1.5")
+        run(["mingw32-make", "install"], cwd="qwt-6.1.5")
 
-    run(["qmake", "-set", "QMAKEFEATURES", r"C:\Qwt-6.1.4\features"])
+    run(["qmake", "-set", "QMAKEFEATURES", r"C:\Qwt-6.1.5\features"])
 
     run(["qmake", "red_lenlab.pro"])
     run(["mingw32-make"])
