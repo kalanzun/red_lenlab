@@ -29,4 +29,5 @@ Weitere Mitwirkende, in alphabetischer Reihenfolge:
 
 * Friedolin Gröger <friedolin.groeger@student.kit.edu>
 * Lennart Nachtigall <lennart.nachtigall@student.kit.edu>
+* Leptopoda <ufile@student.kit.edu>
 * Felix Rehm <uhezk@student.kit.edu>

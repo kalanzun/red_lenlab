@@ -174,9 +174,12 @@ Linux
 
 Der Download ist ein AppImage. Die meisten modernen Distributionen können die Datei direkt ausführen.
 Aktivieren Sie dafür das Dateiattribut für "ausführbar" und starten Sie die Datei.
+Einige Distributionen verlangen, dass LenLab als Administrator (Super User) ausgeführt wird.
+Dies zeigt sich durch die Fehlermeldung "Access denied (insufficient permissions)" im Nachrichtenfenster.
 
 Im Terminal:
 
 - Wechseln Sie in das Verzeichnis, in dem das AppImage liegt: `cd [Verzeichnisname]`
 - Aktivieren Sie das Dateiattribut "ausführbar": `chmod +x Lenlab*`
 - Führen Sie die Datei aus: `./Lenlab*`
+- Ausführen als Administrator: `sudo ./Lenlab*`
