@@ -135,27 +135,33 @@ MainWindow::on_logMessage(QString const & msg)
 void
 MainWindow::on_actionSaveImage_triggered()
 {
-    int index = ui->tabWidget->currentIndex();
-
-    if (index == 0)
-        ui->loggerTab->saveImage();
-    else if (index == 1)
-        ui->oscilloscopeTab->saveImage();
-    else if (index == 2)
-        ui->FrequencyTab->saveImage();
+    switch (ui->tabWidget->currentIndex()){
+        case 0:
+            ui->loggerTab->saveImage();
+            break;
+        case 1:
+            ui->oscilloscopeTab->saveImage();
+            break;
+        case 2:
+            ui->FrequencyTab->saveImage();
+            break;
+    }
 }
 
 void
 MainWindow::on_actionSaveData_triggered()
 {
-    int index = ui->tabWidget->currentIndex();
-
-    if (index == 0)
-        ui->loggerTab->save();
-    else if (index == 1)
-        ui->oscilloscopeTab->save();
-    else if (index == 2)
-        ui->FrequencyTab->save();
+    switch (ui->tabWidget->currentIndex()){
+        case 0:
+            ui->loggerTab->save();
+            break;
+        case 1:
+            ui->oscilloscopeTab->save();
+            break;
+        case 2:
+            ui->FrequencyTab->save();
+            break;
+    }
 }
 
 
