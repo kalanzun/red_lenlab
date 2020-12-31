@@ -178,7 +178,7 @@ OscilloscopeForm::on_saveButton_clicked()
 void
 OscilloscopeForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "oszilloskop.csv", tr("CSV (*.csv)"));
     try {
         m_oscilloscope->save(fileName);
     }
