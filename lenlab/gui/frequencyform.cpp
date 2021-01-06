@@ -170,7 +170,7 @@ void FrequencyForm::activeChanged(bool)
 void
 FrequencyForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "bode.csv", tr("CSV (*.csv)"));
     try {
         m_frequencysweep->save(fileName);
     }

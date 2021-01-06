@@ -27,7 +27,7 @@ Lenlab red (Version 7) wurde geschrieben und wird betreut von:
 
 Weitere Mitwirkende, in alphabetischer Reihenfolge:
 
+* Felix Rehm <uhezk@student.kit.edu>
 * Friedolin Gröger <friedolin.groeger@student.kit.edu>
 * Lennart Nachtigall <lennart.nachtigall@student.kit.edu>
 * Leptopoda <ufile@student.kit.edu>
-* Felix Rehm <uhezk@student.kit.edu>

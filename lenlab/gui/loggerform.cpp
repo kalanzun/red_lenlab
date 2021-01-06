@@ -198,7 +198,7 @@ LoggerForm::on_saveButton_clicked()
 void
 LoggerForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern");
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "logger.csv", tr("CSV (*.csv)"));
     try {
         m_voltmeter->save(fileName);
     }
