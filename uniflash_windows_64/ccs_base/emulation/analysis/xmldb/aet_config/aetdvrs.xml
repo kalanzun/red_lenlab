@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-	<!-- This file defines all the AET drivers for different ISAs. -->
+<!-- This file defines all the AET drivers for different ISAs. -->
 <AET>
 	<DB_MAJOR_V>1</DB_MAJOR_V>
 	<DB_MINOR_V>0</DB_MINOR_V>
@@ -179,6 +179,13 @@
 		<CPUTYPE>6455</CPUTYPE>
 		<DRIVERNAME>AETOperationServer</DRIVERNAME>
 		<PROPERTYFILE>AET_Property64Plus.xml</PROPERTYFILE>
+		<ENTITYCODE>cTools2000</ENTITYCODE>
+		<SUPPORTTRACE>YES</SUPPORTTRACE>
+	</DRIVER>
+	<DRIVER>
+		<CPUTYPE>64105</CPUTYPE>
+		<DRIVERNAME>AETOperationServer</DRIVERNAME>
+		<PROPERTYFILE>AET_Property64.xml</PROPERTYFILE>
 		<ENTITYCODE>cTools2000</ENTITYCODE>
 		<SUPPORTTRACE>YES</SUPPORTTRACE>
 	</DRIVER>

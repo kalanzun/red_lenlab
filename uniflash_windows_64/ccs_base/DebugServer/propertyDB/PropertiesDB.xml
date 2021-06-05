@@ -30,6 +30,7 @@
 			<child>OSDebugGroup</child>
 			<child>PreventStepIntoAsm</child>
 			<child>LowPowerRunMode</child>
+			<child>KeepDebugPoweredAtDisconnect</child>
 			<child>CIOTimestamp</child>
 			<child>EnableSoftwareBreakpoints</child>
 			<child>FileIODefaultDirectory</child>
@@ -593,6 +594,16 @@
 		<disableIf>
 			<target>MSP430</target>
 		</disableIf>
+	</property>
+	
+	<property id="KeepDebugPoweredAtDisconnect">
+		<target>generic</target>
+		<name>Allow re-connecting without a board reset</name>
+		<valueType>Boolean</valueType>
+		<defaultValue>1</defaultValue>
+		<enableIf>
+			<capableDebugPowerDisconnectOpts>true</capableDebugPowerDisconnectOpts>
+		</enableIf>
 	</property>
 	
 	<property id="CIOTimestamp">

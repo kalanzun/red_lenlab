@@ -33,6 +33,24 @@
 	<FlashProperties name="BL_MSP432P4">
 		<partnum regex="^MSP432P.*\(Bootloader\)" />
 	</FlashProperties>
+	<FlashProperties name="BL_MSP430Flash-Legacy">
+		<partnum regex="^MSP430F1.*\(Bootloader\)" />
+		<partnum regex="^MSP430F2.*\(Bootloader\)" />
+		<partnum regex="^MSP430F4.*\(Bootloader\)" />
+		<partnum regex="^MSP430G.*\(Bootloader\)" />
+	</FlashProperties>
+	<FlashProperties name="CC13x2x7_CC26x2x7">
+		<partnum regex="^CC13[1|5]2[R|P]7" />
+		<partnum regex="^CC2652[R|P]7" />
+	</FlashProperties>
+	<FlashProperties name="CC13x1_CC26x1">
+		<partnum regex="^CC1311[R|P]3" />
+		<partnum regex="^CC2651[R|P]3" />
+	</FlashProperties>
+	<FlashProperties name="CC13x4x10_CC26x4x10">
+		<partnum regex="^CC13[1|5]4[R|P]10" />
+		<partnum regex="^CC2654[R|P]10" />
+	</FlashProperties>
 	<FlashProperties name="CC25">
 		<partnum beginsWith="CC25" />
 		<partnum beginsWith="CM25" />
@@ -165,6 +183,19 @@
 		<partnum beginsWith="TMS320F2838" />
 		<partnum beginsWith="F2838" />
 	</FlashProperties>
+	<FlashProperties name="F28M35_512KB">
+		<partnum beginsWith="F28M35H5" />
+		<partnum beginsWith="F28M35M5" />
+	</FlashProperties>
+	<FlashProperties name="F28M35_256KB">
+		<partnum beginsWith="F28M35" />
+	</FlashProperties>
+	<FlashProperties name="F28M36_C512KB_M1MB">
+		<partnum beginsWith="F28M36P63" />
+	</FlashProperties>
+	<FlashProperties name="F28M36_C512KB_M512KB">
+		<partnum beginsWith="F28M36" />
+	</FlashProperties>
 	<!-- UCD3138 FLASH PROPERTIES -->
 	<FlashProperties name="UCD3138064">
 		<partnum beginsWith="UCD3138064" />
@@ -179,22 +210,19 @@
 		<partnum beginsWith="UCD3138" />
 	</FlashProperties>
 	<FlashProperties name="AWR14xx">
-		<partnum beginsWith="AR14" />
-		<partnum beginsWith="AR12" />
 		<partnum beginsWith="AWR14" />
 		<partnum beginsWith="AWR12" />
-		<partnum beginsWith="IR14" />
-		<partnum beginsWith="IR12" />
+		<partnum beginsWith="AWR22" />
 		<partnum beginsWith="IWR14" />
 		<partnum beginsWith="IWR12" />
 	</FlashProperties>
 	<FlashProperties name="AWR16xx">
-		<partnum beginsWith="AR16" />
 		<partnum beginsWith="AWR16" />
-		<partnum beginsWith="IR16" />
+		<partnum beginsWith="AWR18" />
+		<partnum beginsWith="AWR64" />
+		<partnum beginsWith="AWR68" />
 		<partnum beginsWith="IWR16" />
 		<partnum beginsWith="IWR18" />
-		<partnum beginsWith="AWR18" />
 		<partnum beginsWith="IWR68" />
 	</FlashProperties>
 	<FlashProperties name="MSP430">

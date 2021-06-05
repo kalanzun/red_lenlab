@@ -16,6 +16,7 @@
                     <property Type="choicelist" Value="5" id="The Target Scan Format"/>
                 </choice>
             </property>
+			<!--XDSSerial-->
             <platform XML_version="1.2" id="platform_0">
                 <instance XML_version="1.2" desc="CC1310F128_0" href="devices/cc1310f128.xml" id="CC1310F128_0" xml="cc1310f128.xml" xmlpath="devices"/>
             <device HW_revision="1" XML_version="1.2" description="SimpleLink(TM) Sub-1 GHz CC1310 wireless MCU" id="CC1310F128_0" partnum="CC1310F128">

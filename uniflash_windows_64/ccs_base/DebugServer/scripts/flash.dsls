@@ -1,4 +1,5 @@
 {"command":"defineOption", "data":["config,c", "Target Configuration (ccxml) file, must be supplied other than running --help. CCXML file can be generated and exported using the Uniflash GUI or Code Composer Studio.", true]}
+{"command":"defineValuelessOption", "data":["list-cores,N", "List the available cores and index of the current configuration (index to be used with -n afterwards)."]}
 {"command":"defineDefaultOption", "data":["core,n", "Zero based index of core to operate on.", 0]}
 {"command":"defineOption", "data":["list-settings,S", "Takes a regex and list the final values applied to the matching settings. (ie; use .* to list all available settings)", false]}
 {"command":"defineValuelessOption", "data":["list-ops,p", "List the available flash operations."]}
@@ -10,6 +11,7 @@
 {"command":"defineValuelessOption", "data":["verify,v", "Verify the file(s) specified at the end of the command line."]}
 {"command":"defineMultiTokenOption", "data":["after,a", "Optional operation to perform after loading.  Can be specified multiple times, and are performed in the order they appear on the command line. Get a list of operations by using --list-ops."]}
 {"command":"defineValuelessOption", "data":["list-resets,R", "List of resets that can be done after program load and verification."]}
+{"command":"defineValuelessOption", "data":["run,u", "Run the target at the end of the flash load/operation."]}
 {"command":"defineOption", "data":["reset,r", "Set reset operation to be done after program load and verification."]}
 {"command":"defineOption", "data":["post-flash-device-cmd,O", "Execute the given device command. Get a list of device commands by using --list-device-cmds."]}
 {"command":"defineOption", "data":["timeout,t", "Timeout in seconds, infinite if unspecified.", false]}
@@ -19,7 +21,7 @@
 {"command":"defineUsage", "data":["dslite flash --config=ccxml-file [options] [flash-file1 ...]"]}
 {"command":"acceptTrailingOperand"}
 {"command":"parseCommandLine"}
-{"command":"verifySomeOptionsSupplied", "data":[["before", "operands", "after", "list-ops", "list-settings", "list-device-cmds", "list-resets", "reset", "post-flash-device-cmd"], "nothing to do"]}
+{"command":"verifySomeOptionsSupplied", "data":[["before", "operands", "after", "list-cores", "list-ops", "list-settings", "list-device-cmds", "list-resets", "reset", "post-flash-device-cmd"], "nothing to do"]}
 {"command":"getVersion", "log":["DSLite version %s\n", "version"],"enableIf":[@verbose@]}
 {"command":"logging.configure", "data":[true, "@log@"]}
 {"command":"logEvent", "data":["statusMessage", "%s: %s", ["type", "message"]]}
@@ -30,6 +32,7 @@
 {"command":"setTimeout", "data":[@timeout@]}
 {"command":"configure","data":["@config@"]}
 {"command":"debuggerSettings.loadSettingsFromFile","data":["@load-settings@"]}
+{"command":"listCores","data":[],"log":["\n--- Available Cores ---\n%s\n",["cores"]],"enableIf":[@list-cores@]}
 {"command":"switchToCore", "data":[@core@]}
 {"command":"expressions.evaluate","data":["GEL_CLI_ListCommands()"],"enableIf":[@list-device-cmds@]}
 {"command":"logMessage", "data":["Connecting...\n"],"enableIf":[@verbose@]}
@@ -45,8 +48,8 @@
 {"command":"flash.performOperation","data":["@after...@"]}
 {"command":"targetState.getResetsCLI","data":[],"log":["\n--- Available Reset Operations ---\n%s\n",["formattedString"]],"enableIf":[@list-resets@]}
 {"command":"targetState.resetCLI","data":["@reset@"],"log":["\nResetting...\n%s\n",["responseString"]] }
-{"command":"logMessage", "data":["Running...\n"],"enableIf":[@verbose@]}
-{"command":"targetState.run","data":[true]}
+{"command":"logMessage", "data":["Running...\n"],"enableIf":["@verbose@","@run@"]}
+{"command":"targetState.run","data":[true],"enableIf":[@run@]}
 {"command":"expressions.evaluate","data":["GEL_CLI_@post-flash-device-cmd@()"],"enableIf":["@post-flash-device-cmd@"]}
 {"command":"switchToDebugger"}
 {"command":"waitForIdle"}

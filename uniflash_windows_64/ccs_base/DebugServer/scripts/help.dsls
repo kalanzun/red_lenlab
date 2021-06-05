@@ -11,5 +11,7 @@
 {"command":"logMessage", "data":["\tmemory\n"]}
 {"command":"logMessage", "data":["\t\tExtracts memory from the target into a coff or\n"]}
 {"command":"logMessage", "data":["\t\tbinary file\n"]}
+{"command":"logMessage", "data":["\tidentifyProbe\n"]}
+{"command":"logMessage", "data":["\t\tIdentify a connected debug probe\n"]}
 {"command":"logMessage", "data":["\thelp\n"]}
 {"command":"logMessage", "data":["\t\tPrints this message\n"]}

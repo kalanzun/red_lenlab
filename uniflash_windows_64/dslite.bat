@@ -84,7 +84,7 @@ if "!MODE!" EQU "" (
 )
 echo.
 
-echo For more details and examples, please visit http://processors.wiki.ti.com/index.php/UniFlash_v4_Quick_Guide#Command_Line_Interface
+echo For more details and examples, please visit https://processors.wiki.ti.com/index.php/UniFlash_v4_Quick_Guide#Command_Line_Interface
 echo.
 
 CMD /S /C "%EXECUTABLE% !MODE! !USEROPTIONS! !ADDITIONALS!"

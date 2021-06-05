@@ -7,6 +7,7 @@
         <children>
             <child>FlashResetGroup</child>
             <child>FlashEraseGroup</child>
+			<child>EraseActionGroup</child>
             <child>FlashMACAddressModeGroup</child>
             <child>UserRegisterGroup</child>
         </children>
@@ -30,7 +31,12 @@
             <child>BlankCheck</child>
         </children>
     </group>
-
+	<group id="EraseActionGroup">
+        <name>Erase Actions</name>
+        <children>
+            <child>ChipEraseButton</child>
+        </children>
+    </group>
     <group id="FlashMACAddressModeGroup">
         <name>MAC Address Operations</name>
         <children>
@@ -102,6 +108,17 @@
         <name>Perform Blank Check</name>
         <valueType>Button</valueType>
         <action>DPActiveDebugSession.flash.performOperation("BlankCheck")</action>
+    </property>
+	
+	<!-- Erase Action -->
+    <property id="ChipEraseButton">
+        <target>generic</target> <!-- ISA name for Cortex-M3/4 -->
+        <name>Erase Entire Flash</name>
+        <valueType>Button</valueType>
+        <action>DPActiveDebugSession.flash.performOperation("MassErase")</action>
+        <categories>
+            <category>Manual Erase</category>
+        </categories>
     </property>
 
     <!-- Mac address operations -->

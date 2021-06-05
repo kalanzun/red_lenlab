@@ -578,7 +578,7 @@ Example: "0-5,8" Skip erase/program/verify of sectors 0, 1, 2, 3, 4, 5, 8.
         <target>generic</target>
         <name>Alignment Size: 0x</name>
         <valueType>String</valueType>
-        <defaultValue>800</defaultValue> <!-- HEX value -->
+        <defaultValue>8</defaultValue> <!-- HEX value -->
         <hidden />
     </property>
     <property id="DeviceInfoFlashSize">
@@ -640,7 +640,7 @@ Example: "0-5,8" Skip erase/program/verify of sectors 0, 1, 2, 3, 4, 5, 8.
         <target>generic</target>
         <name>FCFG1</name>
         <valueType>String</valueType>
-        <defaultValue>0x50001000-0x500013FF</defaultValue>
+        <defaultValue>0x50001000-0x500017FF</defaultValue>
         <readOnly>1</readOnly>
         <hidden />
     </property>

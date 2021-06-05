@@ -58,6 +58,7 @@
       <xs:element name="hidden" minOccurs="0" maxOccurs="1"/>
       <xs:element name="description" minOccurs="0" maxOccurs="1"/>
       <xs:element name="categories" type="categories_type" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="quickSetting" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute name="id" type="xs:string" use="required"/>
   </xs:complexType>

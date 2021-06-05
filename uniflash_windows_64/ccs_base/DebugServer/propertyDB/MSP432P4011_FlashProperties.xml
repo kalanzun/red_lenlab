@@ -6,6 +6,7 @@
         <children>
             <child>FlashResetGroup</child>
             <child>FlashEraseGroup</child>
+			<child>EraseActionGroup</child>
             <child>FlashDeviceSecurityGroup</child>
             <child>FlashSecureRegionGroup</child>
         </children>
@@ -25,6 +26,12 @@
             <child>FlashUnlockBSLMemory</child>
             <child>FlashVerification</child>
             <child>BlankCheck</child>
+        </children>
+    </group>
+	<group id="EraseActionGroup">
+        <name>Erase Actions</name>
+        <children>
+            <child>ChipEraseButton</child>
         </children>
     </group>
     <group id="FlashDeviceSecurityGroup">
@@ -95,6 +102,17 @@
         <name>Perform Blank Check</name>
         <valueType>Button</valueType>
         <action>DPActiveDebugSession.flash.performOperation("BlankCheck")</action>
+    </property>
+	
+	<!-- Erase Action -->
+    <property id="ChipEraseButton">
+        <target>generic</target> <!-- ISA name for Cortex-M3/4 -->
+        <name>Erase Entire Flash</name>
+        <valueType>Button</valueType>
+        <action>DPActiveDebugSession.flash.performOperation("MassErase")</action>
+        <categories>
+            <category>Manual Erase</category>
+        </categories>
     </property>
 
     <!-- Security configuration -->
