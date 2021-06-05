@@ -1,11 +1,11 @@
 skip_non_tags: true
-image: Visual Studio 2015
+image: Visual Studio 2019
 environment:
-  QTDIR: C:\Qt\latest\mingw73_32
-  TOOLCHAIN_VERSION: 730_32
+  QTDIR: C:\Qt\latest\mingw81_32
+  TOOLCHAIN_VERSION: 810_32
   MINGWDIR: C:\Qt\Tools\mingw%TOOLCHAIN_VERSION%
   PATH: '%QTDIR%\bin;%MINGWDIR%\bin;%PATH%'
-  QWTDIR: C:\Qwt-6.1.5
+  QWTDIR: C:\Qwt-6.1.6
 cache: '%QWTDIR%'
 build_script:
   - cmd: python build.py

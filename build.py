@@ -21,21 +21,6 @@ from subprocess import call as run
 
 
 def build_osx(env):
-    # detect qwt version
-    # contents = os.listdir("/usr/local/Cellar/qwt")
-    # assert len(contents) == 1
-    # qwt_version = contents[0]
-
-    # qwt config uses this (false) include path
-    # run(
-    #     [
-    #         "ln",
-    #         "-s",
-    #         "/usr/local/lib/qwt.framework/Headers",
-    #         "/usr/local/Cellar/qwt/" + qwt_version + "/include",
-    #     ]
-    # )
-
     env["PATH"] = "/usr/local/opt/qt5/bin:" + env["PATH"]
 
     run(["qmake", "-set", "QMAKEFEATURES", "/usr/local/opt/qwt/features"], env=env)
@@ -119,27 +104,27 @@ def build_windows(env):
         [
             "appveyor",
             "DownloadFile",
-            "https://github.com/libusb/libusb/releases/download/v1.0.23/libusb-1.0.23.7z",
+            "https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.7z",
         ]
     )
     os.mkdir("libusb")
-    run(["7z", "x", r"..\libusb-1.0.23.7z"], cwd="libusb")
+    run(["7z", "x", r"..\libusb-1.0.24.7z"], cwd="libusb")
 
     if not os.path.exists(r"C:\Qwt-6.1.5\features"):
         run(
             [
                 "appveyor",
                 "DownloadFile",
-                "https://sourceforge.net/projects/qwt/files/qwt/6.1.5/qwt-6.1.5.tar.bz2",
+                "https://sourceforge.net/projects/qwt/files/qwt/6.1.6/qwt-6.1.6.tar.bz2",
             ]
         )
-        run(["7z", "x", "qwt-6.1.5.tar.bz2"])
-        run(["7z", "x", "qwt-6.1.5.tar"])
-        run(["qmake", "qwt.pro"], cwd="qwt-6.1.5")
-        run(["mingw32-make"], cwd="qwt-6.1.5")
-        run(["mingw32-make", "install"], cwd="qwt-6.1.5")
+        run(["7z", "x", "qwt-6.1.6.tar.bz2"])
+        run(["7z", "x", "qwt-6.1.6.tar"])
+        run(["qmake", "qwt.pro"], cwd="qwt-6.1.6")
+        run(["mingw32-make"], cwd="qwt-6.1.6")
+        run(["mingw32-make", "install"], cwd="qwt-6.1.6")
 
-    run(["qmake", "-set", "QMAKEFEATURES", r"C:\Qwt-6.1.5\features"])
+    run(["qmake", "-set", "QMAKEFEATURES", r"C:\Qwt-6.1.6\features"])
     # Note: This path is also in .appveyor.yml, in an environment variable QWTDIR
 
     run(["qmake", "red_lenlab.pro"])
