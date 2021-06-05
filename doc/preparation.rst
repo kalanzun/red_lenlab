@@ -183,3 +183,18 @@ Im Terminal:
 - Aktivieren Sie das Dateiattribut "ausführbar": `chmod +x Lenlab*`
 - Führen Sie die Datei aus: `./Lenlab*`
 - Ausführen als Administrator: `sudo ./Lenlab*`
+
+ARM v8 (arm64) Systeme (Raspberry Pi, ...)
+------------------------------------------
+
+Der Download ist das Lenlab executable binary. Es gelten die gleichen Anweisungen wie für Linux.
+
+Lenlab für ARM hat keine Programm-Bibliotheken dabei. Unter Umständen müssen diese noch installiert werden. Lenlab benötigt:
+
+- qt5
+- libqwt
+- libusb
+
+Auf ubuntu lautet der Befehl für die Installation:
+
+`sudo apt install sudo apt install libqwt-qt5-6 libqt5svg5 libqt5opengl5 libusb-1.0-0`
