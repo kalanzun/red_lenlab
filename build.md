@@ -141,6 +141,30 @@ https://www.anaconda.com/download/
 
 Lenlab builds should work with the default development packages of qt5, qwt and libusb and default compiler of the distribution.
 
+### Raspberry Pi 4
+
+Ubuntu: https://cdimage.ubuntu.com/releases/18.04.5/release/
+
+`ssh ubuntu@ubuntu`
+
+`sudo apt update`
+
+`sudo apt upgrade`
+
+`sudo apt install build-essential qt5-default libqwt-qt5-dev libqt5svg5-dev libqt5opengl5-dev libusb-1.0-0-dev pkg-config`
+
+`sudo reboot`
+
+`git clone https://github.com/kalanzun/red_lenlab.git`
+
+`cd red_lenlab`
+
+`qmake red_lenlab.pro`
+
+`make -j4`
+
+
+
 ### TI Code Composer Studio
 
 It runs on Windows, Linux and Mac.

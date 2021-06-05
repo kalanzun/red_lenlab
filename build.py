@@ -27,14 +27,18 @@ def build_osx(env):
     qwt_version = contents[0]
 
     # qwt config uses this (false) include path
-    run(
-        [
-            "ln",
-            "-s",
-            "/usr/local/lib/qwt.framework/Headers",
-            "/usr/local/Cellar/qwt/" + qwt_version + "/include",
-        ]
-    )
+    # run(
+    #     [
+    #         "ln",
+    #         "-s",
+    #         "/usr/local/lib/qwt.framework/Headers",
+    #         "/usr/local/Cellar/qwt/" + qwt_version + "/include",
+    #     ]
+    # )
+
+    run(["ls", "/usr/local/opt"])
+    run(["ls", "/usr/local/opt/qt"])
+    run(["ls", "/usr/local/opt/qwt"])
 
     env["PATH"] = "/usr/local/opt/qt/bin:" + env["PATH"]
 
@@ -76,36 +80,42 @@ def build_linux(env):
     run(["make"])
 
     tag = env["TRAVIS_TAG"]
+    arch = env["TRAVIS_CPU_ARCH"]
 
-    run(
-        [
-            "wget",
-            "-c",
-            "-nv",
-            "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage",
-        ]
-    )
-    run(["chmod", "a+x", "linuxdeployqt-continuous-x86_64.AppImage"])
+    if arch == "amd64":
+        run(
+            [
+                "wget",
+                "-c",
+                "-nv",
+                "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage",
+            ]
+        )
+        run(["chmod", "a+x", "linuxdeployqt-continuous-x86_64.AppImage"])
 
-    os.makedirs("build/usr/share/applications")
-    run(["cp", "linux/lenlab.desktop", "build/usr/share/applications/"])
+        os.makedirs("build/usr/share/applications")
+        run(["cp", "linux/lenlab.desktop", "build/usr/share/applications/"])
 
-    os.makedirs("build/usr/share/icons/hicolor/scaleable/")
-    run(["cp", "linux/lenlab.svg", "build/usr/share/icons/hicolor/scaleable/"])
+        os.makedirs("build/usr/share/icons/hicolor/scaleable/")
+        run(["cp", "linux/lenlab.svg", "build/usr/share/icons/hicolor/scaleable/"])
 
-    os.makedirs("build/usr/bin")
-    run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
+        os.makedirs("build/usr/bin")
+        run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
 
-    # linuxdeployqt uses VERSION environment variable for the filename
-    env["VERSION"] = tag + "-linux"
-    run(
-        [
-            "./linuxdeployqt-continuous-x86_64.AppImage",
-            "build/usr/share/applications/lenlab.desktop",
-            "-appimage",
-        ],
-        env=env,
-    )
+        # linuxdeployqt uses VERSION environment variable for the filename
+        env["VERSION"] = tag + "-linux"
+        run(
+            [
+                "./linuxdeployqt-continuous-x86_64.AppImage",
+                "build/usr/share/applications/lenlab.desktop",
+                "-appimage",
+            ],
+            env=env,
+        )
+
+    if arch == "arm64":
+        release_name = "Lenlab-" + tag + "-linux-arm64"
+        shutil.copy("lenlab/app/lenlab", release_name)
 
 
 def build_windows(env):
