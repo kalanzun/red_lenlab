@@ -4,8 +4,11 @@ compiler: gcc
 os:
   - linux
   - osx
-dist: xenial
-osx_image: xcode12
+arch:
+  - amd64
+  - arm64
+dist: bionic
+osx_image: xcode12.5
 addons:
   homebrew:
     packages:
