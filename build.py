@@ -22,9 +22,9 @@ from subprocess import call as run
 
 def build_osx(env):
     # detect qwt version
-    contents = os.listdir("/usr/local/Cellar/qwt")
-    assert len(contents) == 1
-    qwt_version = contents[0]
+    # contents = os.listdir("/usr/local/Cellar/qwt")
+    # assert len(contents) == 1
+    # qwt_version = contents[0]
 
     # qwt config uses this (false) include path
     # run(
@@ -36,11 +36,7 @@ def build_osx(env):
     #     ]
     # )
 
-    run(["ls", "/usr/local/opt"])
-    run(["ls", "/usr/local/opt/qt"])
-    run(["ls", "/usr/local/opt/qwt"])
-
-    env["PATH"] = "/usr/local/opt/qt/bin:" + env["PATH"]
+    env["PATH"] = "/usr/local/opt/qt5/bin:" + env["PATH"]
 
     run(["qmake", "-set", "QMAKEFEATURES", "/usr/local/opt/qwt/features"], env=env)
 
