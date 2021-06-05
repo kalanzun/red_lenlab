@@ -36,33 +36,26 @@ Third party software download and install in `build.py`. The versions are define
 
 Build environment configuration in `.travis.yml`
 
-Virtual Machine Image: Ubuntu Xenial Xerus 16.04
+Virtual Machine Image: Ubuntu 18.04 LTS Bionic Beaver
 
-The virtual machine image is specified within the configuration. It will use the default version of each software of that distribution.
+The build environment configuration specifies the virtual machine image. It will use the default version of each software of that distribution.
 
 Compiler: gcc
 
-Note: AppImages require the oldest supported Ubuntu LTS
-
-- qt5-default: Version 5.5.1
-- libqwt-qt5-dev: Version 6.1.2
-- libusb-1.0-0-dev: Version 1.0.20
-- Python: Build environment default is version 2.7.11
+Note: AppImage requires the oldest supported Ubuntu LTS
 
 ### Mac
 
-Build environment configuration in `.travis.yml`
+Build environment configuration in `.travis.yml`: Xcode 12.5, macOS 11.3
 
 Compiler: clang
 
-The versions are not specified within the configuration. If Travis CI or Homebrew update the default version, the build environment will use the updated version.
+The configuration does not specify the exact version of the dependencies. If Travis CI or Homebrew update the default version, the build will use the new version.
 
 Currently:
 
-Travis CI uses macOS 10.13 and Xcode 9.4.1 by default. 
-
-- qt5: Homebrew latest version is 5.13.1
-- qwt: Homebrew latest version is 6.1.4
+- qt5: Homebrew latest version is 5.15.2
+- qwt: Homebrew latest version is 6.1.6
 
 ## Local build environment
 
@@ -163,7 +156,7 @@ Ubuntu: https://cdimage.ubuntu.com/releases/18.04.5/release/
 
 `make -j4`
 
-
+The executable is `lenlab/app/lenlab`
 
 ### TI Code Composer Studio
 
