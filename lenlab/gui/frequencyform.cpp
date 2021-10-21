@@ -18,10 +18,10 @@
 
 #include "frequencyform.h"
 #include "ui_frequencyform.h"
-#include "pointvectorseriesdata.h"
-#include "qwt_text.h"
-#include "qwt_plot_renderer.h"
-#include "qwt_scale_engine.h"
+//#include "pointvectorseriesdata.h"
+//#include "qwt_text.h"
+//#include "qwt_plot_renderer.h"
+//#include "qwt_scale_engine.h"
 //#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -34,6 +34,7 @@ FrequencyForm::FrequencyForm(QWidget * parent)
 {
     ui->setupUi(this);
 
+    /*
     ui->plot->enableAxis(QwtPlot::yRight);
 
     QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
@@ -63,6 +64,7 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     m_curves[1]->setYAxis(QwtPlot::yRight);
 
     newGrid();
+    */
 }
 
 FrequencyForm::~FrequencyForm()
@@ -93,6 +95,7 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
             this, &FrequencyForm::activeChanged);
 }
 
+/*
 QwtPlotCurve *
 FrequencyForm::newCurve(const QColor &color, bool visible)
 {
@@ -124,6 +127,7 @@ FrequencyForm::newGrid()
     grid->attach(ui->plot); // acquires ownership
     return grid.release();
 }
+*/
 
 void
 FrequencyForm::on_startButton_clicked()
@@ -182,21 +186,25 @@ FrequencyForm::save()
 void
 FrequencyForm::saveImage()
 {
+    /*
     QwtPlotRenderer renderer;
     renderer.exportTo(ui->plot, "bode.pdf"); // it asks for the filename
+    */
 }
 
 void
 FrequencyForm::seriesUpdated()
 {
-    ui->plot->replot();
+    //ui->plot->replot();
 }
 
 void
 FrequencyForm::seriesChanged(model::pSeries const & series)
 {
+    /*
     m_curves[0]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
     m_curves[1]->setSamples(new PointVectorSeriesData(series, 2)); // acquires ownership
+    */
 }
 
 } // namespace gui

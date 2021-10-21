@@ -18,9 +18,9 @@
 
 #include "oscilloscopeform.h"
 #include "ui_oscilloscopeform.h"
-#include "pointvectorseriesdata.h"
-#include "qwt_text.h"
-#include "qwt_plot_renderer.h"
+//#include "pointvectorseriesdata.h"
+//#include "qwt_text.h"
+//#include "qwt_plot_renderer.h"
 //#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -33,6 +33,7 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
 {
     ui->setupUi(this);
 
+    /*
     QwtText x_label("Zeit [ms]");
     QFont x_font(ui->plot->axisFont(2));
     x_label.setFont(x_font);
@@ -53,6 +54,7 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     //m_curves[1] = newCurve(QColor("#fce94f"), true); // butter 0
 
     newGrid();
+    */
 }
 
 OscilloscopeForm::~OscilloscopeForm()
@@ -83,6 +85,7 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
             this, &OscilloscopeForm::activeChanged);
 }
 
+/*
 QwtPlotCurve *
 OscilloscopeForm::newCurve(const QColor &color, bool visible)
 {
@@ -113,6 +116,7 @@ OscilloscopeForm::newGrid()
     grid->attach(ui->plot); // acquires ownership
     return grid.release();
 }
+*/
 
 void
 OscilloscopeForm::on_startButton_clicked()
@@ -145,10 +149,12 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
+    /*
     for (unsigned int i = 0; i < m_curves.size(); ++i) {
         m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
     }
     ui->plot->replot();
+    */
 }
 
 void
@@ -160,13 +166,13 @@ OscilloscopeForm::on_samplerateBox_activated(int index)
 void
 OscilloscopeForm::on_ch1CheckBox_stateChanged(int state)
 {
-    m_curves[0]->setVisible(state == Qt::Checked);
+    //m_curves[0]->setVisible(state == Qt::Checked);
 }
 
 void
 OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
 {
-    m_curves[1]->setVisible(state == Qt::Checked);
+    //m_curves[1]->setVisible(state == Qt::Checked);
 }
 
 void
@@ -190,16 +196,20 @@ OscilloscopeForm::save()
 void
 OscilloscopeForm::saveImage()
 {
+    /*
     QwtPlotRenderer renderer;
     renderer.exportTo(ui->plot, "oszilloskop.pdf"); // it asks for the filename
+    */
 }
 
 void
 OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
 {
+    /*
     double timerange = 0.5 * (1<<index);
     ui->plot->setAxisScale(QwtPlot::xBottom, -timerange/2, timerange/2);
     ui->plot->replot();
+    */
 }
 
 void OscilloscopeForm::activeChanged(bool)

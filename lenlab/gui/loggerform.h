@@ -22,8 +22,8 @@
 #include "mainwindow.h"
 #include "model/lenlab.h"
 #include "model/series.h"
-#include "qwt_plot_curve.h"
-#include "qwt_plot_grid.h"
+//#include "qwt_plot_curve.h"
+//#include "qwt_plot_grid.h"
 #include <QWidget>
 
 namespace gui {
@@ -44,7 +44,7 @@ class LoggerForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
 
-    std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
+    //std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
 
 public:
     explicit LoggerForm(QWidget * parent = nullptr);
@@ -57,8 +57,10 @@ public:
     void saveImage();
 
 private:
+    /*
     QwtPlotGrid * newGrid();
     QwtPlotCurve * newCurve(QColor const & color, bool visible);
+    */
 
 private slots:
     void on_intervalComboBox_activated(int);

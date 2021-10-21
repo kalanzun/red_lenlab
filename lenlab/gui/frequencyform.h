@@ -21,8 +21,8 @@
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "qwt_plot_curve.h"
-#include "qwt_plot_grid.h"
+//#include "qwt_plot_curve.h"
+//#include "qwt_plot_grid.h"
 #include <QWidget>
 
 namespace gui {
@@ -43,10 +43,12 @@ class FrequencyForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Frequencysweep * m_frequencysweep = nullptr;
 
+    /*
     std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
 
     QwtPlotCurve *newCurve(const QColor &color, bool visible);
     QwtPlotGrid *newGrid();
+    */
 
 public:
     explicit FrequencyForm(QWidget * parent = nullptr);

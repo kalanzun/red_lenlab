@@ -21,7 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QwtPlot" name="plot">
+    <widget class="QFrame" name="plot">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -72,8 +72,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>318</width>
-          <height>548</height>
+          <width>268</width>
+          <height>543</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -180,14 +180,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

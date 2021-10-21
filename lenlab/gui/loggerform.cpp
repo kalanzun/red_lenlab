@@ -18,10 +18,10 @@
 
 #include "loggerform.h"
 #include "ui_loggerform.h"
-#include "pointvectorseriesdata.h"
+//#include "pointvectorseriesdata.h"
 #include "mainwindow.h"
-#include "qwt_text.h"
-#include "qwt_plot_renderer.h"
+//#include "qwt_text.h"
+//#include "qwt_plot_renderer.h"
 #include <QMessageBox>
 #include <QFileDialog>
 //#include <QDebug>
@@ -38,6 +38,7 @@ LoggerForm::LoggerForm(QWidget * parent) :
 
     ui->autoSaveCheckBox->setEnabled(false);
 
+    /*
     QwtText x_label("Zeit [s]");
     QFont x_font(ui->plot->axisFont(2));
     x_label.setFont(x_font);
@@ -54,6 +55,7 @@ LoggerForm::LoggerForm(QWidget * parent) :
     m_curves[3] = newCurve(QColor("#fce94f"), false); // butter 0
 
     newGrid();
+    */
 }
 
 LoggerForm::~LoggerForm()
@@ -61,6 +63,7 @@ LoggerForm::~LoggerForm()
     delete ui;
 }
 
+/*
 QwtPlotCurve *
 LoggerForm::newCurve(QColor const & color, bool visible)
 {
@@ -92,6 +95,7 @@ LoggerForm::newGrid()
     grid->attach(ui->plot); // acquires ownership
     return grid.release();
 }
+*/
 
 void
 LoggerForm::setMainWindow(MainWindow * main_window)
@@ -210,8 +214,10 @@ LoggerForm::save()
 void
 LoggerForm::saveImage()
 {
+    /*
     QwtPlotRenderer renderer;
     renderer.exportTo(ui->plot, "logger.pdf"); // it asks for the filename
+    */
 }
 
 void
@@ -272,9 +278,11 @@ LoggerForm::fileNameChanged(const QString &fileName)
 void
 LoggerForm::channelsChanged(const std::bitset<4> &channels)
 {
+    /*
     for (std::size_t i = 0; i < m_curves.size(); ++i)
         m_curves[i]->setVisible(channels[i]);
     ui->plot->replot();
+    */
 }
 
 void LoggerForm::activeChanged(bool)
@@ -295,16 +303,18 @@ LoggerForm::on_intervalComboBox_activated(int index)
 void
 LoggerForm::seriesChanged(model::pSeries const & series)
 {
+    /*
     for (unsigned int i = 0; i < m_curves.size(); ++i) {
         m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
     }
     ui->plot->replot();
+    */
 }
 
 void
 LoggerForm::seriesUpdated()
 {
-    ui->plot->replot();
+    //ui->plot->replot();
 }
 
 } // namespace gui

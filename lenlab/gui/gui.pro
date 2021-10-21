@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-QT       += widgets
+QT       += widgets charts
 
 TARGET = gui
 TEMPLATE = lib
@@ -37,7 +37,6 @@ SOURCES += \
     loggerform.cpp \
     mainwindow.cpp \
     oscilloscopeform.cpp \
-    pointvectorseriesdata.cpp \
     signalform.cpp \
 
 HEADERS += \
@@ -45,7 +44,6 @@ HEADERS += \
     loggerform.h \
     mainwindow.h \
     oscilloscopeform.h \
-    pointvectorseriesdata.h \
     signalform.h \
 
 FORMS += \

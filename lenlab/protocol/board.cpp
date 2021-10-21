@@ -70,7 +70,7 @@ Board::lookForBoard(int boottime)
 bool
 Board::isOpen() const
 {
-    return mDevice;
+    return (bool) mDevice;
 }
 
 bool
