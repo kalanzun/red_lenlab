@@ -21,14 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QFrame" name="plot">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
+    <widget class="QChartView" name="plot"/>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -227,6 +220,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -258,7 +258,7 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
     m_current->append(1, value);
     m_current->append(2, angle);
 
-    emit seriesUpdated();
+    emit seriesUpdated(m_current);
 }
 
 void Frequencysweep::on_failed(protocol::pTask const & task)
@@ -301,7 +301,7 @@ Frequencysweep::save(const QString &fileName)
 
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
-    for (uint32_t i = 0; i < m_current->getLength(0); i++) {
+    for (uint32_t i = 0; i < m_current->getLength(); i++) {
         stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 1) << DELIMITER << m_current->getY(i, 2) << "\n";
     }
 

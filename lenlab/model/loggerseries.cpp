@@ -51,9 +51,9 @@ Loggerseries::getChannels() const
 }
 
 std::size_t
-Loggerseries::getLength(std::size_t channel) const
+Loggerseries::getLength() const
 {
-    return static_cast< std::size_t >(data[channel].size());
+    return data[0].size();
 }
 
 double
@@ -65,8 +65,24 @@ Loggerseries::getX(std::size_t i) const
 double
 Loggerseries::getY(std::size_t i, std::size_t channel) const
 {
+    qsizetype q = i;
     Q_ASSERT(channel < data.size());
-    return data[channel].at(static_cast< int >(i));
+    Q_ASSERT(q < data[channel].size());
+    return data[channel].at(q);
+}
+
+double
+Loggerseries::getLastX() const
+{
+    auto length = getLength();
+    return length ? getX(length - 1) : 0;
+}
+
+double
+Loggerseries::getLastY(std::size_t channel) const
+{
+    Q_ASSERT(channel < data.size());
+    return data[channel].size() ? data[channel].constLast() : 0;
 }
 
 double
@@ -78,14 +94,9 @@ Loggerseries::getMinX() const
 double
 Loggerseries::getMaxX() const
 {
-    auto length = getLength(0);
-    if (length > 0) {
-        auto value = getX(length - 1);
-        if (value > 10) {
-            return value;
-        }
-    }
-    return 10.0;
+    auto length = getLength();
+    length = length > 10 ? length - 1 : 10;
+    return getX(length);
 }
 
 double

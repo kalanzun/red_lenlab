@@ -137,9 +137,7 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         uint16_t state0 = buffer[2];
         uint16_t state1 = buffer[3];
 
-        if (trigger) {
-            incoming->setTrigger(trigger);
-        }
+        incoming->setTrigger(trigger);
 
         incoming->append(0, to_double(state0));
         incoming->append(1, to_double(state1));
@@ -155,7 +153,6 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
     }
 
     incoming->setView(504*16); // das letzte Paket wird nie verwendet, 17 würden ausreichen
-    //qDebug() << incoming->trigger();
 
     waveform.swap(incoming);
     emit seriesChanged(incoming);
@@ -195,7 +192,7 @@ Oscilloscope::save(const QString &fileName)
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
 
-    for (std::size_t i = 0; i < waveform->getLength(0); ++i) {
+    for (std::size_t i = 0; i < waveform->getLength(); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
 

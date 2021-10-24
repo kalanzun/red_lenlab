@@ -48,10 +48,9 @@ FrequencySeries::getChannels() const
 }
 
 std::size_t
-FrequencySeries::getLength(std::size_t channel) const
+FrequencySeries::getLength() const
 {
-    Q_ASSERT(channel < m_channels);
-    return index[channel];
+    return index[0];
 }
 
 double
@@ -66,6 +65,20 @@ FrequencySeries::getY(std::size_t i, std::size_t channel) const
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(i < m_length);
     return data[channel][i];
+}
+
+double
+FrequencySeries::getLastX() const
+{
+    return getLastY(0);
+}
+
+double
+FrequencySeries::getLastY(std::size_t channel) const
+{
+    Q_ASSERT(channel < m_channels);
+    Q_ASSERT(index[channel] > 0);
+    return data[channel][index[channel] - 1];
 }
 
 double

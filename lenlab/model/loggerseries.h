@@ -22,7 +22,6 @@
 #include "series.h"
 
 #include <QObject>
-#include <QVector>
 
 #include <array>
 
@@ -35,7 +34,7 @@ class Loggerseries : public Series
     typedef Series super;
 
     Q_PROPERTY(uint32_t interval READ interval WRITE setInterval)
-    uint32_t m_interval = 0;
+    uint32_t m_interval = 1000;
 
     std::array< QVector<double>, 4 > data;
 
@@ -51,10 +50,13 @@ public:
     void append(std::size_t channel, double value);
 
     std::size_t getChannels() const;
-    std::size_t getLength(std::size_t channel) const;
+    std::size_t getLength() const;
 
     double getX(std::size_t i) const;
     double getY(std::size_t i, std::size_t channel) const;
+
+    double getLastX() const;
+    double getLastY(std::size_t channel) const;
 
     double getMinX() const;
     double getMaxX() const;

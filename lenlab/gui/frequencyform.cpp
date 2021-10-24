@@ -34,6 +34,29 @@ FrequencyForm::FrequencyForm(QWidget * parent)
 {
     ui->setupUi(this);
 
+    QChart *chart = new QChart();
+    chart->legend()->hide();
+
+    QLogValueAxis *axisX = new QLogValueAxis();
+    chart->addAxis(axisX, Qt::AlignBottom);
+
+    for (size_t i = 0; i < m_series.size(); ++i) {
+        m_series[i] = new QLineSeries();
+        chart->addSeries(m_series[i]);
+        m_series[i]->attachAxis(axisX);
+    }
+
+    QValueAxis *axisMag = new QValueAxis();
+    chart->addAxis(axisMag, Qt::AlignLeft);
+    m_series[0]->attachAxis(axisMag);
+
+    QValueAxis *axisAng = new QValueAxis();
+    chart->addAxis(axisAng, Qt::AlignRight);
+    m_series[1]->attachAxis(axisAng);
+
+    ui->plot->setChart(chart);
+    ui->plot->setRenderHint(QPainter::Antialiasing);
+
     /*
     ui->plot->enableAxis(QwtPlot::yRight);
 
@@ -193,18 +216,29 @@ FrequencyForm::saveImage()
 }
 
 void
-FrequencyForm::seriesUpdated()
+FrequencyForm::seriesUpdated(model::pSeries const & series)
 {
-    //ui->plot->replot();
+    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
+        m_series[channel]->append(series->getLastX(), series->getLastY(channel + 1));
+    }
+
+    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
+    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(1), series->getMaxY(1));
+    ui->plot->chart()->axes(Qt::Vertical)[1]->setRange(series->getMinY(2), series->getMaxY(2));
 }
 
 void
 FrequencyForm::seriesChanged(model::pSeries const & series)
 {
-    /*
-    m_curves[0]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
-    m_curves[1]->setSamples(new PointVectorSeriesData(series, 2)); // acquires ownership
-    */
+    // a new measurement just started, series is empty
+
+    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
+        m_series[channel]->clear();
+    }
+
+    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
+    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(1), series->getMaxY(1));
+    ui->plot->chart()->axes(Qt::Vertical)[1]->setRange(series->getMinY(2), series->getMaxY(2));
 }
 
 } // namespace gui

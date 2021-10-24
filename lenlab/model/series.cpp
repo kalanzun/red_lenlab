@@ -25,4 +25,20 @@ Series::Series(QObject *parent) : QObject(parent)
 
 }
 
+double
+Series::getLastX() const
+{
+    Q_ASSERT("not implemented");
+    return 0;
+}
+
+double
+Series::getLastY(std::size_t channel) const
+{
+    Q_UNUSED(channel);
+
+    Q_ASSERT("not implemented");
+    return 0;
+}
+
 } // namespace model

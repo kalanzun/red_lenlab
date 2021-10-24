@@ -65,7 +65,7 @@ signals:
     void activeChanged(bool);
 
     void seriesChanged(pSeries const &);
-    void seriesUpdated();
+    void seriesUpdated(pSeries const &);
 };
 
 } // namespace model

@@ -81,7 +81,7 @@ Waveform::getChannels() const
 }
 
 std::size_t
-Waveform::getLength(std::size_t) const
+Waveform::getLength() const
 {
     return m_view;
 }

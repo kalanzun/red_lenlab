@@ -24,6 +24,7 @@
 //#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QtCharts>
 
 namespace gui {
 
@@ -32,6 +33,19 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     , ui(new Ui::OscilloscopeForm)
 {
     ui->setupUi(this);
+
+    QChart *chart = new QChart();
+    chart->legend()->hide();
+
+    for (size_t i = 0; i < m_series.size(); ++i) {
+        m_series[i] = new QLineSeries();
+        chart->addSeries(m_series[i]);
+    }
+
+    chart->createDefaultAxes();
+
+    ui->plot->setChart(chart);
+    ui->plot->setRenderHint(QPainter::Antialiasing);
 
     /*
     QwtText x_label("Zeit [ms]");
@@ -149,6 +163,17 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
+    QList< QPointF > points(series->getLength());
+
+    for (size_t channel = 0; channel < m_series.size(); ++channel) {
+        for (size_t i = 0; i < series->getLength(); ++i)
+            points[i] = QPointF(series->getX(i), series->getY(i, channel));
+
+        m_series[channel]->replace(points);
+    }
+
+    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
+    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(0), series->getMaxY(0));
     /*
     for (unsigned int i = 0; i < m_curves.size(); ++i) {
         m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership

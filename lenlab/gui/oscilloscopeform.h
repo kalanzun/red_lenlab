@@ -25,6 +25,7 @@
 //#include "qwt_plot_curve.h"
 //#include "qwt_plot_grid.h"
 #include <QWidget>
+#include <QtCharts>
 
 namespace gui {
 
@@ -47,6 +48,8 @@ class OscilloscopeForm : public QWidget
     MainWindow * m_main_window = nullptr;
     model::Lenlab * m_lenlab = nullptr;
     model::Oscilloscope * m_oscilloscope = nullptr;
+
+    std::array<QLineSeries *, 2> m_series; // pointer, no ownership
 
     /*
     std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership

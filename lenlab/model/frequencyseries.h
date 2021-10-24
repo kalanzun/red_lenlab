@@ -53,10 +53,13 @@ public:
     void append(std::size_t channel, double value);
 
     std::size_t getChannels() const;
-    std::size_t getLength(std::size_t channel) const;
+    std::size_t getLength() const;
 
     double getX(std::size_t i) const;
     double getY(std::size_t i, std::size_t channel) const;
+
+    double getLastX() const;
+    double getLastY(std::size_t channel) const;
 
     double getMinX() const;
     double getMaxX() const;

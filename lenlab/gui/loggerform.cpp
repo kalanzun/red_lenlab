@@ -27,6 +27,7 @@
 //#include <QDebug>
 #include <QPen>
 #include <QColor>
+#include <QtCharts>
 
 namespace gui {
 
@@ -37,6 +38,19 @@ LoggerForm::LoggerForm(QWidget * parent) :
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
+
+    QChart *chart = new QChart();
+    chart->legend()->hide();
+
+    for (size_t i = 0; i < m_series.size(); ++i) {
+        m_series[i] = new QLineSeries();
+        chart->addSeries(m_series[i]);
+    }
+
+    chart->createDefaultAxes();
+
+    ui->plot->setChart(chart);
+    ui->plot->setRenderHint(QPainter::Antialiasing);
 
     /*
     QwtText x_label("Zeit [s]");
@@ -303,18 +317,27 @@ LoggerForm::on_intervalComboBox_activated(int index)
 void
 LoggerForm::seriesChanged(model::pSeries const & series)
 {
-    /*
-    for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
+    QList< QPointF > points(series->getLength());
+
+    for (size_t channel = 0; channel < m_series.size(); ++channel) {
+        for (size_t i = 0; i < series->getLength(); ++i)
+            points[i] = QPointF(series->getX(i), series->getY(i, channel));
+
+        m_series[channel]->replace(points);
     }
-    ui->plot->replot();
-    */
+
+    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
+    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(0), series->getMaxY(0));
 }
 
 void
-LoggerForm::seriesUpdated()
+LoggerForm::seriesUpdated(model::pSeries const & series)
 {
-    //ui->plot->replot();
+    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
+        m_series[channel]->append(series->getLastX(), series->getLastY(channel));
+    }
+
+    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
 }
 
 } // namespace gui

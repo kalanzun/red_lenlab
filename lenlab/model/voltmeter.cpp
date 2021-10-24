@@ -294,7 +294,7 @@ Voltmeter::do_save()
 
     stream << "\n";
 
-    for (size_t t = 0; t < m_loggerseries->getLength(0); ++t) {
+    for (size_t t = 0; t < m_loggerseries->getLength(); ++t) {
         stream << m_loggerseries->getX(t);
         for (size_t i = 0; i < m_loggerseries->getChannels(); ++i) {
             if (mChannels[i]) {
@@ -339,7 +339,7 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
     setMeasurementData(true);
     setUnsavedData(true);
 
-    emit seriesUpdated();
+    emit seriesUpdated(m_loggerseries);
 
 }
 

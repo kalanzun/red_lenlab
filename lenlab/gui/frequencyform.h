@@ -24,6 +24,7 @@
 //#include "qwt_plot_curve.h"
 //#include "qwt_plot_grid.h"
 #include <QWidget>
+#include <QtCharts>
 
 namespace gui {
 
@@ -43,6 +44,7 @@ class FrequencyForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Frequencysweep * m_frequencysweep = nullptr;
 
+    std::array< QLineSeries *, 2 > m_series; // pointer, no ownership
     /*
     std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
 
@@ -62,7 +64,7 @@ public:
 
 private slots:
     void seriesChanged(model::pSeries const &);
-    void seriesUpdated();
+    void seriesUpdated(model::pSeries const &);
 
     void on_startButton_clicked();
     void on_stopButton_clicked();

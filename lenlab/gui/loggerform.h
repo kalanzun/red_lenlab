@@ -25,6 +25,7 @@
 //#include "qwt_plot_curve.h"
 //#include "qwt_plot_grid.h"
 #include <QWidget>
+#include <QtCharts>
 
 namespace gui {
 
@@ -44,6 +45,7 @@ class LoggerForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
 
+    std::array< QLineSeries *, 4 > m_series; // pointer, no ownership
     //std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
 
 public:
@@ -74,7 +76,7 @@ private slots:
     void on_autoSaveCheckBox_stateChanged(int);
     void on_clearButton_clicked();
 
-    void seriesUpdated();
+    void seriesUpdated(model::pSeries const &);
     void seriesChanged(model::pSeries const &);
 
     void measurementDataChanged(bool);
