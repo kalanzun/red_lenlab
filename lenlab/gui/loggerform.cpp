@@ -42,6 +42,7 @@ LoggerForm::LoggerForm(QWidget * parent) :
         chart->addSeries(m_series[i]);
         stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
                 + m_series[i]->color().name() + "; }\n";
+        m_series[i]->setVisible(i == 0);
     }
 
     chart->createDefaultAxes();
