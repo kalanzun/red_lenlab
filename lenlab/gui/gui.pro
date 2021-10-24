@@ -37,6 +37,7 @@ SOURCES += \
     mainwindow.cpp \
     oscilloscopeform.cpp \
     signalform.cpp \
+    verticallabel.cpp
 
 HEADERS += \
     frequencyform.h \
@@ -44,6 +45,7 @@ HEADERS += \
     mainwindow.h \
     oscilloscopeform.h \
     signalform.h \
+    verticallabel.h
 
 FORMS += \
     frequencyform.ui \
