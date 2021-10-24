@@ -35,6 +35,8 @@ LoggerForm::LoggerForm(QWidget * parent) :
     QWidget(parent),
     ui(new Ui::LoggerForm)
 {
+    QString stylesheet;
+
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
@@ -45,12 +47,16 @@ LoggerForm::LoggerForm(QWidget * parent) :
     for (size_t i = 0; i < m_series.size(); ++i) {
         m_series[i] = new QLineSeries();
         chart->addSeries(m_series[i]);
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + m_series[i]->color().name() + "; }\n";
     }
 
     chart->createDefaultAxes();
 
     ui->plot->setChart(chart);
     ui->plot->setRenderHint(QPainter::Antialiasing);
+
+    ui->scrollArea->setStyleSheet(stylesheet);
 
     /*
     QwtText x_label("Zeit [s]");

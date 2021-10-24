@@ -117,24 +117,6 @@
           <height>508</height>
          </rect>
         </property>
-        <property name="styleSheet">
-         <string notr="true">#ch4CheckBox {
-	color: #edd400;
-	font-weight: bold;
-}
-#ch2CheckBox {
-	color: #73d216;
-	font-weight: bold;
-}
-#ch1CheckBox {
-	color: #3465a4;
-	font-weight: bold;
-}
-#ch3CheckBox {
-	color: #cc0000;
-	font-weight: bold;
-}</string>
-        </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QLabel" name="label">

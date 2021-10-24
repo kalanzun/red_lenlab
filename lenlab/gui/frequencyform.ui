@@ -69,24 +69,6 @@
           <height>586</height>
          </rect>
         </property>
-        <property name="styleSheet">
-         <string notr="true">#ch1Label {
-	color: #3465a4;
-	font-weight: bold;
-}
-#ch2Label {
-	color: #cc0000;
-	font-weight: bold;
-}
-#amplitudeLabel {
-	color: #3465a4;
-	font-weight: bold;
-}
-#phaseLabel {
-	color: #cc0000;
-	font-weight: bold;
-}</string>
-        </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QLabel" name="label">

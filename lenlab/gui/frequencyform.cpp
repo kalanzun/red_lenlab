@@ -32,6 +32,8 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::FrequencyForm)
 {
+    QString stylesheet;
+
     ui->setupUi(this);
 
     QChart *chart = new QChart();
@@ -44,7 +46,15 @@ FrequencyForm::FrequencyForm(QWidget * parent)
         m_series[i] = new QLineSeries();
         chart->addSeries(m_series[i]);
         m_series[i]->attachAxis(axisX);
+        stylesheet += "#ch" + QString::number(i + 1) + "Label { color: "
+                + m_series[i]->color().name() + "; }\n";
     }
+
+    stylesheet += "#amplitudeLabel { color: "
+            + m_series[0]->color().name() + "; }\n";
+
+    stylesheet += "#phaseLabel { color: "
+            + m_series[1]->color().name() + "; }\n";
 
     QValueAxis *axisMag = new QValueAxis();
     chart->addAxis(axisMag, Qt::AlignLeft);
@@ -56,6 +66,8 @@ FrequencyForm::FrequencyForm(QWidget * parent)
 
     ui->plot->setChart(chart);
     ui->plot->setRenderHint(QPainter::Antialiasing);
+
+    ui->scrollArea->setStyleSheet(stylesheet);
 
     /*
     ui->plot->enableAxis(QwtPlot::yRight);

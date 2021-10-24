@@ -18,6 +18,8 @@ CONFIG += c++11
 
 CONFIG += qwt
 
+DEFINES *= QT_USE_QSTRINGBUILDER
+
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT
 
 INCLUDEPATH += ../../lenlab ../../include
