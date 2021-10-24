@@ -22,7 +22,6 @@
 #include "model/lenlab.h"
 
 #include <QMainWindow>
-#include <QPointer>
 
 namespace gui {
 

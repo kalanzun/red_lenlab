@@ -18,7 +18,6 @@
 
 #include "signalform.h"
 #include "ui_signalform.h"
-//#include <QDebug>
 
 namespace gui {
 

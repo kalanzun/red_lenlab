@@ -21,6 +21,7 @@
 
 #include "mainwindow.h"
 #include "model/lenlab.h"
+
 #include <QWidget>
 
 namespace gui {

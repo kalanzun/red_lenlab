@@ -19,9 +19,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "lenlab_version.h"
+
 #include <QMessageBox>
 #include <QFileDialog>
-//#include <QDebug>
 
 namespace gui {
 

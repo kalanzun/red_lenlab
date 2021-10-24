@@ -18,11 +18,7 @@
 
 #include "frequencyform.h"
 #include "ui_frequencyform.h"
-//#include "pointvectorseriesdata.h"
-//#include "qwt_text.h"
-//#include "qwt_plot_renderer.h"
-//#include "qwt_scale_engine.h"
-//#include <QDebug>
+
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -70,35 +66,11 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     ui->scrollArea->setStyleSheet(stylesheet);
 
     /*
-    ui->plot->enableAxis(QwtPlot::yRight);
+    QString x_label("Frequenz [Hz]");
 
-    QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
-    ui->plot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine);
-    ui->plot->setAxisMaxMinor(QwtPlot::xBottom, 10);
+    QString y_label("Amplitude [dB]");
 
-    QwtText x_label("Frequenz [Hz]");
-    QFont x_font(ui->plot->axisFont(2));
-    x_label.setFont(x_font);
-    ui->plot->setAxisTitle(2, x_label);
-
-    QwtText y_label("Amplitude [dB]");
-    QFont y_font(ui->plot->axisFont(0));
-    y_label.setFont(y_font);
-    ui->plot->setAxisTitle(0, y_label);
-
-    QwtText phase_label("Phase [°]");
-    QFont phase_font(ui->plot->axisFont(QwtPlot::yRight));
-    phase_label.setFont(phase_font);
-    ui->plot->setAxisTitle(QwtPlot::yRight, phase_label);
-
-    //QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
-    //ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
-
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
-    m_curves[1]->setYAxis(QwtPlot::yRight);
-
-    newGrid();
+    QString phase_label("Phase [°]");
     */
 }
 
@@ -129,40 +101,6 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     connect(&m_lenlab->oscilloscope, &model::Oscilloscope::activeChanged,
             this, &FrequencyForm::activeChanged);
 }
-
-/*
-QwtPlotCurve *
-FrequencyForm::newCurve(const QColor &color, bool visible)
-{
-    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
-
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-    curve->setVisible(visible);
-
-    QPen pen;
-    pen.setColor(color);
-    pen.setWidth(2);
-    curve->setPen(pen);
-
-    curve->attach(ui->plot); // acquires ownership
-    return curve.release();
-}
-
-QwtPlotGrid *
-FrequencyForm::newGrid()
-{
-    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
-
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor("#555753"); // aluminium 4
-    grid->setPen(pen);
-    grid->enableXMin(true);
-
-    grid->attach(ui->plot); // acquires ownership
-    return grid.release();
-}
-*/
 
 void
 FrequencyForm::on_startButton_clicked()

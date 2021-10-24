@@ -18,13 +18,9 @@
 
 #include "oscilloscopeform.h"
 #include "ui_oscilloscopeform.h"
-//#include "pointvectorseriesdata.h"
-//#include "qwt_text.h"
-//#include "qwt_plot_renderer.h"
-//#include <QDebug>
+
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QtCharts>
 
 namespace gui {
 
@@ -54,26 +50,9 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     ui->scrollArea->setStyleSheet(stylesheet);
 
     /*
-    QwtText x_label("Zeit [ms]");
-    QFont x_font(ui->plot->axisFont(2));
-    x_label.setFont(x_font);
-    ui->plot->setAxisTitle(2, x_label);
+    QString x_label("Zeit [ms]");
 
-    QwtText y_label("Spannung [V]");
-    QFont y_font(ui->plot->axisFont(0));
-    y_label.setFont(y_font);
-    ui->plot->setAxisTitle(0, y_label);
-
-    for (int i = 0; i < 7; ++i)
-        ui->timerangeBox->insertItem(i, QString("%L1 ms").arg(0.5*(1<<i)));
-    ui->timerangeBox->setCurrentIndex(3);
-
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    //m_curves[0] = newCurve(QColor("#8ae234"), true); // green 0
-    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
-    //m_curves[1] = newCurve(QColor("#fce94f"), true); // butter 0
-
-    newGrid();
+    QString y_label("Spannung [V]");
     */
 }
 
@@ -104,39 +83,6 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     connect(&m_lenlab->frequencysweep, &model::Oscilloscope::activeChanged,
             this, &OscilloscopeForm::activeChanged);
 }
-
-/*
-QwtPlotCurve *
-OscilloscopeForm::newCurve(const QColor &color, bool visible)
-{
-    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
-
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-    curve->setVisible(visible);
-
-    QPen pen;
-    pen.setColor(color);
-    pen.setWidth(2);
-    curve->setPen(pen);
-
-    curve->attach(ui->plot); // acquires ownership
-    return curve.release();
-}
-
-QwtPlotGrid *
-OscilloscopeForm::newGrid()
-{
-    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
-
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor("#555753"); // aluminium 4
-    grid->setPen(pen);
-
-    grid->attach(ui->plot); // acquires ownership
-    return grid.release();
-}
-*/
 
 void
 OscilloscopeForm::on_startButton_clicked()
@@ -180,12 +126,6 @@ OscilloscopeForm::seriesChanged(model::pSeries const & series)
 
     ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
     ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(0), series->getMaxY(0));
-    /*
-    for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
-    }
-    ui->plot->replot();
-    */
 }
 
 void

@@ -18,16 +18,9 @@
 
 #include "loggerform.h"
 #include "ui_loggerform.h"
-//#include "pointvectorseriesdata.h"
-#include "mainwindow.h"
-//#include "qwt_text.h"
-//#include "qwt_plot_renderer.h"
+
 #include <QMessageBox>
 #include <QFileDialog>
-//#include <QDebug>
-#include <QPen>
-#include <QColor>
-#include <QtCharts>
 
 namespace gui {
 
@@ -59,22 +52,9 @@ LoggerForm::LoggerForm(QWidget * parent) :
     ui->scrollArea->setStyleSheet(stylesheet);
 
     /*
-    QwtText x_label("Zeit [s]");
-    QFont x_font(ui->plot->axisFont(2));
-    x_label.setFont(x_font);
-    ui->plot->setAxisTitle(2, x_label);
+    QString x_label("Zeit [s]");
 
-    QwtText y_label("Spannung [V]");
-    QFont y_font(ui->plot->axisFont(0));
-    y_label.setFont(y_font);
-    ui->plot->setAxisTitle(0, y_label);
-
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    m_curves[1] = newCurve(QColor("#8ae234"), false); // green 0
-    m_curves[2] = newCurve(QColor("#ef2929"), false); // scarlet red 0
-    m_curves[3] = newCurve(QColor("#fce94f"), false); // butter 0
-
-    newGrid();
+    QString y_label("Spannung [V]");
     */
 }
 
@@ -82,40 +62,6 @@ LoggerForm::~LoggerForm()
 {
     delete ui;
 }
-
-/*
-QwtPlotCurve *
-LoggerForm::newCurve(QColor const & color, bool visible)
-{
-    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
-
-    //curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-    curve->setVisible(visible);
-
-    QPen pen;
-    pen.setColor(color);
-    pen.setWidth(2);
-    curve->setPen(pen);
-
-    curve->attach(ui->plot); // acquires ownership
-    return curve.release();
-}
-
-QwtPlotGrid *
-LoggerForm::newGrid()
-{
-    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
-
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor("#555753"); // aluminium 4
-    grid->setPen(pen);
-
-    grid->attach(ui->plot); // acquires ownership
-    return grid.release();
-}
-*/
 
 void
 LoggerForm::setMainWindow(MainWindow * main_window)
