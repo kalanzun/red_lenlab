@@ -191,13 +191,13 @@ OscilloscopeForm::on_samplerateBox_activated(int index)
 void
 OscilloscopeForm::on_ch1CheckBox_stateChanged(int state)
 {
-    //m_curves[0]->setVisible(state == Qt::Checked);
+    m_series[0]->setVisible(state == Qt::Checked);
 }
 
 void
 OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
 {
-    //m_curves[1]->setVisible(state == Qt::Checked);
+    m_series[1]->setVisible(state == Qt::Checked);
 }
 
 void

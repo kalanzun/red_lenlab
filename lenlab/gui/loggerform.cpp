@@ -292,11 +292,8 @@ LoggerForm::fileNameChanged(const QString &fileName)
 void
 LoggerForm::channelsChanged(const std::bitset<4> &channels)
 {
-    /*
-    for (std::size_t i = 0; i < m_curves.size(); ++i)
-        m_curves[i]->setVisible(channels[i]);
-    ui->plot->replot();
-    */
+    for (std::size_t i = 0; i < m_series.size(); ++i)
+        m_series[i]->setVisible(channels[i]);
 }
 
 void LoggerForm::activeChanged(bool)
