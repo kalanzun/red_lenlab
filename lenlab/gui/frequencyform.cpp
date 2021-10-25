@@ -64,14 +64,6 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     ui->plot->setRenderHint(QPainter::Antialiasing);
 
     ui->scrollArea->setStyleSheet(stylesheet);
-
-    /*
-    QString x_label("Frequenz [Hz]");
-
-    QString y_label("Amplitude [dB]");
-
-    QString phase_label("Phase [°]");
-    */
 }
 
 FrequencyForm::~FrequencyForm()

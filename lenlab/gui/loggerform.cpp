@@ -51,12 +51,6 @@ LoggerForm::LoggerForm(QWidget * parent) :
     ui->plot->setRenderHint(QPainter::Antialiasing);
 
     ui->scrollArea->setStyleSheet(stylesheet);
-
-    /*
-    QString x_label("Zeit [s]");
-
-    QString y_label("Spannung [V]");
-    */
 }
 
 LoggerForm::~LoggerForm()

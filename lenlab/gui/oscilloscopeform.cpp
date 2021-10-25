@@ -48,12 +48,6 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     ui->plot->setRenderHint(QPainter::Antialiasing);
 
     ui->scrollArea->setStyleSheet(stylesheet);
-
-    /*
-    QString x_label("Zeit [ms]");
-
-    QString y_label("Spannung [V]");
-    */
 }
 
 OscilloscopeForm::~OscilloscopeForm()
