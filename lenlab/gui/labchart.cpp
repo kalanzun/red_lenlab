@@ -122,22 +122,18 @@ LabChart::print(QString filename)
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setPageSize(QPageSize::A6);
     printer.setPageOrientation(QPageLayout::Landscape);
-    // printer.setPageMargins(QMarginsF()); // TODO does not work
 
     QPrintDialog dialog = QPrintDialog(&printer);
     dialog.setWindowTitle("Print Plots");
     if (dialog.exec() != QDialog::Accepted)
         return;
 
-
     QPainter painter;
     painter.begin(&printer);
 
-    //painter.setViewport(printer.pageRect(QPrinter::DevicePixel).toRect()); // set device coordinates
     auto pageRect = printer.pageRect(QPrinter::Point);
-    //painter.setWindow(pageRect.toRect()); // set logical coordinates
-
     resize(pageRect.width(), pageRect.height());
+
     qreal scale = printer.resolution() / 72.0;
     painter.scale(scale, scale);
 
