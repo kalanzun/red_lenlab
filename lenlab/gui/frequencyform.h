@@ -19,11 +19,11 @@
 #ifndef GUI_FREQUENCYFORM_H
 #define GUI_FREQUENCYFORM_H
 
+#include "labchart.h"
 #include "mainwindow.h"
 #include "model/lenlab.h"
 
 #include <QWidget>
-#include <QtCharts>
 
 namespace gui {
 
@@ -43,11 +43,11 @@ class FrequencyForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Frequencysweep * m_frequencysweep = nullptr;
 
-    std::array< QLineSeries *, 2 > m_series; // pointer, no ownership
-
 public:
     explicit FrequencyForm(QWidget * parent = nullptr);
     ~FrequencyForm();
+
+    void prepareChart(LabChart *chart);
 
     void setMainWindow(MainWindow * main_window);
     void setModel(model::Lenlab * lenlab);

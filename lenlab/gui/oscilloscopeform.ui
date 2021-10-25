@@ -21,31 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="1">
-      <widget class="QChartView" name="plot"/>
-     </item>
-     <item row="0" column="0">
-      <widget class="VerticalLabel" name="label_4">
-       <property name="text">
-        <string>Spannung [V]</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Zeit [ms]</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="LabChart" name="labChart" native="true"/>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -89,7 +65,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>268</width>
+          <width>370</width>
           <height>543</height>
          </rect>
         </property>
@@ -181,14 +157,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QChartView</class>
-   <extends>QGraphicsView</extends>
-   <header>QtCharts</header>
-  </customwidget>
-  <customwidget>
-   <class>VerticalLabel</class>
-   <extends>QLabel</extends>
-   <header>verticallabel.h</header>
+   <class>LabChart</class>
+   <extends>QWidget</extends>
+   <header>labchart.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

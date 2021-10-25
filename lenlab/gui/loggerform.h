@@ -19,12 +19,13 @@
 #ifndef GUI_LOGGERFORM_H
 #define GUI_LOGGERFORM_H
 
+
+#include "labchart.h"
 #include "mainwindow.h"
 #include "model/lenlab.h"
 #include "model/series.h"
 
 #include <QWidget>
-#include <QtCharts>
 
 namespace gui {
 
@@ -44,11 +45,11 @@ class LoggerForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
 
-    std::array< QLineSeries *, 4 > m_series; // pointer, no ownership
-
 public:
     explicit LoggerForm(QWidget * parent = nullptr);
     ~LoggerForm();
+
+    void prepareChart(LabChart *chart);
 
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab * lenlab);

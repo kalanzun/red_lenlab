@@ -32,43 +32,52 @@ FrequencyForm::FrequencyForm(QWidget * parent)
 
     ui->setupUi(this);
 
-    QChart *chart = new QChart();
-    chart->legend()->hide();
+    prepareChart(ui->labChart);
 
-    QLogValueAxis *axisX = new QLogValueAxis();
-    chart->addAxis(axisX, Qt::AlignBottom);
+    auto series = ui->labChart->series();
 
-    for (size_t i = 0; i < m_series.size(); ++i) {
-        m_series[i] = new QLineSeries();
-        chart->addSeries(m_series[i]);
-        m_series[i]->attachAxis(axisX);
-        stylesheet += "#ch" + QString::number(i + 1) + "Label { color: "
-                + m_series[i]->color().name() + "; }\n";
-    }
-
+    stylesheet += "#ch1Label { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#ch2Label { color: "
+            + series.at(1)->color().name() + "; }\n";
     stylesheet += "#amplitudeLabel { color: "
-            + m_series[0]->color().name() + "; }\n";
-
+            + series.at(0)->color().name() + "; }\n";
     stylesheet += "#phaseLabel { color: "
-            + m_series[1]->color().name() + "; }\n";
+            + series.at(1)->color().name() + "; }\n";
 
-    QValueAxis *axisMag = new QValueAxis();
-    chart->addAxis(axisMag, Qt::AlignLeft);
-    m_series[0]->attachAxis(axisMag);
-
-    QValueAxis *axisAng = new QValueAxis();
-    chart->addAxis(axisAng, Qt::AlignRight);
-    m_series[1]->attachAxis(axisAng);
-
-    ui->plot->setChart(chart);
-    ui->plot->setRenderHint(QPainter::Antialiasing);
-
-    ui->scrollArea->setStyleSheet(stylesheet);
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 FrequencyForm::~FrequencyForm()
 {
     delete ui;
+}
+
+void
+FrequencyForm::prepareChart(LabChart *chart)
+{
+    chart->setLabelX("Frequenz [Hz]");
+    chart->setLabelY("Amplitude [dB]");
+    chart->setLabelY2("Phase [°]");
+
+    QLogValueAxis *axisX = new QLogValueAxis();
+    chart->addAxis(axisX, Qt::AlignBottom);
+
+    auto seriesMag = new QLineSeries();
+    chart->addSeries(seriesMag);
+    seriesMag->attachAxis(axisX);
+
+    QValueAxis *axisMag = new QValueAxis();
+    chart->addAxis(axisMag, Qt::AlignLeft);
+    seriesMag->attachAxis(axisMag);
+
+    auto seriesAng = new QLineSeries();
+    chart->addSeries(seriesAng);
+    seriesAng->attachAxis(axisX);
+
+    QValueAxis *axisAng = new QValueAxis();
+    chart->addAxis(axisAng, Qt::AlignRight);
+    seriesAng->attachAxis(axisAng);
 }
 
 void
@@ -151,36 +160,22 @@ FrequencyForm::save()
 void
 FrequencyForm::saveImage()
 {
-    /*
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "bode.pdf"); // it asks for the filename
-    */
+    LabChart chart = LabChart();
+    prepareChart(&chart);
+    chart.replace(m_frequencysweep->getSeries());
+    chart.print("bode.pdf");
 }
 
 void
 FrequencyForm::seriesUpdated(model::pSeries const & series)
 {
-    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
-        m_series[channel]->append(series->getLastX(), series->getLastY(channel + 1));
-    }
-
-    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
-    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(1), series->getMaxY(1));
-    ui->plot->chart()->axes(Qt::Vertical)[1]->setRange(series->getMinY(2), series->getMaxY(2));
+    ui->labChart->appendLast(series);
 }
 
 void
 FrequencyForm::seriesChanged(model::pSeries const & series)
 {
-    // a new measurement just started, series is empty
-
-    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
-        m_series[channel]->clear();
-    }
-
-    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
-    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(1), series->getMaxY(1));
-    ui->plot->chart()->axes(Qt::Vertical)[1]->setRange(series->getMinY(2), series->getMaxY(2));
+    ui->labChart->replace(series);
 }
 
 } // namespace gui

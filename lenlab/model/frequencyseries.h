@@ -36,13 +36,16 @@ class FrequencySeries : public Series
     static const std::size_t m_start_index = 34;
     static const std::size_t m_stop_index = 129;
 
-    static const std::size_t m_channels = 3;
+    static const std::size_t m_channels = 2;
     static const std::size_t m_length = m_stop_index - m_start_index;
 
     std::array< std::size_t, m_channels > index;
     std::array< double, m_channels > MinY;
     std::array< double, m_channels > MaxY;
     std::array< std::array< double, m_length >, m_channels > data;
+
+    std::size_t freq_index;
+    std::array< double, m_length > freq;
 
 public:
     FrequencySeries();
@@ -51,6 +54,7 @@ public:
     FrequencySeries & operator=(FrequencySeries const &) = delete;
 
     void append(std::size_t channel, double value);
+    void appendFrequency(double value);
 
     std::size_t getChannels() const;
     std::size_t getLength() const;

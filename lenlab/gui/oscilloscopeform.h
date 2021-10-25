@@ -19,12 +19,11 @@
 #ifndef GUI_OSCILLOSCOPEFORM_H
 #define GUI_OSCILLOSCOPEFORM_H
 
+#include "labchart.h"
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "model/series.h"
 
 #include <QWidget>
-#include <QtCharts>
 
 namespace gui {
 
@@ -48,11 +47,11 @@ class OscilloscopeForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Oscilloscope * m_oscilloscope = nullptr;
 
-    std::array<QLineSeries *, 2> m_series; // pointer, no ownership
-
 public:
     explicit OscilloscopeForm(QWidget  *parent = nullptr);
     ~OscilloscopeForm();
+
+    void prepareChart(LabChart *chart);
 
     void setMainWindow(MainWindow * main_window);
     void setModel(model::Lenlab * lenlab);

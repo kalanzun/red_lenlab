@@ -34,28 +34,34 @@ LoggerForm::LoggerForm(QWidget * parent) :
 
     ui->autoSaveCheckBox->setEnabled(false);
 
-    QChart *chart = new QChart();
-    chart->legend()->hide();
+    prepareChart(ui->labChart);
 
-    for (size_t i = 0; i < m_series.size(); ++i) {
-        m_series[i] = new QLineSeries();
-        chart->addSeries(m_series[i]);
+    auto series = ui->labChart->series();
+    for (unsigned int i = 0; i < series.size(); ++i) {
         stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
-                + m_series[i]->color().name() + "; }\n";
-        m_series[i]->setVisible(i == 0);
+                + series.at(i)->color().name() + "; }\n";
+        series.at(i)->setVisible(i == 0);
     }
 
-    chart->createDefaultAxes();
-
-    ui->plot->setChart(chart);
-    ui->plot->setRenderHint(QPainter::Antialiasing);
-
-    ui->scrollArea->setStyleSheet(stylesheet);
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 LoggerForm::~LoggerForm()
 {
     delete ui;
+}
+
+void
+LoggerForm::prepareChart(LabChart *chart)
+{
+    chart->setLabelX("Zeit [s]");
+    chart->setLabelY("Spannung [V]");
+
+    for (unsigned int i = 0; i < 4; ++i) {
+        chart->addSeries(new QLineSeries());
+    }
+
+    chart->createDefaultAxes();
 }
 
 void
@@ -175,10 +181,15 @@ LoggerForm::save()
 void
 LoggerForm::saveImage()
 {
-    /*
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "logger.pdf"); // it asks for the filename
-    */
+    LabChart chart = LabChart();
+    prepareChart(&chart);
+
+    auto channels = m_voltmeter->channels();
+    for (unsigned int i = 0; i < 4; ++i)
+        chart.setChannelVisible(i, channels[i]);
+
+    chart.replace(m_voltmeter->getSeries());
+    chart.print("logger.pdf");
 }
 
 void
@@ -239,8 +250,8 @@ LoggerForm::fileNameChanged(const QString &fileName)
 void
 LoggerForm::channelsChanged(const std::bitset<4> &channels)
 {
-    for (std::size_t i = 0; i < m_series.size(); ++i)
-        m_series[i]->setVisible(channels[i]);
+    for (unsigned int i = 0; i < 4; ++i)
+        ui->labChart->setChannelVisible(i, channels[i]);
 }
 
 void LoggerForm::activeChanged(bool)
@@ -261,27 +272,13 @@ LoggerForm::on_intervalComboBox_activated(int index)
 void
 LoggerForm::seriesChanged(model::pSeries const & series)
 {
-    QList< QPointF > points(series->getLength());
-
-    for (size_t channel = 0; channel < m_series.size(); ++channel) {
-        for (size_t i = 0; i < series->getLength(); ++i)
-            points[i] = QPointF(series->getX(i), series->getY(i, channel));
-
-        m_series[channel]->replace(points);
-    }
-
-    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
-    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(0), series->getMaxY(0));
+    ui->labChart->replace(series);
 }
 
 void
 LoggerForm::seriesUpdated(model::pSeries const & series)
 {
-    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
-        m_series[channel]->append(series->getLastX(), series->getLastY(channel));
-    }
-
-    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
+    ui->labChart->appendLast(series);
 }
 
 } // namespace gui

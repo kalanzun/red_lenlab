@@ -254,9 +254,9 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
 
     //qDebug() << "frequency" << index << f;
 
-    m_current->append(0, f);
-    m_current->append(1, value);
-    m_current->append(2, angle);
+    m_current->appendFrequency(f);
+    m_current->append(0, value);
+    m_current->append(1, angle);
 
     emit seriesUpdated(m_current);
 }
@@ -302,7 +302,7 @@ Frequencysweep::save(const QString &fileName)
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
     for (uint32_t i = 0; i < m_current->getLength(); i++) {
-        stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 1) << DELIMITER << m_current->getY(i, 2) << "\n";
+        stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 0) << DELIMITER << m_current->getY(i, 1) << "\n";
     }
 
     file.commit();

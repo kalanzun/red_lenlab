@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-QT       += widgets charts
+QT       += widgets charts printsupport
 
 TARGET = gui
 TEMPLATE = lib
@@ -33,6 +33,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 SOURCES += \
     frequencyform.cpp \
+    labchart.cpp \
     loggerform.cpp \
     mainwindow.cpp \
     oscilloscopeform.cpp \
@@ -41,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
     frequencyform.h \
+    labchart.h \
     loggerform.h \
     mainwindow.h \
     oscilloscopeform.h \
@@ -49,10 +51,11 @@ HEADERS += \
 
 FORMS += \
     frequencyform.ui \
+    labchart.ui \
     loggerform.ui \
     mainwindow.ui \
     oscilloscopeform.ui \
-    signalform.ui \
+    signalform.ui
 
 win32 {
     CONFIG(debug, debug|release) PRE_TARGETDEPS += ../model/debug/libmodel.a

@@ -21,6 +21,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QtPrintSupport/QtPrintSupport>
 
 namespace gui {
 
@@ -32,27 +33,34 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
 
     ui->setupUi(this);
 
-    QChart *chart = new QChart();
-    chart->legend()->hide();
+    prepareChart(ui->labChart);
 
-    for (size_t i = 0; i < m_series.size(); ++i) {
-        m_series[i] = new QLineSeries();
-        chart->addSeries(m_series[i]);
+    auto series = ui->labChart->series();
+    for (unsigned int i = 0; i < series.size(); ++i) {
         stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
-                + m_series[i]->color().name() + "; }\n";
+                + series.at(i)->color().name() + "; }\n";
+        series.at(i)->setVisible(i == 0);
     }
 
-    chart->createDefaultAxes();
-
-    ui->plot->setChart(chart);
-    ui->plot->setRenderHint(QPainter::Antialiasing);
-
-    ui->scrollArea->setStyleSheet(stylesheet);
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 OscilloscopeForm::~OscilloscopeForm()
 {
     delete ui;
+}
+
+void
+OscilloscopeForm::prepareChart(LabChart *chart)
+{
+    chart->setLabelX("Zeit [ms]");
+    chart->setLabelY("Spannung [V]");
+
+    for (unsigned int i = 0; i < 2; ++i) {
+        chart->addSeries(new QLineSeries());
+    }
+
+    chart->createDefaultAxes();
 }
 
 void
@@ -109,17 +117,7 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
-    QList< QPointF > points(series->getLength());
-
-    for (size_t channel = 0; channel < m_series.size(); ++channel) {
-        for (size_t i = 0; i < series->getLength(); ++i)
-            points[i] = QPointF(series->getX(i), series->getY(i, channel));
-
-        m_series[channel]->replace(points);
-    }
-
-    ui->plot->chart()->axes(Qt::Horizontal)[0]->setRange(series->getMinX(), series->getMaxX());
-    ui->plot->chart()->axes(Qt::Vertical)[0]->setRange(series->getMinY(0), series->getMaxY(0));
+    ui->labChart->replace(series);
 }
 
 void
@@ -131,13 +129,13 @@ OscilloscopeForm::on_samplerateBox_activated(int index)
 void
 OscilloscopeForm::on_ch1CheckBox_stateChanged(int state)
 {
-    m_series[0]->setVisible(state == Qt::Checked);
+    ui->labChart->setChannelVisible(0, state == Qt::Checked);
 }
 
 void
 OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
 {
-    m_series[1]->setVisible(state == Qt::Checked);
+    ui->labChart->setChannelVisible(1, state == Qt::Checked);
 }
 
 void
@@ -161,10 +159,12 @@ OscilloscopeForm::save()
 void
 OscilloscopeForm::saveImage()
 {
-    /*
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "oszilloskop.pdf"); // it asks for the filename
-    */
+    LabChart chart = LabChart();
+    prepareChart(&chart);
+    chart.setChannelVisible(0, ui->ch1CheckBox->checkState() == Qt::Checked);
+    chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);
+    chart.replace(m_oscilloscope->getSeries());
+    chart.print("oszilloskop.pdf");
 }
 
 void
