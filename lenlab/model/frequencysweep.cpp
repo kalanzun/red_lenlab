@@ -36,7 +36,7 @@ char const * const Frequencysweep::DELIMITER = ";";
 Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator)
     : Component(lenlab, board)
     , m_signalgenerator(signalgenerator)
-    , m_current(new FrequencySeries())
+    , m_current(new FrequencySeries)
 {
     connect(&m_signalgenerator, &Signalgenerator::succeeded,
             this, &Frequencysweep::on_signalgenerator_succeeded);

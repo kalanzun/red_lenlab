@@ -41,9 +41,9 @@ class Waveform : public Series
     // 18 packets a 504 samples
     std::array< std::array< double, 18*504 >, 2 > data;
 
-    double m_samplerate = 0;
+    double m_samplerate = 250e3;
     uint32_t m_trigger = 0;
-    uint32_t m_view = 0;
+    uint32_t m_view = 16*504; // das letzte Paket wird nie verwendet, 17 würden ausreichen
 
 public:
     explicit Waveform();

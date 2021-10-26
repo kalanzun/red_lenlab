@@ -25,8 +25,9 @@ namespace model {
 FrequencySeries::FrequencySeries()
     : Series()
     , index{0, 0}
-    , MinY{-1.0, -90.0}
-    , MaxY{1, 90}
+    , MinY{-10, -90}
+    , MaxY{10, 90}
+    , freq_index(0)
 {
 
 }
@@ -93,13 +94,13 @@ FrequencySeries::getLastY(std::size_t channel) const
 double
 FrequencySeries::getMinX() const
 {
-    return freq_index ? freq[0] : 1;
+    return 100;
 }
 
 double
 FrequencySeries::getMaxX() const
 {
-    return freq_index ? freq[freq_index - 1] : 1;
+    return 10000;
 }
 
 double

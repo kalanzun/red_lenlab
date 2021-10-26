@@ -61,24 +61,27 @@ FrequencyForm::prepareChart(LabChart *chart)
     chart->setLabelY2("Phase [°]");
 
     QLogValueAxis *axisX = new QLogValueAxis();
+    // Note: With kHz, from 0.1 kHz it has rounding issues and the max tick is missing
+    axisX->setBase(10);
+    axisX->setLabelFormat("%i");
     chart->addAxis(axisX, Qt::AlignBottom);
+
+    QValueAxis *axisM = new QValueAxis();
+    chart->addAxis(axisM, Qt::AlignLeft);
+
+    QValueAxis *axisPh = new QValueAxis();
+    chart->addAxis(axisPh, Qt::AlignRight);
 
     auto seriesM = new QLineSeries();
     seriesM->setName("Amplitude");
     chart->addSeries(seriesM);
     seriesM->attachAxis(axisX);
-
-    QValueAxis *axisM = new QValueAxis();
-    chart->addAxis(axisM, Qt::AlignLeft);
     seriesM->attachAxis(axisM);
 
     auto seriesPh = new QLineSeries();
     seriesPh->setName("Phase");
     chart->addSeries(seriesPh);
     seriesPh->attachAxis(axisX);
-
-    QValueAxis *axisPh = new QValueAxis();
-    chart->addAxis(axisPh, Qt::AlignRight);
     seriesPh->attachAxis(axisPh);
 }
 
@@ -98,6 +101,8 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
             this, &FrequencyForm::seriesChanged);
     connect(m_frequencysweep, &model::Frequencysweep::seriesUpdated,
             this, &FrequencyForm::seriesUpdated);
+
+    seriesChanged(m_frequencysweep->getSeries());
 
     connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
             this, &FrequencyForm::activeChanged);

@@ -31,7 +31,7 @@ char const * const Oscilloscope::DELIMITER = ";";
 
 Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
     : Component(lenlab, board)
-    , waveform(new Waveform())
+    , waveform(new Waveform)
     , samplerateIndex(3)
 {
     double value;
@@ -110,7 +110,7 @@ Oscilloscope::on_start()
         return;
     }
 
-    incoming.reset(new Waveform());
+    incoming.reset(new Waveform);
     incoming->setSamplerate(1e6/(1<<(samplerate+2)));
 
     QVector<uint32_t> args;
@@ -150,8 +150,6 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
             incoming->append(1, to_double(state1));
         }
     }
-
-    incoming->setView(504*16); // das letzte Paket wird nie verwendet, 17 würden ausreichen
 
     waveform.swap(incoming);
     emit seriesChanged(incoming);

@@ -81,6 +81,8 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
             this, &OscilloscopeForm::seriesChanged);
 
+    seriesChanged(m_oscilloscope->getSeries());
+
     connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
             this, &OscilloscopeForm::activeChanged);
     connect(&m_lenlab->frequencysweep, &model::Oscilloscope::activeChanged,
