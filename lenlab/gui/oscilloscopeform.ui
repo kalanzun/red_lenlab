@@ -104,9 +104,6 @@
              <property name="text">
               <string>2 (PD1)</string>
              </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
             </widget>
            </item>
           </layout>

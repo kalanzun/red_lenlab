@@ -17,19 +17,22 @@ class LabChart : public QWidget
     Q_OBJECT
 
     QPointer< QChart > m_chart;
-    QList< QPointer< QLineSeries > > m_curves;
+    QList< QPointer< QLineSeries > > m_series;
 
 public:
     explicit LabChart(QWidget *parent = nullptr);
     ~LabChart();
 
-    void addSeries(QLineSeries *series);
+    QPointer< QChart > chart() const;
     QList< QPointer< QLineSeries > > series() const;
-    void addAxis(QAbstractAxis *axis, Qt::Alignment alignment);
-    void createDefaultAxes();
+
     void setLabelX(QString text);
     void setLabelY(QString text);
     void setLabelY2(QString text);
+
+    void addSeries(QLineSeries *series);
+    void addAxis(QAbstractAxis *axis, Qt::Alignment alignment);
+    void createDefaultAxes();
 
     void replace(model::pSeries const & series);
     void appendLast(model::pSeries const & series);

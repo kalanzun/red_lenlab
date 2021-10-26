@@ -57,7 +57,9 @@ OscilloscopeForm::prepareChart(LabChart *chart)
     chart->setLabelY("Spannung [V]");
 
     for (unsigned int i = 0; i < 2; ++i) {
-        chart->addSeries(new QLineSeries());
+        auto series = new QLineSeries();
+        series->setName(QString("Kanal ") + QString::number(i + 1));
+        chart->addSeries(series);
     }
 
     chart->createDefaultAxes();
@@ -161,6 +163,7 @@ OscilloscopeForm::saveImage()
 {
     LabChart chart = LabChart();
     prepareChart(&chart);
+    chart.chart()->legend()->show();
     chart.setChannelVisible(0, ui->ch1CheckBox->checkState() == Qt::Checked);
     chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);
     chart.replace(m_oscilloscope->getSeries());

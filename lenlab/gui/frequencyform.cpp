@@ -40,7 +40,7 @@ FrequencyForm::FrequencyForm(QWidget * parent)
             + series.at(0)->color().name() + "; }\n";
     stylesheet += "#ch2Label { color: "
             + series.at(1)->color().name() + "; }\n";
-    stylesheet += "#amplitudeLabel { color: "
+    stylesheet += "#magnitudeLabel { color: "
             + series.at(0)->color().name() + "; }\n";
     stylesheet += "#phaseLabel { color: "
             + series.at(1)->color().name() + "; }\n";
@@ -63,21 +63,23 @@ FrequencyForm::prepareChart(LabChart *chart)
     QLogValueAxis *axisX = new QLogValueAxis();
     chart->addAxis(axisX, Qt::AlignBottom);
 
-    auto seriesMag = new QLineSeries();
-    chart->addSeries(seriesMag);
-    seriesMag->attachAxis(axisX);
+    auto seriesM = new QLineSeries();
+    seriesM->setName("Amplitude");
+    chart->addSeries(seriesM);
+    seriesM->attachAxis(axisX);
 
-    QValueAxis *axisMag = new QValueAxis();
-    chart->addAxis(axisMag, Qt::AlignLeft);
-    seriesMag->attachAxis(axisMag);
+    QValueAxis *axisM = new QValueAxis();
+    chart->addAxis(axisM, Qt::AlignLeft);
+    seriesM->attachAxis(axisM);
 
-    auto seriesAng = new QLineSeries();
-    chart->addSeries(seriesAng);
-    seriesAng->attachAxis(axisX);
+    auto seriesPh = new QLineSeries();
+    seriesPh->setName("Phase");
+    chart->addSeries(seriesPh);
+    seriesPh->attachAxis(axisX);
 
-    QValueAxis *axisAng = new QValueAxis();
-    chart->addAxis(axisAng, Qt::AlignRight);
-    seriesAng->attachAxis(axisAng);
+    QValueAxis *axisPh = new QValueAxis();
+    chart->addAxis(axisPh, Qt::AlignRight);
+    seriesPh->attachAxis(axisPh);
 }
 
 void
@@ -162,6 +164,7 @@ FrequencyForm::saveImage()
 {
     LabChart chart = LabChart();
     prepareChart(&chart);
+    chart.chart()->legend()->show();
     chart.replace(m_frequencysweep->getSeries());
     chart.print("bode.pdf");
 }

@@ -25,6 +25,18 @@ LabChart::~LabChart()
     delete ui;
 }
 
+QPointer< QChart >
+LabChart::chart() const
+{
+    return m_chart;
+}
+
+QList< QPointer< QLineSeries > >
+LabChart::series() const
+{
+    return m_series;
+}
+
 void
 LabChart::setLabelX(QString text)
 {
@@ -48,13 +60,7 @@ void
 LabChart::addSeries(QLineSeries *series)
 {
     m_chart->addSeries(series);
-    m_curves.append(series);
-}
-
-QList< QPointer< QLineSeries > >
-LabChart::series() const
-{
-    return m_curves;
+    m_series.append(series);
 }
 
 void
@@ -74,12 +80,12 @@ LabChart::replace(model::pSeries const & series)
 {
     QList< QPointF > points(series->getLength());
 
-    for (unsigned int channel = 0; channel < m_curves.size(); ++channel) {
+    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
         for (unsigned int i = 0; i < series->getLength(); ++i) {
             points[i] = QPointF(series->getX(i), series->getY(i, channel));
         }
 
-        m_curves.at(channel)->replace(points);
+        m_series.at(channel)->replace(points);
     }
 
     setRange(series);
@@ -88,8 +94,8 @@ LabChart::replace(model::pSeries const & series)
 void
 LabChart::appendLast(model::pSeries const & series)
 {
-    for (unsigned int channel = 0; channel < m_curves.size(); ++channel) {
-        m_curves.at(channel)->append(series->getLastX(), series->getLastY(channel));
+    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
+        m_series.at(channel)->append(series->getLastX(), series->getLastY(channel));
     }
 
     setRange(series);
@@ -109,9 +115,9 @@ LabChart::setRange(model::pSeries const & series)
 void
 LabChart::setChannelVisible(unsigned int channel, bool visible)
 {
-    Q_ASSERT(channel < m_curves.size());
+    Q_ASSERT(channel < m_series.size());
 
-    m_curves.at(channel)->setVisible(visible);
+    m_series.at(channel)->setVisible(visible);
 }
 
 void
@@ -120,7 +126,7 @@ LabChart::print(QString filename)
     QPrinter printer = QPrinter(QPrinter::HighResolution);
     printer.setOutputFileName(filename);
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setPageSize(QPageSize::A6);
+    printer.setPageSize(QPageSize::A5);
     printer.setPageOrientation(QPageLayout::Landscape);
 
     QPrintDialog dialog = QPrintDialog(&printer);
@@ -136,6 +142,8 @@ LabChart::print(QString filename)
 
     qreal scale = printer.resolution() / 72.0;
     painter.scale(scale, scale);
+
+    // it ignores page margins
 
     render(&painter);
 

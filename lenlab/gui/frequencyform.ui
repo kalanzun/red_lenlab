@@ -78,7 +78,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="amplitudeLabel">
+          <widget class="QLabel" name="magnitudeLabel">
            <property name="text">
             <string>Amplitude [dB]</string>
            </property>

@@ -58,7 +58,9 @@ LoggerForm::prepareChart(LabChart *chart)
     chart->setLabelY("Spannung [V]");
 
     for (unsigned int i = 0; i < 4; ++i) {
-        chart->addSeries(new QLineSeries());
+        auto series = new QLineSeries();
+        series->setName(QString("Kanal ") + QString::number(i + 1));
+        chart->addSeries(series);
     }
 
     chart->createDefaultAxes();
@@ -183,6 +185,7 @@ LoggerForm::saveImage()
 {
     LabChart chart = LabChart();
     prepareChart(&chart);
+    chart.chart()->legend()->show();
 
     auto channels = m_voltmeter->channels();
     for (unsigned int i = 0; i < 4; ++i)
