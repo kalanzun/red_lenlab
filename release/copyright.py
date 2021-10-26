@@ -1,5 +1,5 @@
 #  Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-#  Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+#  Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 """Update project files with the copyright statement of this file.
 
-Please update doc/conf.py and the /*.md files by hand.
+Please update doc/conf.py, the /*.md files, and the about dialog by hand.
 
 """
 
