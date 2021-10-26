@@ -24,7 +24,6 @@
 #include "lenlab_version.h"
 
 #include <QDebug>
-#include <QSaveFile>
 
 namespace model {
 
@@ -177,17 +176,8 @@ Oscilloscope::to_double(uint16_t state)
 }
 
 void
-Oscilloscope::save(const QString &fileName)
+Oscilloscope::save(QTextStream &stream)
 {
-    QSaveFile file(fileName);
-    //qDebug("save");
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        throw std::exception();
-    }
-
-    QTextStream stream(&file);
-
     stream << QString("Lenlab red %1.%2 Oszilloskop-Daten\n").arg(MAJOR).arg(MINOR);
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
@@ -195,8 +185,6 @@ Oscilloscope::save(const QString &fileName)
     for (std::size_t i = 0; i < waveform->getLength(); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
-
-    file.commit();
 }
 
 } // namespace model

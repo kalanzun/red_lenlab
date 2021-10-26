@@ -150,23 +150,38 @@ void FrequencyForm::activeChanged(bool)
 void
 FrequencyForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "bode.csv", tr("CSV (*.csv)"));
-    try {
-        m_frequencysweep->save(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "bode.csv", "CSV (*.csv)");
+
+    if (fileName.isEmpty()) {
+        return;
     }
-    catch (std::exception const &) {
-        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+
+    QSaveFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Speichern", QString("Fehler beim Speichern der Daten\n") + file.errorString());
+        return;
     }
+
+    QTextStream stream(&file);
+    m_frequencysweep->save(stream);
+    file.commit();
 }
 
 void
 FrequencyForm::saveImage()
 {
-    LabChart chart = LabChart();
+    QString fileName = QFileDialog::getSaveFileName(this, "Bild Speichern", "bode.pdf", "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    LabChart chart;
     prepareChart(&chart);
     chart.chart()->legend()->show();
     chart.replace(m_frequencysweep->getSeries());
-    chart.print("bode.pdf");
+    chart.print(fileName);
 }
 
 void

@@ -123,16 +123,16 @@ LabChart::setChannelVisible(unsigned int channel, bool visible)
 void
 LabChart::print(QString filename)
 {
+    // TODO switch to QPdfWriter
+
     QPrinter printer = QPrinter(QPrinter::HighResolution);
     printer.setOutputFileName(filename);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setPageSize(QPageSize::A5);
     printer.setPageOrientation(QPageLayout::Landscape);
+    printer.setPageMargins(QMarginsF(), QPageLayout::Point);
 
-    QPrintDialog dialog = QPrintDialog(&printer);
-    dialog.setWindowTitle("Print Plots");
-    if (dialog.exec() != QDialog::Accepted)
-        return;
+    // note: it does overwrite without question
 
     QPainter painter;
     painter.begin(&printer);
@@ -142,8 +142,6 @@ LabChart::print(QString filename)
 
     qreal scale = printer.resolution() / 72.0;
     painter.scale(scale, scale);
-
-    // it ignores page margins
 
     render(&painter);
 

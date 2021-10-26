@@ -24,6 +24,7 @@
 #include "indexparameter.h"
 
 #include <QObject>
+#include <QTextStream>
 #include <QTimer>
 
 namespace model {
@@ -66,7 +67,7 @@ public:
 
     void setSamplerate(uint32_t index);
 
-    void save(const QString &fileName);
+    void save(QTextStream &stream);
 
 private:
     static double to_double(uint16_t state);

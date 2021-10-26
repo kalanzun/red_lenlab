@@ -286,17 +286,8 @@ void Frequencysweep::reset()
 }
 
 void
-Frequencysweep::save(const QString &fileName)
+Frequencysweep::save(QTextStream &stream)
 {
-    QSaveFile file(fileName);
-    qDebug("save");
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        throw std::exception();
-    }
-
-    QTextStream stream(&file);
-
     stream << QString("Lenlab red %1.%2 Frequenzanalyse-Daten\n").arg(MAJOR).arg(MINOR);
 
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
@@ -304,8 +295,6 @@ Frequencysweep::save(const QString &fileName)
     for (uint32_t i = 0; i < m_current->getLength(); i++) {
         stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 0) << DELIMITER << m_current->getY(i, 1) << "\n";
     }
-
-    file.commit();
 }
 
 } // namespace model

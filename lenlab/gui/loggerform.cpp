@@ -19,8 +19,8 @@
 #include "loggerform.h"
 #include "ui_loggerform.h"
 
-#include <QMessageBox>
 #include <QFileDialog>
+#include <QMessageBox>
 
 namespace gui {
 
@@ -171,19 +171,37 @@ LoggerForm::on_saveButton_clicked()
 void
 LoggerForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "logger.csv", tr("CSV (*.csv)"));
-    try {
-        m_voltmeter->save(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "logger.csv", "CSV (*.csv)");
+
+    if (fileName.isEmpty()) {
+        return;
     }
-    catch (std::exception const &) {
-        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+
+    QSaveFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Speichern", QString("Fehler beim Speichern der Daten\n") + file.errorString());
+        return;
     }
+
+    m_voltmeter->setAutoSave(false);
+    m_voltmeter->setFileName(fileName);
+
+    QTextStream stream(&file);
+    m_voltmeter->save(stream);
+    file.commit();
 }
 
 void
 LoggerForm::saveImage()
 {
-    LabChart chart = LabChart();
+    QString fileName = QFileDialog::getSaveFileName(this, "Bild Speichern", "logger.pdf", "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    LabChart chart;
     prepareChart(&chart);
     chart.chart()->legend()->show();
 
@@ -192,7 +210,7 @@ LoggerForm::saveImage()
         chart.setChannelVisible(i, channels[i]);
 
     chart.replace(m_voltmeter->getSeries());
-    chart.print("logger.pdf");
+    chart.print(fileName);
 }
 
 void

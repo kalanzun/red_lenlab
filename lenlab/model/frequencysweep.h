@@ -25,6 +25,7 @@
 
 #include <QObject>
 #include <QSharedPointer>
+#include <QTextStream>
 #include <QTimer>
 
 namespace model {
@@ -72,7 +73,7 @@ public:
     virtual void stop();
     virtual void reset();
 
-    void save(const QString &fileName);
+    void save(QTextStream &stream);
 
 signals:
     void calculate(pOscilloscopeData);

@@ -21,7 +21,6 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QtPrintSupport/QtPrintSupport>
 
 namespace gui {
 
@@ -149,25 +148,40 @@ OscilloscopeForm::on_saveButton_clicked()
 void
 OscilloscopeForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "oszilloskop.csv", tr("CSV (*.csv)"));
-    try {
-        m_oscilloscope->save(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "oszilloskop.csv", "CSV (*.csv)");
+
+    if (fileName.isEmpty()) {
+        return;
     }
-    catch (std::exception const &) {
-        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+
+    QSaveFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Speichern", QString("Fehler beim Speichern der Daten\n") + file.errorString());
+        return;
     }
+
+    QTextStream stream(&file);
+    m_oscilloscope->save(stream);
+    file.commit();
 }
 
 void
 OscilloscopeForm::saveImage()
 {
-    LabChart chart = LabChart();
+    QString fileName = QFileDialog::getSaveFileName(this, "Bild Speichern", "oszilloskop.pdf", "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    LabChart chart;
     prepareChart(&chart);
     chart.chart()->legend()->show();
     chart.setChannelVisible(0, ui->ch1CheckBox->checkState() == Qt::Checked);
     chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);
     chart.replace(m_oscilloscope->getSeries());
-    chart.print("oszilloskop.pdf");
+    chart.print(fileName);
 }
 
 void

@@ -20,8 +20,8 @@
 #include "ui_mainwindow.h"
 #include "lenlab_version.h"
 
-#include <QMessageBox>
 #include <QFileDialog>
+#include <QMessageBox>
 
 namespace gui {
 

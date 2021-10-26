@@ -262,27 +262,9 @@ Voltmeter::clear()
 }
 
 void
-Voltmeter::save(const QString &fileName)
+Voltmeter::save(QTextStream &stream)
 {
-    setAutoSave(false);
-    setFileName(fileName);
-    do_save();
-}
-
-void
-Voltmeter::do_save()
-{
-    QSaveFile file(mFileName);
-    qDebug("save");
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        throw std::exception();
-    }
-
-    QTextStream stream(&file);
-
     stream << QString("Lenlab red %1.%2 Voltmeter-Daten\n").arg(MAJOR).arg(MINOR);
-
 
     stream << "Zeit";
 
@@ -303,8 +285,6 @@ Voltmeter::do_save()
         }
         stream << "\n";
     }
-
-    file.commit();
 }
 
 void
@@ -347,14 +327,19 @@ void
 Voltmeter::on_autosave()
 {
     if (mUnsavedData) {
-        try {
-            do_save();
-            setUnsavedData(false);
-        }
-        catch (std::exception const &) {
+        QSaveFile file(mFileName);
+
+        if (!file.open(QIODevice::WriteOnly)) {
             setAutoSave(false);
-            qDebug("Voltmeter: Fehler beim automatischen Speichern."); // TODO error signal and include reason
+            emit mLenlab.logMessage(QString("Voltmeter: Fehler beim automatischen Speichern. ") + file.errorString());
+            return;
         }
+
+        QTextStream stream(&file);
+        save(stream);
+        file.commit();
+
+        setUnsavedData(false);
     }
 }
 

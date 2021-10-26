@@ -23,7 +23,7 @@
 #include "labchart.h"
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "model/series.h"
+//#include "model/series.h"
 
 #include <QWidget>
 
