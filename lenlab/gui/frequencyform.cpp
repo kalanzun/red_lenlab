@@ -63,7 +63,7 @@ FrequencyForm::prepareChart(LabChart *chart)
     QLogValueAxis *axisX = new QLogValueAxis();
     // Note: With kHz, from 0.1 kHz it has rounding issues and the max tick is missing
     axisX->setBase(10);
-    axisX->setLabelFormat("%i");
+    axisX->setLabelFormat("%g");
     chart->addAxis(axisX, Qt::AlignBottom);
 
     QValueAxis *axisM = new QValueAxis();

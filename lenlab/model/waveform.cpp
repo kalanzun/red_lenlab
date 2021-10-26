@@ -103,13 +103,13 @@ Waveform::getY(std::size_t i, std::size_t channel) const
 double
 Waveform::getMinX() const
 {
-    return static_cast< double >(static_cast< int >(m_view) / -2) / m_samplerate * 1000;
+    return std::round(static_cast< double >(static_cast< int >(m_view) / -2) / m_samplerate * 1000);
 }
 
 double
 Waveform::getMaxX() const
 {
-    return static_cast< double >(static_cast< int >(m_view) / 2) / m_samplerate * 1000;
+    return std::round(static_cast< double >(static_cast< int >(m_view) / 2) / m_samplerate * 1000);
 }
 
 double

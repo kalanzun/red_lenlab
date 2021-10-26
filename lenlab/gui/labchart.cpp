@@ -73,6 +73,7 @@ void
 LabChart::createDefaultAxes()
 {
     m_chart->createDefaultAxes();
+    qobject_cast< QValueAxis * >(m_chart->axes(Qt::Horizontal).at(0))->setLabelFormat("%g");
 }
 
 void
