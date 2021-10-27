@@ -35,14 +35,14 @@ class LabChart : public QWidget
     Q_OBJECT
 
     QPointer< QChart > m_chart;
-    QList< QPointer< QLineSeries > > m_series;
+    QVector< QPointer< QLineSeries > > m_series;
 
 public:
     explicit LabChart(QWidget *parent = nullptr);
     ~LabChart();
 
     QPointer< QChart > chart() const;
-    QList< QPointer< QLineSeries > > series() const;
+    QVector< QPointer< QLineSeries > > series() const;
 
     void setLabelX(QString text);
     void setLabelY(QString text);

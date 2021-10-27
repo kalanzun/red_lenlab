@@ -49,7 +49,7 @@ LabChart::chart() const
     return m_chart;
 }
 
-QList< QPointer< QLineSeries > >
+QVector< QPointer< QLineSeries > >
 LabChart::series() const
 {
     return m_series;
@@ -97,7 +97,7 @@ LabChart::createDefaultAxes()
 void
 LabChart::replace(model::pSeries const & series)
 {
-    QList< QPointF > points(series->getLength());
+    QVector< QPointF > points(series->getLength());
 
     for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
         for (unsigned int i = 0; i < series->getLength(); ++i) {
