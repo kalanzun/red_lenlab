@@ -20,7 +20,6 @@
 #include "ui_labchart.h"
 
 #include <QtCharts>
-#include <QtPrintSupport/QtPrintSupport>
 
 namespace gui {
 
@@ -142,8 +141,12 @@ LabChart::setChannelVisible(unsigned int channel, bool visible)
 void
 LabChart::print(QString filename)
 {
-    // TODO switch to QPdfWriter
+    QPdfWriter writer(filename);
+    writer.setPageSize(QPageSize(QPageSize::A5));
+    writer.setPageOrientation(QPageLayout::Orientation::Landscape);
+    writer.setPageMargins(QMarginsF());
 
+    /*
     QPrinter printer = QPrinter(QPrinter::HighResolution);
     printer.setOutputFileName(filename);
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -152,14 +155,20 @@ LabChart::print(QString filename)
     printer.setPageMargins(QMarginsF(), QPageLayout::Point);
 
     // note: it does overwrite without question
+    */
 
     QPainter painter;
+    painter.begin(&writer);
+    /*
+    QPainter painter;
     painter.begin(&printer);
+    */
 
-    auto pageRect = printer.pageRect(QPrinter::Point);
+    //auto pageRect = printer.pageRect(QPrinter::Point);
+    auto pageRect = writer.pageLayout().paintRectPoints();
     resize(pageRect.width(), pageRect.height());
 
-    qreal scale = printer.resolution() / 72.0;
+    qreal scale = writer.resolution() / 72.0;
     painter.scale(scale, scale);
 
     render(&painter);
