@@ -20,6 +20,8 @@ DEFINES *= QT_USE_QSTRINGBUILDER
 
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT
 
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
+
 INCLUDEPATH += ../../lenlab ../../include
 
 unix {
@@ -55,5 +57,5 @@ win32 {
 
     # libusb
     INCLUDEPATH += $$PWD/libusb/include/libusb-1.0
-    LIBS += -L$$PWD/libusb/MinGW32/dll/ -llibusb-1.0
+    LIBS += -L$$PWD/libusb/MinGW64/dll/ -llibusb-1.0
 }

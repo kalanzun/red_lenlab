@@ -5,7 +5,6 @@ This file describes the build environment on the build servers for release build
 ## Dependencies
 
 - Qt (and MinGW on Windows)
-- qwt
 - libusb
 - Python (for the build scripts) and Sphinx (for the documentation)
 - TI Code Composer Studio
@@ -21,16 +20,15 @@ This file describes the build environment on the build servers for release build
 
 Build environment configuration in `.appveyor.yml`
 
-Virtual Machine Image: Visual Studio 2015
+Virtual Machine Image: Visual Studio 2019
 
 Note: We use the MinGW compiler of the Qt package
 
 Third party software download and install in `build.py`. The versions are defined there.
 
-- Qt: Latest and MinGW 7.3.0 32 bit compiler
-- qwt: Own build from source, version 6.1.4, hard coded in `build.py`
+- Qt: 6.2.0 and MinGW 8.1.0 64 bit compiler
 - libusb: Binary download from project home http://libusb.info (SourceForge), version 1.0.22, hard coded in `build.py`
-- Python: Build environment default is version 2.7.16
+- Python: Build environment default
 
 ### Linux
 
@@ -67,46 +65,12 @@ Download and run windows Installer
 
 https://qt.io/download-open-source/
 
-Note: Open source version - you may skip account creation
-
 Select
 
-* Qt / MinGW 7.3.0 32 bit
-* Tools / MinGW 7.3.0 32 bit
+* Design Tools
+* Qt for dektop development
 
 To build and run lenlab or the tests, open `red_lenlab.pro` in Qt Creator and click the play button (after installing the rest of the dependencies).
-
-#### qwt
-
-Download windows source files (the zip archive)
-
-https://sourceforge.net/projects/qwt/files/qwt/
-
-Start Menu -> Qt -> MinGW 7.3.0 32 bit Command Prompt
-
-qwt will install to C:\Qwt-$VERSION by default
-
-Installation instructions: http://qwt.sourceforge.net/qwtinstall.html
-
-- unzip
-
-- cd qwt-$VERSION
-
-- qmake qwt.pro
-
-- mingw32-make -j4
-
-- mingw32-make install
-
-**register qwt with the qt build system**
-
-`qmake -set QMAKEFEATURES C:\Qwt-$VERSION\features`
-
-This allows the project file to get all build settings with `CONFIG += qwt`.
-
-For running lenlab, Qt Creator additionally needs the library paths. The Qwt path to run lenlab in Qt Creator is hard coded in `lenlab.pro`.
-
-You may delete the source directory after installing.
 
 #### libusb
 
@@ -132,7 +96,7 @@ https://www.anaconda.com/download/
 
 ### Linux
 
-Lenlab builds should work with the default development packages of qt5, qwt and libusb and default compiler of the distribution.
+Lenlab builds should work with the default development packages of qt6 and libusb and default compiler of the distribution.
 
 ### Raspberry Pi 4
 

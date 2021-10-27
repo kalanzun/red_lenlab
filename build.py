@@ -18,32 +18,16 @@ import os
 import re
 import shutil
 from subprocess import call as run
+import sys
 
 
 def build_osx(env):
-    # detect qwt version
-    contents = os.listdir("/usr/local/Cellar/qwt")
-    assert len(contents) == 1
-    qwt_version = contents[0]
-
-    # qwt config uses this (false) include path
-    run(
-        [
-            "ln",
-            "-s",
-            "/usr/local/lib/qwt.framework/Headers",
-            "/usr/local/Cellar/qwt/" + qwt_version + "/include",
-        ]
-    )
-
-    env["PATH"] = "/usr/local/opt/qt5/bin:" + env["PATH"]
-
-    run(["qmake", "-set", "QMAKEFEATURES", "/usr/local/opt/qwt/features"], env=env)
+    env["PATH"] = env["HOME"] + r"/Qt/6.1/macos/bin:" + env["PATH"]
 
     run(["qmake", "red_lenlab.pro"], env=env)
     run(["make"], env=env)
 
-    tag = env["TRAVIS_TAG"]
+    tag = env["APPVEYOR_REPO_TAG_NAME"]
 
     os.mkdir("build")
     run(["cp", "-r", "lenlab/app/lenlab.app", "build/"])
@@ -72,49 +56,51 @@ def build_osx(env):
 
 
 def build_linux(env):
-    run(["qmake", "red_lenlab.pro"])
+    env["PATH"] = env["HOME"] + r"/Qt/5.15/gcc_64/bin:" + env["PATH"]
+    # there is a Qt6, but it did not work because glibc is too old
+
+    run(["sudo", "apt-get", "update"])
+    run(["sudo", "apt-get", "install", "-y", "libusb-1.0-0-dev"])
+
+    run(["qmake", "red_lenlab.pro"], env=env)
     run(["make"])
 
-    tag = env["TRAVIS_TAG"]
-    arch = env["TRAVIS_CPU_ARCH"]
+    tag = env["APPVEYOR_REPO_TAG_NAME"]
 
-    if arch == "amd64":
-        run(
-            [
-                "wget",
-                "-c",
-                "-nv",
-                "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage",
-            ]
-        )
-        run(["chmod", "a+x", "linuxdeployqt-continuous-x86_64.AppImage"])
+    run(
+        [
+            "wget",
+            "-c",
+            "-nv",
+            "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage",
+        ]
+    )
+    run(["chmod", "a+x", "linuxdeployqt-continuous-x86_64.AppImage"])
 
-        os.makedirs("build/usr/share/applications")
-        run(["cp", "linux/lenlab.desktop", "build/usr/share/applications/"])
+    os.makedirs("build/usr/share/applications")
+    run(["cp", "linux/lenlab.desktop", "build/usr/share/applications/"])
 
-        os.makedirs("build/usr/share/icons/hicolor/scaleable/")
-        run(["cp", "linux/lenlab.svg", "build/usr/share/icons/hicolor/scaleable/"])
+    os.makedirs("build/usr/share/icons/hicolor/scaleable/")
+    run(["cp", "linux/lenlab.svg", "build/usr/share/icons/hicolor/scaleable/"])
 
-        os.makedirs("build/usr/bin")
-        run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
+    os.makedirs("build/usr/bin")
+    run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
 
-        # linuxdeployqt uses VERSION environment variable for the filename
-        env["VERSION"] = tag + "-linux"
-        run(
-            [
-                "./linuxdeployqt-continuous-x86_64.AppImage",
-                "build/usr/share/applications/lenlab.desktop",
-                "-appimage",
-            ],
-            env=env,
-        )
-
-    if arch == "arm64":
-        release_name = "Lenlab-" + tag + "-linux-arm64"
-        shutil.copy("lenlab/app/lenlab", release_name)
+    # linuxdeployqt uses VERSION environment variable for the filename
+    env["VERSION"] = tag + "-linux"
+    run(
+        [
+            "./linuxdeployqt-continuous-x86_64.AppImage",
+            "build/usr/share/applications/lenlab.desktop",
+            "-appimage",
+        ],
+        env=env,
+    )
 
 
 def build_windows(env):
+    env["PATH"] = r"C:\Qt\6.2\mingw81_64\bin;C:\Qt\Tools\mingw810_64\bin;" + env["PATH"]
+
     run(
         [
             "appveyor",
@@ -123,34 +109,17 @@ def build_windows(env):
         ]
     )
     os.mkdir("libusb")
-    run(["7z", "x", r"..\libusb-1.0.24.7z"], cwd="libusb")
+    run(["7z", "x", r"..\\libusb-1.0.24.7z"], cwd="libusb")
 
-    if not os.path.exists(r"C:\Qwt-6.1.5\features"):
-        run(
-            [
-                "appveyor",
-                "DownloadFile",
-                "https://sourceforge.net/projects/qwt/files/qwt/6.1.6/qwt-6.1.6.tar.bz2",
-            ]
-        )
-        run(["7z", "x", "qwt-6.1.6.tar.bz2"])
-        run(["7z", "x", "qwt-6.1.6.tar"])
-        run(["qmake", "qwt.pro"], cwd="qwt-6.1.6")
-        run(["mingw32-make"], cwd="qwt-6.1.6")
-        run(["mingw32-make", "install"], cwd="qwt-6.1.6")
-
-    run(["qmake", "-set", "QMAKEFEATURES", r"C:\Qwt-6.1.6\features"])
-    # Note: This path is also in .appveyor.yml, in an environment variable QWTDIR
-
-    run(["qmake", "red_lenlab.pro"])
-    run(["mingw32-make"])
+    run(["qmake", "red_lenlab.pro"], env=env, shell=True)
+    run(["mingw32-make"], env=env, shell=True)
 
     tag = env["APPVEYOR_REPO_TAG_NAME"]
     result = re.compile(r"(\d)\.(\d)").match(tag)
     major = int(result.group(1))
     minor = int(result.group(2))
 
-    release_dir_name = "Lenlab-" + tag + "-win32"
+    release_dir_name = "Lenlab-" + tag + "-win64"
 
     os.makedirs(release_dir_name + "/lenlab")
 
@@ -158,15 +127,14 @@ def build_windows(env):
         "lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe"
     )
     shutil.copy(
-        "libusb/MinGW32/dll/libusb-1.0.dll", release_dir_name + "/lenlab/libusb-1.0.dll"
-    )
-    shutil.copy(
-        os.environ["QWTDIR"] + "/lib/qwt.dll", release_dir_name + "/lenlab/qwt.dll"
+        "libusb/MinGW64/dll/libusb-1.0.dll", release_dir_name + "/lenlab/libusb-1.0.dll"
     )
 
     run(
         ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
         cwd=release_dir_name + "/lenlab",
+        env=env,
+        shell=True,
     )
 
     # Readme and License
@@ -205,18 +173,11 @@ def build_windows(env):
 def main():
     env = dict(os.environ)
 
-    if "TRAVIS_OS_NAME" in env:
-        os_name = os.environ["TRAVIS_OS_NAME"]
-    elif "APPVEYOR" in env:
-        os_name = "windows"
-    else:
-        raise ValueError("Unknown CI service")
-
-    if os_name == "linux":
+    if sys.platform.startswith("linux"):
         build_linux(env)
-    elif os_name == "osx":
+    elif sys.platform.startswith("darwin"):
         build_osx(env)
-    elif os_name == "windows":
+    elif sys.platform.startswith("win32"):
         build_windows(env)
     else:
         raise ValueError("Unknown operating system")
