@@ -4,3 +4,4 @@ libusb/
 .ipynb_checkpoints/
 red_lenlab.pro.user
 .idea/
+lenlab_flash/red_firmware.out
