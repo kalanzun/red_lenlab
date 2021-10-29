@@ -20,6 +20,7 @@
 #include "ui_labchart.h"
 
 #include <QtCharts>
+#include <QtPrintSupport/QtPrintSupport>
 
 namespace gui {
 
@@ -141,34 +142,34 @@ LabChart::setChannelVisible(unsigned int channel, bool visible)
 void
 LabChart::print(QString filename)
 {
+    // QPdfWriter creates a vector graphic
+    // The legend does not work with QPdfWriter
+    /*
     QPdfWriter writer(filename);
     writer.setPageSize(QPageSize(QPageSize::A5));
     writer.setPageOrientation(QPageLayout::Orientation::Landscape);
     writer.setPageMargins(QMarginsF());
+    */
 
-    /*
-    QPrinter printer = QPrinter(QPrinter::HighResolution);
+    // QPrinter creates pixel art
+    QPrinter printer;
     printer.setOutputFileName(filename);
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setPageSize(QPageSize::A5);
+    printer.setPageSize(QPageSize(QPageSize::A5));
     printer.setPageOrientation(QPageLayout::Landscape);
     printer.setPageMargins(QMarginsF(), QPageLayout::Point);
-
-    // note: it does overwrite without question
-    */
+    printer.setResolution(300); // dpi
 
     QPainter painter;
-    painter.begin(&writer);
-    /*
-    QPainter painter;
+    //painter.begin(&writer);
     painter.begin(&printer);
-    */
 
-    //auto pageRect = printer.pageRect(QPrinter::Point);
-    auto pageRect = writer.pageLayout().paintRectPoints();
+    auto pageRect = printer.pageRect(QPrinter::Point);
+    //auto pageRect = writer.pageLayout().paintRectPoints();
     resize(pageRect.width(), pageRect.height());
 
-    qreal scale = writer.resolution() / 72.0;
+    qreal scale = printer.resolution() / 72.0;
+    //qreal scale = writer.resolution() / 72.0;
     painter.scale(scale, scale);
 
     render(&painter);
