@@ -33,7 +33,7 @@ Series::getLastX() const
 }
 
 double
-Series::getLastY(std::size_t channel) const
+Series::getLastY(int channel) const
 {
     Q_UNUSED(channel);
 

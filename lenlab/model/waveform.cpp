@@ -42,60 +42,60 @@ Waveform::samplerate()
 }
 
 void
-Waveform::setTrigger(uint32_t trigger)
+Waveform::setTrigger(unsigned int trigger)
 {
     m_trigger = trigger;
 }
 
-uint32_t
+unsigned int
 Waveform::trigger()
 {
     return m_trigger;
 }
 
 void
-Waveform::setView(uint32_t view)
+Waveform::setView(unsigned int view)
 {
-    Q_ASSERT(view + m_trigger < data.at(0).size());
+    Q_ASSERT(view + m_trigger < m_length);
     m_view = view;
 }
 
-uint32_t
+unsigned int
 Waveform::view()
 {
     return m_view;
 }
 
 void
-Waveform::append(std::size_t channel, double value)
+Waveform::append(int channel, double value)
 {
-    Q_ASSERT(channel < index.size());
-    Q_ASSERT(index[channel] < data[channel].size());
+    Q_ASSERT(channel < m_channels);
+    Q_ASSERT(index[channel] < m_length);
     data[channel][index[channel]++] = value;
 }
 
-std::size_t
+int
 Waveform::getChannels() const
 {
-    return data.size();
+    return m_channels;
 }
 
-std::size_t
+int
 Waveform::getLength() const
 {
     return m_view;
 }
 
 double
-Waveform::getX(std::size_t i) const
+Waveform::getX(int i) const
 {
     return static_cast< double >((static_cast< int >(m_view) / -2) + static_cast< int >(i)) / m_samplerate * 1000;
 }
 
 double
-Waveform::getY(std::size_t i, std::size_t channel) const
+Waveform::getY(int i, int channel) const
 {
-    Q_ASSERT(channel < data.size());
+    Q_ASSERT(channel < m_channels);
     Q_ASSERT(m_trigger + i < data[channel].size());
     return data[channel][m_trigger + i];
 }
@@ -113,13 +113,13 @@ Waveform::getMaxX() const
 }
 
 double
-Waveform::getMinY(std::size_t) const
+Waveform::getMinY(int) const
 {
     return -2;
 }
 
 double
-Waveform::getMaxY(std::size_t) const
+Waveform::getMaxY(int) const
 {
     return 2;
 }

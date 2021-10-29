@@ -27,13 +27,12 @@ FrequencySeries::FrequencySeries()
     , index{0, 0}
     , MinY{-10, -90}
     , MaxY{10, 90}
-    , freq_index(0)
 {
 
 }
 
 void
-FrequencySeries::append(std::size_t channel, double value)
+FrequencySeries::append(int channel, double value)
 {
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(index[channel] < m_length);
@@ -49,27 +48,27 @@ FrequencySeries::appendFrequency(double value)
     freq[freq_index++] = value;
 }
 
-std::size_t
+int
 FrequencySeries::getChannels() const
 {
     return m_channels;
 }
 
-std::size_t
+int
 FrequencySeries::getLength() const
 {
     return freq_index;
 }
 
 double
-FrequencySeries::getX(std::size_t i) const
+FrequencySeries::getX(int i) const
 {
     Q_ASSERT(i < m_length);
     return freq[i];
 }
 
 double
-FrequencySeries::getY(std::size_t i, std::size_t channel) const
+FrequencySeries::getY(int i, int channel) const
 {
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(i < m_length);
@@ -84,7 +83,7 @@ FrequencySeries::getLastX() const
 }
 
 double
-FrequencySeries::getLastY(std::size_t channel) const
+FrequencySeries::getLastY(int channel) const
 {
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(index[channel]);
@@ -104,26 +103,26 @@ FrequencySeries::getMaxX() const
 }
 
 double
-FrequencySeries::getMinY(std::size_t channel) const
+FrequencySeries::getMinY(int channel) const
 {
     Q_ASSERT(channel < m_channels);
     return MinY[channel];
 }
 
 double
-FrequencySeries::getMaxY(std::size_t channel) const
+FrequencySeries::getMaxY(int channel) const
 {
     Q_ASSERT(channel < m_channels);
     return MaxY[channel];
 }
 
-std::size_t
+int
 FrequencySeries::startIndex() const
 {
     return m_start_index;
 }
 
-std::size_t
+int
 FrequencySeries::stopIndex() const
 {
     return m_stop_index;

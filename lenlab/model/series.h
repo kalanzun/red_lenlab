@@ -34,21 +34,21 @@ public:
 
     Series & operator=(Series const &) = delete;
 
-    virtual void append(std::size_t channel, double value) = 0;
+    virtual void append(int channel, double value) = 0;
 
-    virtual std::size_t getChannels() const = 0;
-    virtual std::size_t getLength() const = 0;
+    virtual int getChannels() const = 0;
+    virtual int getLength() const = 0;
 
-    virtual double getX(std::size_t i) const = 0;
-    virtual double getY(std::size_t i, std::size_t channel) const = 0;
+    virtual double getX(int i) const = 0;
+    virtual double getY(int i, int channel) const = 0;
 
     virtual double getLastX() const;
-    virtual double getLastY(std::size_t channel) const;
+    virtual double getLastY(int channel) const;
 
     virtual double getMinX() const = 0;
     virtual double getMaxX() const = 0;
-    virtual double getMinY(std::size_t channel) const = 0;
-    virtual double getMaxY(std::size_t channel) const = 0;
+    virtual double getMinY(int channel) const = 0;
+    virtual double getMaxY(int channel) const = 0;
 };
 
 typedef QSharedPointer<Series> pSeries;

@@ -37,7 +37,7 @@ LoggerForm::LoggerForm(QWidget * parent) :
     prepareChart(ui->labChart);
 
     auto series = ui->labChart->series();
-    for (unsigned int i = 0; i < series.size(); ++i) {
+    for (int i = 0; i < series.size(); ++i) {
         stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
                 + series.at(i)->color().name() + "; }\n";
         series.at(i)->setVisible(i == 0);

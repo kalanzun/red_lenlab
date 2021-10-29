@@ -99,8 +99,8 @@ LabChart::replace(model::pSeries const & series)
 {
     QVector< QPointF > points(series->getLength());
 
-    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
-        for (unsigned int i = 0; i < series->getLength(); ++i) {
+    for (int channel = 0; channel < m_series.size(); ++channel) {
+        for (int i = 0; i < series->getLength(); ++i) {
             points[i] = QPointF(series->getX(i), series->getY(i, channel));
         }
 
@@ -113,7 +113,7 @@ LabChart::replace(model::pSeries const & series)
 void
 LabChart::appendLast(model::pSeries const & series)
 {
-    for (unsigned int channel = 0; channel < m_series.size(); ++channel) {
+    for (int channel = 0; channel < m_series.size(); ++channel) {
         m_series.at(channel)->append(series->getLastX(), series->getLastY(channel));
     }
 
@@ -132,7 +132,7 @@ LabChart::setRange(model::pSeries const & series)
 }
 
 void
-LabChart::setChannelVisible(unsigned int channel, bool visible)
+LabChart::setChannelVisible(int channel, bool visible)
 {
     Q_ASSERT(channel < m_series.size());
 

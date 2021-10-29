@@ -39,6 +39,7 @@ class Frequencysweep : public Component
 
     static char const * const DELIMITER;
 
+    static int const m_length = 5040;
     static int const m_channels = 2;
     static int const m_uint16_offset = 6;
 
@@ -48,15 +49,15 @@ class Frequencysweep : public Component
     Signalgenerator & m_signalgenerator;
     QSharedPointer<FrequencySeries> m_current;
 
-    std::size_t m_index;
-    uint32_t m_samplerate;
+    int m_index;
+    unsigned int m_samplerate;
     int m_error_counter;
     int m_signalgenerator_error_counter;
 
     QTimer stepTimer;
 
 public:
-    typedef std::array< std::array < double, 5040 >, m_channels > OscilloscopeData;
+    typedef std::array< std::array < double, m_length >, m_channels > OscilloscopeData;
     typedef QSharedPointer< OscilloscopeData > pOscilloscopeData;
 
     explicit Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalgenerator & signalgenerator);

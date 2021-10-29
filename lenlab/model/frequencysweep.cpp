@@ -170,7 +170,7 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
 
     if (!mActive) return;
 
-    std::array< std::size_t, m_channels > index = {0};
+    std::array< int, m_channels > index = {0};
     pOscilloscopeData waveform(new OscilloscopeData());
 
     for (auto reply: task->getReplies()) {
@@ -182,14 +182,14 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
 
         Q_ASSERT(channel < m_channels);
 
-        for (std::size_t i = 0; i < reply->getUInt16BufferLength() - m_uint16_offset; ++i) {
-            Q_ASSERT(index[channel] < waveform->at(channel).size());
+        for (int i = 0; i < reply->getUInt16BufferLength() - m_uint16_offset; ++i) {
+            Q_ASSERT(index[channel] < m_length);
             waveform->at(channel).at(index[channel]) = (static_cast< double >(data[i] >> 2) / 1024.0 - 0.5) * 3.3;
             ++index[channel];
         }
     }
 
-    if (!(index[0] == waveform->at(0).size() && index[1] == waveform->at(1).size())) {
+    if (!(index[0] == m_length && index[1] == m_length)) {
         if (m_error_counter < 3) {
             emit mLenlab.logMessage("Unvollständige Daten empfangen. Wiederhole.");
             ++m_error_counter;
@@ -236,7 +236,7 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
     sum0 = 0;
     sum1 = 0;
 
-    for (std::size_t i = 0; i < waveform->at(0).size(); ++i) {
+    for (int i = 0; i < m_length; ++i) {
         //x = 2 * pi * f * 1e-6 * (1<<samplerate) * ((double) i - (waveform->at(0).size() / 2));
         x = 2 * pi * f * 1e-6 * static_cast< double >(i);
         y = std::sin(x) + j * std::cos(x);
@@ -292,7 +292,7 @@ Frequencysweep::save(QTextStream &stream)
 
     stream << "Frequenz" << DELIMITER << "Amplitude" << DELIMITER << "Phase" << "\n";
 
-    for (uint32_t i = 0; i < m_current->getLength(); i++) {
+    for (int i = 0; i < m_current->getLength(); i++) {
         stream << m_current->getX(i) << DELIMITER << m_current->getY(i, 0) << DELIMITER << m_current->getY(i, 1) << "\n";
     }
 }

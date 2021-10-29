@@ -37,13 +37,16 @@ class Waveform : public Series
     Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger) // offset
     Q_PROPERTY(uint32_t view READ view WRITE setView) // length
 
-    std::array< uint32_t, 2 > index;
+    static const int m_channels = 2;
     // 18 packets a 504 samples
-    std::array< std::array< double, 18*504 >, 2 > data;
+    static const int m_length = 18 * 504;
+
+    std::array< int, m_channels > index;
+    std::array< std::array< double, m_length >, m_channels > data;
 
     double m_samplerate = 250e3;
-    uint32_t m_trigger = 0;
-    uint32_t m_view = 16*504; // das letzte Paket wird nie verwendet, 17 würden ausreichen
+    unsigned int m_trigger = 0;
+    unsigned int m_view = 16 * 504; // das letzte Paket wird nie verwendet, 17 Pakete würden ausreichen
 
 public:
     explicit Waveform();
@@ -51,24 +54,24 @@ public:
     void setSamplerate(double samplerate);
     double samplerate();
 
-    void setTrigger(uint32_t trigger);
-    uint32_t trigger();
+    void setTrigger(unsigned int trigger);
+    unsigned int trigger();
 
-    void setView(uint32_t view);
-    uint32_t view();
+    void setView(unsigned int view);
+    unsigned int view();
 
-    void append(std::size_t channel, double value);
+    void append(int channel, double value);
 
-    std::size_t getChannels() const;
-    std::size_t getLength() const;
+    int getChannels() const;
+    int getLength() const;
 
-    double getX(std::size_t i) const;
-    double getY(std::size_t i, std::size_t channel) const;
+    double getX(int i) const;
+    double getY(int i, int channel) const;
 
     double getMinX() const;
     double getMaxX() const;
-    double getMinY(std::size_t channel) const;
-    double getMaxY(std::size_t channel) const;
+    double getMinY(int channel) const;
+    double getMaxY(int channel) const;
 };
 
 } // namespace model

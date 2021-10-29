@@ -143,7 +143,7 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
 
         int8_t * data = reinterpret_cast<int8_t *>(buffer + 6);
 
-        for (uint32_t i = 1; i < reply->getUInt16BufferLength() - 6; ++i) {
+        for (int i = 1; i < reply->getUInt16BufferLength() - 6; ++i) {
             state0 += data[2*i];
             state1 += data[2*i+1];
             incoming->append(0, to_double(state0));
@@ -180,7 +180,7 @@ Oscilloscope::save(QTextStream &stream)
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
 
-    for (std::size_t i = 0; i < waveform->getLength(); ++i) {
+    for (int i = 0; i < waveform->getLength(); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
 }

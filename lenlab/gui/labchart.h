@@ -56,7 +56,7 @@ public:
     void appendLast(model::pSeries const & series);
     void setRange(model::pSeries const & series);
 
-    void setChannelVisible(unsigned int channel, bool visible);
+    void setChannelVisible(int channel, bool visible);
 
     void print(QString filename);
 

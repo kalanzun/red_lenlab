@@ -36,7 +36,9 @@ class Loggerseries : public Series
     Q_PROPERTY(uint32_t interval READ interval WRITE setInterval)
     uint32_t m_interval = 1000;
 
-    std::array< QVector<double>, 4 > data;
+    static const int m_channels = 4;
+
+    std::array< QVector<double>, m_channels > data;
 
 public:
     explicit Loggerseries();
@@ -47,21 +49,21 @@ public:
     void setInterval(uint32_t interval);
     uint32_t interval() const;
 
-    void append(std::size_t channel, double value);
+    void append(int channel, double value);
 
-    std::size_t getChannels() const;
-    std::size_t getLength() const;
+    int getChannels() const;
+    int getLength() const;
 
-    double getX(std::size_t i) const;
-    double getY(std::size_t i, std::size_t channel) const;
+    double getX(int i) const;
+    double getY(int i, int channel) const;
 
     double getLastX() const;
-    double getLastY(std::size_t channel) const;
+    double getLastY(int channel) const;
 
     double getMinX() const;
     double getMaxX() const;
-    double getMinY(std::size_t channel) const;
-    double getMaxY(std::size_t channel) const;
+    double getMinY(int channel) const;
+    double getMaxY(int channel) const;
 };
 
 } // namespace model
