@@ -157,7 +157,7 @@ Verbinden Sie den DEVICE USB-Anschluss an der langen Seite des Launchpad mit dem
 Stellen Sie den Power-Schalter auf DEVICE. Die grüne Power-LED leuchtet.
 
 Lenlab sucht nach dem Board und verbindet sich, wenn es eines findet. Es meldet
-dann im Nachrichten-Fenster "Lenlab-Board bereit."
+dann im Nachrichten-Fenster "Lenlab-Board Version [VERSION] verbunden."
 
 Windows
 -------
