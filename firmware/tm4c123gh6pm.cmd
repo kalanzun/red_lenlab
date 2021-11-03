@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Default Linker Command file for the Texas Instruments TM4C1230H6PM
+ * Default Linker Command file for the Texas Instruments TM4C123GH6PM
  *
  * This is derived from revision 15071 of the TivaWare Library.
  *

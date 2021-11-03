@@ -88,7 +88,7 @@ ConfigureADC(tADC *self)
     GPIOPinTypeADC(self->gpio_base, self->gpio_pin);
 
     ADCPhaseDelaySet(self->base, ADC_PHASE_0);
-    ADCHardwareOversampleConfigure(self->base, 1);
+    ADCHardwareOversampleConfigure(self->base, 0);
 }
 
 
