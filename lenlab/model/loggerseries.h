@@ -22,6 +22,7 @@
 #include "series.h"
 
 #include <QObject>
+#include <QVector>
 
 #include <array>
 

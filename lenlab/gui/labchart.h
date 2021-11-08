@@ -21,6 +21,7 @@
 
 #include "model/lenlab.h"
 
+#include <QVector>
 #include <QWidget>
 #include <QtCharts>
 
