@@ -66,11 +66,6 @@ def build_linux(tag: str):
     run([qmake, "red_lenlab.pro"])
     run(["make", f"-j{cpu_count()}"])
 
-    if os.environ.get("APPVEYOR_BUILD_WORKER_IMAGE", str()) == "Ubuntu2004":
-        print_header("deploy")
-        copy("lenlab/app/lenlab", f"lenlab-{tag}-linux-x86_64")
-        return
-
     print_header("download linuxdeployqt")
     linuxdeployqt_url = (
         "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/"
