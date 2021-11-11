@@ -38,6 +38,17 @@ Stellen Sie den Power-Schalter auf DEVICE. Die grüne Power-LED leuchtet.
 Lenlab sucht nach dem Board und verbindet sich, wenn es eines findet. Es meldet
 dann im Nachrichten-Fenster "Lenlab-Board Version [VERSION] verbunden."
 
+Falls folgende Meldungen im Nachrichten-Fenster erscheinen, hat Lenlab zwar das Board gefunden,
+kann aber nicht mit der Firmware auf dem Board kommunizieren::
+
+  Lenlab-Board gefunden.
+  Zeitüberschreitungsfehler: init wurde nicht innerhalb von 100 ms abgeschlossen.
+  Reset.
+  Verbindung getrennt.
+
+Starten Sie in diesem Fall die Firmware neu. Sie können das Board mit dem Power-Schalter für ein paar Sekunden ausschalten
+(die grüne LED ist aus) und dann wieder einschalten.
+
 Windows
 =======
 
