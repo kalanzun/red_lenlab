@@ -192,7 +192,7 @@ def build_windows(tag: str):
     )
 
     print_header("deploy")
-    release_dir = Path(f"Lenlab-{tag}-win")
+    release_dir = Path("build")
     release_dir.mkdir()
     print(f"{release_dir=}")
 
@@ -213,7 +213,7 @@ def build_windows(tag: str):
     copy("LICENSE.pdf", release_dir)
 
     print_header("package")
-    run(["7z", "a", f"Lenlab-{tag}-win.zip", release_dir])
+    run(["7z", "a", f"Lenlab-{tag}-win.zip", f"{release_dir}/*"], shell=True)
 
 
 def main():

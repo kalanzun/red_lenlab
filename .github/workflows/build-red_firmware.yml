@@ -76,7 +76,7 @@ jobs:
       - name: Copy Firmware
         run: cp red_firmware.out lenlab_flash/red_firmware.out
       - name: Package
-        run: zip -r lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip lenlab_flash
+        run: zip -r lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip lenlab_flash/*
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
