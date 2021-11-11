@@ -208,7 +208,7 @@ def build_windows(tag: str):
     copy("LICENSE.pdf", release_dir)
 
     print_header("package")
-    run(["7z", "a", f"Lenlab-{tag}-win.zip", f"{release_dir}/*"], shell=True)
+    run(["7z", "a", Path(f"Lenlab-{tag}-win.zip").absolute()] + list(release_dir.glob("*")), cwd=release_dir)
 
 
 def main():
