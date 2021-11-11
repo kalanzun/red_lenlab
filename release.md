@@ -52,4 +52,6 @@ You may create the release on the github releases page with "Draft a new release
 Note on prerelease: Appveyor will set prerelease to true, when finished. If everything is fine,
 remove the setting on github.
 
+Additionally, the build servers run for every push to main, but do not deploy.
+
 ReadTheDocs builds on every main commit.

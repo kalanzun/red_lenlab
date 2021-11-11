@@ -6,6 +6,8 @@ workflows:
     jobs:
       - build:
           filters:
+            branches:
+              only: main
             tags:
               only: /.*/
       - deploy:
