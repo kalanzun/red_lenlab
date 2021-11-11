@@ -22,8 +22,8 @@ Lenlab läuft auf Windows, Mac und Linux.
 
 - Windows: Version 10 und 11, nur 64 bit
 - Mac: macOS 10.15.7 "Catalina" und neuer
-- Linux amd64: Ubuntu 18.04 und neuer
-- Linux arm64: Ubuntu 20.04 und neuer
+- Linux x86_64: Ubuntu 18.04 und neuer
+- Linux arm64: Ubuntu 20.04
 
 Sie finden den Download unter "Releases" auf github:
 `Releases kalanzun/red_lenlab <https://github.com/kalanzun/red_lenlab/releases>`_.
@@ -72,7 +72,7 @@ Linux
 =====
 
 Für Linux stehen verschiedene Downloads zur Verfügung. Ein AppImage, welches die notwendingen Bibliotheken
-selbst dabei hat und auf den meisten modernen Linux-Systemen läuft, sowie binaries für Ubuntu 20.04 und neuer
+selbst dabei hat und auf den meisten modernen Linux-Systemen läuft, sowie binaries für Ubuntu 20.04
 auf den Architekturen x86_64 und arm64.
 
 Ein normaler Benutzer auf Linux hat meist nicht genügend Rechte, dass Lenlab mit der Firmware kommunizieren kann.
@@ -80,13 +80,13 @@ Dies zeigt sich durch die Fehlermeldung "Access denied (insufficient permissions
 
 Sie können Ihrem Benutzer die Berechtigung geben:
 
-Erstellen Sie (als root) eine Datei ``/etc/udev.d/20-lenlab.rules`` mit dem Inhalt::
+Erstellen Sie (als root) eine Datei ``/etc/udev/rules.d/20-lenlab.rules`` mit dem Inhalt::
 
   SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", ATTR{idProduct}=="0270", GROUP="uucp"
 
 Im Terminal::
 
-  sudo echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", ATTR{idProduct}=="0270", GROUP="uucp"' > /etc/udev.d/20-lenlab.rules
+  echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", ATTR{idProduct}=="0270", GROUP="uucp"' | sudo tee /etc/udev/rules.d/20-lenlab.rules
 
 Damit konfigurieren Sie Ihr Linux-System, dass Benutzer der Gruppe ``uucp`` Zugriff über USB auf
 die Lenlab-Firmware ``1cbe:0270`` erhalten.
@@ -110,15 +110,23 @@ Im Terminal::
   chmod +x Lenlab*
   ./Lenlab*
 
-Binaries ab Ubuntu 20.04
-------------------------
+Binaries für Ubuntu 20.04
+-------------------------
 
 Für x86_64 heißt der Download ``lenlab-[VERSION]-linux-x86_64`` und für arm64 ``lenlab-[VERSION]-linux-arm64``.
 Es sind nur die ausführbaren Dateien, die notwendigen Bibliotheken sind nicht dabei.
 
-Installation der Abhängigkeiten::
+Installation der Abhängigkeiten, im Terminal::
 
-  sudo apt install qt5-default libqt5charts5 libqt5svg5 libqt5opengl5 libusb-1.0-0
+  sudo apt install qt5-default libqt5charts5
+
+Aktivieren Sie das Dateiattribut für "ausführbar" und starten Sie die Datei.
+
+Im Terminal::
+
+  cd [VERZEICHNIS]
+  chmod +x lenlab*
+  ./lenlab*
 
 Auf Linux selbst kompilieren
 ============================
@@ -127,7 +135,7 @@ Anbei eine ganz knappe Anleitung, falls Sie lenlab selbst kompilieren möchten.
 
 Abhängigkeiten installieren::
 
-  sudo apt install build-essential git qt5-default libqt5charts5-dev libqt5svg5-dev libqt5opengl5-dev libusb-1.0-0-dev
+  sudo apt install build-essential qt5-default libqt5charts5-dev libusb-1.0-0-dev git
 
 Quelltext herunterladen::
 
