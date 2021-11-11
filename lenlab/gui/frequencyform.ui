@@ -21,14 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QwtPlot" name="plot">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
+    <widget class="LabChart" name="labChart" native="true"/>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -72,27 +65,9 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>318</width>
-          <height>548</height>
+          <width>370</width>
+          <height>586</height>
          </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">#ch1Label {
-	color: #3465a4;
-	font-weight: bold;
-}
-#ch2Label {
-	color: #cc0000;
-	font-weight: bold;
-}
-#amplitudeLabel {
-	color: #3465a4;
-	font-weight: bold;
-}
-#phaseLabel {
-	color: #cc0000;
-	font-weight: bold;
-}</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -103,7 +78,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="amplitudeLabel">
+          <widget class="QLabel" name="magnitudeLabel">
            <property name="text">
             <string>Amplitude [dB]</string>
            </property>
@@ -229,9 +204,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
+   <class>LabChart</class>
+   <extends>QWidget</extends>
+   <header>labchart.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

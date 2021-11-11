@@ -21,14 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QwtPlot" name="plot">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
+    <widget class="LabChart" name="labChart" native="true"/>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -72,27 +65,9 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>318</width>
-          <height>548</height>
+          <width>370</width>
+          <height>543</height>
          </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">#ch4CheckBox {
-	color: #edd400;
-	font-weight: bold;
-}
-#ch3CheckBox {
-	color: #73d216;
-	font-weight: bold;
-}
-#ch1CheckBox {
-	color: #3465a4;
-	font-weight: bold;
-}
-#ch2CheckBox {
-	color: #cc0000;
-	font-weight: bold;
-}</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -128,9 +103,6 @@
             <widget class="QCheckBox" name="ch2CheckBox">
              <property name="text">
               <string>2 (PD1)</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -182,9 +154,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
+   <class>LabChart</class>
+   <extends>QWidget</extends>
+   <header>labchart.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

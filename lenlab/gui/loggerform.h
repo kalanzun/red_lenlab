@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,12 @@
 #ifndef GUI_LOGGERFORM_H
 #define GUI_LOGGERFORM_H
 
+
+#include "labchart.h"
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "model/series.h"
-#include "qwt_plot_curve.h"
-#include "qwt_plot_grid.h"
+//#include "model/series.h"
+
 #include <QWidget>
 
 namespace gui {
@@ -44,21 +45,17 @@ class LoggerForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Voltmeter * m_voltmeter = nullptr;
 
-    std::array<QwtPlotCurve *, 4> m_curves; // pointer, no ownership
-
 public:
     explicit LoggerForm(QWidget * parent = nullptr);
     ~LoggerForm();
+
+    void prepareChart(LabChart *chart);
 
     void setMainWindow(MainWindow *main_window);
     void setModel(model::Lenlab * lenlab);
 
     void save();
     void saveImage();
-
-private:
-    QwtPlotGrid * newGrid();
-    QwtPlotCurve * newCurve(QColor const & color, bool visible);
 
 private slots:
     void on_intervalComboBox_activated(int);
@@ -72,7 +69,7 @@ private slots:
     void on_autoSaveCheckBox_stateChanged(int);
     void on_clearButton_clicked();
 
-    void seriesUpdated();
+    void seriesUpdated(model::pSeries const &);
     void seriesChanged(model::pSeries const &);
 
     void measurementDataChanged(bool);

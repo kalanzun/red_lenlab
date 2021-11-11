@@ -2,7 +2,7 @@
 //
 // usbhost.h - Host specific definitions for the USB host library.
 //
-// Copyright (c) 2008-2017 Texas Instruments Incorporated.  All rights reserved.
+// Copyright (c) 2008-2020 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
 // 
 // Texas Instruments (TI) is supplying this software for use solely and
@@ -18,7 +18,7 @@
 // CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
 // DAMAGES, FOR ANY REASON WHATSOEVER.
 // 
-// This is part of revision 2.1.4.178 of the Tiva USB Library.
+// This is part of revision 2.2.0.295 of the Tiva USB Library.
 //
 //*****************************************************************************
 
@@ -239,7 +239,6 @@ extern uint32_t USBHCDPipeAllocSize(uint32_t ui32Index,
 extern uint32_t USBHCDPipeConfig(uint32_t ui32Pipe, uint32_t ui32MaxPayload,
                                  uint32_t ui32Interval,
                                  uint32_t ui32TargetEndpoint);
-extern uint32_t USBHCDPipeStatus(uint32_t ui32Pipe);
 extern uint32_t USBHCDPipeWrite(uint32_t ui32Pipe, uint8_t *pui8Data,
                                 uint32_t ui32Size);
 extern uint32_t USBHCDPipeRead(uint32_t ui32Pipe, uint8_t *pui8Data,

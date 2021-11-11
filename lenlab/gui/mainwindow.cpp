@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "lenlab_version.h"
-#include <QMessageBox>
+
 #include <QFileDialog>
-//#include <QDebug>
+#include <QMessageBox>
 
 namespace gui {
 
@@ -187,7 +187,7 @@ const QString ABOUT(
         "</p>\n"
 
         R"_(
-        <p>Copyright 2019<br/>
+        <p>Copyright 2017-2021<br/>
         Christoph Simon und das Lenlab-Entwicklerteam</p>
 
         <p>Homepage: <a href='https://github.com/kalanzun/red_lenlab'>https://github.com/kalanzun/red_lenlab</a></p>

@@ -1,5 +1,5 @@
 #  Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
-#  Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+#  Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
 #  
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,9 +16,11 @@
 
 CONFIG += c++11
 
-CONFIG += qwt
+DEFINES *= QT_USE_QSTRINGBUILDER
 
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG QT_NO_DEBUG_OUTPUT
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
 
 INCLUDEPATH += ../../lenlab ../../include
 
@@ -27,14 +29,6 @@ unix {
     LIBS += -L../../lenlab/model -lmodel
     LIBS += -L../../lenlab/protocol -lprotocol
     LIBS += -L../../lenlab/usb -lusb
-
-    # qwt
-    # or create a symlink during installation of qwt
-    #macx {
-    #    # there is an error in qwt, CONFIG += qwt should set this
-    #    # but it sets a wrong path (/usr/local/qwt-6.1.5-svn/include
-    #    INCLUDEPATH += /usr/local/qwt-6.1.5-svn/lib/qwt.framework/Headers
-    #}
 
     # libusb
     macx {
@@ -61,12 +55,7 @@ win32 {
         LIBS += -L../../lenlab/usb/release -lusb
     }
 
-    # qwt
-    # Qt Creator uses this variable to construct the PATH variable for the dynamic linker to run lenlab
-    CONFIG(release, debug|release): LIBS += -Lc:/Qwt-6.1.4/lib/ -lqwt
-    else:CONFIG(debug, debug|release): LIBS += -Lc:/Qwt-6.1.4/lib/ -lqwtd
-
     # libusb
     INCLUDEPATH += $$PWD/libusb/include/libusb-1.0
-    LIBS += -L$$PWD/libusb/MinGW32/dll/ -llibusb-1.0
+    LIBS += -L$$PWD/libusb/MinGW64/dll/ -llibusb-1.0
 }

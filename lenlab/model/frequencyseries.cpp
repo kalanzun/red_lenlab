@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,15 +24,15 @@ namespace model {
 
 FrequencySeries::FrequencySeries()
     : Series()
-    , index{0, 0, 0}
-    , MinY{100.0, -1.0, -90.0}
-    , MaxY{10.0e3, 1, 90}
+    , index{0, 0}
+    , MinY{-10, -90}
+    , MaxY{10, 90}
 {
 
 }
 
 void
-FrequencySeries::append(std::size_t channel, double value)
+FrequencySeries::append(int channel, double value)
 {
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(index[channel] < m_length);
@@ -41,27 +41,34 @@ FrequencySeries::append(std::size_t channel, double value)
     data[channel][index[channel]++] = value;
 }
 
-std::size_t
+void
+FrequencySeries::appendFrequency(double value)
+{
+    Q_ASSERT(freq_index < m_length);
+    freq[freq_index++] = value;
+}
+
+int
 FrequencySeries::getChannels() const
 {
     return m_channels;
 }
 
-std::size_t
-FrequencySeries::getLength(std::size_t channel) const
+int
+FrequencySeries::getLength() const
 {
-    Q_ASSERT(channel < m_channels);
-    return index[channel];
+    return freq_index;
 }
 
 double
-FrequencySeries::getX(std::size_t i) const
+FrequencySeries::getX(int i) const
 {
-    return getY(i, 0);
+    Q_ASSERT(i < m_length);
+    return freq[i];
 }
 
 double
-FrequencySeries::getY(std::size_t i, std::size_t channel) const
+FrequencySeries::getY(int i, int channel) const
 {
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(i < m_length);
@@ -69,38 +76,53 @@ FrequencySeries::getY(std::size_t i, std::size_t channel) const
 }
 
 double
+FrequencySeries::getLastX() const
+{
+    Q_ASSERT(freq_index);
+    return freq[freq_index - 1];
+}
+
+double
+FrequencySeries::getLastY(int channel) const
+{
+    Q_ASSERT(channel < m_channels);
+    Q_ASSERT(index[channel]);
+    return data[channel][index[channel] - 1];
+}
+
+double
 FrequencySeries::getMinX() const
 {
-    return getMinY(0);
+    return 100;
 }
 
 double
 FrequencySeries::getMaxX() const
 {
-    return getMaxY(0);
+    return 10000;
 }
 
 double
-FrequencySeries::getMinY(std::size_t channel) const
+FrequencySeries::getMinY(int channel) const
 {
     Q_ASSERT(channel < m_channels);
     return MinY[channel];
 }
 
 double
-FrequencySeries::getMaxY(std::size_t channel) const
+FrequencySeries::getMaxY(int channel) const
 {
     Q_ASSERT(channel < m_channels);
     return MaxY[channel];
 }
 
-std::size_t
+int
 FrequencySeries::startIndex() const
 {
     return m_start_index;
 }
 
-std::size_t
+int
 FrequencySeries::stopIndex() const
 {
     return m_stop_index;

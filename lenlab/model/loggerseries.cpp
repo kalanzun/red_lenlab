@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,65 +38,75 @@ Loggerseries::interval() const
 }
 
 void
-Loggerseries::append(std::size_t channel, double value)
+Loggerseries::append(int channel, double value)
 {
-    Q_ASSERT(channel < data.size());
+    Q_ASSERT(channel < m_channels);
     data[channel].append(value);
 }
 
-std::size_t
+int
 Loggerseries::getChannels() const
 {
-    return data.size();
+    return m_channels;
 }
 
-std::size_t
-Loggerseries::getLength(std::size_t channel) const
+int
+Loggerseries::getLength() const
 {
-    return static_cast< std::size_t >(data[channel].size());
+    return data[0].size();
 }
 
 double
-Loggerseries::getX(std::size_t i) const
+Loggerseries::getX(int i) const
 {
     return static_cast< double >(i * m_interval) / 1000;
 }
 
 double
-Loggerseries::getY(std::size_t i, std::size_t channel) const
+Loggerseries::getY(int i, int channel) const
 {
-    Q_ASSERT(channel < data.size());
-    return data[channel].at(static_cast< int >(i));
+    Q_ASSERT(channel < m_channels);
+    Q_ASSERT(i < data[channel].size());
+    return data[channel].at(i);
+}
+
+double
+Loggerseries::getLastX() const
+{
+    auto length = getLength();
+    return length ? getX(length - 1) : 0;
+}
+
+double
+Loggerseries::getLastY(int channel) const
+{
+    Q_ASSERT(channel < m_channels);
+    return data[channel].size() ? data[channel].last() : 0;
 }
 
 double
 Loggerseries::getMinX() const
 {
-    return 0.0;
+    return 0;
 }
 
 double
 Loggerseries::getMaxX() const
 {
-    auto length = getLength(0);
-    if (length > 0) {
-        auto value = getX(length - 1);
-        if (value > 10) {
-            return value;
-        }
-    }
-    return 10.0;
+    auto length = getLength();
+    length = length > 10 ? length - 1 : 10;
+    return getX(length);
 }
 
 double
-Loggerseries::getMinY(std::size_t channel) const
+Loggerseries::getMinY(int channel) const
 {
     Q_UNUSED(channel);
     return 0;
 }
 
 double
-Loggerseries::getMaxY(std::size_t channel) const
+Loggerseries::getMaxY(int channel) const
 {
     Q_UNUSED(channel);
     return 3.5;

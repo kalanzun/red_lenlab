@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include "lenlab_version.h"
 
 #include <QDebug>
-#include <QSaveFile>
 
 namespace model {
 
@@ -32,7 +31,7 @@ char const * const Oscilloscope::DELIMITER = ";";
 
 Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
     : Component(lenlab, board)
-    , waveform(new Waveform())
+    , waveform(new Waveform)
     , samplerateIndex(3)
 {
     double value;
@@ -111,7 +110,7 @@ Oscilloscope::on_start()
         return;
     }
 
-    incoming.reset(new Waveform());
+    incoming.reset(new Waveform);
     incoming->setSamplerate(1e6/(1<<(samplerate+2)));
 
     QVector<uint32_t> args;
@@ -137,25 +136,20 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         uint16_t state0 = buffer[2];
         uint16_t state1 = buffer[3];
 
-        if (trigger) {
-            incoming->setTrigger(trigger);
-        }
+        incoming->setTrigger(trigger);
 
         incoming->append(0, to_double(state0));
         incoming->append(1, to_double(state1));
 
         int8_t * data = reinterpret_cast<int8_t *>(buffer + 6);
 
-        for (uint32_t i = 1; i < reply->getUInt16BufferLength() - 6; ++i) {
+        for (int i = 1; i < reply->getUInt16BufferLength() - 6; ++i) {
             state0 += data[2*i];
             state1 += data[2*i+1];
             incoming->append(0, to_double(state0));
             incoming->append(1, to_double(state1));
         }
     }
-
-    incoming->setView(504*16); // das letzte Paket wird nie verwendet, 17 würden ausreichen
-    //qDebug() << incoming->trigger();
 
     waveform.swap(incoming);
     emit seriesChanged(incoming);
@@ -180,26 +174,15 @@ Oscilloscope::to_double(uint16_t state)
 }
 
 void
-Oscilloscope::save(const QString &fileName)
+Oscilloscope::save(QTextStream &stream)
 {
-    QSaveFile file(fileName);
-    //qDebug("save");
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        throw std::exception();
-    }
-
-    QTextStream stream(&file);
-
     stream << QString("Lenlab red %1.%2 Oszilloskop-Daten\n").arg(MAJOR).arg(MINOR);
 
     stream << "Zeit" << DELIMITER << "Kanal_1" << DELIMITER << "Kanal_2" << "\n";
 
-    for (std::size_t i = 0; i < waveform->getLength(0); ++i) {
+    for (int i = 0; i < waveform->getLength(); ++i) {
         stream << waveform->getX(i) << DELIMITER << waveform->getY(i, 0) << DELIMITER << waveform->getY(i, 1) << "\n";
     }
-
-    file.commit();
 }
 
 } // namespace model

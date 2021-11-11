@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QSharedPointer>
+#include <QTextStream>
 #include <QTimer>
 
 #include <bitset>
@@ -98,7 +99,7 @@ public:
     //virtual void receive(const usb::pMessage &reply);
     //virtual void ready();
 
-    void save(QString const & fileName);
+    void save(QTextStream &stream);
 
 signals:
     void measurementDataChanged(bool);
@@ -107,9 +108,6 @@ signals:
     void fileNameChanged(QString const &);
     void channelsChanged(std::bitset<4> const &);
     void intervalChanged(uint32_t);
-
-private:
-    void do_save();
 
 private slots:
     void on_autosave();

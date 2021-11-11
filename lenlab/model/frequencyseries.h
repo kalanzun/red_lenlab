@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,16 +33,19 @@ class FrequencySeries : public Series
 
     typedef Series super;
 
-    static const std::size_t m_start_index = 34;
-    static const std::size_t m_stop_index = 129;
+    static const int m_start_index = 34;
+    static const int m_stop_index = 129;
 
-    static const std::size_t m_channels = 3;
-    static const std::size_t m_length = m_stop_index - m_start_index;
+    static const int m_channels = 2;
+    static const int m_length = m_stop_index - m_start_index;
 
-    std::array< std::size_t, m_channels > index;
+    std::array< int, m_channels > index;
     std::array< double, m_channels > MinY;
     std::array< double, m_channels > MaxY;
     std::array< std::array< double, m_length >, m_channels > data;
+
+    int freq_index = 0;
+    std::array< double, m_length > freq;
 
 public:
     FrequencySeries();
@@ -50,21 +53,25 @@ public:
 
     FrequencySeries & operator=(FrequencySeries const &) = delete;
 
-    void append(std::size_t channel, double value);
+    void append(int channel, double value);
+    void appendFrequency(double value);
 
-    std::size_t getChannels() const;
-    std::size_t getLength(std::size_t channel) const;
+    int getChannels() const;
+    int getLength() const;
 
-    double getX(std::size_t i) const;
-    double getY(std::size_t i, std::size_t channel) const;
+    double getX(int i) const;
+    double getY(int i, int channel) const;
+
+    double getLastX() const;
+    double getLastY(int channel) const;
 
     double getMinX() const;
     double getMaxX() const;
-    double getMinY(std::size_t channel) const;
-    double getMaxY(std::size_t channel) const;
+    double getMinY(int channel) const;
+    double getMaxY(int channel) const;
 
-    std::size_t startIndex() const;
-    std::size_t stopIndex() const;
+    int startIndex() const;
+    int stopIndex() const;
 };
 
 } // namespace model

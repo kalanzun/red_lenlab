@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,9 @@
 
 #include "loggerform.h"
 #include "ui_loggerform.h"
-#include "pointvectorseriesdata.h"
-#include "mainwindow.h"
-#include "qwt_text.h"
-#include "qwt_plot_renderer.h"
-#include <QMessageBox>
+
 #include <QFileDialog>
-//#include <QDebug>
-#include <QPen>
-#include <QColor>
+#include <QMessageBox>
 
 namespace gui {
 
@@ -34,26 +28,22 @@ LoggerForm::LoggerForm(QWidget * parent) :
     QWidget(parent),
     ui(new Ui::LoggerForm)
 {
+    QString stylesheet;
+
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
 
-    QwtText x_label("Zeit [s]");
-    QFont x_font(ui->plot->axisFont(2));
-    x_label.setFont(x_font);
-    ui->plot->setAxisTitle(2, x_label);
+    prepareChart(ui->labChart);
 
-    QwtText y_label("Spannung [V]");
-    QFont y_font(ui->plot->axisFont(0));
-    y_label.setFont(y_font);
-    ui->plot->setAxisTitle(0, y_label);
+    auto series = ui->labChart->series();
+    for (int i = 0; i < series.size(); ++i) {
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + series.at(i)->color().name() + "; }\n";
+        series.at(i)->setVisible(i == 0);
+    }
 
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    m_curves[1] = newCurve(QColor("#8ae234"), false); // green 0
-    m_curves[2] = newCurve(QColor("#ef2929"), false); // scarlet red 0
-    m_curves[3] = newCurve(QColor("#fce94f"), false); // butter 0
-
-    newGrid();
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 LoggerForm::~LoggerForm()
@@ -61,36 +51,19 @@ LoggerForm::~LoggerForm()
     delete ui;
 }
 
-QwtPlotCurve *
-LoggerForm::newCurve(QColor const & color, bool visible)
+void
+LoggerForm::prepareChart(LabChart *chart)
 {
-    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
+    chart->setLabelX("Zeit [s]");
+    chart->setLabelY("Spannung [V]");
 
-    //curve->setSamples(new PointVectorSeriesData(time, value)); // acquires ownership
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-    curve->setVisible(visible);
+    for (unsigned int i = 0; i < 4; ++i) {
+        auto series = new QLineSeries();
+        series->setName(QString("Kanal ") + QString::number(i + 1));
+        chart->addSeries(series);
+    }
 
-    QPen pen;
-    pen.setColor(color);
-    pen.setWidth(2);
-    curve->setPen(pen);
-
-    curve->attach(ui->plot); // acquires ownership
-    return curve.release();
-}
-
-QwtPlotGrid *
-LoggerForm::newGrid()
-{
-    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
-
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor("#555753"); // aluminium 4
-    grid->setPen(pen);
-
-    grid->attach(ui->plot); // acquires ownership
-    return grid.release();
+    chart->createDefaultAxes();
 }
 
 void
@@ -198,20 +171,46 @@ LoggerForm::on_saveButton_clicked()
 void
 LoggerForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "logger.csv", tr("CSV (*.csv)"));
-    try {
-        m_voltmeter->save(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "logger.csv", "CSV (*.csv)");
+
+    if (fileName.isEmpty()) {
+        return;
     }
-    catch (std::exception const &) {
-        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+
+    QSaveFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Speichern", QString("Fehler beim Speichern der Daten\n") + file.errorString());
+        return;
     }
+
+    m_voltmeter->setAutoSave(false);
+    m_voltmeter->setFileName(fileName);
+
+    QTextStream stream(&file);
+    m_voltmeter->save(stream);
+    file.commit();
 }
 
 void
 LoggerForm::saveImage()
 {
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "logger.pdf"); // it asks for the filename
+    QString fileName = QFileDialog::getSaveFileName(this, "Bild Speichern", "logger.pdf", "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    LabChart chart;
+    prepareChart(&chart);
+    chart.chart()->legend()->show();
+
+    auto channels = m_voltmeter->channels();
+    for (unsigned int i = 0; i < 4; ++i)
+        chart.setChannelVisible(i, channels[i]);
+
+    chart.replace(m_voltmeter->getSeries());
+    chart.print(fileName);
 }
 
 void
@@ -272,9 +271,8 @@ LoggerForm::fileNameChanged(const QString &fileName)
 void
 LoggerForm::channelsChanged(const std::bitset<4> &channels)
 {
-    for (std::size_t i = 0; i < m_curves.size(); ++i)
-        m_curves[i]->setVisible(channels[i]);
-    ui->plot->replot();
+    for (unsigned int i = 0; i < 4; ++i)
+        ui->labChart->setChannelVisible(i, channels[i]);
 }
 
 void LoggerForm::activeChanged(bool)
@@ -295,16 +293,13 @@ LoggerForm::on_intervalComboBox_activated(int index)
 void
 LoggerForm::seriesChanged(model::pSeries const & series)
 {
-    for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
-    }
-    ui->plot->replot();
+    ui->labChart->replace(series);
 }
 
 void
-LoggerForm::seriesUpdated()
+LoggerForm::seriesUpdated(model::pSeries const & series)
 {
-    ui->plot->replot();
+    ui->labChart->appendLast(series);
 }
 
 } // namespace gui

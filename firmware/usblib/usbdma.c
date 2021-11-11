@@ -2,7 +2,7 @@
 //
 // usbdma.c - USB Library DMA handling functions.
 //
-// Copyright (c) 2012-2017 Texas Instruments Incorporated.  All rights reserved.
+// Copyright (c) 2012-2020 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
 // 
 // Texas Instruments (TI) is supplying this software for use solely and
@@ -18,7 +18,7 @@
 // CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
 // DAMAGES, FOR ANY REASON WHATSOEVER.
 // 
-// This is part of revision 2.1.4.178 of the Tiva USB Library.
+// This is part of revision 2.2.0.295 of the Tiva USB Library.
 //
 //*****************************************************************************
 
@@ -680,7 +680,7 @@ iDMAUSBTransfer(tUSBDMAInstance *psUSBDMAInst, uint32_t ui32Channel,
     // Set the mode based on the size of the transfer.  More than one
     // packet requires mode 1.
     //
-    if(ui32Size > psUSBDMAInst->pui32MaxPacketSize[ui32Channel - 1])
+    if(ui32Size >= psUSBDMAInst->pui32MaxPacketSize[ui32Channel - 1])
     {
         //
         // Calculate the number of packets required for this transfer.

@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,7 @@
 
 #include "frequencyform.h"
 #include "ui_frequencyform.h"
-#include "pointvectorseriesdata.h"
-#include "qwt_text.h"
-#include "qwt_plot_renderer.h"
-#include "qwt_scale_engine.h"
-//#include <QDebug>
+
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -32,42 +28,61 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::FrequencyForm)
 {
+    QString stylesheet;
+
     ui->setupUi(this);
 
-    ui->plot->enableAxis(QwtPlot::yRight);
+    prepareChart(ui->labChart);
 
-    QwtLogScaleEngine* xScaleEngine = new QwtLogScaleEngine();
-    ui->plot->setAxisScaleEngine(QwtPlot::xBottom, xScaleEngine);
-    ui->plot->setAxisMaxMinor(QwtPlot::xBottom, 10);
+    auto series = ui->labChart->series();
 
-    QwtText x_label("Frequenz [Hz]");
-    QFont x_font(ui->plot->axisFont(2));
-    x_label.setFont(x_font);
-    ui->plot->setAxisTitle(2, x_label);
+    stylesheet += "#ch1Label { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#ch2Label { color: "
+            + series.at(1)->color().name() + "; }\n";
+    stylesheet += "#magnitudeLabel { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#phaseLabel { color: "
+            + series.at(1)->color().name() + "; }\n";
 
-    QwtText y_label("Amplitude [dB]");
-    QFont y_font(ui->plot->axisFont(0));
-    y_label.setFont(y_font);
-    ui->plot->setAxisTitle(0, y_label);
-
-    QwtText phase_label("Phase [°]");
-    QFont phase_font(ui->plot->axisFont(QwtPlot::yRight));
-    phase_label.setFont(phase_font);
-    ui->plot->setAxisTitle(QwtPlot::yRight, phase_label);
-
-    //QwtLogScaleEngine* yAmplitudeScaleEngine = new QwtLogScaleEngine();
-    //ui->plot->setAxisScaleEngine(QwtPlot::yLeft, yAmplitudeScaleEngine);
-
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
-    m_curves[1]->setYAxis(QwtPlot::yRight);
-
-    newGrid();
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 FrequencyForm::~FrequencyForm()
 {
     delete ui;
+}
+
+void
+FrequencyForm::prepareChart(LabChart *chart)
+{
+    chart->setLabelX("Frequenz [Hz]");
+    chart->setLabelY("Amplitude [dB]");
+    chart->setLabelY2("Phase [°]");
+
+    QLogValueAxis *axisX = new QLogValueAxis();
+    // Note: With kHz, from 0.1 kHz it has rounding issues and the max tick is missing
+    axisX->setBase(10);
+    axisX->setLabelFormat("%g");
+    chart->addAxis(axisX, Qt::AlignBottom);
+
+    QValueAxis *axisM = new QValueAxis();
+    chart->addAxis(axisM, Qt::AlignLeft);
+
+    QValueAxis *axisPh = new QValueAxis();
+    chart->addAxis(axisPh, Qt::AlignRight);
+
+    auto seriesM = new QLineSeries();
+    seriesM->setName("Amplitude");
+    chart->addSeries(seriesM);
+    seriesM->attachAxis(axisX);
+    seriesM->attachAxis(axisM);
+
+    auto seriesPh = new QLineSeries();
+    seriesPh->setName("Phase");
+    chart->addSeries(seriesPh);
+    seriesPh->attachAxis(axisX);
+    seriesPh->attachAxis(axisPh);
 }
 
 void
@@ -87,42 +102,12 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
     connect(m_frequencysweep, &model::Frequencysweep::seriesUpdated,
             this, &FrequencyForm::seriesUpdated);
 
+    seriesChanged(m_frequencysweep->getSeries());
+
     connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
             this, &FrequencyForm::activeChanged);
     connect(&m_lenlab->oscilloscope, &model::Oscilloscope::activeChanged,
             this, &FrequencyForm::activeChanged);
-}
-
-QwtPlotCurve *
-FrequencyForm::newCurve(const QColor &color, bool visible)
-{
-    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
-
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-    curve->setVisible(visible);
-
-    QPen pen;
-    pen.setColor(color);
-    pen.setWidth(2);
-    curve->setPen(pen);
-
-    curve->attach(ui->plot); // acquires ownership
-    return curve.release();
-}
-
-QwtPlotGrid *
-FrequencyForm::newGrid()
-{
-    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
-
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor("#555753"); // aluminium 4
-    grid->setPen(pen);
-    grid->enableXMin(true);
-
-    grid->attach(ui->plot); // acquires ownership
-    return grid.release();
 }
 
 void
@@ -170,33 +155,50 @@ void FrequencyForm::activeChanged(bool)
 void
 FrequencyForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "bode.csv", tr("CSV (*.csv)"));
-    try {
-        m_frequencysweep->save(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "bode.csv", "CSV (*.csv)");
+
+    if (fileName.isEmpty()) {
+        return;
     }
-    catch (std::exception const &) {
-        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+
+    QSaveFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Speichern", QString("Fehler beim Speichern der Daten\n") + file.errorString());
+        return;
     }
+
+    QTextStream stream(&file);
+    m_frequencysweep->save(stream);
+    file.commit();
 }
 
 void
 FrequencyForm::saveImage()
 {
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "bode.pdf"); // it asks for the filename
+    QString fileName = QFileDialog::getSaveFileName(this, "Bild Speichern", "bode.pdf", "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    LabChart chart;
+    prepareChart(&chart);
+    chart.chart()->legend()->show();
+    chart.replace(m_frequencysweep->getSeries());
+    chart.print(fileName);
 }
 
 void
-FrequencyForm::seriesUpdated()
+FrequencyForm::seriesUpdated(model::pSeries const & series)
 {
-    ui->plot->replot();
+    ui->labChart->appendLast(series);
 }
 
 void
 FrequencyForm::seriesChanged(model::pSeries const & series)
 {
-    m_curves[0]->setSamples(new PointVectorSeriesData(series, 1)); // acquires ownership
-    m_curves[1]->setSamples(new PointVectorSeriesData(series, 2)); // acquires ownership
+    ui->labChart->replace(series);
 }
 
 } // namespace gui

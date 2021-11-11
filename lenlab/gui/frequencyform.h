@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
 #ifndef GUI_FREQUENCYFORM_H
 #define GUI_FREQUENCYFORM_H
 
+#include "labchart.h"
 #include "mainwindow.h"
 #include "model/lenlab.h"
-#include "qwt_plot_curve.h"
-#include "qwt_plot_grid.h"
+
 #include <QWidget>
 
 namespace gui {
@@ -43,14 +43,11 @@ class FrequencyForm : public QWidget
     model::Lenlab * m_lenlab = nullptr;
     model::Frequencysweep * m_frequencysweep = nullptr;
 
-    std::array<QwtPlotCurve *, 2> m_curves; // pointer, no ownership
-
-    QwtPlotCurve *newCurve(const QColor &color, bool visible);
-    QwtPlotGrid *newGrid();
-
 public:
     explicit FrequencyForm(QWidget * parent = nullptr);
     ~FrequencyForm();
+
+    void prepareChart(LabChart *chart);
 
     void setMainWindow(MainWindow * main_window);
     void setModel(model::Lenlab * lenlab);
@@ -60,7 +57,7 @@ public:
 
 private slots:
     void seriesChanged(model::pSeries const &);
-    void seriesUpdated();
+    void seriesUpdated(model::pSeries const &);
 
     void on_startButton_clicked();
     void on_stopButton_clicked();

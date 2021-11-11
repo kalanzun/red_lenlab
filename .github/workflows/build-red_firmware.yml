@@ -1,0 +1,83 @@
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Update
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get -y upgrade
+      - name: Install dependencies
+        run: sudo apt-get install -y libc6:i386 libgconf-2-4 libgtk-3-0 libncurses5 libpython2.7 libtinfo5 libusb-0.1-4
+      - name: Cache CCS
+        uses: actions/cache@v2
+        id: cache
+        with:
+          key: ccs1100
+          path: ~/ti/ccs1100
+      - name: Install CCS
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          wget --no-verbose https://software-dl.ti.com/ccs/esd/CCSv11/CCS_11_0_0/exports/CCS11.0.0.00012_linux-x64.tar.gz
+          tar xf CCS11.0.0.00012_linux-x64.tar.gz
+          CCS11.0.0.00012_linux-x64/ccs_setup_11.0.0.00012.run --mode unattended --prefix ~/ti/ccs1100 --enable-components PF_C28,PF_TM4C
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Import
+        run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectImport -ccs.location ${{ github.workspace }}/firmware/
+      - name: Build
+        run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware
+      - name: Archive production artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: red_firmware
+          path: firmware/Debug/red_firmware.out
+  deploy:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download production artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: red_firmware
+      - name: get_version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Rename
+        run: cp red_firmware.out lenlab_firmware_${{ steps.get_version.outputs.VERSION }}.out
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: lenlab_firmware_${{ steps.get_version.outputs.VERSION }}.out
+  flash:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download production artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: red_firmware
+      - name: get_version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Copy Firmware
+        run: cp red_firmware.out lenlab_flash/red_firmware.out
+      - name: Package
+        run: zip -r lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip lenlab_flash
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip

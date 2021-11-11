@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #include "series.h"
 
 #include <QObject>
-#include <QVector>
 
 #include <array>
 
@@ -38,13 +37,16 @@ class Waveform : public Series
     Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger) // offset
     Q_PROPERTY(uint32_t view READ view WRITE setView) // length
 
-    std::array< uint32_t, 2 > index;
+    static const int m_channels = 2;
     // 18 packets a 504 samples
-    std::array< std::array< double, 18*504 >, 2 > data;
+    static const int m_length = 18 * 504;
 
-    double m_samplerate = 0;
-    uint32_t m_trigger = 0;
-    uint32_t m_view = 0;
+    std::array< int, m_channels > index;
+    std::array< std::array< double, m_length >, m_channels > data;
+
+    double m_samplerate = 250e3;
+    unsigned int m_trigger = 0;
+    unsigned int m_view = 16 * 504; // das letzte Paket wird nie verwendet, 17 Pakete würden ausreichen
 
 public:
     explicit Waveform();
@@ -52,24 +54,24 @@ public:
     void setSamplerate(double samplerate);
     double samplerate();
 
-    void setTrigger(uint32_t trigger);
-    uint32_t trigger();
+    void setTrigger(unsigned int trigger);
+    unsigned int trigger();
 
-    void setView(uint32_t view);
-    uint32_t view();
+    void setView(unsigned int view);
+    unsigned int view();
 
-    void append(std::size_t channel, double value);
+    void append(int channel, double value);
 
-    std::size_t getChannels() const;
-    std::size_t getLength(std::size_t channel) const;
+    int getChannels() const;
+    int getLength() const;
 
-    double getX(std::size_t i) const;
-    double getY(std::size_t i, std::size_t channel) const;
+    double getX(int i) const;
+    double getY(int i, int channel) const;
 
     double getMinX() const;
     double getMaxX() const;
-    double getMinY(std::size_t channel) const;
-    double getMaxY(std::size_t channel) const;
+    double getMinY(int channel) const;
+    double getMaxY(int channel) const;
 };
 
 } // namespace model

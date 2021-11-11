@@ -2,7 +2,7 @@
 //
 // usbdcomp.c - USB composite device class driver.
 //
-// Copyright (c) 2010-2017 Texas Instruments Incorporated.  All rights reserved.
+// Copyright (c) 2010-2020 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
 // 
 // Texas Instruments (TI) is supplying this software for use solely and
@@ -18,7 +18,7 @@
 // CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
 // DAMAGES, FOR ANY REASON WHATSOEVER.
 // 
-// This is part of revision 2.1.4.178 of the Tiva USB Library.
+// This is part of revision 2.2.0.295 of the Tiva USB Library.
 //
 //****************************************************************************
 
@@ -1047,6 +1047,8 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
     tInterfaceDescriptor *psInterface;
     tEndpointDescriptor *psEndpoint;
     const tDeviceInfo *psDevice;
+	bool bINEndpointSet = false;
+	bool bOUTEndpointSet = false;
 
     //
     // Save the number of devices to look through.
@@ -1058,6 +1060,8 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
     ui8OUTEndpoint = 1;
     ui32Offset = 0;
     ui32FixINT = 0;
+	bINEndpointSet = false;
+	bOUTEndpointSet = false;
 
     //
     // This puts the first section pointer in the first entry in the list
@@ -1182,6 +1186,8 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
                 pui8Data[ui32CPIdx + ui32Offset] = pui8Descriptor[ui32CPIdx];
             }
 
+        	bINEndpointSet = false;
+        	bOUTEndpointSet = false;
             //
             // Read out the descriptors in this section.
             //
@@ -1253,36 +1259,20 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
                     if(psEndpoint->bEndpointAddress & USB_RTYPE_DIR_IN)
                     {
                         //
-                        // Check if this is the special Fixed Interrupt class
-                        // and this is the interrupt endpoint.
+                    	// TivaWare Update 2.2.x - Removed check for Fixed Interrupt
+                    	// class which caused multiple Windows 10 issues with USB
+                    	// composite device enumeration.
                         //
-                        if(((psEndpoint->bmAttributes & USB_EP_ATTR_TYPE_M) ==
-                            USB_EP_ATTR_INT) &&
-                           (psCompDevice->ui16PID == USB_PID_COMP_SERIAL))
-                        {
-                            //
-                            // Check if the Fixed Interrupt endpoint has been
-                            // set yet.
-                            //
-                            if(ui32FixINT == 0)
+
+                    	// Check if an OUT Endpoint was set during this loop
+                    	if (bOUTEndpointSet)
                             {
-                                //
-                                // Allocate the fixed interrupt endpoint and
-                                // save its number.
-                                //
-                                ui32FixINT = ui8INEndpoint++;
-                            }
+                    		// Set IN Endpoint Number to be one less than the OUT endpoint
+                    		// since it was incremented when setting the IN Endpoint.
 
-                            CompositeEPChange(
-                                        &psCompDevice->psDevices[ui32Dev],
-                                        psEndpoint->bEndpointAddress,
-                                        ui32FixINT);
-
-                            psEndpoint->bEndpointAddress = ui32FixINT |
-                                                           USB_RTYPE_DIR_IN;
+                    		ui8INEndpoint = ui8OUTEndpoint-1;
                         }
-                        else
-                        {
+
                             //
                             // Notify the class that it's interface number has
                             // changed.
@@ -1294,10 +1284,24 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
 
                             psEndpoint->bEndpointAddress = ui8INEndpoint++ |
                                                            USB_RTYPE_DIR_IN;
+                    	// Check if a BULK Endpoint for Data transfer is being set.
+                    	if(((psEndpoint->bmAttributes & USB_EP_ATTR_TYPE_M) ==
+                    			USB_EP_ATTR_BULK) &&
+                    			(psCompDevice->ui16PID == USB_PID_COMP_SERIAL))
+                    	{
+                    		// Set the boolean that an IN Endpoint for Data transfer is set.
+                    		bINEndpointSet = true;
                         }
                     }
                     else
                     {
+                    	// Check if an IN Endpoint was set during this loop
+                    	if (bINEndpointSet)
+                    	{
+                    		// Set OUT Endpoint Number to be one less than the IN endpoint
+                    		// since it was incremented when setting the IN Endpoint.
+                    		ui8OUTEndpoint = ui8INEndpoint-1;
+                    	}
                         //
                         // Notify the class that it's interface number has
                         // changed.
@@ -1306,6 +1310,14 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
                                           psEndpoint->bEndpointAddress,
                                           ui8OUTEndpoint);
                         psEndpoint->bEndpointAddress = ui8OUTEndpoint++;
+                        // Check if a BULK Endpoint for Data transfer is being set.
+                        if(((psEndpoint->bmAttributes & USB_EP_ATTR_TYPE_M) ==
+                        		USB_EP_ATTR_BULK) &&
+                        		(psCompDevice->ui16PID == USB_PID_COMP_SERIAL))
+                        {
+                        	// Set the boolean that an OUT Endpoint for Data transfer is set.
+                        	bOUTEndpointSet = true;
+                        }
                     }
                 }
 

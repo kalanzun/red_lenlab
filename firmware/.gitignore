@@ -2,4 +2,5 @@
 /.launches/
 /Debug/
 /Release/
+/targetConfigs/
 /.ccsproject

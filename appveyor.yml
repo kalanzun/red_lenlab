@@ -1,0 +1,23 @@
+branches:
+  only:
+    - main
+image:
+  - Ubuntu
+  - Ubuntu2004
+  - macOS
+  - Visual Studio 2019
+build_script:
+  - cmd: C:\Python39-x64\python -u build.py
+  - sh: $HOME/venv3.9/bin/python build.py
+artifacts:
+  - path: 'Lenlab-*-linux-x86_64.AppImage'
+  - path: 'lenlab-*-linux-x86_64'
+  - path: 'Lenlab-*-mac.dmg'
+  - path: 'Lenlab-*-win.zip'
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: 1jImAYiBl0QnfhjcWQIZJCu4egVYVbkB3A2yS3EBD3SxoPA3Gq65hy18n6kaAOh9
+    prerelease: true
+    on:
+      APPVEYOR_REPO_TAG: true

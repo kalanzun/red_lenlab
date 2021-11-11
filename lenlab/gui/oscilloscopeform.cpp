@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,7 @@
 
 #include "oscilloscopeform.h"
 #include "ui_oscilloscopeform.h"
-#include "pointvectorseriesdata.h"
-#include "qwt_text.h"
-#include "qwt_plot_renderer.h"
-//#include <QDebug>
+
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -31,33 +28,40 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::OscilloscopeForm)
 {
+    QString stylesheet;
+
     ui->setupUi(this);
 
-    QwtText x_label("Zeit [ms]");
-    QFont x_font(ui->plot->axisFont(2));
-    x_label.setFont(x_font);
-    ui->plot->setAxisTitle(2, x_label);
+    prepareChart(ui->labChart);
 
-    QwtText y_label("Spannung [V]");
-    QFont y_font(ui->plot->axisFont(0));
-    y_label.setFont(y_font);
-    ui->plot->setAxisTitle(0, y_label);
+    auto series = ui->labChart->series();
+    for (int i = 0; i < series.size(); ++i) {
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + series.at(i)->color().name() + "; }\n";
+        series.at(i)->setVisible(i == 0);
+    }
 
-    for (int i = 0; i < 7; ++i)
-        ui->timerangeBox->insertItem(i, QString("%L1 ms").arg(0.5*(1<<i)));
-    ui->timerangeBox->setCurrentIndex(3);
-
-    m_curves[0] = newCurve(QColor("#729fcf"), true); // sky blue 0
-    //m_curves[0] = newCurve(QColor("#8ae234"), true); // green 0
-    m_curves[1] = newCurve(QColor("#ef2929"), true); // scarlet red 0
-    //m_curves[1] = newCurve(QColor("#fce94f"), true); // butter 0
-
-    newGrid();
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 OscilloscopeForm::~OscilloscopeForm()
 {
     delete ui;
+}
+
+void
+OscilloscopeForm::prepareChart(LabChart *chart)
+{
+    chart->setLabelX("Zeit [ms]");
+    chart->setLabelY("Spannung [V]");
+
+    for (unsigned int i = 0; i < 2; ++i) {
+        auto series = new QLineSeries();
+        series->setName(QString("Kanal ") + QString::number(i + 1));
+        chart->addSeries(series);
+    }
+
+    chart->createDefaultAxes();
 }
 
 void
@@ -77,41 +81,12 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
             this, &OscilloscopeForm::seriesChanged);
 
+    seriesChanged(m_oscilloscope->getSeries());
+
     connect(&m_lenlab->voltmeter, &model::Voltmeter::activeChanged,
             this, &OscilloscopeForm::activeChanged);
     connect(&m_lenlab->frequencysweep, &model::Oscilloscope::activeChanged,
             this, &OscilloscopeForm::activeChanged);
-}
-
-QwtPlotCurve *
-OscilloscopeForm::newCurve(const QColor &color, bool visible)
-{
-    std::unique_ptr<QwtPlotCurve> curve(new QwtPlotCurve());
-
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-    curve->setVisible(visible);
-
-    QPen pen;
-    pen.setColor(color);
-    pen.setWidth(2);
-    curve->setPen(pen);
-
-    curve->attach(ui->plot); // acquires ownership
-    return curve.release();
-}
-
-QwtPlotGrid *
-OscilloscopeForm::newGrid()
-{
-    std::unique_ptr<QwtPlotGrid> grid(new QwtPlotGrid());
-
-    QPen pen;
-    pen.setStyle(Qt::DotLine);
-    pen.setColor("#555753"); // aluminium 4
-    grid->setPen(pen);
-
-    grid->attach(ui->plot); // acquires ownership
-    return grid.release();
 }
 
 void
@@ -145,10 +120,7 @@ OscilloscopeForm::on_stopButton_clicked()
 void
 OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
-    for (unsigned int i = 0; i < m_curves.size(); ++i) {
-        m_curves[i]->setSamples(new PointVectorSeriesData(series, i)); // acquires ownership
-    }
-    ui->plot->replot();
+    ui->labChart->replace(series);
 }
 
 void
@@ -160,13 +132,13 @@ OscilloscopeForm::on_samplerateBox_activated(int index)
 void
 OscilloscopeForm::on_ch1CheckBox_stateChanged(int state)
 {
-    m_curves[0]->setVisible(state == Qt::Checked);
+    ui->labChart->setChannelVisible(0, state == Qt::Checked);
 }
 
 void
 OscilloscopeForm::on_ch2CheckBox_stateChanged(int state)
 {
-    m_curves[1]->setVisible(state == Qt::Checked);
+    ui->labChart->setChannelVisible(1, state == Qt::Checked);
 }
 
 void
@@ -178,28 +150,50 @@ OscilloscopeForm::on_saveButton_clicked()
 void
 OscilloscopeForm::save()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "oszilloskop.csv", tr("CSV (*.csv)"));
-    try {
-        m_oscilloscope->save(fileName);
+    QString fileName = QFileDialog::getSaveFileName(this, "Speichern", "oszilloskop.csv", "CSV (*.csv)");
+
+    if (fileName.isEmpty()) {
+        return;
     }
-    catch (std::exception const &) {
-        QMessageBox::critical(this, "Speichern", "Fehler beim Speichern der Daten"); // TODO include reason
+
+    QSaveFile file(fileName);
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Speichern", QString("Fehler beim Speichern der Daten\n") + file.errorString());
+        return;
     }
+
+    QTextStream stream(&file);
+    m_oscilloscope->save(stream);
+    file.commit();
 }
 
 void
 OscilloscopeForm::saveImage()
 {
-    QwtPlotRenderer renderer;
-    renderer.exportTo(ui->plot, "oszilloskop.pdf"); // it asks for the filename
+    QString fileName = QFileDialog::getSaveFileName(this, "Bild Speichern", "oszilloskop.pdf", "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    LabChart chart;
+    prepareChart(&chart);
+    chart.chart()->legend()->show();
+    chart.setChannelVisible(0, ui->ch1CheckBox->checkState() == Qt::Checked);
+    chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);
+    chart.replace(m_oscilloscope->getSeries());
+    chart.print(fileName);
 }
 
 void
 OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
 {
+    /*
     double timerange = 0.5 * (1<<index);
     ui->plot->setAxisScale(QwtPlot::xBottom, -timerange/2, timerange/2);
     ui->plot->replot();
+    */
 }
 
 void OscilloscopeForm::activeChanged(bool)

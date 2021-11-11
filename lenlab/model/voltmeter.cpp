@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -262,31 +262,13 @@ Voltmeter::clear()
 }
 
 void
-Voltmeter::save(const QString &fileName)
+Voltmeter::save(QTextStream &stream)
 {
-    setAutoSave(false);
-    setFileName(fileName);
-    do_save();
-}
-
-void
-Voltmeter::do_save()
-{
-    QSaveFile file(mFileName);
-    qDebug("save");
-
-    if (!file.open(QIODevice::WriteOnly)) {
-        throw std::exception();
-    }
-
-    QTextStream stream(&file);
-
     stream << QString("Lenlab red %1.%2 Voltmeter-Daten\n").arg(MAJOR).arg(MINOR);
-
 
     stream << "Zeit";
 
-    for (size_t i = 0; i < m_loggerseries->getChannels(); ++i) {
+    for (int i = 0; i < m_loggerseries->getChannels(); ++i) {
         if (mChannels[i]) {
             stream << DELIMITER << "Kanal_" << (i + 1);
         }
@@ -294,17 +276,15 @@ Voltmeter::do_save()
 
     stream << "\n";
 
-    for (size_t t = 0; t < m_loggerseries->getLength(0); ++t) {
+    for (int t = 0; t < m_loggerseries->getLength(); ++t) {
         stream << m_loggerseries->getX(t);
-        for (size_t i = 0; i < m_loggerseries->getChannels(); ++i) {
+        for (int i = 0; i < m_loggerseries->getChannels(); ++i) {
             if (mChannels[i]) {
                 stream << DELIMITER << m_loggerseries->getY(t, i);
             }
         }
         stream << "\n";
     }
-
-    file.commit();
 }
 
 void
@@ -319,17 +299,17 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
 
     // TODO Implement time stamp???
 
-    for (std::size_t i = 0; i < m_loggerseries->getChannels(); ++i)
+    for (int i = 0; i < m_loggerseries->getChannels(); ++i)
         m_loggerseries->append(i, static_cast< double >(buffer[i]) / VOLT);
 
     // A buried reply contains the header in the buffer and is therefore 5 elements, not 4
     // TODO hard coded 5
     auto num_buried_replies = (reply->getUInt32BufferLength() - m_loggerseries->getChannels()) / 5;
-    for (std::size_t j = 0; j < num_buried_replies; ++j)
+    for (int j = 0; j < num_buried_replies; ++j)
     {
         emit mLenlab.logMessage("Mehrfach-Paket empfangen.");
         if (buffer[4 + 5*j] == 0xFF000407) // header for LoggerData (little endian)
-            for (std::size_t i = 0; i < m_loggerseries->getChannels(); ++i)
+            for (int i = 0; i < m_loggerseries->getChannels(); ++i)
                 m_loggerseries->append(i, static_cast< double >(buffer[4 + 5*j + 1 + i]) / VOLT);
         else
             emit mLenlab.logMessage("Ungültiges Mehrfach-Paket.");
@@ -339,7 +319,7 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
     setMeasurementData(true);
     setUnsavedData(true);
 
-    emit seriesUpdated();
+    emit seriesUpdated(m_loggerseries);
 
 }
 
@@ -347,14 +327,19 @@ void
 Voltmeter::on_autosave()
 {
     if (mUnsavedData) {
-        try {
-            do_save();
-            setUnsavedData(false);
-        }
-        catch (std::exception const &) {
+        QSaveFile file(mFileName);
+
+        if (!file.open(QIODevice::WriteOnly)) {
             setAutoSave(false);
-            qDebug("Voltmeter: Fehler beim automatischen Speichern."); // TODO error signal and include reason
+            emit mLenlab.logMessage(QString("Voltmeter: Fehler beim automatischen Speichern. ") + file.errorString());
+            return;
         }
+
+        QTextStream stream(&file);
+        save(stream);
+        file.commit();
+
+        setUnsavedData(false);
     }
 }
 

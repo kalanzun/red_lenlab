@@ -2,7 +2,7 @@
 //
 // usbhostenum.c - Device enumeration code for the USB host library.
 //
-// Copyright (c) 2008-2017 Texas Instruments Incorporated.  All rights reserved.
+// Copyright (c) 2008-2020 Texas Instruments Incorporated.  All rights reserved.
 // Software License Agreement
 // 
 // Texas Instruments (TI) is supplying this software for use solely and
@@ -18,7 +18,7 @@
 // CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
 // DAMAGES, FOR ANY REASON WHATSOEVER.
 // 
-// This is part of revision 2.1.4.178 of the Tiva USB Library.
+// This is part of revision 2.2.0.295 of the Tiva USB Library.
 //
 //*****************************************************************************
 
@@ -1523,26 +1523,6 @@ USBHCDPipeConfig(uint32_t ui32Pipe, uint32_t ui32MaxPayload,
 
 //*****************************************************************************
 //
-//! This function is used to return the current status of a USB HCD pipe.
-//!
-//! This function will return the current status for a given USB pipe.  If
-//! there is no status to report this call will simply return
-//! \b USBHCD_PIPE_NO_CHANGE.
-//!
-//! \param ui32Pipe is the USB pipe for this status request.
-//!
-//! \return This function returns the current status for the given endpoint.
-//! This will be one of the \b USBHCD_PIPE_* values.
-//
-//*****************************************************************************
-uint32_t
-USBHCDPipeStatus(uint32_t ui32Pipe)
-{
-    return(0);
-}
-
-//*****************************************************************************
-//
 //! This function is used to write data to a USB HCD pipe.
 //!
 //! \param ui32Pipe is the USB pipe to put data into.
@@ -1614,12 +1594,15 @@ USBHCDPipeWrite(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
                             g_sUSBHCD.psUSBOUTPipes[ui32PipeIdx].ui8DMAChannel,
                             pui8Data, ui32RemainingBytes) != 0)
             {
-                if(ui32RemainingBytes < 64)
+                if(ui32RemainingBytes <
+                   g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx])
                 {
                     g_sUSBHCD.psUSBOUTPipes[ui32PipeIdx].iState =
                                                             ePipeWriteDMASend;
                 }
-                else if((ui32RemainingBytes % 64) == 0)
+                else if((ui32RemainingBytes %
+                   g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx]) ==
+                   0)
                 {
                     g_sUSBHCD.psUSBOUTPipes[ui32PipeIdx].iState =
                                                                 ePipeWriteDMA;
@@ -1642,11 +1625,13 @@ USBHCDPipeWrite(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
         if(bUseDMA == false)
         {
             //
-            // Only send 64 bytes at a time if not using DMA.
+            // Only send MaxPacketSize bytes a time if not using DMA.
             //
-            if(ui32ByteToSend > 64)
+            if(ui32ByteToSend >
+               g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx])
             {
-                ui32ByteToSend = 64;
+                ui32ByteToSend =
+                    g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx];
             }
             else
             {
@@ -1717,10 +1702,11 @@ USBHCDPipeWrite(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
                 pui8Data += ui32ByteToSend;
 
                 //
-                // If there are less than 64 bytes to send then this is the
-                // last of the data to go out.
+                // If there are less than MaxPacketSize bytes to send then 
+                // this is the last of the data to go out.
                 //
-                if(ui32RemainingBytes < 64)
+                if(ui32RemainingBytes <
+                   g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx])
                 {
                     ui32ByteToSend = ui32RemainingBytes;
                 }
@@ -2111,7 +2097,10 @@ USBHCDPipeRead(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
             //
             g_sUSBHCD.psUSBINPipes[ui32PipeIdx].pui8ReadPtr = pui8Data;
             g_sUSBHCD.psUSBINPipes[ui32PipeIdx].ui32ReadSize =
-                        (ui32RemainingBytes < 64) ? ui32RemainingBytes : 64;
+                   (ui32RemainingBytes <
+                    g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx]) ?
+                    ui32RemainingBytes :
+                    g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx];
         }
 
         //
@@ -2199,7 +2188,10 @@ USBHCDPipeRead(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
                     // Compute bytes to transfer and set up transfer
                     //
                     ui32BytesRead =
-                            ui32RemainingBytes > 64 ? 64 : ui32RemainingBytes;
+                     ui32RemainingBytes >
+                     g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx] ?
+                     g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx] :
+                     ui32RemainingBytes;
 
                     //
                     // Acknowledge that the data was read from the endpoint.
@@ -2213,10 +2205,11 @@ USBHCDPipeRead(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
                 ui32RemainingBytes -= ui32BytesRead;
 
                 //
-                // If there were less than 64 bytes read, then this was a short
-                // packet and no more data will be returned.
+                // If there were less than MaxPacketSize bytes read, then this
+                // was a short packet and no more data will be returned.
                 //
-                if(ui32BytesRead < 64)
+                if(ui32BytesRead <
+                   g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx])
                 {
                     //
                     // Subtract off the bytes that were not received and exit
@@ -2231,7 +2224,8 @@ USBHCDPipeRead(uint32_t ui32Pipe, uint8_t *pui8Data, uint32_t ui32Size)
                     // Move the buffer ahead to receive more data into the
                     // buffer.
                     //
-                    pui8Data += 64;
+                    pui8Data +=
+                      g_sUSBHCD.psDMAInstance->pui32MaxPacketSize[ui32PipeIdx];
                 }
                 break;
             }
@@ -4068,8 +4062,11 @@ USBHostIntHandlerInternal(uint32_t ui32Index, uint32_t ui32Status)
                     // Remember that we need to notify this device's class
                     // driver that an interrupt occurred.
                     //
-                    g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice->ui32Flags |=
+                    if(g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice)
+                    {
+                        g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice->ui32Flags |=
                                                     USBHDEV_FLAG_NOTIFYINT;
+                    }
                 }
             }
             if(g_sUSBHCD.psUSBOUTPipes[ui32Idx].iState ==
@@ -4307,8 +4304,11 @@ USBHostIntHandlerInternal(uint32_t ui32Index, uint32_t ui32Status)
             // Remember that we need to notify this device's class
             // driver that an interrupt occurred.
             //
-            g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice->ui32Flags |=
+            if(g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice)
+            {
+                g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice->ui32Flags |=
                                                     USBHDEV_FLAG_NOTIFYINT;
+            }
         }
 
         //
@@ -4415,7 +4415,7 @@ USBHostIntHandlerInternal(uint32_t ui32Index, uint32_t ui32Status)
             //
             if(g_sUSBHCD.psUSBOUTPipes[ui32Idx].psDevice)
             {
-                g_sUSBHCD.psUSBINPipes[ui32Idx].psDevice->ui32Flags |=
+                g_sUSBHCD.psUSBOUTPipes[ui32Idx].psDevice->ui32Flags |=
                                                     USBHDEV_FLAG_NOTIFYINT;
             }
         }

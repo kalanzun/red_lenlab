@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ usb::pPacket &Message::getPacket()
     return mPacket;
 }
 
-size_t
+int
 Message::getHeadLength()
 {
     return mHeadLength;
@@ -91,7 +91,7 @@ void
 Message::setCommand(Command code)
 {
     mPacket->getByteBuffer()[0] = code;
-    for (size_t i = 1; i < mHeadLength; ++i)
+    for (int i = 1; i < mHeadLength; ++i)
         mPacket->getByteBuffer()[i] = 0;
     mPacket->setByteLength(mHeadLength);
 }
@@ -114,7 +114,7 @@ void
 Message::setReply(Reply reply)
 {
     mPacket->getByteBuffer()[0] = reply;
-    for (size_t i = 1; i < mHeadLength; ++i)
+    for (int i = 1; i < mHeadLength; ++i)
         mPacket->getByteBuffer()[i] = 0;
     mPacket->setByteLength(mHeadLength);
 }
@@ -165,7 +165,7 @@ Message::isLast() const
     return static_cast<bool>(mPacket->getByteBuffer()[3]);
 }
 
-size_t
+int
 Message::getUInt32BufferLength() const
 {
     return (mPacket->getByteLength() - mHeadLength) / sizeof(uint32_t);
@@ -183,10 +183,10 @@ Message::setUInt32Vector(const QVector<uint32_t> &vector)
     setType(IntArray);
     for (int i = 0; i < vector.size(); ++i)
         getUInt32Buffer()[i] = vector.at(i);
-    mPacket->setByteLength(mHeadLength + static_cast<size_t>(vector.size()) * sizeof(uint32_t));
+    mPacket->setByteLength(mHeadLength + vector.size() * sizeof(uint32_t));
 }
 
-size_t
+int
 Message::getUInt16BufferLength() const
 {
     return (mPacket->getByteLength() - mHeadLength) / sizeof(uint16_t);
@@ -198,7 +198,7 @@ Message::getUInt16Buffer()
     return reinterpret_cast<uint16_t *>(mPacket->getBuffer() + mHeadLength / 4);
 }
 
-size_t
+int
 Message::getUInt8BufferLength() const
 {
     return (mPacket->getByteLength() - mHeadLength) / sizeof(uint8_t);
@@ -210,7 +210,7 @@ Message::getUInt8Buffer()
     return reinterpret_cast<uint8_t *>(mPacket->getBuffer() + mHeadLength / 4);
 }
 
-size_t
+int
 Message::getInt8BufferLength() const
 {
     return (mPacket->getByteLength() - mHeadLength) / sizeof(int8_t);

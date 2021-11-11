@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "indexparameter.h"
 
 #include <QObject>
+#include <QTextStream>
 #include <QTimer>
 
 namespace model {
@@ -66,7 +67,7 @@ public:
 
     void setSamplerate(uint32_t index);
 
-    void save(const QString &fileName);
+    void save(QTextStream &stream);
 
 private:
     static double to_double(uint16_t state);

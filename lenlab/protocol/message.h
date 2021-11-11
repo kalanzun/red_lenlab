@@ -1,6 +1,6 @@
 /*
  * Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
- * Copyright (C) 2017-2020 Christoph Simon and the Lenlab developer team
+ * Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ namespace protocol {
 
 class Message
 {
-    static size_t const mHeadLength = LENLAB_PACKET_HEAD_LENGTH; // bytes
+    static int const mHeadLength = LENLAB_PACKET_HEAD_LENGTH; // bytes
     usb::pPacket mPacket;
 
     static std::array<char const *, NUM_COMMANDS> const mCommandNames;
@@ -49,7 +49,7 @@ public:
 
     usb::pPacket & getPacket();
 
-    static size_t getHeadLength();
+    static int getHeadLength();
     uint8_t * getHead();
 
     void setCommand(Command);
@@ -68,17 +68,17 @@ public:
 
     bool isLast() const;
 
-    size_t getUInt32BufferLength() const;
+    int getUInt32BufferLength() const;
     uint32_t * getUInt32Buffer();
     void setUInt32Vector(QVector<uint32_t> const & vector);
 
-    size_t getUInt16BufferLength() const;
+    int getUInt16BufferLength() const;
     uint16_t * getUInt16Buffer();
 
-    size_t getUInt8BufferLength() const;
+    int getUInt8BufferLength() const;
     uint8_t * getUInt8Buffer();
 
-    size_t getInt8BufferLength() const;
+    int getInt8BufferLength() const;
     int8_t * getInt8Buffer();
 
     QString getString() const;
