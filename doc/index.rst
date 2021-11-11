@@ -27,11 +27,37 @@ Download: `https://github.com/kalanzun/red_lenlab/releases <https://github.com/k
 
 Dokumentation: `https://red-lenlab.readthedocs.io <https://red-lenlab.readthedocs.io>`_
 
+Installation
+============
+
+Das Lenlab-Softwareprojekt besteht aus zwei Teilen: Eine Firmware, welche auf dem Microcontroller des Launchpads läuft
+und eine Software für den Computer, welche die Messdaten vom Launchpad empfängt.
+
+Die Firmware läuft auf dem Launchpad EK-TM4C123GXL (Texas Instruments), Lenlab läuft auf Windows, Mac und Linux.
+
+Zur Verwendung der Software installieren Sie bitte einmalig die Firmware in den Speicher des Mikrocontrollers.
+Die Anleitung befindet sich im Unterpunkt :doc:`Firmware <firmware>`. Laden Sie außerdem die passende Variante
+der Software für Ihr Betriebssystem herunter und führen Sie diese aus. Die Details werden im Unterpunkt
+:doc:`Lenlab <lenlab>` erklärt.
+
+USB-Anschlüsse des Launchpads
+=============================
+
+.. image:: launchpad_usb_ports.svg
+
+Das Launchpad hat zwei USB-Anschlüsse, einen für das Programmieren und Testen
+der Firmware (DEBUG) und einen für die Kommunikation zwischen der Firmware und
+Lenlab auf dem Computer (DEVICE). Der POWER-Schalter wählt, von welchem
+USB-Anschluss die Versorgungsspannung bezogen wird. Wenn die Stromversorgung
+eingeschaltet ist, leuchtet die grüne POWER-LED, welche sich ebenfalls in dem
+Bereich links oben befindet.
+
 .. toctree::
     :maxdepth: 2
     :caption: Inhaltsverzeichnis:
 
-    preparation
+    firmware
+    lenlab
     logger
     oscilloscope
     signal
