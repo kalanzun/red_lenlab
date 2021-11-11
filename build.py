@@ -187,7 +187,7 @@ def build_windows(tag: str):
         env=env,
     )
     run(
-        ["make", f"-j{cpu_count()}"],
+        [make, f"-j{cpu_count()}"],
         env=env,
     )
 
