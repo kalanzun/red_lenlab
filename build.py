@@ -66,11 +66,6 @@ def build_linux(tag: str):
     run([qmake, "red_lenlab.pro"])
     run(["make", f"-j{cpu_count()}"])
 
-    if os.environ.get("APPVEYOR_BUILD_WORKER_IMAGE", str()) == "Ubuntu2004":
-        print_header("deploy")
-        copy("lenlab/app/lenlab", f"lenlab-{tag}-linux-x86_64")
-        return
-
     print_header("download linuxdeployqt")
     linuxdeployqt_url = (
         "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/"
@@ -213,7 +208,7 @@ def build_windows(tag: str):
     copy("LICENSE.pdf", release_dir)
 
     print_header("package")
-    run(["7z", "a", f"Lenlab-{tag}-win.zip", f"{release_dir}/*"], shell=True)
+    run(["7z", "a", Path(f"Lenlab-{tag}-win.zip").absolute(), fr"*"], cwd=release_dir)
 
 
 def main():

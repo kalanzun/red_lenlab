@@ -10,9 +10,16 @@ workflows:
               only: main
             tags:
               only: /.*/
+      - build_arm:
+          filters:
+            branches:
+              only: main
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - build
+            - build_arm
           filters:
             branches:
               ignore: /.*/
@@ -23,26 +30,42 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:202101-01
-    resource_class: arm.medium
     steps:
       - checkout
       - run: sudo apt update
-      - run: sudo apt install build-essential qt5-default libqt5charts5-dev libqt5svg5-dev libqt5opengl5-dev libusb-1.0-0-dev
+      - run: sudo apt install build-essential qt5-default libqt5charts5-dev libusb-1.0-0-dev
       - run: qmake red_lenlab.pro
       - run: make -j2
+      - run: cp lenlab/app/lenlab lenlab-linux-x86_64
       - store_artifacts:
-          path: lenlab/app/lenlab
-          destination: lenlab
+          path: lenlab-linux-x86_64
       - persist_to_workspace:
-          root: lenlab/app/
+          root: .
           paths:
-            - lenlab
-  deploy:
+            - lenlab-linux-x86_64
+  build_arm:
     machine:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
     steps:
+      - checkout
+      - run: sudo apt update
+      - run: sudo apt install build-essential qt5-default libqt5charts5-dev libusb-1.0-0-dev
+      - run: qmake red_lenlab.pro
+      - run: make -j2
+      - run: cp lenlab/app/lenlab lenlab-linux-arm64
+      - store_artifacts:
+          path: lenlab-linux-arm64
+      - persist_to_workspace:
+          root: .
+          paths:
+            - lenlab-linux-arm64
+  deploy:
+    machine:
+      image: ubuntu-2004:202101-01
+    steps:
       - attach_workspace:
           at: /tmp/workspace
       - run: go get github.com/github-release/github-release
-      - run: github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name "lenlab-${CIRCLE_TAG}-linux-arm64" --file /tmp/workspace/lenlab
+      - run: github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name "lenlab-${CIRCLE_TAG}-linux-x86_64" --file /tmp/workspace/lenlab-linux-x86_64
+      - run: github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name "lenlab-${CIRCLE_TAG}-linux-arm64" --file /tmp/workspace/lenlab-linux-arm64

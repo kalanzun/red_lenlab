@@ -3,7 +3,6 @@ branches:
     - main
 image:
   - Ubuntu
-  - Ubuntu2004
   - macOS
   - Visual Studio 2019
 build_script:
@@ -11,7 +10,6 @@ build_script:
   - sh: $HOME/venv3.9/bin/python build.py
 artifacts:
   - path: 'Lenlab-*-linux-x86_64.AppImage'
-  - path: 'lenlab-*-linux-x86_64'
   - path: 'Lenlab-*-mac.dmg'
   - path: 'Lenlab-*-win.zip'
 deploy:
