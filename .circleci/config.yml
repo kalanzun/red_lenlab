@@ -1,0 +1,46 @@
+version: 2.1
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - run: sudo apt update
+      - run: sudo apt install build-essential qt5-default libqt5charts5-dev libqt5svg5-dev libqt5opengl5-dev libusb-1.0-0-dev
+      - run: qmake red_lenlab.pro
+      - run: make -j2
+      - store_artifacts:
+          path: lenlab/app/lenlab
+          destination: lenlab
+      - persist_to_workspace:
+          root: lenlab/app/
+          paths:
+            - lenlab
+  deploy:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: go get github.com/github-release/github-release
+      - run: github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name "lenlab-${CIRCLE_TAG}-linux-arm64" --file /tmp/workspace/lenlab

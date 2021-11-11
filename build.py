@@ -1,96 +1,112 @@
 #  Lenlab, an oscilloscope software for the TI LaunchPad EK-TM4C123GXL
 #  Copyright (C) 2017-2021 Christoph Simon and the Lenlab developer team
-#  
+#
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import re
-import shutil
-from subprocess import call as run
+from pathlib import Path
+from multiprocessing import cpu_count
+from shutil import copy, copytree
+from subprocess import run
 import sys
 
 
-def build_osx(env):
-    env["PATH"] = env["HOME"] + r"/Qt/6.1/macos/bin:" + env["PATH"]
-
-    run(["qmake", "red_lenlab.pro"], env=env)
-    run(["make"], env=env)
-
-    tag = env["APPVEYOR_REPO_TAG_NAME"]
-
-    os.mkdir("build")
-    run(["cp", "-r", "lenlab/app/lenlab.app", "build/"])
-    run(["macdeployqt", "build/lenlab.app"], env=env)
-
-    # Readme and License
-    shutil.copy("README.md", "build/README.md")
-    shutil.copy("README.pdf", "build/README.pdf")
-    shutil.copy("LICENSE.md", "build/LICENSE.md")
-    shutil.copy("LICENSE.pdf", "build/LICENSE.pdf")
-
-    run(
-        [
-            "hdiutil",
-            "create",
-            "-volname",
-            "Lenlab-" + tag,
-            "-srcFolder",
-            "build",
-            "-ov",
-            "-format",
-            "UDZO",
-            "Lenlab-" + tag + "-mac.dmg",
-        ]
-    )
+def print_header(headline: str):
+    print()
+    print("-" * 80)
+    print(headline)
+    print("-" * 80)
+    print()
 
 
-def build_linux(env):
-    env["PATH"] = env["HOME"] + r"/Qt/5.15/gcc_64/bin:" + env["PATH"]
+def path_str(path: Path):
+    if path.is_symlink():
+        return f"{path.name} -> {path.readlink().name}"
+    else:
+        return path.name
+
+
+def print_versions(name: str, prefix: Path, pattern: str = "*"):
+    print_header(f"Available {name} versions")
+    for node in prefix.glob(pattern):
+        print(f"- {path_str(node)}")
+
+
+def print_qt_version(qmake: Path):
+    print_header("Qt version")
+    versions = run([qmake, "--version"], capture_output=True, text=True)
+    print(versions.stdout)
+
+
+def build_linux(tag: str):
+    print_versions("Qt", Path.home() / "Qt")
+    print_versions("Python", Path.home(), "venv*")
+
     # there is a Qt6, but it did not work because glibc is too old
+    qmake = Path.home() / "Qt/latest/gcc_64/bin/qmake"
+    print_qt_version(qmake)
 
+    print_header("install")
     run(["sudo", "apt-get", "update"])
-    run(["sudo", "apt-get", "install", "-y", "libusb-1.0-0-dev"])
+    # run(["sudo", "apt-get", "upgrade", "-y"])  # it takes way too long
+    run(["sudo", "apt-get", "install", "-y", "libgl1-mesa-dev", "libusb-1.0-0-dev"])
 
-    run(["qmake", "red_lenlab.pro"], env=env)
-    run(["make"])
+    print_header("build")
+    run([qmake, "red_lenlab.pro"])
+    run(["make", f"-j{cpu_count()}"])
 
-    tag = env["APPVEYOR_REPO_TAG_NAME"]
+    if os.environ.get("APPVEYOR_BUILD_WORKER_IMAGE", str()) == "Ubuntu2004":
+        print_header("deploy")
+        copy("lenlab/app/lenlab", f"lenlab-{tag}-linux-x86_64")
+        return
 
+    print_header("download linuxdeployqt")
+    linuxdeployqt_url = (
+        "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/"
+        "linuxdeployqt-continuous-x86_64.AppImage"
+    )
     run(
         [
             "wget",
             "-c",
             "-nv",
-            "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage",
+            linuxdeployqt_url,
         ]
     )
-    run(["chmod", "a+x", "linuxdeployqt-continuous-x86_64.AppImage"])
+    linuxdeployqt = Path("linuxdeployqt-continuous-x86_64.AppImage").absolute()
+    linuxdeployqt.chmod(0o700)
 
-    os.makedirs("build/usr/share/applications")
-    run(["cp", "linux/lenlab.desktop", "build/usr/share/applications/"])
+    print_header("deploy")
+    dest = Path("build/usr/share/applications")
+    dest.mkdir(parents=True)
+    copy("linux/lenlab.desktop", dest)
 
-    os.makedirs("build/usr/share/icons/hicolor/scaleable/")
-    run(["cp", "linux/lenlab.svg", "build/usr/share/icons/hicolor/scaleable/"])
+    dest = Path("build/usr/share/icons/hicolor/scaleable/")
+    dest.mkdir(parents=True)
+    copy("linux/lenlab.svg", dest)
 
-    os.makedirs("build/usr/bin")
-    run(["cp", "lenlab/app/lenlab", "build/usr/bin/"])
+    dest = Path("build/usr/bin")
+    dest.mkdir(parents=True)
+    copy("lenlab/app/lenlab", dest)
 
     # linuxdeployqt uses VERSION environment variable for the filename
-    env["VERSION"] = tag + "-linux"
+    env = dict(os.environ)
+    env["VERSION"] = f"{tag}-linux"
+    env["PATH"] = f"{qmake.parent}:{env['PATH']}"
     run(
         [
-            "./linuxdeployqt-continuous-x86_64.AppImage",
+            linuxdeployqt,
             "build/usr/share/applications/lenlab.desktop",
             "-appimage",
         ],
@@ -98,87 +114,126 @@ def build_linux(env):
     )
 
 
-def build_windows(env):
-    env["PATH"] = r"C:\Qt\6.2\mingw81_64\bin;C:\Qt\Tools\mingw810_64\bin;" + env["PATH"]
+def build_osx(tag: str):
+    print_versions("Qt", Path.home() / "Qt")
+    print_versions("Python", Path.home(), "venv*")
 
+    qmake = Path.home() / "Qt/6.1/macos/bin/qmake"
+    macdeployqt = Path.home() / "Qt/6.1/macos/bin/macdeployqt"
+    print_qt_version(qmake)
+
+    print_header("build")
+    run([qmake, "red_lenlab.pro"])
+    run(["make", f"-j{cpu_count()}"])
+
+    print_header("deploy")
+    release_dir = Path("build")
+    copytree("lenlab/app/lenlab.app", release_dir / "lenlab.app")
+    run([macdeployqt, release_dir / "lenlab.app"])
+
+    print_header("Readme and License")
+    copy("README.md", release_dir)
+    copy("README.pdf", release_dir)
+    copy("LICENSE.md", release_dir)
+    copy("LICENSE.pdf", release_dir)
+
+    print_header("package")
+    run(
+        [
+            "hdiutil",
+            "create",
+            "-volname",
+            f"Lenlab-{tag}",
+            "-srcFolder",
+            release_dir,
+            "-ov",
+            "-format",
+            "UDZO",
+            f"Lenlab-{tag}-mac.dmg",
+        ]
+    )
+
+
+def build_windows(tag: str):
+    print_versions("Qt", Path(r"C:\Qt"))
+    print_versions("Python", Path(r"C:"), "Python*")
+
+    env = dict(os.environ)
+
+    qmake = Path(r"C:\Qt\6.2\mingw81_64\bin\qmake.exe")
+    make = Path(r"C:\Qt\Tools\mingw810_64\bin\mingw32-make.exe")
+    env["PATH"] = f"{qmake.parent};{make.parent};{env['PATH']}"
+    windeployqt = qmake.parent / "windeployqt.exe"
+    print_qt_version(qmake)
+
+    print_header("download libusb")
     run(
         [
             "appveyor",
             "DownloadFile",
             "https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.7z",
-        ]
+        ],
     )
-    os.mkdir("libusb")
-    run(["7z", "x", r"..\\libusb-1.0.24.7z"], cwd="libusb")
-
-    run(["qmake", "red_lenlab.pro"], env=env, shell=True)
-    run(["mingw32-make"], env=env, shell=True)
-
-    tag = env["APPVEYOR_REPO_TAG_NAME"]
-    result = re.compile(r"(\d)\.(\d)").match(tag)
-    major = int(result.group(1))
-    minor = int(result.group(2))
-
-    release_dir_name = "Lenlab-" + tag + "-win64"
-
-    os.makedirs(release_dir_name + "/lenlab")
-
-    shutil.copy(
-        "lenlab/app/release/lenlab.exe", release_dir_name + "/lenlab/lenlab.exe"
-    )
-    shutil.copy(
-        "libusb/MinGW64/dll/libusb-1.0.dll", release_dir_name + "/lenlab/libusb-1.0.dll"
-    )
-
+    libusb_dir = Path("libusb")
+    libusb_dir.mkdir()
     run(
-        ["windeployqt", "-opengl", "-printsupport", "lenlab.exe"],
-        cwd=release_dir_name + "/lenlab",
+        ["7z", "x", r"..\\libusb-1.0.24.7z"],
+        cwd=libusb_dir,
+    )
+
+    print_header("build")
+    run(
+        [qmake, "red_lenlab.pro"],
         env=env,
-        shell=True,
     )
-
-    # Readme and License
-    shutil.copy("README.md", release_dir_name + "/README.md")
-    shutil.copy("README.pdf", release_dir_name + "/README.pdf")
-    shutil.copy("LICENSE.md", release_dir_name + "/LICENSE.md")
-    shutil.copy("LICENSE.pdf", release_dir_name + "/LICENSE.pdf")
-
-    # Documentation
-    # Note: Do not collide with the repository directory 'red-lenlab' or with 'doc'
     run(
-        [
-            "appveyor",
-            "DownloadFile",
-            "-FileName", "html.zip",
-            "https://readthedocs.org/projects/red-lenlab/downloads/htmlzip/latest/",
-        ]
+        ["make", f"-j{cpu_count()}"],
+        env=env,
     )
-    run(["7z", "x", "html.zip", "-ohtml"])
-    shutil.move("html/red-lenlab-latest", release_dir_name + "/doc")
 
-    # Firmware
-    firmware_name = "lenlab_firmware_%s-%s.out" % (major, minor)
-    os.makedirs(release_dir_name + "/firmware")
-    shutil.copy("bin/" + firmware_name, release_dir_name + "/firmware/" + firmware_name)
+    print_header("deploy")
+    release_dir = Path(f"Lenlab-{tag}-win")
+    release_dir.mkdir()
+    print(f"{release_dir=}")
 
-    # uniflash_windows_64
-    shutil.copytree("uniflash_windows_64", release_dir_name + "/uniflash_windows_64")
-    path = os.path.join(release_dir_name, "uniflash_windows_64", "user_files", "images")
-    os.mkdir(path)
-    shutil.copy("bin/" + firmware_name, os.path.join(path, "red_firmware.out"))
+    dest = release_dir / "lenlab"
+    dest.mkdir()
+    copy("lenlab/app/release/lenlab.exe", dest / "lenlab.exe")
+    copy("libusb/MinGW64/dll/libusb-1.0.dll", dest / "libusb-1.0.dll")
+    run(
+        [windeployqt, "lenlab.exe"],
+        cwd=dest,
+        env=env,
+    )
 
-    run(["7z", "a", release_dir_name + ".zip", release_dir_name])
+    print_header("Readme and License")
+    copy("README.md", release_dir)
+    copy("README.pdf", release_dir)
+    copy("LICENSE.md", release_dir)
+    copy("LICENSE.pdf", release_dir)
+
+    print_header("package")
+    run(["7z", "a", f"Lenlab-{tag}-win.zip", release_dir])
 
 
 def main():
-    env = dict(os.environ)
+    env = os.environ
+    if env["APPVEYOR_REPO_TAG"] == "true":
+        tag = env["APPVEYOR_REPO_TAG_NAME"]
+    else:
+        tag = "dev"
+
+    print_header("Lenlab CI build script")
+    print(f"Tag: {tag}")
+    print(f"Platform: {sys.platform}")
+    print(f"Python: {sys.version}")
 
     if sys.platform.startswith("linux"):
-        build_linux(env)
+        build_linux(tag)
     elif sys.platform.startswith("darwin"):
-        build_osx(env)
+        build_osx(tag)
     elif sys.platform.startswith("win32"):
-        build_windows(env)
+        build_windows(tag)
     else:
         raise ValueError("Unknown operating system")
 

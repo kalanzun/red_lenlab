@@ -8,35 +8,37 @@ This file describes the build environment on the build servers for release build
 - libusb
 - Python (for the build scripts) and Sphinx (for the documentation)
 - TI Code Composer Studio
-- TI TivaWare for TM4C Series
 
 ## Build servers
 
-- Windows: https://ci.appveyor.com/project/ChristophSimon/red-lenlab
-- Linux, Mac: https://travis-ci.org/kalanzun/red_lenlab
+- Linux, Mac, and Windows: https://ci.appveyor.com/project/ChristophSimon/red-lenlab
+- Linux arm64: https://app.circleci.com/pipelines/github/kalanzun/red_lenlab
+- Firmware: https://github.com/kalanzun/red_lenlab/actions
 - Documentation: https://red-lenlab.readthedocs.io
 
 ### Windows
 
-Build environment configuration in `.appveyor.yml`
+Appveyor configuration `appveyor.yml`
 
 Virtual Machine Image: Visual Studio 2019
 
 Note: We use the MinGW compiler of the Qt package
 
+AppVeyor has Python and Qt pre-installed. `build.py` selects the version.
+
 Third party software download and install in `build.py`. The versions are defined there.
 
-- Qt: 6.2.0 and MinGW 8.1.0 64 bit compiler
-- libusb: Binary download from project home http://libusb.info (SourceForge), version 1.0.22, hard coded in `build.py`
-- Python: Build environment default
+- libusb: https://github.com/libusb/libusb/releases/
 
 ### Linux
 
-Build environment configuration in `.travis.yml`
+Appveyor configuration `appveyor.yml`
 
 Virtual Machine Image: Ubuntu 18.04 LTS Bionic Beaver
 
 The build environment configuration specifies the virtual machine image. It will use the default version of each software of that distribution.
+
+AppVeyor has Python and Qt pre-installed. `build.py` selects the version.
 
 Compiler: gcc
 
@@ -44,16 +46,23 @@ Note: AppImage requires the oldest supported Ubuntu LTS
 
 ### Mac
 
-Build environment configuration in `.travis.yml`: Xcode 12.5, macOS 11.3
+Appveyor configuration `appveyor.yml`
+
+macOS 10.15.7 "Catalina"
+
+The build environment configuration specifies the virtual machine image. It will use the default version of each software of that distribution.
+
+AppVeyor has Python and Qt pre-installed. `build.py` selects the version.
 
 Compiler: clang
 
-The configuration does not specify the exact version of the dependencies. If Travis CI or Homebrew update the default version, the build will use the new version.
+### Linux arm64
 
-Currently:
+CircleCI configuration `.circleci/config.yml`
 
-- qt5: Homebrew latest version is 5.15.2
-- qwt: Homebrew latest version is 6.1.6
+Ubuntu 20.04
+
+Ubuntu packages for Qt and libusb.
 
 ## Local build environment
 
@@ -74,7 +83,7 @@ To build and run lenlab or the tests, open `red_lenlab.pro` in Qt Creator and cl
 
 #### libusb
 
-http://libusb.info
+https://github.com/libusb/libusb/releases/
 
 Downloads -> Latest Windows Binaries
 
@@ -82,90 +91,76 @@ Extract file to the project directory (repository root), name `libusb`, remove t
 
 #### Python
 
-Anaconda or standard python.
+Anaconda or standard Python.
 
 #### Anaconda
 
 https://www.anaconda.com/download/
 
-`conda install sphinx_rtd_theme`
+`conda install sphinx sphinx_rtd_theme`
 
 #### Standard Python
+
+https://python.org/
 
 `pip install sphinx sphinx_rtd_theme`
 
 ### Linux
 
-Lenlab builds should work with the default development packages of qt6 and libusb and default compiler of the distribution.
+On PC and on arm64 (i.e. Raspberry Pi).
 
-### Raspberry Pi 4
+Lenlab builds should work with the default compiler and default development packages of qt and libusb.
 
-Ubuntu: https://cdimage.ubuntu.com/releases/18.04.5/release/
+Ubuntu: `apt install build-essential qt5-default libqt5charts5-dev libqt5svg5-dev libqt5opengl5-dev libusb-1.0-0-dev`
 
-`ssh ubuntu@ubuntu`
+#### Build instructions
 
-`sudo apt update`
-
-`sudo apt upgrade`
-
-`sudo apt install build-essential qt5-default libqwt-qt5-dev libqt5svg5-dev libqt5opengl5-dev libusb-1.0-0-dev pkg-config`
-
-`sudo reboot`
-
+Download the source code:
 `git clone https://github.com/kalanzun/red_lenlab.git`
 
+Go into the repository:
 `cd red_lenlab`
 
+qmake:
 `qmake red_lenlab.pro`
 
+make:
 `make -j4`
 
 The executable is `lenlab/app/lenlab`
 
 ### TI Code Composer Studio
 
+for building the firmware.
+
 It runs on Windows, Linux and Mac.
 
 Download von www.ti.com/tool/CCSTUDIO
 
-Virenscanner dekativeieren, dieser verhindert unter Umständen das Kopieren einiger Dateien.
+Virenscanner deaktivieren, dieser verhindert unter Umständen das Kopieren einiger Dateien.
 
-Standard-Pfad `c:\ti`
+Standard-Pfad `C:\ti`
 
 TM4C12x ARM Cortex-M4F core-based MCUs
 
 Standard-Einstellungen
 
-TI XDS Debug Probe Support
-
 Tiva/Stellaris ICDI Debug Probe
 
 #### Tiva Ware
+
+library for firmware development.
+Vendorized in `firmware/driverlib`, `firmware/inc`, `firmware/usblib`, and `firmware/utils`.
+
+Not required for building.
 
 http://www.ti.com/tool/SW-TM4C
 
 SW-TM4C: TivaWare for C Series Software (Complete)
 
-Im nächsten Fenster: TivaWare for TM4C Series
+Im nächsten Fenster: TivaWare for TM4C Series. The "KIT SOFTWARE SW-EK-TM4C123GXL-$VERSION.exe" is sufficient.
 
 TI Account notwendig
-
-Installieren im Standard-Pfad
-
-After installation, register the TivaWare library in the Code Composer Studio Workspace.
-
-red lenlab reads the TivaWare path from a variable named TIVAWARE_INSTALL.
-
-See "Creating Variable at Workspace Level" in [Portable Projects](http://software-dl.ti.com/ccs/esd/documents/ccs_portable-projects.html)
-
-To create a workspace level Build or Path variable:
-
-- Go to menu **Window → Preferences → Code Composer Studio → Build → Variables**.
-- Click the **Add** button to define a new variable.
-- Specify the **Variable name**: TIVAWARE_INSTALL
-- **Type**: Directory
-- and **Value**: `c:\ti\TivaWare...`
-- Click **Apply and Close**.
 
 #### Red lenlab firmware project import
 
@@ -176,10 +171,6 @@ File / Import / Code Composer Studio / CCS Projects
 Directory `red_lenlab/firmware`
 
 Do not tick copy.
-
-The build settings use `TIVAWARE_INSTALL` to link files and should work right away.
-
-If it complains about target configuration not set, right click on target Configurations/Tiva TM4C1230H6PM.ccxml and select set as default target Configuration.
 
 #### UART terminal for debug messages
 
