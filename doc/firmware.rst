@@ -66,7 +66,7 @@ herunter und installieren Sie es.
 
 Uniflash unterstützt derzeit Windows, Mac und Linux, aber nur x86_64.
 
-Laden Sie die Firmware ``lenlab_firmware_[VERSION].out`` herunter von
+Laden Sie die Firmware ``lenlab_firmware-[VERSION].out`` herunter von
 `Releases kalanzun/red_lenlab <https://github.com/kalanzun/red_lenlab/releases>`_.
 
 * Das Lenlab-Board ist über den DEBUG-Anschluss verbunden, der Schalter steht auf DEBUG, die grüne Power-LED leuchtet.
