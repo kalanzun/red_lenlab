@@ -60,7 +60,7 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Rename firmware
-        run: cp red_firmware.out lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
+        run: cp firmware/Debug/red_firmware.out lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
       - name: Rename flash package
         run: cp lenlab_flash-win.zip lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip
       - name: Release
