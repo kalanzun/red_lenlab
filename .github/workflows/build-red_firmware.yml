@@ -36,11 +36,17 @@ jobs:
         run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectImport -ccs.location ${{ github.workspace }}/firmware/
       - name: Build
         run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware
+      - name: Package
+        run: cp firmware/Debug/red_firmware.out lenlab_flash/red_firmware.out
+      - name: Create archive
+        run: (cd lenlab_flash && zip -r ../lenlab_flash-win.zip *)
       - name: Archive production artifact
         uses: actions/upload-artifact@v2
         with:
           name: red_firmware
-          path: firmware/Debug/red_firmware.out
+          path: |
+            firmware/Debug/red_firmware.out
+            lenlab_flash-win.zip
   deploy:
     if: startsWith(github.ref, 'refs/tags/')
     needs: build
@@ -53,31 +59,13 @@ jobs:
       - name: get_version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-      - name: Rename
+      - name: Rename firmware
         run: cp red_firmware.out lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
+      - name: Rename flash package
+        run: cp lenlab_flash-win.zip lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
-  flash:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Download production artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: red_firmware
-      - name: get_version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-      - name: Copy Firmware
-        run: cp red_firmware.out lenlab_flash/red_firmware.out
-      - name: Package
-        run: (cd lenlab_flash && zip -r ../lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip *)
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip
+          files: |
+            lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
+            lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip
