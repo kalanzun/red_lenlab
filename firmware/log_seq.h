@@ -122,7 +122,7 @@ LogSeqGroupEnable(tLogSeqGroup *self, uint32_t interval)
     uint32_t buffer[8]; // max FIFO length of SS1
 
     // clear data FIFO
-    LogSeqGroupDataGet(self, &buffer);
+    LogSeqGroupDataGet(self, buffer);
 
     FOREACH_ADC LogSeqEnable(&self->log_seq[i]);
 

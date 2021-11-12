@@ -34,7 +34,7 @@ extern tOscilloscope oscilloscope;
 
 tError OscilloscopeLinearTestData(tOscilloscope *self);
 
-tError OscilloscopeStart(tOscilloscope *self, uint32_t samplerate);
+tError OscilloscopeStart(tOscilloscope *self, uint32_t log2oversamples);
 
 tError OscilloscopeStop(tOscilloscope *self); // internal and for tests
 

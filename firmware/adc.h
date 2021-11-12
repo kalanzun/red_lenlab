@@ -74,11 +74,14 @@ ADCGroupUnlock(tADCGroup *self)
 
 
 inline void
-ADCGroupSetHardwareOversample(tADCGroup *self, uint32_t samplerate)
+ADCGroupSetHardwareOversample(tADCGroup *self, uint32_t log2oversamples)
 {
+    // samplerate is 1 MHz / (2**log2oversamples)
     int i;
+    uint32_t factor = log2oversamples > 0 ? 1 << log2oversamples : 0;
+    // a factor of 0 disables oversampling
 
-    FOREACH_ADC ADCHardwareOversampleConfigure(self->adc[i].base, 1<<samplerate);
+    FOREACH_ADC ADCHardwareOversampleConfigure(self->adc[i].base, factor);
 }
 
 

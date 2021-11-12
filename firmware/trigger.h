@@ -48,7 +48,7 @@ typedef struct Trigger {
 extern tTrigger trigger;
 
 
-tError TriggerStart(tTrigger *self, uint32_t samplerate);
+tError TriggerStart(tTrigger *self, uint32_t log2oversamples);
 
 tError TriggerStop(tTrigger *self); // internal and for tests
 

@@ -46,7 +46,7 @@ ADC1SS0Handler(void)
 
 
 tError
-OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
+OscilloscopeStart(tOscilloscope *self, uint32_t log2oversamples)
 {
     if (self->lock) return LOCK_ERROR;
 
@@ -58,7 +58,7 @@ OscilloscopeStart(tOscilloscope *self, uint32_t samplerate)
 
     ADCGroupLock(&adc_group);
 
-    ADCGroupSetHardwareOversample(&adc_group, samplerate);
+    ADCGroupSetHardwareOversample(&adc_group, log2oversamples);
 
     // 2 rings of 10 pages each (osc_seq want's an even number)
     OscSeqGroupAllocate(&osc_seq_group, 10);
