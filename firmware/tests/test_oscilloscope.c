@@ -25,7 +25,8 @@
 #include "oscilloscope.h"
 
 
-#define SAMPLERATE 1
+// 500 kHz
+#define LOG2OVERSAMPLES 1
 
 
 void
@@ -34,7 +35,7 @@ test_oscilloscope_lock(void)
     test();
 
     assert(oscilloscope.lock == false);
-    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == OK);
+    assert(OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES) == OK);
     assert(oscilloscope.lock == true);
     assert(adc_group.lock == true);
     assert(memory.lock);
@@ -53,8 +54,8 @@ test_oscilloscope_double_start(void)
 {
     test();
 
-    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == OK);
-    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == LOCK_ERROR);
+    assert(OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES) == OK);
+    assert(OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES) == LOCK_ERROR);
     assert(OscilloscopeStop(&oscilloscope) == OK);
     MemoryUnlock(&memory, memory.lock);
 
@@ -66,7 +67,7 @@ test_oscilloscope_double_stop(void)
 {
     test();
 
-    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == OK);
+    assert(OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES) == OK);
     assert(OscilloscopeStop(&oscilloscope) == OK);
     MemoryUnlock(&memory, memory.lock);
     assert(OscilloscopeStop(&oscilloscope) == LOCK_ERROR);
@@ -81,7 +82,7 @@ test_oscilloscope_adc_error(void)
     test();
 
     adc_group.lock = true;
-    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == ADC_ERROR);
+    assert(OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES) == ADC_ERROR);
     adc_group.lock = false;
 
     ok();
@@ -94,7 +95,7 @@ test_oscilloscope_memory_error(void)
     test();
 
     MemoryLock(&memory, 1);
-    assert(OscilloscopeStart(&oscilloscope, SAMPLERATE) == MEMORY_ERROR);
+    assert(OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES) == MEMORY_ERROR);
     MemoryUnlock(&memory, memory.lock);
 
     ok();
@@ -121,7 +122,7 @@ test_oscilloscope_measurement()
         }
     }
 
-    OscilloscopeStart(&oscilloscope, SAMPLERATE);
+    OscilloscopeStart(&oscilloscope, LOG2OVERSAMPLES);
     while (oscilloscope.lock) OscilloscopeMain(&oscilloscope, false);
     MemoryUnlock(&memory, memory.lock); // early on, because of return statements
 

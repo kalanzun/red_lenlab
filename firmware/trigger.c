@@ -25,7 +25,7 @@
 
 
 tError
-TriggerStart(tTrigger *self, uint32_t samplerate)
+TriggerStart(tTrigger *self, uint32_t log2oversamples)
 {
     uint32_t i;
 
@@ -52,7 +52,7 @@ TriggerStart(tTrigger *self, uint32_t samplerate)
 
     ADCGroupLock(&adc_group);
 
-    ADCGroupSetHardwareOversample(&adc_group, samplerate);
+    ADCGroupSetHardwareOversample(&adc_group, log2oversamples);
 
     // TODO
     // Ich brauche einen pingpong Modus. W�hrend pong den zweiten Puffer schreibt, verarbeitet Main den ersten Puffer

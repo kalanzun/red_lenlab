@@ -50,7 +50,7 @@ LoggerStart(tLogger *self, uint32_t interval)
 
     if (adc_group.lock) return ADC_ERROR;
 
-    ADCGroupSetHardwareOversample(&adc_group, 1);
+    ADCGroupSetHardwareOversample(&adc_group, 0);
 
     LogSeqGroupEnable(&self->seq_group, interval);
 

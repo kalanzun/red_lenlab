@@ -26,7 +26,8 @@
 #include "microtest.h"
 
 
-#define SAMPLERATE 1
+// 250 kHz, trigger is too slow for 1 MHz
+#define LOG2OVERSAMPLES 2
 
 
 void
@@ -35,7 +36,7 @@ test_trigger_lock()
     test();
 
     assert(trigger.lock == false);
-    assert(TriggerStart(&trigger, SAMPLERATE) == OK);
+    assert(TriggerStart(&trigger, LOG2OVERSAMPLES) == OK);
     assert(trigger.lock == true);
     assert(adc_group.lock == true);
     assert(memory.lock);
@@ -54,8 +55,8 @@ test_trigger_double_start()
 {
     test();
 
-    assert(TriggerStart(&trigger, SAMPLERATE) == OK);
-    assert(TriggerStart(&trigger, SAMPLERATE) == LOCK_ERROR);
+    assert(TriggerStart(&trigger, LOG2OVERSAMPLES) == OK);
+    assert(TriggerStart(&trigger, LOG2OVERSAMPLES) == LOCK_ERROR);
     assert(TriggerStop(&trigger) == OK);
     MemoryUnlock(&memory, memory.lock);
 
@@ -68,7 +69,7 @@ test_trigger_double_stop()
 {
     test();
 
-    assert(TriggerStart(&trigger, SAMPLERATE) == OK);
+    assert(TriggerStart(&trigger, LOG2OVERSAMPLES) == OK);
     assert(TriggerStop(&trigger) == OK);
     MemoryUnlock(&memory, memory.lock);
     assert(TriggerStop(&trigger) == LOCK_ERROR);
@@ -83,7 +84,7 @@ test_trigger_adc_error()
     test();
 
     adc_group.lock = true;
-    assert(TriggerStart(&trigger, SAMPLERATE) == ADC_ERROR);
+    assert(TriggerStart(&trigger, LOG2OVERSAMPLES) == ADC_ERROR);
     adc_group.lock = false;
 
     ok();
@@ -96,7 +97,7 @@ test_trigger_memory_error(void)
     test();
 
     MemoryLock(&memory, 1);
-    assert(TriggerStart(&trigger, SAMPLERATE) == MEMORY_ERROR);
+    assert(TriggerStart(&trigger, LOG2OVERSAMPLES) == MEMORY_ERROR);
     MemoryUnlock(&memory, memory.lock);
 
     ok();
@@ -124,8 +125,7 @@ test_trigger_measurement()
         }
     }
 
-    // 500 kHz, trigger is too slow for 1 MHz
-    TriggerStart(&trigger, 2);
+    TriggerStart(&trigger, LOG2OVERSAMPLES);
     while (trigger.lock) TriggerMain(&trigger, false);
     MemoryUnlock(&memory, memory.lock); // early on, because of return statements
 
