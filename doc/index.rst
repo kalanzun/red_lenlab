@@ -30,15 +30,13 @@ Dokumentation: `https://red-lenlab.readthedocs.io <https://red-lenlab.readthedoc
 Installation
 ============
 
-Das Lenlab-Softwareprojekt besteht aus zwei Teilen: Eine Firmware, welche auf dem Microcontroller des Launchpads läuft
-und eine Software für den Computer, welche die Messdaten vom Launchpad empfängt.
+Installieren Sie bitte einmalig die Firmware in den Speicher des Mikrocontrollers
+auf dem Launchpad. Sie finden einen detaillierte Anleitung im Unterpunkt
+:doc:`Firmware <firmware>`.
 
-Die Firmware läuft auf dem Launchpad EK-TM4C123GXL (Texas Instruments), Lenlab läuft auf Windows, Mac und Linux.
-
-Zur Verwendung der Software installieren Sie bitte einmalig die Firmware in den Speicher des Mikrocontrollers.
-Die Anleitung befindet sich im Unterpunkt :doc:`Firmware <firmware>`. Laden Sie außerdem die passende Variante
-der Software für Ihr Betriebssystem herunter und führen Sie diese aus. Die Details werden im Unterpunkt
-:doc:`Lenlab <lenlab>` erklärt.
+Laden Sie außerdem die passende Variante der Software "Lenlab" für Ihr Betriebssystem
+herunter und führen Sie diese aus. Die Details werden im Unterpunkt
+:doc:`Lenlab <lenlab>` beschrieben. Lenlab läuft auf Windows, Mac und Linux.
 
 USB-Anschlüsse des Launchpads
 =============================

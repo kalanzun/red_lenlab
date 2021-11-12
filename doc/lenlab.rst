@@ -21,13 +21,14 @@ Lenlab
 Lenlab läuft auf Windows, Mac und Linux.
 
 - Windows: Version 10 und 11, nur 64 bit
-- Mac: macOS 10.15.7 "Catalina" und neuer
-- Linux x86_64: Ubuntu 18.04 und neuer
-- Linux arm64: Ubuntu 20.04
+- Mac: Ab macOS 10.15.7 "Catalina"
+- Linux x86_64: Ab Ubuntu 18.04, Ubuntu 20.04 (und andere)
+- Linux arm64: Ubuntu 20.04 (und andere)
 
 Sie finden den Download unter "Releases" auf github:
 `Releases kalanzun/red_lenlab <https://github.com/kalanzun/red_lenlab/releases>`_.
-Wählen Sie bitte die neueste, stabile Version, welche mit "Latest" markiert ist. Die "Pre-releases" sind zum Testen.
+Wählen Sie bitte die neueste, stabile Version, welche mit "Latest" markiert ist.
+Die "Pre-releases" sind zum Testen.
 
 Launchpad anschließen
 =====================
@@ -46,18 +47,18 @@ kann aber nicht mit der Firmware auf dem Board kommunizieren::
   Reset.
   Verbindung getrennt.
 
-Starten Sie in diesem Fall die Firmware neu. Sie können das Board mit dem Power-Schalter für ein paar Sekunden ausschalten
-(die grüne LED ist aus) und dann wieder einschalten.
+Starten Sie in diesem Fall die Firmware neu. Sie können das Board mit dem Power-Schalter
+für ein paar Sekunden ausschalten (die grüne LED ist aus) und dann wieder einschalten.
 
 Windows
 =======
 
-Der Download für Windows heißt ``Lenlab-[VERSION]-win.zip``. Es ist ein zip-Archiv, bitte entpacken Sie es.
-(Im Windows Explorer, Rechtsklick auf das Archiv, "Alle extrahieren...").
+Der Download für Windows heißt ``Lenlab-[VERSION]-win.zip``. Es ist ein zip-Archiv,
+bitte entpacken Sie es. (Im Windows Explorer, Rechtsklick auf das Archiv, "Alle extrahieren...").
 
 Die ausführbare Datei heißt ``lenlab.exe`` und ist im Unterordner ``lenlab``.
-Starten Sie ``lenlab.exe`` mit einem Doppelklick. Meist zeigt Windows die Dateiendung ``.exe`` nicht an,
-sondern nur den Namen ``lenlab``.
+Starten Sie ``lenlab.exe`` mit einem Doppelklick. Meist zeigt Windows die Dateiendung
+``.exe`` nicht an, sondern nur den Namen ``lenlab``.
 
 Im Dialog "Der Computer wurde durch Windows geschützt", klicken Sie auf "Weitere Informationen".
 Dann können Sie auf "Trotzdem ausführen" klicken.
@@ -71,12 +72,15 @@ Das Programm darin heißt ``lenlab``, starten Sie es.
 Linux
 =====
 
-Für Linux stehen verschiedene Downloads zur Verfügung. Ein AppImage, welches die notwendingen Bibliotheken
-selbst dabei hat und auf den meisten modernen Linux-Systemen läuft, sowie binaries für Ubuntu 20.04
-auf den Architekturen x86_64 und arm64.
+Für Linux stehen verschiedene Downloads zur Verfügung. Ein AppImage,
+welches die notwendingen Bibliotheken selbst dabei hat
+und auf den meisten modernen Linux-Systemen läuft,
+sowie binaries für Ubuntu 20.04 auf den Architekturen x86_64 und arm64.
 
-Ein normaler Benutzer auf Linux hat meist nicht genügend Rechte, dass Lenlab mit der Firmware kommunizieren kann.
-Dies zeigt sich durch die Fehlermeldung "Access denied (insufficient permissions)" im Nachrichtenfenster von Lenlab.
+Ein normaler Benutzer auf Linux hat meist nicht genügend Rechte,
+dass Lenlab mit der Firmware kommunizieren kann.
+Dies zeigt sich durch die Fehlermeldung "Access denied (insufficient permissions)"
+und "Reset" im Nachrichtenfenster von Lenlab.
 
 Sie können Ihrem Benutzer die Berechtigung geben:
 
@@ -95,14 +99,17 @@ Fügen Sie Ihren Benutzer zu der Gruppe ``uucp`` hinzu. Im Terminal::
 
   sudo adduser [NAME] uucp
 
-Zum Schluß noch ein logout und login, oder ein Neustart, damit die Gruppenzugehörigkeit neu geladen wird.
+Zum Schluß noch ein logout und login oder ein Neustart,
+damit die Gruppenzugehörigkeit neu geladen wird.
 Lenlab sollte nun mit der Firmware kommunizieren können.
 
 AppImage
 --------
 
-Das AppImage heißt ``Lenlab-[VERSION]-linux-x86_64.AppImage``. Die meisten modernen Distributionen können das AppImage
-direkt ausführen. Aktivieren Sie dafür das Dateiattribut für "ausführbar" und starten Sie die Datei.
+Das AppImage heißt ``Lenlab-[VERSION]-linux-x86_64.AppImage``.
+Die meisten modernen Distributionen können das AppImage
+direkt ausführen. Aktivieren Sie dafür das Dateiattribut für "ausführbar"
+und starten Sie die Datei.
 
 Im Terminal::
 
@@ -113,7 +120,8 @@ Im Terminal::
 Binaries für Ubuntu 20.04
 -------------------------
 
-Für x86_64 heißt der Download ``lenlab-[VERSION]-linux-x86_64`` und für arm64 ``lenlab-[VERSION]-linux-arm64``.
+Für x86_64 heißt der Download ``lenlab-[VERSION]-linux-x86_64``
+und für arm64 ``lenlab-[VERSION]-linux-arm64``.
 Es sind nur die ausführbaren Dateien, die notwendigen Bibliotheken sind nicht dabei.
 
 Installation der Abhängigkeiten, im Terminal::
@@ -121,7 +129,6 @@ Installation der Abhängigkeiten, im Terminal::
   sudo apt install qt5-default libqt5charts5
 
 Aktivieren Sie das Dateiattribut für "ausführbar" und starten Sie die Datei.
-
 Im Terminal::
 
   cd [VERZEICHNIS]
@@ -131,7 +138,7 @@ Im Terminal::
 Auf Linux selbst kompilieren
 ============================
 
-Anbei eine ganz knappe Anleitung, falls Sie lenlab selbst kompilieren möchten.
+Anbei eine knappe Anleitung, falls Sie lenlab selbst kompilieren möchten.
 
 Abhängigkeiten installieren::
 
