@@ -110,7 +110,6 @@ ConfigurePeripherals(void)
 //*****************************************************************************
 inline void ConfigureUART(void)
 {
-#ifdef DEBUG
     //
     // Configure GPIO Pins for UART mode.
     //
@@ -122,7 +121,6 @@ inline void ConfigureUART(void)
     // Initialize the UART for console I/O.
     //
     UARTStdioConfig(0, 115200, 80000000);
-#endif
 }
 
 
@@ -224,7 +222,9 @@ int main(void)
     //
     // Configure UART for DEBUG_PRINT
     //
+#ifdef DEBUG
     ConfigureUART();
+#endif
 
     //
     // Print a welcome message
@@ -300,7 +300,9 @@ int main(void)
     //
     // Run tests
     //
+#ifdef DEBUG
     tests();
+#endif
 
     while (1) {
         CommandHandlerMain(&command_handler);
