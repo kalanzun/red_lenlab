@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware -ccs.configuration Release
       - name: Package
-        run: cp firmware/Debug/red_firmware.out lenlab_flash/red_firmware.out
+        run: cp firmware/Release/red_firmware.out lenlab_flash/red_firmware.out
       - name: Create archive
         run: (cd lenlab_flash && zip -r ../lenlab_flash-win.zip *)
       - name: Archive production artifact
@@ -46,7 +46,7 @@ jobs:
         with:
           name: red_firmware
           path: |
-            firmware/Debug/red_firmware.out
+            firmware/Release/red_firmware.out
             lenlab_flash-win.zip
   deploy:
     if: startsWith(github.ref, 'refs/tags/')
@@ -61,7 +61,7 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Rename firmware
-        run: cp firmware/Debug/red_firmware.out lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
+        run: cp firmware/Release/red_firmware.out lenlab_firmware-${{ steps.get_version.outputs.VERSION }}.out
       - name: Rename flash package
         run: cp lenlab_flash-win.zip lenlab_flash-${{ steps.get_version.outputs.VERSION }}-win.zip
       - name: Release
