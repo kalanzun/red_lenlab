@@ -32,10 +32,11 @@ jobs:
           CCS11.0.0.00012_linux-x64/ccs_setup_11.0.0.00012.run --mode unattended --prefix ~/ti/ccs1100 --enable-components PF_C28,PF_TM4C
       - name: Checkout
         uses: actions/checkout@v2
+      # https://software-dl.ti.com/ccs/esd/documents/ccs_projects-command-line.html
       - name: Import
         run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectImport -ccs.location ${{ github.workspace }}/firmware/
       - name: Build
-        run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware
+        run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware -ccs.configuration Release
       - name: Package
         run: cp firmware/Debug/red_firmware.out lenlab_flash/red_firmware.out
       - name: Create archive
