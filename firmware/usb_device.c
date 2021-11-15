@@ -21,8 +21,10 @@
 
 #include "usb_device.h"
 
+#include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
+#include "driverlib/interrupt.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
@@ -165,6 +167,31 @@ tUSBDBulkDevice bulk_device = {
     NUM_STRING_DESCRIPTORS
 };
 
+inline void
+USBDeviceStartuDMA(tUSBDevice *self, uint8_t *payload, uint32_t length)
+{
+    ASSERT(!usb_device.dma_pending);
+
+    //
+    // Configure the address and size of the data to transfer.
+    //
+    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, payload, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), length);
+    // works only with multiples of 16 and up to 1024
+
+    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+
+    //
+    // Start the transfer.
+    //
+    IntDisable(INT_USB0);
+
+    self->dma_pending = true;
+    USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+
+    IntEnable(INT_USB0);
+}
+
 uint32_t
 YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
@@ -211,29 +238,12 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
 uint32_t
 YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
-    //
-    // Which event have we been sent?
-    //
     switch(ui32Event)
     {
-        //
-        // A previous transmission has completed.
-        //
         case USB_EVENT_TX_COMPLETE:
         {
-            //DEBUG_PRINT("USB_EVENT_TX_COMPLETE\n");
-
-            /*
-            if (g_ui32TxCount == 0)
-            {
-                USBDBulkPacketWrite(&g_sBulkDevice, data, 64, true);
-                g_ui32TxCount = 1;
-            }
-            else
-                g_ui32TxCount = 0;
-            */
-
-            return 0;
+            //DEBUG_PRINT("TX_COMPLETE");
+            usb_device.tx_pending = false;
         }
     }
 
@@ -241,83 +251,48 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
 }
 
 inline void
-USBDeviceStartuDMA(tUSBDevice *self, uint8_t *payload, uint32_t length)
-{
-    ASSERT(!usb_device.dma_pending);
-    self->dma_pending = true;
-    //
-    // Configure and enable DMA for the IN transfer.
-    //
-    //USBLibDMATransfer(g_psUSBDMAInst, ui8INDMA, pi8Data, 1024);
-    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
-    // does not work if moved up into the config section
-
-    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, payload,
-                           (void *)USBFIFOAddrGet(USB0_BASE, USB_EP_1), length);
-    // works only with multiples of 16 and up to 1024
-
-
-    //USBEndpointPacketCountSet(USB0_BASE, USB_EP_1,
-    //                                  2048/64);
-    // offenbar nicht noetig
-
-    //
-    // Start the DMA transfer.
-    //
-    //USBLibDMAChannelEnable(g_psUSBDMAInst, ui8INDMA);
-
-    USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-    uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
-    // both are needed here
-}
-
-inline void
-USBDeviceIntHandler(tUSBDevice *self)
+USBDeviceuDMAIntHandler(tUSBDevice *self)
 {
     tEvent *event;
     tPage *page;
 
-    if ((self->dma_pending) && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
-    {
-        //
-        // Handle the DMA complete case.
-        //
-        self->dma_pending = false;
+    //if (self->dma_pending && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
 
-        event = QueueRead(&reply_handler.reply_queue);
-        if (event->ring) {
-            RingRelease(event->ring);
-            // Free memory, if this was the last page
-            if (RingEmpty(event->ring)) {
-                RingFree(event->ring);
-                QueueRelease(&reply_handler.reply_queue);
-            }
-            else {
-                page = RingRead(event->ring);
-                USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
-                // because of immediate restart, it does not receive commands meanwhile
-                // commands wait, till the ring is through
-                // TODO command waiting during DMA transfer seems handy for a simpler state machine
-                // no special memory locking while DMA transfer necessary
-                // how fast is it?
-            }
-        }
-        else {
-            USBEndpointDataSend(USB0_BASE, USB_EP_1, USB_TRANS_IN); // commit shorter packages than 1024
-            QueueRelease(&reply_handler.reply_queue);
-            // Main will start a new DMA transfer eventually
-        }
+    //
+    // Handle the DMA complete case.
+    //
+    self->dma_pending = false;
+    USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    // USB DMA is working again, we can receive a command in between two data packets
+
+    event = QueueRead(&reply_handler.reply_queue);
+    ASSERT(event->ring);
+    RingRelease(event->ring); // page sent
+
+    // Was this the last page?
+    if (RingEmpty(event->ring)) {
+        // free memory
+        RingFree(event->ring);
+        QueueRelease(&reply_handler.reply_queue);
     }
-    else
-    {
-        USB0DeviceIntHandler();
+    else {
+        page = RingRead(event->ring);
+        USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+        // because of immediate restart, it does not send replies of other commands in between
     }
 }
 
 void
 USB0IntHandler()
 {
-    USBDeviceIntHandler(&usb_device);
+    if ((usb_device.dma_pending)) {
+        // DMA interrupt
+        USBDeviceuDMAIntHandler(&usb_device);
+    }
+    else {
+        // pass on to usblib
+        USB0DeviceIntHandler();
+    }
 }
 
 void
@@ -326,22 +301,23 @@ USBDeviceMain(tUSBDevice *self)
     tEvent *event;
     tPage *page;
 
-    if (!self->dma_pending)// && USBDBulkTxPacketAvailable(&bulk_device) == 64)
-    {
+    //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
+
+    if (!self->tx_pending) {
         if (!QueueEmpty(&reply_handler.reply_queue)) {
-            //ASSERT(!self->send_reply);
             event = QueueRead(&reply_handler.reply_queue);
-            //self->send_reply = true;
+            self->tx_pending = true;
             if (event->ring) {
                 page = RingRead(event->ring);
                 USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+                //ASSERT(USBDBulkPacketWrite(&bulk_device, (uint8_t *) page->buffer, 4 * PAGE_LENGTH, true)); // too big
+                //RingRelease(event->ring);
             }
             else {
-                USBDeviceStartuDMA(self, event->payload, event->length);
+                //USBDeviceStartuDMA(self, event->payload, event->length);
+                ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
+                QueueRelease(&reply_handler.reply_queue);
             }
-            //ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
-            //QueueRelease(&reply_handler.reply_queue);
-            //DEBUG_PRINT("send reply\n");
         }
     }
 }
@@ -356,10 +332,15 @@ void
 USBDeviceInit(tUSBDevice *self)
 {
     self->dma_pending = false;
+    self->tx_pending = false;
+
     ConfigureUSBDevice(self);
 
     //
-    // Set the USB stack mode to Device mode with VBUS monitoring.
+    // Set the USB stack mode to ForceDevice mode without VBUS monitoring.
+    //
+    // I think the Launchpad does not connect the VBUS pin,
+    // so Device mode with VBUS monitoring does not work.
     //
     USBStackModeSet(0, eUSBModeForceDevice, 0);
 
@@ -370,19 +351,26 @@ USBDeviceInit(tUSBDevice *self)
     USBDBulkInit(0, &bulk_device);
 
     //
-    // Configure the DMA for the IN endpoint.
+    // Map the uDMA channel to the given endpoint.
     //
-    //ui8INDMA = USBLibDMAChannelAllocate(g_psUSBDMAInst, USB_EP_1, 64, USB_DMA_EP_TX | USB_DMA_EP_DEVICE);
+    //MAP_USBEndpointDMAChannel(psUSBDMAInst->ui32Base, ui8Endpoint,
+    //                          ui32Channel);
     USBEndpointDMAChannel(USB0_BASE, USB_EP_1, UDMA_CHANNEL_USBEP1TX);
+
+    //
+    // Clear out the attributes on this channel.
+    //
+    //MAP_uDMAChannelAttributeDisable(ui32Channel, UDMA_ATTR_ALL);
     uDMAChannelAttributeDisable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_ALL);
-    uDMAChannelAttributeEnable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_USEBURST);
-    // manual says to set burst mode, the DMA code of usblib doesn't. Both work.
+
+    //
+    // Configure the uDMA channel for the pipe
+    //
+    //MAP_uDMAChannelControlSet(ui32Channel,
+    //                          psUSBDMAInst->pui32Config[ui32Channel]);
     uDMAChannelControlSet(UDMA_CHANNEL_USBEP1TX, UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_64);
-    // FIFO byte-weise befuellen, UDMA_SIZE_32 funktioniert nicht
-    // USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-    // offenbar nicht noetig
 
-    //USBLibDMAUnitSizeSet(g_psUSBDMAInst, ui8INDMA, 8);
-
-    //USBLibDMAArbSizeSet(g_psUSBDMAInst, ui8INDMA, 16);
+    //MAP_USBEndpointDMADisable(psUSBDMAInst->ui32Base, ui8Endpoint,
+    //                          USB_EP_DEV_IN);
+    USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN); // for now
 }

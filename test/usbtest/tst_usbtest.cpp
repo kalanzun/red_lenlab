@@ -47,10 +47,10 @@ private slots:
     void test_init();
     void test_getName();
     void test_getVersion();
+    void test_USBOverload();
     void test_startOscilloscopeLockError();
     void test_startOscilloscopeMemoryError();
     void test_startTriggerDMAQueue();
-    void test_USBOverload();
 
 private:
     Bus bus;
@@ -202,6 +202,24 @@ void USBTest::test_getVersion()
     QVERIFY(spy.wait(m_short_timeout) == 0); // no second packet
 }
 
+void USBTest::test_USBOverload()
+{
+    // firmware 7.4 has a bug that it sometimes sends empty packets
+    // this test tries to trigger that bug
+    // if an empty packet arrives, the lower layer will drop it
+    // and the spy here will timeout
+    QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
+    QVERIFY(spy.isValid());
+
+    for (int i = 0; i < 1000; ++i) {
+        auto cmd = create_command(getName);
+        device->send(cmd);
+
+        spy.wait(m_short_timeout); // wait for reply
+        QCOMPARE(spy.count(), i + 1);
+    }
+}
+
 void USBTest::test_startOscilloscopeLockError()
 {
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
@@ -301,24 +319,6 @@ void USBTest::test_startOscilloscopeMemoryError()
     //QVERIFY(spy.wait(m_short_timeout)); // it did already arrive
     reply = qvariant_cast<pPacket>(spy.last().at(0));
     verify_header(reply, Error, noType, 3); // MEMORY_ERROR
-}
-
-void USBTest::test_USBOverload()
-{
-    // firmware 7.4 has a bug that it sometimes sends empty packets
-    // this test tries to trigger that bug
-    // if an empty packet arrives, the lower layer will drop it
-    // and the spy here will timeout
-    QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
-    QVERIFY(spy.isValid());
-
-    for (int i = 0; i < 1000; ++i) {
-        auto cmd = create_command(getName);
-        device->send(cmd);
-
-        QVERIFY(spy.wait(m_short_timeout)); // wait for reply
-        QCOMPARE(spy.count(), i + 1);
-    }
 }
 
 QTEST_MAIN(USBTest)

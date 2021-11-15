@@ -156,7 +156,7 @@ on_setSignalSine(tEvent *event)
     uint32_t amplitude  = EventGetInt(event, 3);
     uint32_t second     = EventGetInt(event, 4);
 
-    //DEBUG_PRINT("setSignalSine\n");
+    //DEBUG_PRINT("setSignalSine");
 
     // this may need a long time
     SignalSetSine(&signal, multiplier, predivider, divider, amplitude, second);
@@ -178,7 +178,7 @@ on_stopSignal(tEvent *event)
 {
     tEvent *reply;
 
-    //DEBUG_PRINT("stopSignal\n");
+    //DEBUG_PRINT("stopSignal");
 
     if (signal.lock) SignalStop(&signal);
 
@@ -275,7 +275,7 @@ on_error()
 {
     tEvent *reply;
 
-    DEBUG_PRINT("Invalid command\n");
+    DEBUG_PRINT("Invalid command");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
