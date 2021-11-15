@@ -79,11 +79,11 @@ QString
 Task::getErrorMessage() const
 {
     if (mErrorMessage) {
-        return QString("Firmwarefehler: Fehler in %1: Fehlercode %2.").arg(mCommand->getCommandName()).arg(mErrorMessage->getError());
+        return QString("Firmwarefehler: Fehler in %1: Fehlercode %2").arg(mCommand->getCommandName()).arg(mErrorMessage->getError());
     } else if (!mErrorString.isEmpty()) {
         return mErrorString;
     } else if (mTimeoutError) {
-        return QString("Zeitüberschreitungsfehler: %1 wurde nicht innerhalb von %2 ms abgeschlossen.").arg(mCommand->getCommandName()).arg(mTimeout);
+        return QString("Zeitüberschreitungsfehler: %1 wurde nicht innerhalb von %2 ms abgeschlossen").arg(mCommand->getCommandName()).arg(mTimeout);
     } else {
         return QString();
     }
