@@ -23,6 +23,7 @@
 
 #include "lenlab_protocol.h"
 #include "reply_handler.h"
+#include "usb_device.h"
 
 
 void
@@ -95,6 +96,8 @@ LoggerMain(tLogger *self)
     else if (LogSeqGroupReady(&self->seq_group)) {
 
         //DEBUG_PRINT("LoggerData");
+
+        if (QueueNearlyFull(&reply_handler.reply_queue)) DEBUG_PRINT("%i", usb_device.packet_counter);
 
         reply = QueueAcquire(&reply_handler.reply_queue);
         // if the queue fills up because sending is not fast enough, it will crash here

@@ -28,7 +28,7 @@
 #include "lenlab_protocol.h"
 
 
-#define EVENT_QUEUE_LENGTH 8
+#define EVENT_QUEUE_LENGTH 16
 
 
 typedef struct Event {
@@ -56,6 +56,13 @@ inline bool
 QueueFull(tQueue *self)
 {
     return (self->write + 1) % EVENT_QUEUE_LENGTH == self->read;
+}
+
+
+inline bool
+QueueNearlyFull(tQueue *self)
+{
+    return (self->write + 1) % EVENT_QUEUE_LENGTH == self->read || (self->write + 2) % EVENT_QUEUE_LENGTH == self->read || (self->write + 3) % EVENT_QUEUE_LENGTH == self->read;
 }
 
 

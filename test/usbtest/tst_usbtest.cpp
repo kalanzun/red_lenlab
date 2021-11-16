@@ -173,7 +173,7 @@ void USBTest::test_getName()
     QString reply_name(reinterpret_cast<const char *>(reply->getByteBuffer() + LENLAB_PACKET_HEAD_LENGTH));
     //qDebug() << reply_name;
 
-    auto name = QString("Lenlab red Firmware Version %1.%2").arg(MAJOR).arg(MINOR);
+    auto name = QString("Lenlab red Version %1.%2").arg(MAJOR).arg(MINOR);
     QVERIFY(reply_name.startsWith(name));
 
     QVERIFY(spy.wait(m_short_timeout) == 0); // no second packet

@@ -35,7 +35,7 @@ packet header, 4 bytes
  */
 
 #define LENLAB_PACKET_HEAD_LENGTH 4
-#define LENLAB_PACKET_BODY_LENGTH 60 // command and reply packet
+#define LENLAB_PACKET_BODY_LENGTH 28 // command and reply packet
 
 // in case of changes, please also update lenlab/protocol/message.cpp
 
