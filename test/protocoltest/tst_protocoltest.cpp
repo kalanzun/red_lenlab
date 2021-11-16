@@ -119,11 +119,11 @@ void ProtocolTest::test_LoggerOverload()
     QSignalSpy logger_spy(&mBoard, &Board::logger_data);
     QVERIFY(logger_spy.isValid());
 
-    // reply queue length in the firmware is 4, cycle at least once
+    // 10 thousand packets in 10 seconds
     for (int i = 0; i < 10000; ++i) {
         //qDebug() << i;
         logger_spy.wait(2);
-        QCOMPARE(logger_spy.count(), i + 1);
+        QVERIFY2(logger_spy.count() > i, qPrintable(QString("i = %1").arg(i)));
     }
 
     pTask stop_task(new Task(::stopLogger));

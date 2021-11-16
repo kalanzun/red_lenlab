@@ -97,6 +97,7 @@ LoggerMain(tLogger *self)
         //DEBUG_PRINT("LoggerData");
 
         reply = QueueAcquire(&reply_handler.reply_queue);
+        // if the queue fills up because sending is not fast enough, it will crash here
 
         EventSetReply(reply, LoggerData);
         EventSetType(reply, IntArray);

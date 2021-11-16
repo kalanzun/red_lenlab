@@ -28,7 +28,7 @@
 #include "lenlab_protocol.h"
 
 
-#define EVENT_QUEUE_LENGTH 4
+#define EVENT_QUEUE_LENGTH 8
 
 
 typedef struct Event {

@@ -229,21 +229,38 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
                     DEBUG_PRINT("command queue full\n");
                 }
             }
+
             return size;
         }
     }
+
     return 0;
 }
 
 uint32_t
 YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
+    tEvent *event;
+
     switch(ui32Event)
     {
         case USB_EVENT_TX_COMPLETE:
         {
             //DEBUG_PRINT("TX_COMPLETE");
             usb_device.tx_pending = false;
+
+            // In case the queue starts to pile up, immediately start another transfer
+            if (!QueueEmpty(&reply_handler.reply_queue)) {
+                event = QueueRead(&reply_handler.reply_queue);
+                if (!event->ring) {
+                    usb_device.tx_pending = true;
+                    //USBDeviceStartuDMA(self, event->payload, event->length);
+                    ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
+                    QueueRelease(&reply_handler.reply_queue);
+                }
+            }
+
+            return 0;
         }
     }
 
