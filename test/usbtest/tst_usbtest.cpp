@@ -48,7 +48,7 @@ private slots:
     void test_startOscilloscopeLockError();
     void test_startOscilloscopeMemoryError();
     void test_startTriggerDMAQueue();
-    //void test_startLoggerOverflow();
+    void test_startLoggerOverflow();
 
 private:
     Bus bus;
@@ -335,30 +335,49 @@ void USBTest::test_startOscilloscopeMemoryError()
     verify_header(reply, Error, noType, 3, false); // MEMORY_ERROR
 }
 
-/*
 void USBTest::test_startLoggerOverflow()
 {
-    // this test somehow does not trigger the QUEUE_ERROR
-
     QSignalSpy spy(device.data(), SIGNAL(reply(pPacket)));
     QVERIFY(spy.isValid());
 
     auto cmd = create_command(startLogger, IntArray);
-    set_single_int(cmd, 1);
+    set_single_int(cmd, 10);
 
     device->send(cmd);
     QVERIFY(spy.wait(m_long_timeout)); // wait for the reply
     auto reply = qvariant_cast<pPacket>(spy.at(0).at(0));
     verify_header(reply, Logger, noType, 0, false);
 
-    for (int i = 1; i < 10000; ++i) {
-        if (!spy.wait(2)) break; // wait for a few packets
+    QTest::qSleep(100); // sleep and ignore packets
+
+    bool error_received = false;
+    bool pipe_empty = false;
+    for (int i = 0; i < 13; ++i) {
+        // read packets
+        if (!spy.wait(m_short_timeout)) {
+            pipe_empty = true;
+            break;
+        }
+
+        reply = qvariant_cast<pPacket>(spy.last().at(0));
+        if (reply->getByteBuffer()[0] == LoggerData) {
+            //qDebug() << "data packet " << i;
+        }
+        else if (reply->getByteBuffer()[0] == Error) {
+            //qDebug() << "error packet " << i;
+            QVERIFY(!error_received);
+            verify_header(reply, Error, noType, 4, false); // QUEUE_ERROR
+            error_received = true;
+        }
+        else {
+            //qDebug() << "other packet";
+            QVERIFY(false);
+        }
     }
 
-    reply = qvariant_cast<pPacket>(spy.last().at(0));
-    verify_header(reply, Error, noType, 4, false); // QUEUE_ERROR
+    QVERIFY(error_received);
+    QVERIFY(pipe_empty);
 }
-*/
 
 QTEST_MAIN(USBTest)
 
