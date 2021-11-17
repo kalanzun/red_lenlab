@@ -313,23 +313,22 @@ USBDeviceMain(tUSBDevice *self)
             self->tx_pending = true;
             page = RingRead(reply->ring);
             USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
-            //USBDBulkPacketWrite(&bulk_device, (uint8_t *) page->buffer, 4 * PAGE_LENGTH, true); // too big
-            //RingRelease(event->ring);
         }
         else if (!QueueEmpty(&reply_handler.reply_queue)) {
             reply = QueueRead(&reply_handler.reply_queue);
             length = QueueGetEventLength(&reply_handler.reply_queue);
-            self->tx_pending = true;
-            //USBDeviceStartuDMA(self, reply->payload, reply->length);
-            USBDBulkPacketWrite(&bulk_device, reply->payload, length, true);
-            QueueRelease(&reply_handler.reply_queue);
+            if (USBDBulkPacketWrite(&bulk_device, reply->payload, length, true)) {
+                self->tx_pending = true;
+                QueueRelease(&reply_handler.reply_queue);
+            }
         }
         else if (!QueueEmpty(&reply_handler.logger_queue)) {
             reply = QueueRead(&reply_handler.logger_queue);
             length = QueueGetEventLength(&reply_handler.logger_queue);
-            self->tx_pending = true;
-            USBDBulkPacketWrite(&bulk_device, reply->payload, length, true);
-            QueueRelease(&reply_handler.logger_queue);
+            if (USBDBulkPacketWrite(&bulk_device, reply->payload, length, true)) {
+                self->tx_pending = true;
+                QueueRelease(&reply_handler.logger_queue);
+            }
         }
     }
 }
