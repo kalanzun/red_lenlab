@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <QtMath>
+
 #include "loggerseries.h"
 
 namespace model {
@@ -93,8 +95,9 @@ Loggerseries::getMinX() const
 double
 Loggerseries::getMaxX() const
 {
+    // round to 4, 8, 16, 32, ...
     auto length = getLength();
-    length = length > 10 ? length - 1 : 10;
+    length = length > 4 ? qNextPowerOfTwo(length - 2) : 4;
     return getX(length);
 }
 

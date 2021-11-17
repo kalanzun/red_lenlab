@@ -50,14 +50,14 @@ Component::active() const
 QString const &
 Component::getNameNominative() const
 {
-    static QString name("die Komponente");
+    static QString name("ie Komponente");
     return name;
 }
 
 QString const &
 Component::getNameAccusative() const
 {
-    static QString name("die Komponente");
+    static QString name("ie Komponente");
     return name;
 }
 
@@ -71,6 +71,7 @@ void
 Component::start()
 {
     Q_ASSERT_X(!mLenlab.isActive(), "Component::start()", "No component may be active.");
+    emit mLenlab.logMessage(QString("D%1 startet.").arg(getNameNominative()));
     setActive(true);
 }
 
@@ -78,6 +79,7 @@ void
 Component::stop()
 {
     Q_ASSERT_X(mActive, "Component::stop()", "This component was not active.");
+    emit mLenlab.logMessage(QString("D%1 stoppt.").arg(getNameNominative()));
     setActive(false);
 }
 

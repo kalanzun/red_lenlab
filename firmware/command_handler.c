@@ -30,7 +30,7 @@
 
 
 void
-on_init(tEvent *event)
+on_init(tCommandHandler *self)
 {
     tEvent *reply;
 
@@ -44,7 +44,7 @@ on_init(tEvent *event)
     reply = QueueAcquire(&reply_handler.reply_queue);
 
     EventSetReply(reply, Init);
-    EventSetBodyLength(reply, 0);
+    QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -60,7 +60,7 @@ const uint8_t name[] = "Lenlab red Firmware Version " STR(MAJOR) "." STR(MINOR);
 
 
 void
-on_getName(tEvent *event)
+on_getName(tCommandHandler *self)
 {
     tEvent *reply;
 
@@ -69,14 +69,14 @@ on_getName(tEvent *event)
     reply = QueueAcquire(&reply_handler.reply_queue);
 
     EventSetReply(reply, Name);
-    EventSetString(reply, name, NAME_LENGTH);
+    QueueSetString(&reply_handler.reply_queue, name, NAME_LENGTH);
 
     QueueWrite(&reply_handler.reply_queue);
 }
 
 
 void
-on_getVersion(tEvent *event)
+on_getVersion(tCommandHandler *self)
 {
     tEvent *reply;
     uint32_t array[2] = {MAJOR, MINOR};
@@ -86,28 +86,26 @@ on_getVersion(tEvent *event)
     reply = QueueAcquire(&reply_handler.reply_queue);
 
     EventSetReply(reply, Version);
-    EventSetIntArray(reply, array, 2);
+    QueueSetIntArray(&reply_handler.reply_queue, array, 2);
 
     QueueWrite(&reply_handler.reply_queue);
 }
 
 
 void
-on_startLogger(tEvent *event)
+on_startLogger(tCommandHandler *self)
 {
     tEvent *reply;
-    uint32_t interval = EventGetInt(event, 0);
+    uint32_t interval = QueueGetInt(&self->command_queue, 0);
     tError error;
 
     //DEBUG_PRINT("startLogger");
-
     error = LoggerStart(&logger, interval);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
-    EventSetBodyLength(reply, 0);
+    QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
     if (error) {
-        DEBUG_PRINT("Error %i\n", error);
         EventSetReply(reply, Error);
         EventSetError(reply, error);
     }
@@ -120,20 +118,18 @@ on_startLogger(tEvent *event)
 
 
 void
-on_stopLogger(tEvent *event)
+on_stopLogger(tCommandHandler *self)
 {
     tEvent *reply;
     tError error;
 
     //DEBUG_PRINT("stopLogger");
-
     error = LoggerStop(&logger);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
-    EventSetBodyLength(reply, 0);
+    QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
     if (error) {
-        DEBUG_PRINT("Error %i\n", error);
         EventSetReply(reply, Error);
         EventSetError(reply, error);
     }
@@ -146,18 +142,17 @@ on_stopLogger(tEvent *event)
 
 
 void
-on_setSignalSine(tEvent *event)
+on_setSignalSine(tCommandHandler *self)
 {
     tEvent *reply;
 
-    uint32_t multiplier = EventGetInt(event, 0);
-    uint32_t predivider = EventGetInt(event, 1);
-    uint32_t divider    = EventGetInt(event, 2);
-    uint32_t amplitude  = EventGetInt(event, 3);
-    uint32_t second     = EventGetInt(event, 4);
+    uint32_t multiplier = QueueGetInt(&self->command_queue, 0);
+    uint32_t predivider = QueueGetInt(&self->command_queue, 1);
+    uint32_t divider    = QueueGetInt(&self->command_queue, 2);
+    uint32_t amplitude  = QueueGetInt(&self->command_queue, 3);
+    uint32_t second     = QueueGetInt(&self->command_queue, 4);
 
-    DEBUG_PRINT("setSignalSine\n");
-
+    //DEBUG_PRINT("setSignalSine");
     // this may need a long time
     SignalSetSine(&signal, multiplier, predivider, divider, amplitude, second);
 
@@ -165,106 +160,109 @@ on_setSignalSine(tEvent *event)
 
     // send a reply
     reply = QueueAcquire(&reply_handler.reply_queue);
+    QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
     EventSetReply(reply, Signal);
-    EventSetBodyLength(reply, 0);
 
     QueueWrite(&reply_handler.reply_queue);
 }
 
 
 void
-on_stopSignal(tEvent *event)
+on_stopSignal(tCommandHandler *self)
 {
     tEvent *reply;
 
-    DEBUG_PRINT("stopSignal\n");
-
+    //DEBUG_PRINT("stopSignal");
     if (signal.lock) SignalStop(&signal);
 
     // send a reply
     reply = QueueAcquire(&reply_handler.reply_queue);
+    QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
     EventSetReply(reply, Signal);
-    EventSetBodyLength(reply, 0);
 
     QueueWrite(&reply_handler.reply_queue);
 }
 
 
 void
-on_startOscilloscope(tEvent *event)
+on_startOscilloscope(tCommandHandler *self)
 {
     tEvent *reply;
-    uint32_t log2oversamples = EventGetInt(event, 0);
+    uint32_t log2oversamples = QueueGetInt(&self->command_queue, 0);
     tError error;
 
     error = OscilloscopeStart(&oscilloscope, log2oversamples);
 
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
+        QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
+
         EventSetReply(reply, Error);
         EventSetError(reply, error);
-        EventSetBodyLength(reply, 0);
+
         QueueWrite(&reply_handler.reply_queue);
     }
 }
 
 
 void
-on_startOscilloscopeLinearTestData(tEvent *event)
+on_startOscilloscopeLinearTestData(tCommandHandler *self)
 {
     tEvent *reply;
     tError error;
-
-    DEBUG_PRINT("startOscilloscopeLinearTestData");
 
     error = OscilloscopeLinearTestData(&oscilloscope);
 
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
+        QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
+
         EventSetReply(reply, Error);
         EventSetError(reply, error);
-        EventSetBodyLength(reply, 0);
+
         QueueWrite(&reply_handler.reply_queue);
     }
 }
 
 
 void
-on_startTrigger(tEvent *event)
+on_startTrigger(tCommandHandler *self)
 {
     tEvent *reply;
-    uint32_t log2oversamples = EventGetInt(event, 0);
+    uint32_t log2oversamples = QueueGetInt(&self->command_queue, 0);
     tError error;
 
     error = TriggerStart(&trigger, log2oversamples);
 
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
+        QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
+
         EventSetReply(reply, Error);
         EventSetError(reply, error);
-        EventSetBodyLength(reply, 0);
+
         QueueWrite(&reply_handler.reply_queue);
     }
 }
 
 
 void
-on_startTriggerLinearTestData(tEvent *event)
+on_startTriggerLinearTestData(tCommandHandler *self)
 {
     tEvent *reply;
     tError error;
-
-    DEBUG_PRINT("startTriggerLinearTestData");
 
     error = TriggerLinearTestData(&trigger);
 
     if (error) {
         reply = QueueAcquire(&reply_handler.reply_queue);
+        QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
+
         EventSetReply(reply, Error);
         EventSetError(reply, error);
-        EventSetBodyLength(reply, 0);
+
         QueueWrite(&reply_handler.reply_queue);
     }
 }
@@ -275,12 +273,12 @@ on_error()
 {
     tEvent *reply;
 
-    DEBUG_PRINT("Invalid command\n");
+    DEBUG_PRINT("Invalid command");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
+    QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
     EventSetReply(reply, Error);
-    EventSetBodyLength(reply, 0);
 
     QueueWrite(&reply_handler.reply_queue);
 }
@@ -296,17 +294,17 @@ CommandHandlerMain(tCommandHandler *self)
         event = QueueRead(&self->command_queue);
         command = EventGetCommand(event);
 
-        if (command == init) on_init(event);
-        else if (command == getName) on_getName(event);
-        else if (command == getVersion) on_getVersion(event);
-        else if (command == startLogger) on_startLogger(event);
-        else if (command == stopLogger) on_stopLogger(event);
-        else if (command == startOscilloscope) on_startOscilloscope(event);
-        else if (command == startTrigger) on_startTrigger(event);
-        else if (command == startOscilloscopeLinearTestData) on_startOscilloscopeLinearTestData(event);
-        else if (command == startTriggerLinearTestData) on_startTriggerLinearTestData(event);
-        else if (command == setSignalSine) on_setSignalSine(event);
-        else if (command == stopSignal) on_stopSignal(event);
+        if (command == init) on_init(self);
+        else if (command == getName) on_getName(self);
+        else if (command == getVersion) on_getVersion(self);
+        else if (command == startLogger) on_startLogger(self);
+        else if (command == stopLogger) on_stopLogger(self);
+        else if (command == startOscilloscope) on_startOscilloscope(self);
+        else if (command == startTrigger) on_startTrigger(self);
+        else if (command == startOscilloscopeLinearTestData) on_startOscilloscopeLinearTestData(self);
+        else if (command == startTriggerLinearTestData) on_startTriggerLinearTestData(self);
+        else if (command == setSignalSine) on_setSignalSine(self);
+        else if (command == stopSignal) on_stopSignal(self);
         else on_error();
 
         QueueRelease(&self->command_queue);
@@ -314,7 +312,7 @@ CommandHandlerMain(tCommandHandler *self)
 }
 
 void
-CommandHandlerInit(tCommandHandler *self)
+CommandHandlerInit(tCommandHandler *self, uint8_t *command_buffer)
 {
-    QueueInit(&self->command_queue);
+    QueueInit(&self->command_queue, command_buffer);
 }

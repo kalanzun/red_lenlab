@@ -20,6 +20,6 @@
 #define LENLAB_VERSION_H
 
 #define MAJOR 7
-#define MINOR 4
+#define MINOR 5
 
 #endif // LENLAB_VERSION_H

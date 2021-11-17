@@ -105,6 +105,10 @@ OscilloscopeLinearTestData(tOscilloscope *self)
             RingWrite(ring);
             j++;
         }
+
+        // look like finished DMA
+        osc_seq_group.osc_seq[i].ping_enable = 0;
+        osc_seq_group.osc_seq[i].pong_enable = 0;
     }
 
     return OK;
@@ -162,9 +166,9 @@ OscilloscopeMain(tOscilloscope *self, bool enable_reply)
         if (enable_reply) {
             // usb_device will call RingFree when done
             FOREACH_ADC {
-                reply = QueueAcquire(&reply_handler.reply_queue);
+                reply = QueueAcquire(&reply_handler.oscilloscope_queue);
                 EventSetRing(reply, &osc_seq_group.osc_seq[i].ring);
-                QueueWrite(&reply_handler.reply_queue);
+                QueueWrite(&reply_handler.oscilloscope_queue);
             }
         }
 

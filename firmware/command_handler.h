@@ -33,7 +33,7 @@ typedef struct CommandHandler {
 extern tCommandHandler command_handler;
 
 
-void CommandHandlerInit(tCommandHandler *self);
+void CommandHandlerInit(tCommandHandler *self, uint8_t *command_buffer);
 
 void CommandHandlerMain(tCommandHandler *self);
 

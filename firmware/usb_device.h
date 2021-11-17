@@ -23,6 +23,7 @@
 
 typedef struct USBDevice {
     volatile bool dma_pending;
+    volatile bool tx_pending;
 } tUSBDevice;
 
 

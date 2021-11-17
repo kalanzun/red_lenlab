@@ -28,18 +28,39 @@
 #include "lenlab_protocol.h"
 
 
-#define EVENT_QUEUE_LENGTH 4
+#define EVENT_QUEUE_LENGTH 8
 
 
-typedef struct Event {
-    uint8_t payload[LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH];
-    uint32_t length;
+typedef union Event {
+    union {
+        uint8_t payload[LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH];
+        struct {
+            uint8_t code;
+            uint8_t type;
+            uint8_t error;
+            uint8_t last;
+            union {
+                uint8_t body[LENLAB_PACKET_BODY_LENGTH];
+                uint32_t array[LENLAB_PACKET_BODY_LENGTH / 4];
+            };
+        };
+    };
     tRing *ring;
 } tEvent;
 
 
+#define EVENT_QUEUE_BUFFER_LENGTH (EVENT_QUEUE_LENGTH * sizeof(tEvent))
+
+
+typedef struct Meta {
+    uint8_t length;
+} tMeta;
+
+
 typedef struct Queue {
-    tEvent queue[EVENT_QUEUE_LENGTH];
+    tEvent *queue;
+    tMeta meta[EVENT_QUEUE_LENGTH];
+
     uint32_t read;
     uint32_t write;
 } tQueue;
@@ -59,11 +80,32 @@ QueueFull(tQueue *self)
 }
 
 
+inline uint32_t
+QueueElementCount(tQueue *self)
+{
+    return ((int32_t) self->write - (int32_t) self->read) % EVENT_QUEUE_LENGTH;
+}
+
+
 inline tEvent*
 QueueAcquire(tQueue *self)
 {
     ASSERT(!QueueFull(self));
     return self->queue + self->write;
+}
+
+
+inline void
+QueueSetEventLength(tQueue *self, uint8_t length)
+{
+    self->meta[self->write].length = length;
+}
+
+
+inline void
+QueueSetEventBodyLength(tQueue *self, uint8_t length)
+{
+    QueueSetEventLength(self, length + LENLAB_PACKET_HEAD_LENGTH);
 }
 
 
@@ -82,6 +124,20 @@ QueueRead(tQueue *self)
 }
 
 
+inline uint8_t
+QueueGetEventLength(tQueue *self)
+{
+    return self->meta[self->read].length;
+}
+
+
+inline uint8_t
+QueueGetEventBodyLength(tQueue *self)
+{
+    return QueueGetEventLength(self) - LENLAB_PACKET_HEAD_LENGTH;
+}
+
+
 inline void
 QueueRelease(tQueue *self)
 {
@@ -90,36 +146,39 @@ QueueRelease(tQueue *self)
 
 
 inline void
-QueueInit(tQueue *self)
+QueueInit(tQueue *self, uint8_t *buffer)
 {
+    self->queue = (tEvent *) buffer;
     self->read = 0;
     self->write = 0;
 }
 
+
 inline void
 EventSetCommand(tEvent *self, enum Command cmd)
 {
-    self->payload[0] = cmd;
-    self->payload[1] = noType;
+    self->code = cmd;
+    self->type = noType;
 }
+
 
 inline enum Command
 EventGetCommand(tEvent *self)
 {
-    ASSERT((enum Command) self->payload[0] < NUM_COMMANDS);
-    return (enum Command) self->payload[0];
+    ASSERT((enum Command) self->code < NUM_COMMANDS);
+    return (enum Command) self->code;
 }
+
 
 inline void
 EventSetReply(tEvent *self, enum Reply reply)
 {
-    self->payload[0] = reply;
-    self->payload[1] = noType;
-    self->payload[2] = 0;
-    self->payload[3] = 255;
-
-    self->ring = 0;
+    self->code = reply;
+    self->type = noType;
+    self->error = 0;
+    self->last = 255;
 }
+
 
 inline void
 EventSetRing(tEvent *self, tRing *ring)
@@ -127,118 +186,124 @@ EventSetRing(tEvent *self, tRing *ring)
     self->ring = ring;
 }
 
+
 inline tRing*
 EventGetRing(tEvent *self)
 {
     return self->ring;
 }
 
+
 inline enum Reply
 EventGetReply(tEvent *self)
 {
-    ASSERT((enum Reply) self->payload[0] < NUM_REPLIES);
-    return (enum Reply) self->payload[0];
+    ASSERT((enum Reply) self->code < NUM_REPLIES);
+    return (enum Reply) self->code;
 }
+
 
 inline void
 EventSetType(tEvent *self, enum Type type)
 {
-    self->payload[1] = type;
+    self->type = type;
 }
+
 
 inline enum Type
 EventGetType(tEvent *self)
 {
-    ASSERT((enum Type) self->payload[1] < NUM_TYPES);
-    return (enum Type) self->payload[1];
+    ASSERT((enum Type) self->type < NUM_TYPES);
+    return (enum Type) self->type;
 }
 
 
 inline void
 EventSetError(tEvent *self, enum Error error)
 {
-    self->payload[2] = error;
+    self->error = error;
 }
+
 
 inline enum Error
 EventGetError(tEvent *self)
 {
-    ASSERT((enum Error) self->payload[2] < NUM_ERRORS);
-    return (enum Error) self->payload[2];
+    ASSERT((enum Error) self->error < NUM_ERRORS);
+    return (enum Error) self->error;
 }
+
 
 inline void
 EventSetLastPackage(tEvent *self, uint8_t last)
 {
-    self->payload[3] = last;
+    self->last = last;
 }
+
 
 inline uint8_t
 EventGetLastPackage(tEvent *self)
 {
-    return self->payload[3];
+    return self->last;
 }
 
-inline void
-EventSetBodyLength(tEvent *self, uint32_t length)
-{
-    ASSERT(length <= LENLAB_PACKET_BODY_LENGTH);
-    self->length = LENLAB_PACKET_HEAD_LENGTH + length;
-}
-
-inline uint32_t
-EventGetBodyLength(tEvent *self)
-{
-    return self->length - LENLAB_PACKET_HEAD_LENGTH;
-}
 
 inline uint8_t*
 EventGetBody(tEvent *self)
 {
-    return self->payload + LENLAB_PACKET_HEAD_LENGTH;
+    return self->body;
 }
 
+
 inline void
-EventSetString(tEvent *self, const uint8_t *string, uint32_t length)
+QueueSetString(tQueue *self, const uint8_t *string, uint32_t length)
 {
+    tEvent *event = QueueAcquire(self);
     uint32_t i, len;
 
-    EventSetType(self, String);
+    event->type = String;
     len = length + 1;
     len = len <= LENLAB_PACKET_BODY_LENGTH ? len : LENLAB_PACKET_BODY_LENGTH;
-    EventSetBodyLength(self, len);
+    QueueSetEventBodyLength(self, len);
     for (i = 0; i < (len - 1); i++)
-        EventGetBody(self)[i] = string[i];
-    EventGetBody(self)[i] = 0;
+        event->body[i] = string[i];
+    event->body[i] = 0;
 }
+
 
 inline void
-EventSetIntArray(tEvent *self, const uint32_t array[], uint32_t length)
+QueueSetIntArray(tQueue *self, const uint32_t array[], uint32_t length)
 {
+    tEvent *event = QueueAcquire(self);
     uint32_t i, len;
 
-    EventSetType(self, IntArray);
+    event->type = IntArray;
     len = length;
     len = len <= LENLAB_PACKET_BODY_LENGTH / 4 ? len : LENLAB_PACKET_BODY_LENGTH / 4;
-    EventSetBodyLength(self, 4*len);
+    QueueSetEventBodyLength(self, 4*len);
     for (i = 0; i < len; i++)
-        *(uint32_t *) (EventGetBody(self) + 4*i) = array[i];
+        event->array[i] = array[i];
 }
+
 
 inline uint8_t
-EventGetByte(tEvent *self, uint32_t i)
+QueueGetByte(tQueue *self, uint32_t i)
 {
-    ASSERT(EventGetType(self) == ByteArray);
-    ASSERT(i < EventGetBodyLength(self));
-    return EventGetBody(self)[i];
+    tEvent *event = QueueRead(self);
+
+    ASSERT(event->type == ByteArray);
+    ASSERT(i < QueueGetEventBodyLength(self));
+    return event->body[i];
 }
 
+
 inline uint32_t
-EventGetInt(tEvent *self, uint32_t i)
+QueueGetInt(tQueue *self, uint32_t i)
 {
-    ASSERT(EventGetType(self) == IntArray);
-    ASSERT(4*i < EventGetBodyLength(self));
-    return ((uint32_t *) EventGetBody(self))[i];
+    tEvent *event = QueueRead(self);
+
+    ASSERT(event->type == IntArray);
+    ASSERT(4*i < QueueGetEventBodyLength(self));
+    return event->array[i];
 }
+
 
 #endif /* EVENT_QUEUE_H_ */

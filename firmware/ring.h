@@ -35,7 +35,7 @@ typedef struct Page {
 
 
 typedef struct Memory {
-    tPage pages[MEMORY_LENGTH];
+    tPage *pages;
     volatile uint32_t lock; // count of pages, which are locked
 } tMemory;
 
@@ -84,8 +84,9 @@ MemoryUnlock(tMemory *self, uint32_t length)
 
 
 inline void
-MemoryInit(tMemory *self)
+MemoryInit(tMemory *self, tPage *pages)
 {
+    self->pages = pages;
     self->lock = 0;
 }
 

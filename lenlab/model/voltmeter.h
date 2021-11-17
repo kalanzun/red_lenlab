@@ -118,6 +118,7 @@ private slots:
     void on_stop_failed(protocol::pTask const &);
 
     void on_logger_data(protocol::pMessage const &);
+    void on_error_message(protocol::pMessage const &);
 };
 
 } // namespace model
