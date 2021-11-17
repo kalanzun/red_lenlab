@@ -56,14 +56,14 @@ Frequencysweep::Frequencysweep(Lenlab & lenlab, protocol::Board & board, Signalg
 QString const &
 Frequencysweep::getNameNominative() const
 {
-    static QString name("die Frequenzanalyse");
+    static QString name("ie Frequenzanalyse");
     return name;
 }
 
 QString const &
 Frequencysweep::getNameAccusative() const
 {
-    static QString name("die Frequenzanalyse");
+    static QString name("ie Frequenzanalyse");
     return name;
 }
 

@@ -50,14 +50,14 @@ Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
 QString const &
 Oscilloscope::getNameNominative() const
 {
-    static QString name("das Oszilloskop");
+    static QString name("as Oszilloskop");
     return name;
 }
 
 QString const &
 Oscilloscope::getNameAccusative() const
 {
-    static QString name("das Oszilloskop");
+    static QString name("as Oszilloskop");
     return name;
 }
 

@@ -67,13 +67,12 @@ MainWindow::askToCancelActiveComponent(model::Component *next_component)
     QString next = next_component->getNameAccusative();
     QMessageBox msgBox;
     msgBox.setText(QString(
-        "%1%2 ist noch aktiv. Um %3 zu starten muss %4 gestoppt werden.").arg(
-            previous.at(0).toUpper(),
-            previous.right(previous.size() - 1),
+        "D%1 ist noch aktiv. Um d%2 zu starten muss d%3 gestoppt werden.").arg(
+            previous,
             next,
             previous));
     msgBox.setInformativeText(QString(
-        "Möchten Sie %1 stoppen und %2 starten?").arg(
+        "Möchten Sie d%1 stoppen und d%2 starten?").arg(
             previous,
             next));
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
