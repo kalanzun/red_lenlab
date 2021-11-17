@@ -45,6 +45,8 @@ Voltmeter::Voltmeter(Lenlab &lenlab, protocol::Board &board)
 
     connect(&mBoard, &protocol::Board::logger_data,
             this, &Voltmeter::on_logger_data);
+    connect(&mBoard, &protocol::Board::error_message,
+            this, &Voltmeter::on_error_message);
 }
 
 QString const &
@@ -320,8 +322,17 @@ Voltmeter::on_logger_data(protocol::pMessage const & reply)
     setUnsavedData(true);
 
     emit seriesUpdated(m_loggerseries);
-
 }
+
+
+void
+Voltmeter::on_error_message(protocol::pMessage const & reply)
+{
+    if (reply->getError() == 4) { // QUEUE_ERROR
+        emit mLenlab.logMessage("Die Logger-Messung wurde abgebrochen weil die USB-Verbindung zu langsam war.");
+    }
+}
+
 
 void
 Voltmeter::on_autosave()

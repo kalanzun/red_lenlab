@@ -92,6 +92,7 @@ signals:
     void error(QString const &);
 
     void logger_data(pMessage const &);
+    void error_message(pMessage const &);
 
 private slots:
     void on_reply(usb::pPacket const &);

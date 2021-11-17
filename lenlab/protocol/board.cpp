@@ -168,15 +168,11 @@ Board::on_reply(usb::pPacket const & packet)
         }
     }
     else if (message->getReply() == Error) {
-        if (message->getError() == 4) {
-            emit log("Firmwarefehler: queue overflow error: Lenlab liest die Daten vom Logger nicht ausreichend schnell");
-        }
-        else {
-            emit log(QString("Firmwarefehler: Fehlercode %1").arg(message->getError()));
-        }
+        emit error(QString("Firmwarefehler: Fehlercode %1").arg(message->getError()));
+        emit error_message(message);
     }
     else {
-        emit log("Unerwartetes Paket empfangen");
+        emit error("Unerwartetes Paket empfangen");
     }
 }
 
