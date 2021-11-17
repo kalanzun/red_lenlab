@@ -249,19 +249,6 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
             //DEBUG_PRINT("TX_COMPLETE");
             usb_device.tx_pending = false;
 
-            ++usb_device.packet_counter;
-
-            // In case the queue starts to pile up, immediately start another transfer
-            if (!QueueEmpty(&reply_handler.reply_queue)) {
-                event = QueueRead(&reply_handler.reply_queue);
-                if (!event->ring) {
-                    usb_device.tx_pending = true;
-                    //USBDeviceStartuDMA(self, event->payload, event->length);
-                    ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
-                    QueueRelease(&reply_handler.reply_queue);
-                }
-            }
-
             return 0;
         }
     }
@@ -352,7 +339,6 @@ USBDeviceInit(tUSBDevice *self)
 {
     self->dma_pending = false;
     self->tx_pending = false;
-    self->packet_counter = 0;
 
     ConfigureUSBDevice(self);
 

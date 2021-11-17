@@ -24,8 +24,6 @@
 typedef struct USBDevice {
     volatile bool dma_pending;
     volatile bool tx_pending;
-    volatile uint32_t packet_counter;
-    uint32_t length;
 } tUSBDevice;
 
 
