@@ -25,6 +25,7 @@ typedef enum Error {
     LOCK_ERROR,
     ADC_ERROR,
     MEMORY_ERROR,
+    QUEUE_ERROR,
     NUM_ERRORS
 } tError;
 

@@ -63,6 +63,18 @@ uint8_t ui8ControlTable[1024] __attribute__ ((aligned(1024)));
 
 //*****************************************************************************
 //
+// Memory
+//
+//*****************************************************************************
+tPage pages[MEMORY_LENGTH];
+uint8_t reply_buffer[EVENT_QUEUE_BUFFER_LENGTH];
+uint8_t shared_buffer[EVENT_QUEUE_BUFFER_LENGTH];
+uint8_t command_buffer[EVENT_QUEUE_BUFFER_LENGTH];
+uint16_t ssi_buffer[SSI_BUFFER_LENGTH];
+
+
+//*****************************************************************************
+//
 // Peripherals
 //
 //*****************************************************************************
@@ -245,7 +257,7 @@ int main(void)
     //
     // memory module
     //
-    MemoryInit(&memory);
+    MemoryInit(&memory, pages);
 
     //
     // adc_group module
@@ -275,7 +287,7 @@ int main(void)
     //
     // ssi module
     //
-    SSIInit(&ssi);
+    SSIInit(&ssi, ssi_buffer);
 
     //
     // signal module
@@ -290,12 +302,12 @@ int main(void)
     //
     // command handler module
     //
-    CommandHandlerInit(&command_handler);
+    CommandHandlerInit(&command_handler, command_buffer);
 
     //
     // reply handler module
     //
-    ReplyHandlerInit(&reply_handler);
+    ReplyHandlerInit(&reply_handler, reply_buffer, shared_buffer);
 
     //
     // Run tests

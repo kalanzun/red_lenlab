@@ -212,21 +212,19 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         case USB_EVENT_RX_AVAILABLE:
         {
             size = USBDBulkRxPacketAvailable(&bulk_device);
-            //DEBUG_PRINT("USB_EVENT_RX_AVAILABLE %d\n", size);
             if (size > LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH)
                 size = LENLAB_PACKET_HEAD_LENGTH + LENLAB_PACKET_BODY_LENGTH;
+
             if (size) {
                 if (!QueueFull(&command_handler.command_queue)) {
                     event = QueueAcquire(&command_handler.command_queue);
-                    event->length = size;
+                    QueueSetEventLength(&command_handler.command_queue, size);
                     USBDBulkPacketRead(&bulk_device, event->payload, size, true);
-                    //DEBUG_PRINT("put command\n");
                     QueueWrite(&command_handler.command_queue);
                 }
                 else {
                     //ASSERT(0);
-                    // TODO Command Queue Full, seems to happen because of DMA transfer???
-                    DEBUG_PRINT("command queue full\n");
+                    DEBUG_PRINT("command queue overflow");
                 }
             }
 
@@ -240,8 +238,6 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
 uint32_t
 YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
-    tEvent *event;
-
     switch(ui32Event)
     {
         case USB_EVENT_TX_COMPLETE:
@@ -259,7 +255,7 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
 inline void
 USBDeviceuDMAIntHandler(tUSBDevice *self)
 {
-    tEvent *event;
+    tEvent *reply;
     tPage *page;
 
     //if (self->dma_pending && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
@@ -271,20 +267,20 @@ USBDeviceuDMAIntHandler(tUSBDevice *self)
     USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
     // USB DMA is working again, we can receive a command in between two data packets
 
-    event = QueueRead(&reply_handler.reply_queue);
-    ASSERT(event->ring);
-    RingRelease(event->ring); // page sent
+    reply = QueueRead(&reply_handler.oscilloscope_queue);
+    RingRelease(reply->ring); // page sent
 
     // Was this the last page?
-    if (RingEmpty(event->ring)) {
+    if (RingEmpty(reply->ring)) {
         // free memory
-        RingFree(event->ring);
-        QueueRelease(&reply_handler.reply_queue);
+        RingFree(reply->ring);
+        QueueRelease(&reply_handler.oscilloscope_queue);
     }
     else {
-        page = RingRead(event->ring);
+        page = RingRead(reply->ring);
         USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
-        // because of immediate restart, it does not send replies of other commands in between
+        // because of immediate restart, it does not send other replies in between
+        // (tx_pending stays true)
     }
 }
 
@@ -304,26 +300,36 @@ USB0IntHandler()
 void
 USBDeviceMain(tUSBDevice *self)
 {
-    tEvent *event;
+    tEvent *reply;
+    uint8_t length;
     tPage *page;
 
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
     if (!self->tx_pending) {
-        if (!QueueEmpty(&reply_handler.reply_queue)) {
-            event = QueueRead(&reply_handler.reply_queue);
+        // transmit all data rings first, no replies in between
+        if (!QueueEmpty(&reply_handler.oscilloscope_queue)) {
+            reply = QueueRead(&reply_handler.oscilloscope_queue);
             self->tx_pending = true;
-            if (event->ring) {
-                page = RingRead(event->ring);
-                USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
-                //ASSERT(USBDBulkPacketWrite(&bulk_device, (uint8_t *) page->buffer, 4 * PAGE_LENGTH, true)); // too big
-                //RingRelease(event->ring);
-            }
-            else {
-                //USBDeviceStartuDMA(self, event->payload, event->length);
-                ASSERT(USBDBulkPacketWrite(&bulk_device, event->payload, event->length, true));
-                QueueRelease(&reply_handler.reply_queue);
-            }
+            page = RingRead(reply->ring);
+            USBDeviceStartuDMA(self, (uint8_t *) page->buffer, 4 * PAGE_LENGTH);
+            //USBDBulkPacketWrite(&bulk_device, (uint8_t *) page->buffer, 4 * PAGE_LENGTH, true); // too big
+            //RingRelease(event->ring);
+        }
+        else if (!QueueEmpty(&reply_handler.reply_queue)) {
+            reply = QueueRead(&reply_handler.reply_queue);
+            length = QueueGetEventLength(&reply_handler.reply_queue);
+            self->tx_pending = true;
+            //USBDeviceStartuDMA(self, reply->payload, reply->length);
+            USBDBulkPacketWrite(&bulk_device, reply->payload, length, true);
+            QueueRelease(&reply_handler.reply_queue);
+        }
+        else if (!QueueEmpty(&reply_handler.logger_queue)) {
+            reply = QueueRead(&reply_handler.logger_queue);
+            length = QueueGetEventLength(&reply_handler.logger_queue);
+            self->tx_pending = true;
+            USBDBulkPacketWrite(&bulk_device, reply->payload, length, true);
+            QueueRelease(&reply_handler.logger_queue);
         }
     }
 }

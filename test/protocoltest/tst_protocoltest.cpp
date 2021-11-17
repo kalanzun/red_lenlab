@@ -53,7 +53,6 @@ private slots:
     void test_startOscilloscope2();
     void test_startOscilloscope3();
     void test_startLogger4();
-    void test_LoggerOverload();
     //void test_TransactionTimeout();
 };
 
@@ -101,39 +100,6 @@ void ProtocolTest::test_startLogger()
 
     // no additional data point after stop
     QVERIFY(logger_spy.wait(m_logger_timeout) == 0);
-}
-
-void ProtocolTest::test_LoggerOverload()
-{
-    QVector<uint32_t> args;
-    args.append(1);
-
-    pTask task(new Task(::startLogger));
-    task->getCommand()->setUInt32Vector(args);
-
-    QSignalSpy spy(task.data(), &Task::succeeded);
-    QVERIFY(spy.isValid());
-    mBoard.startTask(task);
-    QVERIFY(spy.wait(m_short_timeout));
-
-    QSignalSpy logger_spy(&mBoard, &Board::logger_data);
-    QVERIFY(logger_spy.isValid());
-
-    // 10 thousand packets in 10 seconds
-    for (int i = 0; i < 10000; ++i) {
-        //qDebug() << i;
-        logger_spy.wait(2);
-        QVERIFY2(logger_spy.count() > i, qPrintable(QString("i = %1").arg(i)));
-    }
-
-    pTask stop_task(new Task(::stopLogger));
-    QSignalSpy stop_spy(stop_task.data(), &Task::succeeded);
-    QVERIFY(stop_spy.isValid());
-    mBoard.startTask(stop_task);
-    QVERIFY(stop_spy.wait(m_short_timeout));
-
-    // no additional data point after stop
-    QVERIFY(logger_spy.wait(2) == 0);
 }
 
 void ProtocolTest::test_startOscilloscope()

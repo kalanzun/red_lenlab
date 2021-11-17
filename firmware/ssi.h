@@ -24,7 +24,7 @@
 
 
 typedef struct SSI {
-    uint16_t buffer[SSI_BUFFER_LENGTH];
+    uint16_t *buffer;
     uint32_t length;
 } tSSI;
 
@@ -44,7 +44,7 @@ void SSIStart(tSSI *self);
 
 void SSIStop(tSSI *self);
 
-void SSIInit(tSSI *self);
+void SSIInit(tSSI *self, uint16_t *buffer);
 
 
 #endif /* SSI_H_ */

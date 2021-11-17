@@ -210,9 +210,9 @@ TriggerMain(tTrigger *self, bool enable_reply)
             // Note: It does not call RingFree, when enable_usb is false
             if (enable_reply) {
                 // usb_device will call RingFree when done
-                reply = QueueAcquire(&reply_handler.reply_queue);
+                reply = QueueAcquire(&reply_handler.oscilloscope_queue);
                 EventSetRing(reply, &self->ring);
-                QueueWrite(&reply_handler.reply_queue);
+                QueueWrite(&reply_handler.oscilloscope_queue);
             }
             TriggerStop(self);
         }

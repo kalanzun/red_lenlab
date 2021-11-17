@@ -87,35 +87,41 @@ LoggerMain(tLogger *self)
     if (!self->lock) return;
 
     if (LogSeqGroupError(&self->seq_group)) {
-
         LoggerStop(self);
 
         ASSERT(0); // TODO Logger error handling in release build
-
     }
+
     else if (LogSeqGroupReady(&self->seq_group)) {
+        if (QueueFull(&reply_handler.logger_queue)) {
+            DEBUG_PRINT("Logger overflow");
+            LogSeqGroupRelease(&self->seq_group);
+            LoggerStop(self);
 
-        //DEBUG_PRINT("LoggerData");
+            reply = QueueAcquire(&reply_handler.reply_queue);
+            QueueSetEventBodyLength(&reply_handler.reply_queue, 0);
 
-        if (QueueNearlyFull(&reply_handler.reply_queue)) DEBUG_PRINT("%i", usb_device.packet_counter);
+            EventSetReply(reply, Error);
+            EventSetError(reply, QUEUE_ERROR);
 
-        reply = QueueAcquire(&reply_handler.reply_queue);
-        // if the queue fills up because sending is not fast enough, it will crash here
+            QueueWrite(&reply_handler.reply_queue);
+        }
 
-        EventSetReply(reply, LoggerData);
-        EventSetType(reply, IntArray);
+        else {
+            reply = QueueAcquire(&reply_handler.logger_queue);
+            EventSetReply(reply, LoggerData);
+            EventSetType(reply, IntArray);
 
-        size = sizeof(uint32_t) * 2 * ADC_GROUP_SIZE; // bytes; two channels per ADC
-        ASSERT(size <= LENLAB_PACKET_BODY_LENGTH);
-        EventSetBodyLength(reply, size);
+            size = sizeof(uint32_t) * 2 * ADC_GROUP_SIZE; // bytes; two channels per ADC
+            ASSERT(size <= LENLAB_PACKET_BODY_LENGTH);
+            QueueSetEventBodyLength(&reply_handler.logger_queue, size);
 
-        size = LogSeqGroupDataGet(&self->seq_group, (uint32_t *) (EventGetBody(reply)));
-        ASSERT(size == 2 * ADC_GROUP_SIZE); // number of samples
+            size = LogSeqGroupDataGet(&self->seq_group, reply->array);
+            ASSERT(size == 2 * ADC_GROUP_SIZE); // number of samples
 
-        QueueWrite(&reply_handler.reply_queue);
-
-        LogSeqGroupRelease(&self->seq_group);
-
+            LogSeqGroupRelease(&self->seq_group);
+            QueueWrite(&reply_handler.logger_queue);
+        }
     }
 }
 

@@ -19,14 +19,14 @@
 #ifndef REPLY_HANDLER_H_
 #define REPLY_HANDLER_H_
 
-// sends single USB packets
-
 
 #include "event_queue.h"
 
 
 typedef struct ReplyHandler {
     tQueue reply_queue;
+    tQueue logger_queue;
+    tQueue oscilloscope_queue;
 } tReplyHandler;
 
 
@@ -34,9 +34,11 @@ extern tReplyHandler reply_handler;
 
 
 inline void
-ReplyHandlerInit(tReplyHandler *self)
+ReplyHandlerInit(tReplyHandler *self, uint8_t *reply_buffer, uint8_t *shared_buffer)
 {
-    QueueInit(&self->reply_queue);
+    QueueInit(&self->reply_queue, reply_buffer);
+    QueueInit(&self->logger_queue, shared_buffer);
+    QueueInit(&self->oscilloscope_queue, shared_buffer);
 }
 
 

@@ -146,9 +146,10 @@ Board::on_reply(usb::pPacket const & packet)
     auto task = mTask;
     auto message = pMessage::create(packet);
 
-    if (packet->getByteLength() < LENLAB_PACKET_HEAD_LENGTH) {
-        emit log("Leeres Paket empfangen.");
-    } else if (task) {
+    if (message->getReply() == LoggerData) {
+        emit logger_data(message);
+    }
+    else if (task) {
         if (message->getReply() == Error) {
             task->setError(message);
             mTask.clear();
@@ -165,10 +166,17 @@ Board::on_reply(usb::pPacket const & packet)
                 mWatchdog.start(); // restart
             }
         }
-    } else if (message->getReply() == LoggerData) {
-        emit logger_data(message);
-    } else {
-        emit log("Unerwartetes Paket empfangen.");
+    }
+    else if (message->getReply() == Error) {
+        if (message->getError() == 4) {
+            emit log("Firmwarefehler: queue overflow error: Lenlab liest die Daten vom Logger nicht ausreichend schnell");
+        }
+        else {
+            emit log(QString("Firmwarefehler: Fehlercode %1").arg(message->getError()));
+        }
+    }
+    else {
+        emit log("Unerwartetes Paket empfangen");
     }
 }
 

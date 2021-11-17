@@ -178,9 +178,10 @@ SSIConfigure(tSSI *self)
     // DMA enabled, but not running (DMAChannelEnable not called)
 }
 
+
 void
-SSIInit(tSSI *self)
+SSIInit(tSSI *self, uint16_t *buffer)
 {
     SSIConfigure(self);
+    self->buffer = buffer;
 }
-
