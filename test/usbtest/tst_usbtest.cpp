@@ -38,9 +38,6 @@ public:
 private slots:
     void initTestCase();
     void cleanupTestCase();
-    pPacket create_command(enum Command code, Type type);
-    void set_single_int(const pPacket &cmd, const uint32_t &value);
-    //void verify_header(const pPacket &reply, Reply code, Type type, uint8_t error = 0, bool last = true);
     void test_bus_query_unsuccessfull();
     void test_device_construct_error();
     void test_device_send_error();
@@ -59,6 +56,10 @@ private:
 
     int m_short_timeout = 10;
     int m_long_timeout = 800;
+
+    pPacket create_command(enum Command code, Type type);
+    void set_single_int(const pPacket &cmd, const uint32_t &value);
+    //void verify_header(const pPacket &reply, Reply code, Type type, uint8_t error = 0, bool last = true);
 };
 
 USBTest::USBTest()

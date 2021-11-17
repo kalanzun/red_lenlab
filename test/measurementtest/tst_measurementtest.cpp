@@ -42,6 +42,8 @@ private slots:
     void cleanupTestCase();
     void test_startOscilloscopeLinearTestData();
     void test_startTriggerLinearTestData();
+    void test_startOscilloscopeLinearTestData2();
+    void test_startTriggerLinearTestData2();
 };
 
 void MeasurementTest::initTestCase()
@@ -113,6 +115,10 @@ void MeasurementTest::test_startTriggerLinearTestData()
         }
     }
 }
+
+void MeasurementTest::test_startOscilloscopeLinearTestData2() { test_startOscilloscopeLinearTestData(); }
+
+void MeasurementTest::test_startTriggerLinearTestData2() { test_startTriggerLinearTestData(); }
 
 QTEST_MAIN(MeasurementTest)
 

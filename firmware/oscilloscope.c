@@ -105,6 +105,10 @@ OscilloscopeLinearTestData(tOscilloscope *self)
             RingWrite(ring);
             j++;
         }
+
+        // look like finished DMA
+        osc_seq_group.osc_seq[i].ping_enable = 0;
+        osc_seq_group.osc_seq[i].pong_enable = 0;
     }
 
     return OK;
