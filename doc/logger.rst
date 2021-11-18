@@ -32,9 +32,9 @@ Pin-Belegung
     * - Kanal 1
       - PD0
     * - Kanal 2
-      - PD1
-    * - Kanal 3
       - PD2
+    * - Kanal 3
+      - PD1
     * - Kanal 4
       - PD3
 
@@ -55,5 +55,5 @@ ADC Samplerate
     1 MHz
     
 ADC Mittelung
-    1000 Samples
+    32 Samples
 
