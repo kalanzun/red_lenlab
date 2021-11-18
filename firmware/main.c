@@ -194,7 +194,7 @@ ConfigureuDMA(void)
 // Modules
 //
 //*****************************************************************************
-tClock clock;
+tClock red_clock;
 tIntTimer int_timer;
 tMemory memory;
 tADCGroup adc_group;
@@ -224,7 +224,7 @@ int main(void)
     //
     // clock module
     //
-    ClockInit(&clock);
+    ClockInit(&red_clock);
 
     //
     // Configure peripherals
@@ -242,7 +242,7 @@ int main(void)
     // Print a welcome message
     //
     DEBUG_PRINT("Red Firmware TDD");
-    DEBUG_PRINT("Tiva C Series @ %u MHz", clock.cycles_per_us);
+    DEBUG_PRINT("Tiva C Series @ %u MHz", red_clock.cycles_per_us);
 
     //
     // Configure uDMA

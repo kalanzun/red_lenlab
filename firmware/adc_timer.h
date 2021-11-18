@@ -40,7 +40,7 @@ inline void
 ADCTimerSetInterval(tADCTimer *self, uint32_t interval)
 {
     // interval in us
-    TimerLoadSet64(self->base, (uint64_t) interval * clock.cycles_per_us);
+    TimerLoadSet64(self->base, (uint64_t) interval * red_clock.cycles_per_us);
 }
 
 

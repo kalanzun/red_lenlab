@@ -56,7 +56,7 @@ IntTimerStart(tIntTimer *self, uint32_t interval)
 {
     // interval in ms
     self->ready = 0;
-    TimerLoadSet64(self->base, (uint64_t) interval * clock.cycles_per_ms);
+    TimerLoadSet64(self->base, (uint64_t) interval * red_clock.cycles_per_ms);
     TimerEnable(self->base, self->timer);
 }
 

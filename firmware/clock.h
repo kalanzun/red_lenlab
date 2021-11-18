@@ -26,7 +26,8 @@ typedef struct Clock {
 } tClock;
 
 
-extern tClock clock;
+// there is a standard clock() function. Avoid name collision
+extern tClock red_clock;
 
 
 inline void ClockInit(tClock *self);
