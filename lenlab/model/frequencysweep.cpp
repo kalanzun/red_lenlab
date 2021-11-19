@@ -86,9 +86,9 @@ Frequencysweep::start()
     emit seriesChanged(m_current);
     m_index = m_current->startIndex();
 
-    m_signalgenerator.setAmplitude(14);
-    m_signalgenerator.setFrequency(m_index);
-    m_signalgenerator.setSecond(1);
+    m_signalgenerator.setAmplitudeIndex(14);
+    m_signalgenerator.setFrequencyIndex(m_index);
+    m_signalgenerator.setSecondIndex(1);
 
     m_signalgenerator_error_counter = 0;
     if (m_signalgenerator.active()) {
@@ -216,7 +216,7 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
 
     ++m_index;
     if (m_index < m_current->stopIndex()) {
-        m_signalgenerator.setFrequency(m_index);
+        m_signalgenerator.setFrequencyIndex(m_index);
 
         m_signalgenerator_error_counter = 0;
         m_signalgenerator.setSine();
@@ -225,7 +225,7 @@ Frequencysweep::on_calculate(pOscilloscopeData waveform)
         stop();
     }
 
-    double f = m_signalgenerator.getFrequency(index);
+    double f = m_signalgenerator.to_frequency(index);
 
     std::complex<double> sum0, sum1, y;
     double value, angle, x;

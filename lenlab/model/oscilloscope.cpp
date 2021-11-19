@@ -90,7 +90,7 @@ Oscilloscope::setSamplerateIndex(int index)
 }
 
 int
-Oscilloscope::samplerateIndex() const
+Oscilloscope::getSamplerateIndex() const
 {
     return m_samplerate_index;
 }
@@ -106,12 +106,6 @@ Oscilloscope::setViewIndex(int index)
     emit seriesChanged(waveform);
 }
 
-int
-Oscilloscope::viewIndex() const
-{
-    return m_view_index;
-}
-
 QString
 Oscilloscope::getSamplerateLabel(int index)
 {
@@ -121,6 +115,7 @@ Oscilloscope::getSamplerateLabel(int index)
 QString
 Oscilloscope::getViewLabel(int index) const
 {
+    // view_label depends on the current m_samplerate_index
     return QString("%1 ms").arg(german_double(to_view(index) / to_samplerate(m_samplerate_index) * 1000));
 }
 

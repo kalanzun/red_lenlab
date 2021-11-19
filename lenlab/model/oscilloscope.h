@@ -21,7 +21,6 @@
 
 #include "component.h"
 #include "waveform.h"
-#include "indexparameter.h"
 
 #include <QObject>
 #include <QTextStream>
@@ -39,9 +38,6 @@ class Oscilloscope : public Component
 
     static int const m_task_delay = 100;
     static int const m_task_timeout = 400;
-
-    Q_PROPERTY(int samplerate_index READ samplerateIndex WRITE setSamplerateIndex)
-    Q_PROPERTY(int view_index READ viewIndex WRITE setViewIndex)
 
     bool pending = 0;
 
@@ -71,10 +67,8 @@ public:
     virtual void reset();
 
     void setSamplerateIndex(int index);
-    int samplerateIndex() const;
-
+    int getSamplerateIndex() const;
     void setViewIndex(int index);
-    int viewIndex() const;
 
     static QString getSamplerateLabel(int index);
     QString getViewLabel(int index) const;

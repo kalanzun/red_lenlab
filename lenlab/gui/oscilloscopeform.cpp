@@ -127,8 +127,8 @@ OscilloscopeForm::seriesChanged(model::pSeries const & series)
     ui->labChart->replace(series);
 
     // samplerate may be different
-    if (m_oscilloscope->samplerateIndex() != m_current_samplerate_index) {
-        m_current_samplerate_index = m_oscilloscope->samplerateIndex();
+    if (m_oscilloscope->getSamplerateIndex() != m_current_samplerate_index) {
+        m_current_samplerate_index = m_oscilloscope->getSamplerateIndex();
 
         // update timerangeBox
         for (int i = 0; i < m_oscilloscope->view_count; ++i)
