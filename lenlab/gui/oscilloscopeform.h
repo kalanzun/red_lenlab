@@ -43,6 +43,8 @@ class OscilloscopeForm : public QWidget
 
     bool pending = false;
 
+    int m_current_samplerate_index = 0;
+
     MainWindow * m_main_window = nullptr;
     model::Lenlab * m_lenlab = nullptr;
     model::Oscilloscope * m_oscilloscope = nullptr;

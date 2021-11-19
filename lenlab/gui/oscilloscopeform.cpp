@@ -76,7 +76,11 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     m_lenlab = lenlab;
     m_oscilloscope = &lenlab->oscilloscope;
 
-    ui->samplerateBox->insertItems(0, m_oscilloscope->samplerateIndex.labels);
+    for (int i = 0; i < m_oscilloscope->samplerate_count; ++i)
+        ui->samplerateBox->addItem(m_oscilloscope->getSamplerateLabel(i));
+
+    for (int i = 0; i < m_oscilloscope->view_count; ++i)
+        ui->timerangeBox->addItem(m_oscilloscope->getViewLabel(i));
 
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
             this, &OscilloscopeForm::seriesChanged);
@@ -121,12 +125,22 @@ void
 OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
     ui->labChart->replace(series);
+
+    // samplerate may be different
+    if (m_oscilloscope->samplerateIndex() != m_current_samplerate_index) {
+        m_current_samplerate_index = m_oscilloscope->samplerateIndex();
+
+        // update timerangeBox
+        for (int i = 0; i < m_oscilloscope->view_count; ++i)
+            ui->timerangeBox->setItemText(i, m_oscilloscope->getViewLabel(i));
+    }
+
 }
 
 void
 OscilloscopeForm::on_samplerateBox_activated(int index)
 {
-    m_oscilloscope->setSamplerate(static_cast<uint32_t>(index));
+    m_oscilloscope->setSamplerateIndex(index);
 }
 
 void
@@ -189,11 +203,7 @@ OscilloscopeForm::saveImage()
 void
 OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
 {
-    /*
-    double timerange = 0.5 * (1<<index);
-    ui->plot->setAxisScale(QwtPlot::xBottom, -timerange/2, timerange/2);
-    ui->plot->replot();
-    */
+    m_oscilloscope->setViewIndex(index);
 }
 
 void OscilloscopeForm::activeChanged(bool)

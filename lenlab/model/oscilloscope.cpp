@@ -32,15 +32,7 @@ char const * const Oscilloscope::DELIMITER = ";";
 Oscilloscope::Oscilloscope(Lenlab & lenlab, protocol::Board & board)
     : Component(lenlab, board)
     , waveform(new Waveform)
-    , samplerateIndex(3)
 {
-    double value;
-
-    for (uint32_t i = 0; i < samplerateIndex.length; ++i) {
-        value = 1000.0 / (1<<(i+2));
-        samplerateIndex.labels << QString("%1 kHz").arg(german_double(value));
-    }
-
     startTimer.setInterval(m_task_delay);
     startTimer.setSingleShot(true);
     connect(&startTimer, &QTimer::timeout,
@@ -91,9 +83,45 @@ void Oscilloscope::reset()
 }
 
 void
-Oscilloscope::setSamplerate(uint32_t index)
+Oscilloscope::setSamplerateIndex(int index)
 {
-    samplerate = index;
+    // save for next waveform
+    m_samplerate_index = index;
+}
+
+int
+Oscilloscope::samplerateIndex() const
+{
+    return m_samplerate_index;
+}
+
+void
+Oscilloscope::setViewIndex(int index)
+{
+    // save for next waveform
+    m_view_index = index;
+
+    // also change current waveform
+    waveform->setView(to_view(m_view_index));
+    emit seriesChanged(waveform);
+}
+
+int
+Oscilloscope::viewIndex() const
+{
+    return m_view_index;
+}
+
+QString
+Oscilloscope::getSamplerateLabel(int index)
+{
+    return QString("%1 kHz").arg(german_double(to_samplerate(index) / 1000));
+}
+
+QString
+Oscilloscope::getViewLabel(int index) const
+{
+    return QString("%1 ms").arg(german_double(to_view(index) / to_samplerate(m_samplerate_index) * 1000));
 }
 
 void
@@ -111,10 +139,10 @@ Oscilloscope::on_start()
     }
 
     incoming.reset(new Waveform);
-    incoming->setSamplerate(1e6/(1<<(samplerate+2)));
+    incoming->setSamplerate(to_samplerate(m_samplerate_index));
 
     QVector<uint32_t> args;
-    args.append(samplerate + 2);
+    args.append(to_log2oversamples(m_samplerate_index));
 
     protocol::pTask task(new protocol::Task(::startTrigger, m_task_timeout));
     task->getCommand()->setUInt32Vector(args);
@@ -136,7 +164,7 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
         uint16_t state0 = buffer[2];
         uint16_t state1 = buffer[3];
 
-        incoming->setTrigger(trigger);
+        if (trigger > 0) incoming->setTrigger(trigger);
 
         incoming->append(0, to_double(state0));
         incoming->append(1, to_double(state1));
@@ -150,6 +178,8 @@ Oscilloscope::on_succeeded(protocol::pTask const & task)
             incoming->append(1, to_double(state1));
         }
     }
+
+    incoming->setView(to_view(m_view_index));
 
     waveform.swap(incoming);
     emit seriesChanged(incoming);
@@ -172,6 +202,25 @@ Oscilloscope::to_double(uint16_t state)
 {
     return ((static_cast<double>(state)) / 1024.0 - 0.5) * 3.3;
 }
+
+int
+Oscilloscope::to_log2oversamples(int index)
+{
+    return index + 2;
+}
+
+double
+Oscilloscope::to_samplerate(int index)
+{
+    return 1e6 / (1 << (index + 2));
+}
+
+int
+Oscilloscope::to_view(int index)
+{
+    return 8000 >> index;
+}
+
 
 void
 Oscilloscope::save(QTextStream &stream)

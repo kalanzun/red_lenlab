@@ -40,16 +40,21 @@ class Oscilloscope : public Component
     static int const m_task_delay = 100;
     static int const m_task_timeout = 400;
 
+    Q_PROPERTY(int samplerate_index READ samplerateIndex WRITE setSamplerateIndex)
+    Q_PROPERTY(int view_index READ viewIndex WRITE setViewIndex)
+
     bool pending = 0;
 
-    uint32_t samplerate = 0;
+    int m_samplerate_index = 0;
+    int m_view_index = 0;
     QSharedPointer<Waveform> incoming;
     QSharedPointer<Waveform> waveform;
 
     QTimer startTimer;
 
 public:
-    IndexParameter samplerateIndex;
+    static int const samplerate_count = 3;
+    static int const view_count = 4;
 
     explicit Oscilloscope(Lenlab &lenlab, protocol::Board &board);
     Oscilloscope(Oscilloscope const &) = delete;
@@ -65,12 +70,24 @@ public:
     virtual void stop();
     virtual void reset();
 
-    void setSamplerate(uint32_t index);
+    void setSamplerateIndex(int index);
+    int samplerateIndex() const;
+
+    void setViewIndex(int index);
+    int viewIndex() const;
+
+    static QString getSamplerateLabel(int index);
+    QString getViewLabel(int index) const;
 
     void save(QTextStream &stream);
 
 private:
     static double to_double(uint16_t state);
+
+    static int to_log2oversamples(int index);
+    static double to_samplerate(int index);
+
+    static int to_view(int index);
 
 private slots:
     void on_start();
