@@ -78,6 +78,10 @@ LoggerForm::setModel(model::Lenlab * lenlab)
     m_lenlab = lenlab;
     m_voltmeter = &lenlab->voltmeter;
 
+    for (int i = 0; i < m_voltmeter->interval_count; ++i)
+        ui->intervalComboBox->addItem(m_voltmeter->getIntervalLabel(i));
+    ui->intervalComboBox->setCurrentIndex(3);
+
     connect(m_voltmeter, &model::Voltmeter::seriesChanged,
             this, &LoggerForm::seriesChanged);
     connect(m_voltmeter, &model::Voltmeter::seriesUpdated,
@@ -286,8 +290,7 @@ void LoggerForm::activeChanged(bool)
 void
 LoggerForm::on_intervalComboBox_activated(int index)
 {
-    static uint32_t const interval[] = {100, 200, 500, 1000, 2000, 5000};
-    m_voltmeter->setInterval(interval[index]);
+    m_voltmeter->setIntervalIndex(index);
 }
 
 void

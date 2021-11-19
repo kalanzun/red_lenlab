@@ -44,17 +44,19 @@ class Voltmeter : public Component
     Q_PROPERTY(bool autoSave READ autoSave WRITE setAutoSave NOTIFY autoSaveChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PROPERTY(std::bitset<4> channels READ channels WRITE setChannels NOTIFY channelsChanged)
-    Q_PROPERTY(uint32_t interval READ interval WRITE setInterval NOTIFY intervalChanged)
+    Q_PROPERTY(int interval_index READ getIntervalIndex WRITE setIntervalIndex NOTIFY intervalChanged)
 
     static double const MSEC;
     static double const VOLT;
+
+    static std::array< int const, 6 > const interval;
 
     bool mMeasurementData = false;
     bool mUnsavedData = false;
     bool mAutoSave = false;
     QString mFileName;
     std::bitset<4> mChannels = 1;
-    uint32_t mInterval = 1000;
+    int m_interval_index = 3;
 
     QSharedPointer<Loggerseries> m_loggerseries;
 
@@ -62,6 +64,8 @@ class Voltmeter : public Component
     double mOffsetTime;
 
 public:
+    static int const interval_count = interval.size();
+
     explicit Voltmeter(Lenlab & lenlab, protocol::Board & board);
     Voltmeter(Voltmeter const &) = delete;
 
@@ -69,6 +73,8 @@ public:
 
     virtual QString const & getNameNominative() const;
     virtual QString const & getNameAccusative() const;
+
+    static QString getIntervalLabel(int index);
 
     void setMeasurementData(bool measurementData);
     bool measurementData() const;
@@ -85,8 +91,8 @@ public:
     void setChannels(std::bitset<4> const & channels);
     const std::bitset<4> &channels() const;
 
-    void setInterval(uint32_t interval);
-    uint32_t interval() const;
+    void setIntervalIndex(int index);
+    int getIntervalIndex() const;
 
     virtual pSeries getSeries() const;
 
@@ -100,6 +106,9 @@ public:
     //virtual void ready();
 
     void save(QTextStream &stream);
+
+private:
+    static int to_interval(int index);
 
 signals:
     void measurementDataChanged(bool);
