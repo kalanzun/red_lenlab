@@ -65,6 +65,9 @@ public:
     double getMaxX() const;
     double getMinY(int channel) const;
     double getMaxY(int channel) const;
+
+private:
+    static int round_up_towards(int base, int value);
 };
 
 } // namespace model
