@@ -67,7 +67,7 @@ public:
     double getMaxY(int channel) const;
 
 private:
-    static int round_up_towards(int base, int value);
+    static int round_up_towards(int base, double value);
 };
 
 } // namespace model

@@ -64,12 +64,17 @@ FrequencyForm::prepareChart(LabChart *chart)
     // Note: With kHz, from 0.1 kHz it has rounding issues and the max tick is missing
     axisX->setBase(10);
     axisX->setLabelFormat("%g");
+    axisX->setMinorTickCount(-1); // automatic
     chart->addAxis(axisX, Qt::AlignBottom);
 
     QValueAxis *axisM = new QValueAxis();
+    axisM->setTickCount(5); // 4 intervals
+    axisM->setMinorTickCount(4); // 5 intervals in each major interval
     chart->addAxis(axisM, Qt::AlignLeft);
 
     QValueAxis *axisPh = new QValueAxis();
+    axisPh->setTickCount(5); // 4 intervals
+    axisPh->setMinorTickCount(4); // 5 intervals in each major interval
     chart->addAxis(axisPh, Qt::AlignRight);
 
     auto seriesM = new QLineSeries();

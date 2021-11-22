@@ -91,35 +91,20 @@ Loggerseries::getMinX() const
 }
 
 int
-Loggerseries::round_up_towards(int base, int value)
+Loggerseries::round_up_towards(int base, double value)
 {
-    return base * (value / base + (value % base != 0));
+    int ivalue = static_cast< int >(std::ceil(value));
+    return base * (ivalue / base + static_cast< bool >(ivalue % base));
 }
 
 double
 Loggerseries::getMaxX() const
 {
-    auto value = getLength();
-    value = value > 10 ? value - 1 : 10;
+    double value = getLastX();
 
-    if (value < 30)
-        value = round_up_towards(5, value);
-    else if (value < 100)
-        value = round_up_towards(10, value);
-    else if (value < 300)
-        value = round_up_towards(50, value);
-    else if (value < 1000)
-        value = round_up_towards(100, value);
-    else if (value < 3000)
-        value = round_up_towards(500, value);
-    else if (value < 10000)
-        value = round_up_towards(1000, value);
-    else if (value < 30000)
-        value = round_up_towards(5000, value);
-    else
-        value = round_up_towards(10000, value);
-
-    return getX(value);
+    if (value <= 8) return 8;
+    else if (value <= 80) return round_up_towards(8, value);
+    else return round_up_towards(80, value);
 }
 
 double

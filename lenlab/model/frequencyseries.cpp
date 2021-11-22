@@ -25,8 +25,8 @@ namespace model {
 FrequencySeries::FrequencySeries()
     : Series()
     , index{0, 0}
-    , MinY{-10, -90}
-    , MaxY{10, 90}
+    , MinY{-10, -100}
+    , MaxY{10, 100}
 {
 
 }
