@@ -96,19 +96,21 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
 void
 OscilloscopeForm::on_startButton_clicked()
 {
-    if (!m_oscilloscope->active()) {
-        if (m_lenlab->isActive()) {
-            if (m_main_window->askToCancelActiveComponent(m_oscilloscope)) {
-                if (m_lenlab->isActive()) {
-                    // the component might have stopped while the dialog was visible
-                    pending = true;
-                    m_lenlab->getActiveComponent()->stop();
-                } else {
-                    m_oscilloscope->start();
+    if (m_lenlab->isReady()) {
+        if (!m_oscilloscope->active()) {
+            if (m_lenlab->isActive()) {
+                if (m_main_window->askToCancelActiveComponent(m_oscilloscope)) {
+                    if (m_lenlab->isActive()) {
+                        // the component might have stopped while the dialog was visible
+                        pending = true;
+                        m_lenlab->getActiveComponent()->stop();
+                    } else {
+                        m_oscilloscope->start();
+                    }
                 }
+            } else {
+                m_oscilloscope->start();
             }
-        } else {
-            m_oscilloscope->start();
         }
     }
 }

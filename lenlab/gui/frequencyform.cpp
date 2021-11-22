@@ -113,19 +113,21 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!m_frequencysweep->active()) {
-        if (m_lenlab->isActive()) {
-            if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {
-                if (m_lenlab->isActive()) {
-                    // the component might have stopped while the dialog was visible
-                    pending = true;
-                    m_lenlab->getActiveComponent()->stop();
-                } else {
-                    m_frequencysweep->start();
+    if (m_lenlab->isReady()) {
+        if (!m_frequencysweep->active()) {
+            if (m_lenlab->isActive()) {
+                if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {
+                    if (m_lenlab->isActive()) {
+                        // the component might have stopped while the dialog was visible
+                        pending = true;
+                        m_lenlab->getActiveComponent()->stop();
+                    } else {
+                        m_frequencysweep->start();
+                    }
                 }
+            } else {
+                m_frequencysweep->start();
             }
-        } else {
-            m_frequencysweep->start();
         }
     }
 }

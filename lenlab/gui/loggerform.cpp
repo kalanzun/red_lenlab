@@ -109,19 +109,21 @@ LoggerForm::setModel(model::Lenlab * lenlab)
 void
 LoggerForm::on_startButton_clicked()
 {
-    if (!m_voltmeter->active()) {
-        if (m_lenlab->isActive()) {
-            if (m_main_window->askToCancelActiveComponent(m_voltmeter)) {
-                if (m_lenlab->isActive()) {
-                    // the component might have stopped while the dialog was visible
-                    pending = true;
-                    m_lenlab->getActiveComponent()->stop();
-                } else {
-                    m_voltmeter->start();
+    if (m_lenlab->isReady()) {
+        if (!m_voltmeter->active()) {
+            if (m_lenlab->isActive()) {
+                if (m_main_window->askToCancelActiveComponent(m_voltmeter)) {
+                    if (m_lenlab->isActive()) {
+                        // the component might have stopped while the dialog was visible
+                        pending = true;
+                        m_lenlab->getActiveComponent()->stop();
+                    } else {
+                        m_voltmeter->start();
+                    }
                 }
+            } else {
+                m_voltmeter->start();
             }
-        } else {
-            m_voltmeter->start();
         }
     }
 }
