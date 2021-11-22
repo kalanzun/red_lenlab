@@ -34,8 +34,6 @@ on_init(tCommandHandler *self)
 {
     tEvent *reply;
 
-    //DEBUG_PRINT("Init");
-
     LoggerStop(&logger);
     OscilloscopeStop(&oscilloscope);
     TriggerStop(&trigger);
@@ -64,8 +62,6 @@ on_getName(tCommandHandler *self)
 {
     tEvent *reply;
 
-    //DEBUG_PRINT("getName");
-
     reply = QueueAcquire(&reply_handler.reply_queue);
 
     EventSetReply(reply, Name);
@@ -80,8 +76,6 @@ on_getVersion(tCommandHandler *self)
 {
     tEvent *reply;
     uint32_t array[2] = {MAJOR, MINOR};
-
-    //DEBUG_PRINT("getVersion");
 
     reply = QueueAcquire(&reply_handler.reply_queue);
 
@@ -99,7 +93,6 @@ on_startLogger(tCommandHandler *self)
     uint32_t interval = QueueGetInt(&self->command_queue, 0);
     tError error;
 
-    //DEBUG_PRINT("startLogger");
     error = LoggerStart(&logger, interval);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
@@ -108,6 +101,7 @@ on_startLogger(tCommandHandler *self)
     if (error) {
         EventSetReply(reply, Error);
         EventSetError(reply, error);
+        DEBUG_PRINT("startLogger error %i", error);
     }
     else {
         EventSetReply(reply, Logger);
@@ -123,7 +117,6 @@ on_stopLogger(tCommandHandler *self)
     tEvent *reply;
     tError error;
 
-    //DEBUG_PRINT("stopLogger");
     error = LoggerStop(&logger);
 
     reply = QueueAcquire(&reply_handler.reply_queue);
@@ -132,6 +125,7 @@ on_stopLogger(tCommandHandler *self)
     if (error) {
         EventSetReply(reply, Error);
         EventSetError(reply, error);
+        DEBUG_PRINT("stopLogger error %i", error);
     }
     else {
         EventSetReply(reply, Logger);
@@ -152,7 +146,6 @@ on_setSignalSine(tCommandHandler *self)
     uint32_t amplitude  = QueueGetInt(&self->command_queue, 3);
     uint32_t second     = QueueGetInt(&self->command_queue, 4);
 
-    //DEBUG_PRINT("setSignalSine");
     // this may need a long time
     SignalSetSine(&signal, multiplier, predivider, divider, amplitude, second);
 
@@ -173,7 +166,6 @@ on_stopSignal(tCommandHandler *self)
 {
     tEvent *reply;
 
-    //DEBUG_PRINT("stopSignal");
     if (signal.lock) SignalStop(&signal);
 
     // send a reply
@@ -201,6 +193,7 @@ on_startOscilloscope(tCommandHandler *self)
 
         EventSetReply(reply, Error);
         EventSetError(reply, error);
+        DEBUG_PRINT("startOscilloscope error %i", error);
 
         QueueWrite(&reply_handler.reply_queue);
     }
@@ -221,6 +214,7 @@ on_startOscilloscopeLinearTestData(tCommandHandler *self)
 
         EventSetReply(reply, Error);
         EventSetError(reply, error);
+        DEBUG_PRINT("startOscilloscopeLinearTestData error %i", error);
 
         QueueWrite(&reply_handler.reply_queue);
     }
@@ -242,6 +236,7 @@ on_startTrigger(tCommandHandler *self)
 
         EventSetReply(reply, Error);
         EventSetError(reply, error);
+        DEBUG_PRINT("startTrigger error %i", error);
 
         QueueWrite(&reply_handler.reply_queue);
     }
@@ -262,6 +257,7 @@ on_startTriggerLinearTestData(tCommandHandler *self)
 
         EventSetReply(reply, Error);
         EventSetError(reply, error);
+        DEBUG_PRINT("startTriggerLinearTestData error %i", error);
 
         QueueWrite(&reply_handler.reply_queue);
     }
