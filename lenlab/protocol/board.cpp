@@ -77,6 +77,8 @@ bool
 Board::isReady() const
 {
     // TODO rename ready signal open, maybe implement closed signal
+    // there should be an isConnected for the GUI (isOpen + init done)
+    // tasks may queue
     return mDevice && !mTask;
 }
 

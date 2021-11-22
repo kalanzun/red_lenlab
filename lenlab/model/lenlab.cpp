@@ -39,9 +39,9 @@ Lenlab::Lenlab(QObject * parent)
 }
 
 bool
-Lenlab::isReady() const
+Lenlab::isOpen() const
 {
-    return board.isReady();
+    return board.isOpen();
 }
 
 bool

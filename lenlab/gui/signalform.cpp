@@ -118,7 +118,7 @@ void
 SignalForm::on_signalTypeBox_activated(int index)
 {
     if (index == 1) { // Sinus
-        if (!m_lenlab->isReady() || m_signalgenerator->locked()) {
+        if (!m_lenlab->isOpen() || m_signalgenerator->locked()) {
             ui->signalTypeBox->setCurrentIndex(0);
             m_active = 0;
         }
@@ -132,7 +132,7 @@ SignalForm::on_signalTypeBox_activated(int index)
         }
     }
     else {
-        if (!m_lenlab->isReady() || m_signalgenerator->locked()) {
+        if (!m_lenlab->isOpen() || m_signalgenerator->locked()) {
         }
         else if (m_active) {
             m_active = 0;

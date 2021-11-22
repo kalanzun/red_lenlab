@@ -113,7 +113,7 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (m_lenlab->isReady()) {
+    if (m_lenlab->isOpen()) {
         if (!m_frequencysweep->active()) {
             if (m_lenlab->isActive()) {
                 if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {

@@ -49,7 +49,7 @@ public:
 
     Lenlab & operator=(Lenlab const & other) = delete;
 
-    bool isReady() const;
+    bool isOpen() const;
 
     bool isActive() const;
     Component *getActiveComponent();
