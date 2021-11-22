@@ -28,22 +28,17 @@ LoggerForm::LoggerForm(QWidget * parent) :
     QWidget(parent),
     ui(new Ui::LoggerForm)
 {
-    QString stylesheet;
-
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
 
     prepareChart(ui->labChart);
+    setTheme(QChart::ChartThemeLight);
 
     auto series = ui->labChart->series();
     for (int i = 0; i < series.size(); ++i) {
-        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
-                + series.at(i)->color().name() + "; }\n";
         series.at(i)->setVisible(i == 0);
     }
-
-    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 LoggerForm::~LoggerForm()
@@ -217,6 +212,23 @@ LoggerForm::saveImage()
 
     chart.replace(m_voltmeter->getSeries());
     chart.print(fileName);
+}
+
+void
+LoggerForm::setTheme(QChart::ChartTheme theme)
+{
+    QString stylesheet;
+
+    ui->labChart->chart()->setTheme(theme);
+
+    auto series = ui->labChart->series();
+    for (int i = 0; i < series.size(); ++i) {
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + series.at(i)->color().name() + "; }\n";
+        series.at(i)->setVisible(i == 0);
+    }
+
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 void

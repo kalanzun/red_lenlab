@@ -28,24 +28,10 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::FrequencyForm)
 {
-    QString stylesheet;
-
     ui->setupUi(this);
 
     prepareChart(ui->labChart);
-
-    auto series = ui->labChart->series();
-
-    stylesheet += "#ch1Label { color: "
-            + series.at(0)->color().name() + "; }\n";
-    stylesheet += "#ch2Label { color: "
-            + series.at(1)->color().name() + "; }\n";
-    stylesheet += "#magnitudeLabel { color: "
-            + series.at(0)->color().name() + "; }\n";
-    stylesheet += "#phaseLabel { color: "
-            + series.at(1)->color().name() + "; }\n";
-
-    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
+    setTheme(QChart::ChartThemeLight);
 }
 
 FrequencyForm::~FrequencyForm()
@@ -194,6 +180,27 @@ FrequencyForm::saveImage()
     chart.chart()->legend()->show();
     chart.replace(m_frequencysweep->getSeries());
     chart.print(fileName);
+}
+
+void
+FrequencyForm::setTheme(QChart::ChartTheme theme)
+{
+    QString stylesheet;
+
+    ui->labChart->chart()->setTheme(theme);
+
+    auto series = ui->labChart->series();
+
+    stylesheet += "#ch1Label { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#ch2Label { color: "
+            + series.at(1)->color().name() + "; }\n";
+    stylesheet += "#magnitudeLabel { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#phaseLabel { color: "
+            + series.at(1)->color().name() + "; }\n";
+
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 void

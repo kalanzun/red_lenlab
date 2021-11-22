@@ -22,6 +22,8 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QChart>
+#include <QMetaObject>
 
 namespace gui {
 
@@ -32,6 +34,13 @@ MainWindow::MainWindow(QWidget * parent)
     ui->setupUi(this);
 
     setWindowTitle("Lenlab");
+
+    QMetaEnum metaEnum = QChart::staticMetaObject.enumerator(
+                QChart::staticMetaObject.indexOfEnumerator("ChartTheme"));
+    for (int i = 0; i < metaEnum.keyCount(); ++i) {
+        auto action = ui->menuAnsicht->addAction(metaEnum.key(i), this, &MainWindow::on_actionView_triggered);
+        action->setData(i);
+    }
 
     ui->signal->hide();
     ui->logPlainTextEdit->hide();
@@ -161,6 +170,17 @@ MainWindow::on_actionSaveData_triggered()
             ui->FrequencyTab->save();
             break;
     }
+}
+
+
+void
+MainWindow::on_actionView_triggered()
+{
+    QAction* action = qobject_cast< QAction* >(sender());
+    QChart::ChartTheme theme = static_cast< QChart::ChartTheme >(action->data().toInt());
+    ui->loggerTab->setTheme(theme);
+    ui->oscilloscopeTab->setTheme(theme);
+    ui->FrequencyTab->setTheme(theme);
 }
 
 

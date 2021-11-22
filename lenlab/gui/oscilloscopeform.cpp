@@ -28,20 +28,15 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::OscilloscopeForm)
 {
-    QString stylesheet;
-
     ui->setupUi(this);
 
     prepareChart(ui->labChart);
+    setTheme(QChart::ChartThemeLight);
 
     auto series = ui->labChart->series();
     for (int i = 0; i < series.size(); ++i) {
-        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
-                + series.at(i)->color().name() + "; }\n";
         series.at(i)->setVisible(i == 0);
     }
-
-    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 OscilloscopeForm::~OscilloscopeForm()
@@ -200,6 +195,22 @@ OscilloscopeForm::saveImage()
     chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);
     chart.replace(m_oscilloscope->getSeries());
     chart.print(fileName);
+}
+
+void
+OscilloscopeForm::setTheme(QChart::ChartTheme theme)
+{
+    QString stylesheet;
+
+    ui->labChart->chart()->setTheme(theme);
+
+    auto series = ui->labChart->series();
+    for (int i = 0; i < series.size(); ++i) {
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + series.at(i)->color().name() + "; }\n";
+    }
+
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 void

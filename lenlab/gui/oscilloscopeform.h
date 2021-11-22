@@ -61,6 +61,8 @@ public:
     void save();
     void saveImage();
 
+    void setTheme(QChart::ChartTheme theme);
+
 private slots:
     void seriesChanged(model::pSeries const &);
 
