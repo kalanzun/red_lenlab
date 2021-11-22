@@ -105,6 +105,7 @@ Frequencysweep::on_signalgenerator_succeeded(protocol::pTask const &)
 
     if (!mActive) return;
 
+    m_error_counter = 0;
     stepTimer.start(); // wait a little for the system to settle
 }
 
@@ -172,16 +173,39 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
 
     std::array< int, m_channels > index = {0};
     pOscilloscopeData waveform(new OscilloscopeData());
+    bool invalid = false;
 
     for (auto reply: task->getReplies()) {
         uint16_t *data = reply->getUInt16Buffer() + m_uint16_offset;
 
-        std::size_t channel = reply->getHead()[2];
-        //uint8_t count = buffer[2];
-        //qDebug() << "receive" << count << channel << last_package;
+        uint8_t *head = reply->getHead();
+        uint8_t code = head[0];
+        uint8_t type = head[1];
+        uint8_t channel = head[2];
+        //uint8_t last = head[3];
+
+        if (code != ::OscilloscopeData) {
+            invalid = true;
+            break;
+        }
+
+        if (type != ::ShortArray) {
+            invalid = true;
+            break;
+        }
+
+        if (!(channel < m_channels)) {
+            invalid = true;
+            break;
+        }
+
+        if (!(index[channel] < m_length)) {
+            // more packets than expected
+            invalid = true;
+            break;
+        }
 
         Q_ASSERT(channel < m_channels);
-
         for (int i = 0; i < reply->getUInt16BufferLength() - m_uint16_offset; ++i) {
             Q_ASSERT(index[channel] < m_length);
             waveform->at(channel).at(index[channel]) = (static_cast< double >(data[i] >> 2) / 1024.0 - 0.5) * 3.3;
@@ -189,18 +213,19 @@ Frequencysweep::on_succeeded(protocol::pTask const & task)
         }
     }
 
-    if (!(index[0] == m_length && index[1] == m_length)) {
+    if (!invalid && index[0] == m_length && index[1] == m_length) {
+        emit calculate(waveform);
+    } else {
         if (m_error_counter < 3) {
-            emit mLenlab.logMessage("Unvollständige Daten empfangen. Wiederhole.");
+            if (invalid) emit mLenlab.logMessage("Ungültige Daten empfangen. Wiederhole.");
+            else emit mLenlab.logMessage("Unvollständige Daten empfangen. Wiederhole.");
             ++m_error_counter;
             stepTimer.start();
         } else {
-            emit mLenlab.logMessage("Unvollständige Daten empfangen.");
+            if (invalid) emit mLenlab.logMessage("Ungültige Daten empfangen.");
+            else emit mLenlab.logMessage("Unvollständige Daten empfangen.");
             mLenlab.reset();
         }
-    } else {
-        m_error_counter = 0;
-        emit calculate(waveform);
     }
 }
 
