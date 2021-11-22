@@ -258,14 +258,11 @@ USBDeviceuDMAIntHandler(tUSBDevice *self)
     tEvent *reply;
     tPage *page;
 
-    //if (self->dma_pending && (uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP))
-
     //
     // Handle the DMA complete case.
     //
     self->dma_pending = false;
     USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-    // USB DMA is working again, we can receive a command in between two data packets
 
     reply = QueueRead(&reply_handler.oscilloscope_queue);
     RingRelease(reply->ring); // page sent
@@ -287,7 +284,7 @@ USBDeviceuDMAIntHandler(tUSBDevice *self)
 void
 USB0IntHandler()
 {
-    if ((usb_device.dma_pending)) {
+    if (usb_device.dma_pending && uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP) {
         // DMA interrupt
         USBDeviceuDMAIntHandler(&usb_device);
     }
