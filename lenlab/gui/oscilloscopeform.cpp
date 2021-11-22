@@ -206,7 +206,8 @@ OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
     m_oscilloscope->setViewIndex(index);
 }
 
-void OscilloscopeForm::activeChanged(bool)
+void
+OscilloscopeForm::activeChanged(bool)
 {
     if (pending) {
         pending = false;

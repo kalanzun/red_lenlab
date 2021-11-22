@@ -279,7 +279,8 @@ LoggerForm::channelsChanged(const std::bitset<4> &channels)
         ui->labChart->setChannelVisible(i, channels[i]);
 }
 
-void LoggerForm::activeChanged(bool)
+void
+LoggerForm::activeChanged(bool)
 {
     if (pending) {
         pending = false;
