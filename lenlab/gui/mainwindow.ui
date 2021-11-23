@@ -133,13 +133,13 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
-   <widget class="QMenu" name="menuAnsicht">
+   <widget class="QMenu" name="menuThema">
     <property name="title">
-     <string>Ansicht</string>
+     <string>Thema</string>
     </property>
    </widget>
    <addaction name="menuLenlab"/>
-   <addaction name="menuAnsicht"/>
+   <addaction name="menuThema"/>
    <addaction name="menuHilfe"/>
   </widget>
   <action name="actionSaveData">

@@ -38,7 +38,10 @@ MainWindow::MainWindow(QWidget * parent)
     QMetaEnum metaEnum = QChart::staticMetaObject.enumerator(
                 QChart::staticMetaObject.indexOfEnumerator("ChartTheme"));
     for (int i = 0; i < metaEnum.keyCount(); ++i) {
-        auto action = ui->menuAnsicht->addAction(metaEnum.key(i), this, &MainWindow::on_actionView_triggered);
+        // .mid(10) removes the prefix "ChartTheme"
+        auto action = ui->menuThema->addAction(
+                    QString(metaEnum.key(i)).mid(10),
+                    this, &MainWindow::on_changeTheme);
         action->setData(i);
     }
 
@@ -86,12 +89,6 @@ MainWindow::askToCancelActiveComponent(model::Component *next_component)
             next));
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     return (msgBox.exec() == QMessageBox::Ok);
-}
-
-void
-MainWindow::on_replot()
-{
-    //ui->plot->replot();
 }
 
 void
@@ -174,7 +171,7 @@ MainWindow::on_actionSaveData_triggered()
 
 
 void
-MainWindow::on_actionView_triggered()
+MainWindow::on_changeTheme()
 {
     QAction* action = qobject_cast< QAction* >(sender());
     QChart::ChartTheme theme = static_cast< QChart::ChartTheme >(action->data().toInt());
