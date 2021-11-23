@@ -190,6 +190,7 @@ OscilloscopeForm::saveImage()
 
     LabChart chart;
     prepareChart(&chart);
+    chart.chart()->setTheme(ui->labChart->chart()->theme());
     chart.chart()->legend()->show();
     chart.setChannelVisible(0, ui->ch1CheckBox->checkState() == Qt::Checked);
     chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);

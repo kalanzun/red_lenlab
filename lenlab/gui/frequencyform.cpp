@@ -178,6 +178,7 @@ FrequencyForm::saveImage()
     LabChart chart;
     prepareChart(&chart);
     chart.chart()->legend()->show();
+    chart.chart()->setTheme(ui->labChart->chart()->theme());
     chart.replace(m_frequencysweep->getSeries());
     chart.print(fileName);
 }

@@ -204,6 +204,7 @@ LoggerForm::saveImage()
 
     LabChart chart;
     prepareChart(&chart);
+    chart.chart()->setTheme(ui->labChart->chart()->theme());
     chart.chart()->legend()->show();
 
     auto channels = m_voltmeter->channels();
