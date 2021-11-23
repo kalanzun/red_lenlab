@@ -173,7 +173,9 @@ uint8_t g_pui8CDCSerDeviceDescriptor[] =
 {
     18,                             // Size of this structure.
     USB_DTYPE_DEVICE,               // Type of this structure.
-    USBShort(0x110),                // USB version 1.1 (if we say 2.0, hosts
+    USBShort(0x200),                // PATCH for Microsoft OS Descriptor Support
+                                    // MS OS Descriptor works with 2.0 only
+                                    // USB version 1.1 (if we say 2.0, hosts
                                     // assume high-speed - see USB 2.0 spec
                                     // 9.2.6.6)
     USB_CLASS_CDC,                  // USB Device Class (spec 5.1.1)
@@ -1721,6 +1723,14 @@ HandleRequests(void *pvCDCDevice, tUSBRequest *pUSBRequest)
     // Only handle requests meant for this interface.
     //
     if(pUSBRequest->wIndex != psInst->ui8InterfaceControl)
+    {
+        return;
+    }
+
+    // PATCH for Microsoft OS Descriptor Support
+    extern bool MSOSDescriptorHandleVendorRequest(void *pvCDCDevice, tUSBRequest *pUSBRequest);
+
+    if (MSOSDescriptorHandleVendorRequest(pvCDCDevice, pUSBRequest))
     {
         return;
     }
