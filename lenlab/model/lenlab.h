@@ -49,6 +49,8 @@ public:
 
     Lenlab & operator=(Lenlab const & other) = delete;
 
+    bool isOpen() const;
+
     bool isActive() const;
     Component *getActiveComponent();
 

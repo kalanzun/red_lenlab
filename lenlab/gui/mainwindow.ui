@@ -115,7 +115,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLenlab">
@@ -133,7 +133,13 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuThema">
+    <property name="title">
+     <string>Thema</string>
+    </property>
+   </widget>
    <addaction name="menuLenlab"/>
+   <addaction name="menuThema"/>
    <addaction name="menuHilfe"/>
   </widget>
   <action name="actionSaveData">

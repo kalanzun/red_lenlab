@@ -28,24 +28,10 @@ FrequencyForm::FrequencyForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::FrequencyForm)
 {
-    QString stylesheet;
-
     ui->setupUi(this);
 
     prepareChart(ui->labChart);
-
-    auto series = ui->labChart->series();
-
-    stylesheet += "#ch1Label { color: "
-            + series.at(0)->color().name() + "; }\n";
-    stylesheet += "#ch2Label { color: "
-            + series.at(1)->color().name() + "; }\n";
-    stylesheet += "#magnitudeLabel { color: "
-            + series.at(0)->color().name() + "; }\n";
-    stylesheet += "#phaseLabel { color: "
-            + series.at(1)->color().name() + "; }\n";
-
-    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
+    setTheme(QChart::ChartThemeLight);
 }
 
 FrequencyForm::~FrequencyForm()
@@ -64,12 +50,17 @@ FrequencyForm::prepareChart(LabChart *chart)
     // Note: With kHz, from 0.1 kHz it has rounding issues and the max tick is missing
     axisX->setBase(10);
     axisX->setLabelFormat("%g");
+    axisX->setMinorTickCount(-1); // automatic
     chart->addAxis(axisX, Qt::AlignBottom);
 
     QValueAxis *axisM = new QValueAxis();
+    axisM->setTickCount(7); // 6 intervals
+    axisM->setMinorTickCount(4); // 5 intervals in each major interval
     chart->addAxis(axisM, Qt::AlignLeft);
 
     QValueAxis *axisPh = new QValueAxis();
+    axisPh->setTickCount(7); // 6 intervals
+    axisPh->setMinorTickCount(4); // 5 intervals in each major interval
     chart->addAxis(axisPh, Qt::AlignRight);
 
     auto seriesM = new QLineSeries();
@@ -113,19 +104,21 @@ FrequencyForm::setModel(model::Lenlab *lenlab)
 void
 FrequencyForm::on_startButton_clicked()
 {
-    if (!m_frequencysweep->active()) {
-        if (m_lenlab->isActive()) {
-            if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {
-                if (m_lenlab->isActive()) {
-                    // the component might have stopped while the dialog was visible
-                    pending = true;
-                    m_lenlab->getActiveComponent()->stop();
-                } else {
-                    m_frequencysweep->start();
+    if (m_lenlab->isOpen()) {
+        if (!m_frequencysweep->active()) {
+            if (m_lenlab->isActive()) {
+                if (m_main_window->askToCancelActiveComponent(m_frequencysweep)) {
+                    if (m_lenlab->isActive()) {
+                        // the component might have stopped while the dialog was visible
+                        pending = true;
+                        m_lenlab->getActiveComponent()->stop();
+                    } else {
+                        m_frequencysweep->start();
+                    }
                 }
+            } else {
+                m_frequencysweep->start();
             }
-        } else {
-            m_frequencysweep->start();
         }
     }
 }
@@ -185,8 +178,30 @@ FrequencyForm::saveImage()
     LabChart chart;
     prepareChart(&chart);
     chart.chart()->legend()->show();
+    chart.chart()->setTheme(ui->labChart->chart()->theme());
     chart.replace(m_frequencysweep->getSeries());
     chart.print(fileName);
+}
+
+void
+FrequencyForm::setTheme(QChart::ChartTheme theme)
+{
+    QString stylesheet;
+
+    ui->labChart->chart()->setTheme(theme);
+
+    auto series = ui->labChart->series();
+
+    stylesheet += "#ch1Label { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#ch2Label { color: "
+            + series.at(1)->color().name() + "; }\n";
+    stylesheet += "#magnitudeLabel { color: "
+            + series.at(0)->color().name() + "; }\n";
+    stylesheet += "#phaseLabel { color: "
+            + series.at(1)->color().name() + "; }\n";
+
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 void

@@ -91,7 +91,15 @@ void
 LabChart::createDefaultAxes()
 {
     m_chart->createDefaultAxes();
-    qobject_cast< QValueAxis * >(m_chart->axes(Qt::Horizontal).at(0))->setLabelFormat("%g");
+
+    QValueAxis *axis_x = qobject_cast< QValueAxis * >(m_chart->axes(Qt::Horizontal).at(0));
+    axis_x->setTickCount(9); // 8 intervals
+    axis_x->setMinorTickCount(3); // 4 intervals in each major interval
+    axis_x->setLabelFormat("%g");
+
+    QValueAxis *axis_y = qobject_cast< QValueAxis * >(m_chart->axes(Qt::Vertical).at(0));
+    axis_y->setTickCount(5); // 4 intervals
+    axis_y->setMinorTickCount(3); // 4 intervals in each major interval
 }
 
 void

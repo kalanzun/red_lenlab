@@ -57,6 +57,8 @@ public:
     void save();
     void saveImage();
 
+    void setTheme(QChart::ChartTheme theme);
+
 private slots:
     void on_intervalComboBox_activated(int);
     void on_startButton_clicked();

@@ -43,6 +43,8 @@ class OscilloscopeForm : public QWidget
 
     bool pending = false;
 
+    int m_current_samplerate_index = 0;
+
     MainWindow * m_main_window = nullptr;
     model::Lenlab * m_lenlab = nullptr;
     model::Oscilloscope * m_oscilloscope = nullptr;
@@ -59,6 +61,8 @@ public:
     void save();
     void saveImage();
 
+    void setTheme(QChart::ChartTheme theme);
+
 private slots:
     void seriesChanged(model::pSeries const &);
 
@@ -73,6 +77,7 @@ private slots:
     void on_saveButton_clicked();
 
     void on_timerangeBox_currentIndexChanged(int index);
+    void on_yrangeBox_currentIndexChanged(int index);
 
     void activeChanged(bool);
 };

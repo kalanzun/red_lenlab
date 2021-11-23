@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QtMath>
-
 #include "loggerseries.h"
+
+#include <cmath>
 
 namespace model {
 
@@ -92,13 +92,21 @@ Loggerseries::getMinX() const
     return 0;
 }
 
+int
+Loggerseries::round_up_towards(int base, double value)
+{
+    int ivalue = static_cast< int >(std::ceil(value));
+    return base * (ivalue / base + static_cast< bool >(ivalue % base));
+}
+
 double
 Loggerseries::getMaxX() const
 {
-    // round to 4, 8, 16, 32, ...
-    auto length = getLength();
-    length = length > 4 ? qNextPowerOfTwo(length - 2) : 4;
-    return getX(length);
+    double value = getLastX();
+
+    if (value <= 8) return 8;
+    else if (value <= 80) return round_up_towards(8, value);
+    else return round_up_towards(80, value);
 }
 
 double
@@ -112,7 +120,7 @@ double
 Loggerseries::getMaxY(int channel) const
 {
     Q_UNUSED(channel);
-    return 3.5;
+    return 3.3;
 }
 
 } // namespace model

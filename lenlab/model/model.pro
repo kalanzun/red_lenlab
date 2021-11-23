@@ -41,7 +41,6 @@ SOURCES += \
     waveform.cpp \
     series.cpp \
     frequencyseries.cpp \
-    indexparameter.cpp \
     utils.cpp \
     loggerseries.cpp
 
@@ -55,7 +54,6 @@ HEADERS += \
     waveform.h \
     series.h \
     frequencyseries.h \
-    indexparameter.h \
     utils.h \
     loggerseries.h
 

@@ -21,7 +21,6 @@
 
 #include "component.h"
 #include "waveform.h"
-#include "indexparameter.h"
 
 #include <QObject>
 #include <QTextStream>
@@ -42,14 +41,18 @@ class Oscilloscope : public Component
 
     bool pending = 0;
 
-    uint32_t samplerate = 0;
+    int m_samplerate_index = 0;
+    int m_view_index = 0;
+    int m_yrange_index = 0;
     QSharedPointer<Waveform> incoming;
     QSharedPointer<Waveform> waveform;
 
     QTimer startTimer;
 
 public:
-    IndexParameter samplerateIndex;
+    static int const samplerate_count = 3;
+    static int const view_count = 4;
+    static int const yrange_count = 2;
 
     explicit Oscilloscope(Lenlab &lenlab, protocol::Board &board);
     Oscilloscope(Oscilloscope const &) = delete;
@@ -65,12 +68,25 @@ public:
     virtual void stop();
     virtual void reset();
 
-    void setSamplerate(uint32_t index);
+    void setSamplerateIndex(int index);
+    int getSamplerateIndex() const;
+    void setViewIndex(int index);
+    void setYRangeIndex(int index);
+
+    static QString getSamplerateLabel(int index);
+    QString getViewLabel(int index) const;
+    static QString getYRangeLabel(int index);
 
     void save(QTextStream &stream);
 
 private:
     static double to_double(uint16_t state);
+
+    static int to_log2oversamples(int index);
+    static double to_samplerate(int index);
+
+    static int to_view(int index);
+    static double to_yrange(int index);
 
 private slots:
     void on_start();

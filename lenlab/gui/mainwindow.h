@@ -47,7 +47,6 @@ public:
     bool askToCancelActiveComponent(model::Component *next_component);
 
 private slots:
-    void on_replot();
     void on_signalButton_toggled(bool);
     void on_logButton_toggled(bool);
     void on_tabWidget_currentChanged(int);
@@ -56,6 +55,7 @@ private slots:
     void on_actionSaveImage_triggered();
     void on_actionQuit_triggered();
     void on_actionAbout_triggered();
+    void on_changeTheme();
 };
 
 } // namespace gui

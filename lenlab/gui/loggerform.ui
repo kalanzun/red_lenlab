@@ -35,41 +35,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="intervalComboBox">
-         <property name="currentIndex">
-          <number>3</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>100 ms</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>200 ms</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>500 ms</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>1 s</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>2 s</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>5 s</string>
-          </property>
-         </item>
-        </widget>
+        <widget class="QComboBox" name="intervalComboBox"/>
        </item>
       </layout>
      </item>
@@ -99,24 +65,16 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOn</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
        <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>370</width>
-          <height>508</height>
-         </rect>
-        </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QLabel" name="label">
@@ -162,12 +120,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="saveButton">
-           <property name="minimumSize">
-            <size>
-             <width>250</width>
-             <height>0</height>
-            </size>
-           </property>
            <property name="text">
             <string>Speichern</string>
            </property>
@@ -204,12 +156,6 @@
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
            </property>
           </spacer>
          </item>

@@ -55,18 +55,24 @@ SignalForm::setModel(model::Lenlab * lenlab)
     ui->signalTypeBox->insertItem(0, "Aus");
     ui->signalTypeBox->insertItem(1, "Sinus");
 
-    ui->amplitudeBox->insertItems(0, m_signalgenerator->getAmplitudeIndex().labels);
-    ui->amplitudeSlider->setMaximum(static_cast<int>(m_signalgenerator->getAmplitudeIndex().length - 1));
+    for (int i = 0; i < m_signalgenerator->amplitude_count; ++i) {
+        ui->amplitudeBox->addItem(m_signalgenerator->getAmplitudeLabel(i));
+    }
+    ui->amplitudeSlider->setMaximum(static_cast<int>(m_signalgenerator->amplitude_count - 1));
     ui->amplitudeBox->setCurrentIndex(14);
     ui->amplitudeSlider->setValue(14);
 
-    ui->frequencyBox->insertItems(0, m_signalgenerator->getFrequencyIndex().labels);
-    ui->frequencySlider->setMaximum(static_cast<int>(m_signalgenerator->getFrequencyIndex().length - 1));
+    for (int i = 0; i < m_signalgenerator->frequency_count; ++i) {
+        ui->frequencyBox->addItem(m_signalgenerator->getFrequencyLabel(i));
+    }
+    ui->frequencySlider->setMaximum(static_cast<int>(m_signalgenerator->frequency_count - 1));
     ui->frequencyBox->setCurrentIndex(82);
     ui->frequencySlider->setValue(82);
 
-    ui->secondBox->insertItems(0, m_signalgenerator->getSecondIndex().labels);
-    ui->secondSlider->setMaximum(static_cast<int>(m_signalgenerator->getSecondIndex().length - 1));
+    for (int i = 0; i < m_signalgenerator->second_count; ++i) {
+        ui->secondBox->addItem(m_signalgenerator->getSecondLabel(i));
+    }
+    ui->secondSlider->setMaximum(static_cast<int>(m_signalgenerator->second_count - 1));
 }
 
 /*
@@ -112,21 +118,21 @@ void
 SignalForm::on_signalTypeBox_activated(int index)
 {
     if (index == 1) { // Sinus
-        if (m_signalgenerator->locked()) {
+        if (!m_lenlab->isOpen() || m_signalgenerator->locked()) {
             ui->signalTypeBox->setCurrentIndex(0);
             m_active = 0;
         }
         else if (!m_active){
-            m_signalgenerator->setAmplitude(static_cast<uint32_t>(ui->amplitudeBox->currentIndex()));
-            m_signalgenerator->setFrequency(static_cast<uint32_t>(ui->frequencyBox->currentIndex()));
-            m_signalgenerator->setSecond(static_cast<uint32_t>(ui->secondBox->currentIndex()));
+            m_signalgenerator->setAmplitudeIndex(ui->amplitudeBox->currentIndex());
+            m_signalgenerator->setFrequencyIndex(ui->frequencyBox->currentIndex());
+            m_signalgenerator->setSecondIndex(ui->secondBox->currentIndex());
             m_active = 1;
             m_signalgenerator->start();
             //setUIConfiguration(true, true, true);
         }
     }
     else {
-        if (m_signalgenerator->locked()) {
+        if (!m_lenlab->isOpen() || m_signalgenerator->locked()) {
         }
         else if (m_active) {
             m_active = 0;
@@ -167,7 +173,7 @@ SignalForm::on_amplitudeSlider_valueChanged(int index)
 {
     ui->amplitudeBox->setCurrentIndex(index);
     if (m_active) {
-        m_signalgenerator->setAmplitude(static_cast<uint32_t>(index));
+        m_signalgenerator->setAmplitudeIndex(index);
         m_signalgenerator->setSine();
     }
 }
@@ -184,7 +190,7 @@ SignalForm::on_frequencySlider_valueChanged(int index)
 {
     ui->frequencyBox->setCurrentIndex(index);
     if (m_active) {
-        m_signalgenerator->setFrequency(static_cast<uint32_t>(index));
+        m_signalgenerator->setFrequencyIndex(index);
         m_signalgenerator->setSine();
     }
 }
@@ -201,7 +207,7 @@ SignalForm::on_secondSlider_valueChanged(int index)
 {
     ui->secondBox->setCurrentIndex(index);
     if (m_active) {
-        m_signalgenerator->setSecond(static_cast<uint32_t>(index));
+        m_signalgenerator->setSecondIndex(index);
         m_signalgenerator->setSine();
     }
 }

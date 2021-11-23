@@ -167,46 +167,11 @@ std::array< std::array< uint8_t const, 3 > const, 130 > const Signalgenerator::m
     {9, 2, 2}, // 129 10285.71
 }};
 
+int const Signalgenerator::frequency_count = Signalgenerator::m_sine.size();
+
 Signalgenerator::Signalgenerator(Lenlab & lenlab, protocol::Board & board)
     : Component(lenlab, board)
-    , m_amplitudeIndex(18)
-    , m_frequencyIndex(m_sine.size())
-    , m_secondIndex(21)
 {
-    double value;
-
-    for (uint32_t i = 0; i < m_amplitudeIndex.length; ++i) {
-        value = getAmplitude(i);
-        m_amplitudeIndex.labels << QString("%1 V").arg(german_double(value));
-    }
-
-    for (uint32_t i = 0; i < m_frequencyIndex.length; ++i) {
-        value = getFrequency(i);
-        if (value < 100)
-            m_frequencyIndex.labels << QString("%1 Hz").arg(german_double(std::round(10*value)/10));
-        else if (value < 1000)
-            m_frequencyIndex.labels << QString("%1 Hz").arg(german_double(std::round(value)));
-        else if (value < 10000)
-            m_frequencyIndex.labels << QString("%1 kHz").arg(german_double(std::round(value/10)/100));
-        else
-            m_frequencyIndex.labels << QString("%1 kHz").arg(german_double(std::round(value/100)/10));
-    }
-
-    for (uint32_t i = 0; i < m_secondIndex.length; ++i) {
-        m_secondIndex.labels << QString("%1").arg(i);
-    }
-}
-
-double
-Signalgenerator::getAmplitude(uint32_t index)
-{
-    return (0.8 + 0.05 * index);
-}
-
-double
-Signalgenerator::getFrequency(uint32_t index)
-{
-    return BASE_FREQUENCY * static_cast<double>(m_sine[index][0]) / static_cast<double>(m_sine[index][1] * m_sine[index][2]);
 }
 
 bool
@@ -232,42 +197,65 @@ Signalgenerator::unlock()
 }
 
 void
-Signalgenerator::setAmplitude(uint32_t index)
+Signalgenerator::setAmplitudeIndex(int index)
 {
-    Q_ASSERT(index < m_amplitudeIndex.length);
-    m_amplitude = index;
+    Q_ASSERT(index < amplitude_count);
+    m_amplitude_index = index;
 }
 
 void
-Signalgenerator::setFrequency(uint32_t index)
+Signalgenerator::setFrequencyIndex(int index)
 {
-    Q_ASSERT(index < m_frequencyIndex.length);
-    m_frequency = index;
+    Q_ASSERT(index < frequency_count);
+    m_frequency_index = index;
 }
 
 void
-Signalgenerator::setSecond(uint32_t index)
+Signalgenerator::setSecondIndex(int index)
 {
-    Q_ASSERT(index < m_secondIndex.length);
-    m_second = index;
+    Q_ASSERT(index < second_count);
+    m_second_index = index;
 }
 
-IndexParameter const &
-Signalgenerator::getAmplitudeIndex() const
+double
+Signalgenerator::to_amplitude(int index)
 {
-    return m_amplitudeIndex;
+    return (0.8 + 0.05 * index);
 }
 
-IndexParameter const &
-Signalgenerator::getFrequencyIndex() const
+double
+Signalgenerator::to_frequency(int index)
 {
-    return m_frequencyIndex;
+    return BASE_FREQUENCY * static_cast<double>(m_sine[index][0]) / static_cast<double>(m_sine[index][1] * m_sine[index][2]);
 }
 
-IndexParameter const &
-Signalgenerator::getSecondIndex() const
+QString
+Signalgenerator::getAmplitudeLabel(int index)
 {
-    return m_secondIndex;
+    return QString("%1 V").arg(german_double(to_amplitude(index)));
+
+}
+
+QString
+Signalgenerator::getFrequencyLabel(int index)
+{
+    double value = to_frequency(index);
+
+    if (value < 100)
+        return QString("%1 Hz").arg(german_double(std::round(10*value)/10));
+    else if (value < 1000)
+        return QString("%1 Hz").arg(german_double(std::round(value)));
+    else if (value < 10000)
+        return QString("%1 kHz").arg(german_double(std::round(value/10)/100));
+    else
+        return QString("%1 kHz").arg(german_double(std::round(value/100)/10));
+
+}
+
+QString
+Signalgenerator::getSecondLabel(int index)
+{
+    return QString("%1").arg(index);
 }
 
 void Signalgenerator::start()
@@ -311,11 +299,11 @@ Signalgenerator::setSine()
     }
 
     QVector<uint32_t> args;
-    args.append(m_sine[m_frequency][0]); // multiplier
-    args.append(m_sine[m_frequency][1]); // predivider
-    args.append(m_sine[m_frequency][2]); // divider
-    args.append(static_cast<uint32_t>(std::round((1<<11) * getAmplitude(m_amplitude) / 1.65))); // amplitude
-    args.append(m_second); // second
+    args.append(m_sine[m_frequency_index][0]); // multiplier
+    args.append(m_sine[m_frequency_index][1]); // predivider
+    args.append(m_sine[m_frequency_index][2]); // divider
+    args.append(static_cast<uint32_t>(std::round((1<<11) * to_amplitude(m_amplitude_index) / 1.65))); // amplitude
+    args.append(m_second_index); // second
 
     protocol::pTask task(new protocol::Task(::setSignalSine));
     task->getCommand()->setUInt32Vector(args);

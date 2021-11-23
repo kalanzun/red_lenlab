@@ -28,20 +28,15 @@ OscilloscopeForm::OscilloscopeForm(QWidget * parent)
     : QWidget(parent)
     , ui(new Ui::OscilloscopeForm)
 {
-    QString stylesheet;
-
     ui->setupUi(this);
 
     prepareChart(ui->labChart);
+    setTheme(QChart::ChartThemeLight);
 
     auto series = ui->labChart->series();
     for (int i = 0; i < series.size(); ++i) {
-        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
-                + series.at(i)->color().name() + "; }\n";
         series.at(i)->setVisible(i == 0);
     }
-
-    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 OscilloscopeForm::~OscilloscopeForm()
@@ -76,7 +71,14 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     m_lenlab = lenlab;
     m_oscilloscope = &lenlab->oscilloscope;
 
-    ui->samplerateBox->insertItems(0, m_oscilloscope->samplerateIndex.labels);
+    for (int i = 0; i < m_oscilloscope->samplerate_count; ++i)
+        ui->samplerateBox->addItem(m_oscilloscope->getSamplerateLabel(i));
+
+    for (int i = 0; i < m_oscilloscope->view_count; ++i)
+        ui->timerangeBox->addItem(m_oscilloscope->getViewLabel(i));
+
+    for (int i = 0; i < m_oscilloscope->yrange_count; ++i)
+        ui->yrangeBox->addItem(m_oscilloscope->getYRangeLabel(i));
 
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
             this, &OscilloscopeForm::seriesChanged);
@@ -92,19 +94,21 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
 void
 OscilloscopeForm::on_startButton_clicked()
 {
-    if (!m_oscilloscope->active()) {
-        if (m_lenlab->isActive()) {
-            if (m_main_window->askToCancelActiveComponent(m_oscilloscope)) {
-                if (m_lenlab->isActive()) {
-                    // the component might have stopped while the dialog was visible
-                    pending = true;
-                    m_lenlab->getActiveComponent()->stop();
-                } else {
-                    m_oscilloscope->start();
+    if (m_lenlab->isOpen()) {
+        if (!m_oscilloscope->active()) {
+            if (m_lenlab->isActive()) {
+                if (m_main_window->askToCancelActiveComponent(m_oscilloscope)) {
+                    if (m_lenlab->isActive()) {
+                        // the component might have stopped while the dialog was visible
+                        pending = true;
+                        m_lenlab->getActiveComponent()->stop();
+                    } else {
+                        m_oscilloscope->start();
+                    }
                 }
+            } else {
+                m_oscilloscope->start();
             }
-        } else {
-            m_oscilloscope->start();
         }
     }
 }
@@ -121,12 +125,22 @@ void
 OscilloscopeForm::seriesChanged(model::pSeries const & series)
 {
     ui->labChart->replace(series);
+
+    // samplerate may be different
+    if (m_oscilloscope->getSamplerateIndex() != m_current_samplerate_index) {
+        m_current_samplerate_index = m_oscilloscope->getSamplerateIndex();
+
+        // update timeBox
+        for (int i = 0; i < m_oscilloscope->view_count; ++i)
+            ui->timerangeBox->setItemText(i, m_oscilloscope->getViewLabel(i));
+    }
+
 }
 
 void
 OscilloscopeForm::on_samplerateBox_activated(int index)
 {
-    m_oscilloscope->setSamplerate(static_cast<uint32_t>(index));
+    m_oscilloscope->setSamplerateIndex(index);
 }
 
 void
@@ -179,6 +193,7 @@ OscilloscopeForm::saveImage()
 
     LabChart chart;
     prepareChart(&chart);
+    chart.chart()->setTheme(ui->labChart->chart()->theme());
     chart.chart()->legend()->show();
     chart.setChannelVisible(0, ui->ch1CheckBox->checkState() == Qt::Checked);
     chart.setChannelVisible(1, ui->ch2CheckBox->checkState() == Qt::Checked);
@@ -187,16 +202,35 @@ OscilloscopeForm::saveImage()
 }
 
 void
-OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
+OscilloscopeForm::setTheme(QChart::ChartTheme theme)
 {
-    /*
-    double timerange = 0.5 * (1<<index);
-    ui->plot->setAxisScale(QwtPlot::xBottom, -timerange/2, timerange/2);
-    ui->plot->replot();
-    */
+    QString stylesheet;
+
+    ui->labChart->chart()->setTheme(theme);
+
+    auto series = ui->labChart->series();
+    for (int i = 0; i < series.size(); ++i) {
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + series.at(i)->color().name() + "; }\n";
+    }
+
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
-void OscilloscopeForm::activeChanged(bool)
+void
+OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
+{
+    m_oscilloscope->setViewIndex(index);
+}
+
+void
+OscilloscopeForm::on_yrangeBox_currentIndexChanged(int index)
+{
+    m_oscilloscope->setYRangeIndex(index);
+}
+
+void
+OscilloscopeForm::activeChanged(bool)
 {
     if (pending) {
         pending = false;

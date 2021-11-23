@@ -39,6 +39,12 @@ Lenlab::Lenlab(QObject * parent)
 }
 
 bool
+Lenlab::isOpen() const
+{
+    return board.isOpen();
+}
+
+bool
 Lenlab::isActive() const
 {
     return frequencysweep.active() || voltmeter.active() || oscilloscope.active();

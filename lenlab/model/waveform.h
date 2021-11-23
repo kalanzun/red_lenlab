@@ -34,31 +34,38 @@ class Waveform : public Series
     typedef Series super;
 
     Q_PROPERTY(double samplerate READ samplerate WRITE setSamplerate)
-    Q_PROPERTY(uint32_t trigger READ trigger WRITE setTrigger) // offset
-    Q_PROPERTY(uint32_t view READ view WRITE setView) // length
+    Q_PROPERTY(int trigger READ trigger WRITE setTrigger) // offset
+    Q_PROPERTY(int view READ view WRITE setView) // length
+    Q_PROPERTY(double yrange READ yrange WRITE setYRange) // value
 
     static const int m_channels = 2;
     // 18 packets a 504 samples
-    static const int m_length = 18 * 504;
+    static const int m_packet_length = 504;
+    static const int m_length = 18 * m_packet_length;
+    static const int m_max_view = 16 * m_packet_length; // das letzte Paket wird nie verwendet, 17 Pakete würden ausreichen
 
     std::array< int, m_channels > index;
     std::array< std::array< double, m_length >, m_channels > data;
 
     double m_samplerate = 250e3;
-    unsigned int m_trigger = 0;
-    unsigned int m_view = 16 * 504; // das letzte Paket wird nie verwendet, 17 Pakete würden ausreichen
+    int m_trigger = 0;
+    int m_view = 8000;
+    double m_yrange = 4;
 
 public:
     explicit Waveform();
 
     void setSamplerate(double samplerate);
-    double samplerate();
+    double samplerate() const;
 
-    void setTrigger(unsigned int trigger);
-    unsigned int trigger();
+    void setTrigger(int trigger);
+    int trigger() const;
 
-    void setView(unsigned int view);
-    unsigned int view();
+    void setView(int view);
+    int view() const;
+
+    void setYRange(double yrange);
+    double yrange() const;
 
     void append(int channel, double value);
 

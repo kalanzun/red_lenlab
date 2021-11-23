@@ -28,22 +28,17 @@ LoggerForm::LoggerForm(QWidget * parent) :
     QWidget(parent),
     ui(new Ui::LoggerForm)
 {
-    QString stylesheet;
-
     ui->setupUi(this);
 
     ui->autoSaveCheckBox->setEnabled(false);
 
     prepareChart(ui->labChart);
+    setTheme(QChart::ChartThemeLight);
 
     auto series = ui->labChart->series();
     for (int i = 0; i < series.size(); ++i) {
-        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
-                + series.at(i)->color().name() + "; }\n";
         series.at(i)->setVisible(i == 0);
     }
-
-    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 LoggerForm::~LoggerForm()
@@ -78,6 +73,10 @@ LoggerForm::setModel(model::Lenlab * lenlab)
     m_lenlab = lenlab;
     m_voltmeter = &lenlab->voltmeter;
 
+    for (int i = 0; i < m_voltmeter->interval_count; ++i)
+        ui->intervalComboBox->addItem(m_voltmeter->getIntervalLabel(i));
+    ui->intervalComboBox->setCurrentIndex(3);
+
     connect(m_voltmeter, &model::Voltmeter::seriesChanged,
             this, &LoggerForm::seriesChanged);
     connect(m_voltmeter, &model::Voltmeter::seriesUpdated,
@@ -105,19 +104,21 @@ LoggerForm::setModel(model::Lenlab * lenlab)
 void
 LoggerForm::on_startButton_clicked()
 {
-    if (!m_voltmeter->active()) {
-        if (m_lenlab->isActive()) {
-            if (m_main_window->askToCancelActiveComponent(m_voltmeter)) {
-                if (m_lenlab->isActive()) {
-                    // the component might have stopped while the dialog was visible
-                    pending = true;
-                    m_lenlab->getActiveComponent()->stop();
-                } else {
-                    m_voltmeter->start();
+    if (m_lenlab->isOpen()) {
+        if (!m_voltmeter->active()) {
+            if (m_lenlab->isActive()) {
+                if (m_main_window->askToCancelActiveComponent(m_voltmeter)) {
+                    if (m_lenlab->isActive()) {
+                        // the component might have stopped while the dialog was visible
+                        pending = true;
+                        m_lenlab->getActiveComponent()->stop();
+                    } else {
+                        m_voltmeter->start();
+                    }
                 }
+            } else {
+                m_voltmeter->start();
             }
-        } else {
-            m_voltmeter->start();
         }
     }
 }
@@ -203,6 +204,7 @@ LoggerForm::saveImage()
 
     LabChart chart;
     prepareChart(&chart);
+    chart.chart()->setTheme(ui->labChart->chart()->theme());
     chart.chart()->legend()->show();
 
     auto channels = m_voltmeter->channels();
@@ -211,6 +213,22 @@ LoggerForm::saveImage()
 
     chart.replace(m_voltmeter->getSeries());
     chart.print(fileName);
+}
+
+void
+LoggerForm::setTheme(QChart::ChartTheme theme)
+{
+    QString stylesheet;
+
+    ui->labChart->chart()->setTheme(theme);
+
+    auto series = ui->labChart->series();
+    for (int i = 0; i < series.size(); ++i) {
+        stylesheet += "#ch" + QString::number(i + 1) + "CheckBox { color: "
+                + series.at(i)->color().name() + "; }\n";
+    }
+
+    ui->scrollAreaWidgetContents->setStyleSheet(stylesheet);
 }
 
 void
@@ -275,7 +293,8 @@ LoggerForm::channelsChanged(const std::bitset<4> &channels)
         ui->labChart->setChannelVisible(i, channels[i]);
 }
 
-void LoggerForm::activeChanged(bool)
+void
+LoggerForm::activeChanged(bool)
 {
     if (pending) {
         pending = false;
@@ -286,8 +305,7 @@ void LoggerForm::activeChanged(bool)
 void
 LoggerForm::on_intervalComboBox_activated(int index)
 {
-    static uint32_t const interval[] = {100, 200, 500, 1000, 2000, 5000};
-    m_voltmeter->setInterval(interval[index]);
+    m_voltmeter->setIntervalIndex(index);
 }
 
 void

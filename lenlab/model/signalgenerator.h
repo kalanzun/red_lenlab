@@ -20,7 +20,6 @@
 #define SIGNALGENERATOR_H
 
 #include "component.h"
-#include "indexparameter.h"
 
 #include <QObject>
 #include <QTimer>
@@ -50,34 +49,34 @@ class Signalgenerator : public Component
 
     bool m_locked = false;
 
-    uint32_t m_amplitude = 0;
-    uint32_t m_frequency = 0;
-    uint32_t m_second = 0;
-
-    IndexParameter m_amplitudeIndex;
-    IndexParameter m_frequencyIndex;
-    IndexParameter m_secondIndex;
+    int m_amplitude_index = 0;
+    int m_frequency_index = 0;
+    int m_second_index = 0;
 
 public:
+    static int const amplitude_count = 18;
+    static int const frequency_count;
+    static int const second_count = 21;
+
     explicit Signalgenerator(Lenlab & lenlab, protocol::Board & board);
     Signalgenerator(Signalgenerator const &) = delete;
 
     Signalgenerator & operator=(Signalgenerator const &) = delete;
 
-    static double getAmplitude(uint32_t index);
-    static double getFrequency(uint32_t index);
-
     bool locked() const;
     void lock();
     void unlock();
 
-    void setAmplitude(uint32_t index);
-    void setFrequency(uint32_t index);
-    void setSecond(uint32_t index);
+    void setAmplitudeIndex(int index);
+    void setFrequencyIndex(int index);
+    void setSecondIndex(int index);
 
-    IndexParameter const & getAmplitudeIndex() const;
-    IndexParameter const & getFrequencyIndex() const;
-    IndexParameter const & getSecondIndex() const;
+    static double to_amplitude(int index);
+    static double to_frequency(int index);
+
+    static QString getAmplitudeLabel(int index);
+    static QString getFrequencyLabel(int index);
+    static QString getSecondLabel(int index);
 
     virtual void start();
     virtual void stop();

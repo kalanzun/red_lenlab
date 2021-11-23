@@ -35,6 +35,8 @@ double const Voltmeter::VOLT = 4096.0 / 3.3;
 
 char const * const Voltmeter::DELIMITER = ";";
 
+std::array< int const, 6 > const Voltmeter::interval = {100, 200, 500, 1000, 2000, 5000};
+
 Voltmeter::Voltmeter(Lenlab &lenlab, protocol::Board &board)
     : Component(lenlab, board)
     , m_loggerseries(new Loggerseries)
@@ -61,6 +63,17 @@ Voltmeter::getNameAccusative() const
 {
     static QString name("en Logger");
     return name;
+}
+
+QString
+Voltmeter::getIntervalLabel(int index)
+{
+    int value = to_interval(index);
+
+    if (value >= 1000)
+        return QString("%1 s").arg(value / 1000);
+    else
+        return QString("%1 ms").arg(value);
 }
 
 void
@@ -147,18 +160,18 @@ Voltmeter::channels() const
 }
 
 void
-Voltmeter::setInterval(uint32_t interval)
+Voltmeter::setIntervalIndex(int index)
 {
-    if (mInterval != interval) {
-        mInterval = interval;
-        emit intervalChanged(interval);
+    if (m_interval_index != index) {
+        m_interval_index = index;
+        emit intervalChanged(index);
     }
 }
 
-uint32_t
-Voltmeter::interval() const
+int
+Voltmeter::getIntervalIndex() const
 {
-    return mInterval;
+    return m_interval_index;
 }
 
 pSeries
@@ -177,7 +190,7 @@ Voltmeter::start()
     //qDebug("start");
 
     // TODO interval locking
-    m_loggerseries->setInterval(mInterval);
+    m_loggerseries->setInterval(to_interval(m_interval_index));
 
     QVector<uint32_t> args;
     args.append(m_loggerseries->interval());
@@ -287,6 +300,13 @@ Voltmeter::save(QTextStream &stream)
         }
         stream << "\n";
     }
+}
+
+int
+Voltmeter::to_interval(int index)
+{
+    Q_ASSERT(index < interval_count);
+    return interval[index];
 }
 
 void

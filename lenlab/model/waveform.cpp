@@ -36,34 +36,47 @@ Waveform::setSamplerate(double samplerate)
 }
 
 double
-Waveform::samplerate()
+Waveform::samplerate() const
 {
     return m_samplerate;
 }
 
 void
-Waveform::setTrigger(unsigned int trigger)
+Waveform::setTrigger(int trigger)
 {
+    Q_ASSERT(trigger < m_packet_length);
     m_trigger = trigger;
 }
 
-unsigned int
-Waveform::trigger()
+int
+Waveform::trigger() const
 {
     return m_trigger;
 }
 
 void
-Waveform::setView(unsigned int view)
+Waveform::setView(int view)
 {
-    Q_ASSERT(view + m_trigger < m_length);
+    Q_ASSERT(view <= m_max_view);
     m_view = view;
 }
 
-unsigned int
-Waveform::view()
+int
+Waveform::view() const
 {
     return m_view;
+}
+
+void
+Waveform::setYRange(double yrange)
+{
+    m_yrange = yrange;
+}
+
+double
+Waveform::yrange() const
+{
+    return m_yrange;
 }
 
 void
@@ -83,45 +96,51 @@ Waveform::getChannels() const
 int
 Waveform::getLength() const
 {
-    return m_view;
+    return m_view + 1;
 }
 
 double
 Waveform::getX(int i) const
 {
-    return static_cast< double >((static_cast< int >(m_view) / -2) + static_cast< int >(i)) / m_samplerate * 1000;
+    return static_cast< double >((m_view / -2) + i) / m_samplerate * 1000;
 }
 
 double
 Waveform::getY(int i, int channel) const
 {
     Q_ASSERT(channel < m_channels);
-    Q_ASSERT(m_trigger + i < data[channel].size());
-    return data[channel][m_trigger + i];
+
+    // i is the index in m_view samples around m_trigger
+    // m_trigger is offset by m_max_view / 2
+    int index = (m_max_view - m_view) / 2 + m_trigger + i;
+    // index is always >= 0
+    Q_ASSERT(static_cast< unsigned int >(index) < data[channel].size());
+
+    return data[channel][index];
 }
 
 double
 Waveform::getMinX() const
 {
-    return qRound(static_cast< double >(static_cast< int >(m_view) / -2) / m_samplerate * 1000);
+    return getX(0);
 }
 
 double
 Waveform::getMaxX() const
 {
-    return qRound(static_cast< double >(static_cast< int >(m_view) / 2) / m_samplerate * 1000);
+    return -getX(0);
 }
 
 double
 Waveform::getMinY(int) const
 {
-    return -2;
+    return -m_yrange / 2;
 }
 
 double
 Waveform::getMaxY(int) const
 {
-    return 2;
+    return m_yrange / 2;
 }
 
 } // namespace model
