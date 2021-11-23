@@ -68,6 +68,18 @@ Waveform::view() const
 }
 
 void
+Waveform::setYRange(double yrange)
+{
+    m_yrange = yrange;
+}
+
+double
+Waveform::yrange() const
+{
+    return m_yrange;
+}
+
+void
 Waveform::append(int channel, double value)
 {
     Q_ASSERT(channel < m_channels);
@@ -122,13 +134,13 @@ Waveform::getMaxX() const
 double
 Waveform::getMinY(int) const
 {
-    return -2;
+    return -m_yrange / 2;
 }
 
 double
 Waveform::getMaxY(int) const
 {
-    return 2;
+    return m_yrange / 2;
 }
 
 } // namespace model

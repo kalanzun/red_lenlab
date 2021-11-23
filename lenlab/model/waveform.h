@@ -36,6 +36,7 @@ class Waveform : public Series
     Q_PROPERTY(double samplerate READ samplerate WRITE setSamplerate)
     Q_PROPERTY(int trigger READ trigger WRITE setTrigger) // offset
     Q_PROPERTY(int view READ view WRITE setView) // length
+    Q_PROPERTY(double yrange READ yrange WRITE setYRange) // value
 
     static const int m_channels = 2;
     // 18 packets a 504 samples
@@ -49,6 +50,7 @@ class Waveform : public Series
     double m_samplerate = 250e3;
     int m_trigger = 0;
     int m_view = 8000;
+    double m_yrange = 4;
 
 public:
     explicit Waveform();
@@ -61,6 +63,9 @@ public:
 
     void setView(int view);
     int view() const;
+
+    void setYRange(double yrange);
+    double yrange() const;
 
     void append(int channel, double value);
 

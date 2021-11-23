@@ -77,6 +77,7 @@ private slots:
     void on_saveButton_clicked();
 
     void on_timerangeBox_currentIndexChanged(int index);
+    void on_yrangeBox_currentIndexChanged(int index);
 
     void activeChanged(bool);
 };

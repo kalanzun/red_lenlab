@@ -111,6 +111,16 @@
           <widget class="QComboBox" name="timerangeBox"/>
          </item>
          <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Wertebereich</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="yrangeBox"/>
+         </item>
+         <item>
           <widget class="QPushButton" name="saveButton">
            <property name="text">
             <string>Speichern</string>

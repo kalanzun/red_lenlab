@@ -77,6 +77,9 @@ OscilloscopeForm::setModel(model::Lenlab * lenlab)
     for (int i = 0; i < m_oscilloscope->view_count; ++i)
         ui->timerangeBox->addItem(m_oscilloscope->getViewLabel(i));
 
+    for (int i = 0; i < m_oscilloscope->yrange_count; ++i)
+        ui->yrangeBox->addItem(m_oscilloscope->getYRangeLabel(i));
+
     connect(m_oscilloscope, &model::Oscilloscope::seriesChanged,
             this, &OscilloscopeForm::seriesChanged);
 
@@ -127,7 +130,7 @@ OscilloscopeForm::seriesChanged(model::pSeries const & series)
     if (m_oscilloscope->getSamplerateIndex() != m_current_samplerate_index) {
         m_current_samplerate_index = m_oscilloscope->getSamplerateIndex();
 
-        // update timerangeBox
+        // update timeBox
         for (int i = 0; i < m_oscilloscope->view_count; ++i)
             ui->timerangeBox->setItemText(i, m_oscilloscope->getViewLabel(i));
     }
@@ -218,6 +221,12 @@ void
 OscilloscopeForm::on_timerangeBox_currentIndexChanged(int index)
 {
     m_oscilloscope->setViewIndex(index);
+}
+
+void
+OscilloscopeForm::on_yrangeBox_currentIndexChanged(int index)
+{
+    m_oscilloscope->setYRangeIndex(index);
 }
 
 void
