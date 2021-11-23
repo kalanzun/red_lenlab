@@ -66,13 +66,6 @@ main(void)
     MAP_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3|GPIO_PIN_2);
 
     //
-    // Enable the system tick.
-    //
-    MAP_SysTickPeriodSet(MAP_SysCtlClockGet() / SYSTICKS_PER_SECOND);
-    MAP_SysTickIntEnable();
-    MAP_SysTickEnable();
-
-    //
     // Initialize USB
     //
     COMDeviceInit();
@@ -82,6 +75,7 @@ main(void)
     //
     while(1)
     {
+        /*
         //
         // Turn on the Green LED.
         //
@@ -101,5 +95,6 @@ main(void)
         // Delay for a bit.
         //
         SysCtlDelay(MAP_SysCtlClockGet() / 3 / 20);
+        */
     }
 }
