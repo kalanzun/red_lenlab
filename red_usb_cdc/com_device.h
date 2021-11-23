@@ -12,6 +12,9 @@
 struct COMDevice {
     void *device;
     volatile bool connected;
+
+    uint8_t *buffer;
+    uint32_t length;
 };
 
 
@@ -19,6 +22,8 @@ extern struct COMDevice com_device;
 
 
 void COMDeviceInit();
+
+void COMDeviceMain();
 
 
 #endif /* COM_DEVICE_H_ */

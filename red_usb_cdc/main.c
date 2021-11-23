@@ -75,6 +75,7 @@ main(void)
     //
     while(1)
     {
+        COMDeviceMain();
         /*
         //
         // Turn on the Green LED.

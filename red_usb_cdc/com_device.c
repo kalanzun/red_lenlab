@@ -459,6 +459,9 @@ RxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsg
 }
 
 
+static uint8_t buffer[64];
+
+
 void
 COMDeviceInit()
 {
@@ -472,4 +475,17 @@ COMDeviceInit()
     // on the bus.
     //
     com_device.device = USBDCDCInit(0, &g_sCDCDevice);
+
+    com_device.buffer = buffer;
+    com_device.length = 64;
+}
+
+
+void COMDeviceMain()
+{
+    if (com_device.connected) {
+        if(USBDCDCTxPacketAvailable(com_device.device)) {
+            USBDCDCPacketWrite(com_device.device, com_device.buffer, com_device.length, true);
+        }
+    }
 }
