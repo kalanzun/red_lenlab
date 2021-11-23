@@ -18,6 +18,8 @@
 
 #include "loggerseries.h"
 
+#include <cmath>
+
 namespace model {
 
 Loggerseries::Loggerseries()
