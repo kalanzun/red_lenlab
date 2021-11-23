@@ -54,12 +54,12 @@ FrequencyForm::prepareChart(LabChart *chart)
     chart->addAxis(axisX, Qt::AlignBottom);
 
     QValueAxis *axisM = new QValueAxis();
-    axisM->setTickCount(5); // 4 intervals
+    axisM->setTickCount(7); // 6 intervals
     axisM->setMinorTickCount(4); // 5 intervals in each major interval
     chart->addAxis(axisM, Qt::AlignLeft);
 
     QValueAxis *axisPh = new QValueAxis();
-    axisPh->setTickCount(5); // 4 intervals
+    axisPh->setTickCount(7); // 6 intervals
     axisPh->setMinorTickCount(4); // 5 intervals in each major interval
     chart->addAxis(axisPh, Qt::AlignRight);
 

@@ -25,8 +25,8 @@ namespace model {
 FrequencySeries::FrequencySeries()
     : Series()
     , index{0, 0}
-    , MinY{-10, -100}
-    , MaxY{10, 100}
+    , MinY{-20, -90}
+    , MaxY{10, 90}
 {
 
 }
@@ -36,8 +36,9 @@ FrequencySeries::append(int channel, double value)
 {
     Q_ASSERT(channel < m_channels);
     Q_ASSERT(index[channel] < m_length);
-    if (value < MinY[channel]) MinY[channel] = value;
-    if (value > MaxY[channel]) MaxY[channel] = value;
+    double delta = channel ? 90 : 30; // phase : magnitude
+    while (value < MinY[channel]) MinY[channel] -= delta;
+    while (value > MaxY[channel]) MaxY[channel] += delta;
     data[channel][index[channel]++] = value;
 }
 
