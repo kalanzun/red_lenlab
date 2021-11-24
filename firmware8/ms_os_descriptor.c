@@ -32,13 +32,12 @@
 
 
 // Microsoft OS String Descriptor
-
-tUSB_MS_OS_STRING_DESCRIPTOR g_USBMsftOSStringDesc = USB_MS_OS_STRING_DESCRIPTOR( USB_MS_OS_VENDOR_CODE );
+static const tUSB_MS_OS_STRING_DESCRIPTOR USBMsftOSStringDesc = USB_MS_OS_STRING_DESCRIPTOR( USB_MS_OS_VENDOR_CODE );
 
 
 // MS Extended Compat ID OS Feature Descriptor
-
 #define MS_EXTENDED_COMPAT_FUNCTION_NUM   1
+
 
 typedef struct _MS_EXTENDED_COMPAT_ID_DESCRIPTOR
 {
@@ -46,24 +45,22 @@ typedef struct _MS_EXTENDED_COMPAT_ID_DESCRIPTOR
     tMS_EXTENDED_COMPAT_ID_FUNCTION function[ MS_EXTENDED_COMPAT_FUNCTION_NUM ];
 } PACKED tMS_EXTENDED_COMPAT_ID_DESCRIPTOR;
 
-static tMS_EXTENDED_COMPAT_ID_DESCRIPTOR g_USBExtendedCompatIDDesc =
-{
+
+static const tMS_EXTENDED_COMPAT_ID_DESCRIPTOR USBExtendedCompatIDDesc = {
     .header   = MS_EXTENDED_COMPAT_ID_HEADER( sizeof( tMS_EXTENDED_COMPAT_ID_DESCRIPTOR ), MS_EXTENDED_COMPAT_FUNCTION_NUM ),
-    .function = { MS_EXTENDED_COMPAT_ID_FUNCTION( USB_WINUSB_INTERFACE_NUM, USB_COMPATID_WINUSB, USB_SUBCOMPATID_NONE )
-    }
+    .function = { MS_EXTENDED_COMPAT_ID_FUNCTION( USB_WINUSB_INTERFACE_NUM, USB_COMPATID_WINUSB, USB_SUBCOMPATID_NONE ) }
 };
 
 
 // MS Extended Property OS Feature Descriptor
-
 typedef struct _MS_EXTENDED_PROPERTY_DESCRIPTOR
 {
     tMS_EXTENDED_PROPERTY_HEADER         header;
     tMS_EXTENDED_PROPERTY_INTERFACE_GUID property0;
 } PACKED tMS_EXTENDED_PROPERTY_DESCRIPTOR;
 
-static tMS_EXTENDED_PROPERTY_DESCRIPTOR g_USBExtendedPropIfGUIDDesc =
-{
+
+static const tMS_EXTENDED_PROPERTY_DESCRIPTOR USBExtendedPropIfGUIDDesc = {
     .header    = MS_EXTENDED_PROPERTY_HEADER( sizeof( tMS_EXTENDED_PROPERTY_DESCRIPTOR ), 0x0001 ),
     .property0 = MS_EXTENDED_PROPERTY_INTERFACE_GUID( USB_TI_USB_DEV_BULK_IF_GUID )
 };
@@ -72,16 +69,11 @@ static tMS_EXTENDED_PROPERTY_DESCRIPTOR g_USBExtendedPropIfGUIDDesc =
 bool
 MSOSDescriptorHandleStringRequest(uint8_t **ppui8EP0Data, volatile uint32_t *pui32EP0DataRemain, uint16_t ui16Lang, uint16_t ui16Index)
 {
-    if (ui16Index == USB_MS_OS_STRING_DESC_IDX)
-    {
-        //
+    if (ui16Index == USB_MS_OS_STRING_DESC_IDX) {
         // Return the externally specified configuration descriptor.
-        //
-        *ppui8EP0Data = (uint8_t *) &g_USBMsftOSStringDesc;
+        *ppui8EP0Data = (uint8_t *) &USBMsftOSStringDesc;
 
-        //
         // The total size of a string descriptor is in byte 0.
-        //
         *pui32EP0DataRemain = sizeof( tUSB_MS_OS_STRING_DESCRIPTOR );
 
         return true;
@@ -96,22 +88,22 @@ MSOSDescriptorHandleVendorRequest(void *pvBulkDevice, tUSBRequest *pUSBRequest)
 {
     uint32_t len;
 
-    if ( (pUSBRequest->bmRequestType == (USB_RTYPE_DIR_IN | USB_RTYPE_VENDOR) )
-      && (pUSBRequest->bRequest      == USB_MS_OS_VENDOR_CODE)
-//      && (pUSBRequest->wValue        == USB_WINUSB_INTERFACE_NUM)  // should be ignored
-      && (pUSBRequest->wIndex        == USB_MS_EXTENDED_COMPAT_ID_TYPE)
+    if (       (pUSBRequest->bmRequestType == (USB_RTYPE_DIR_IN | USB_RTYPE_VENDOR) )
+            && (pUSBRequest->bRequest      == USB_MS_OS_VENDOR_CODE)
+//          && (pUSBRequest->wValue        == USB_WINUSB_INTERFACE_NUM)  // should be ignored
+            && (pUSBRequest->wIndex        == USB_MS_EXTENDED_COMPAT_ID_TYPE)
        ) {
-        len = pUSBRequest->wLength < sizeof(g_USBExtendedCompatIDDesc) ? pUSBRequest->wLength : sizeof(g_USBExtendedCompatIDDesc);
-        USBDCDSendDataEP0( 0, (uint8_t *)&g_USBExtendedCompatIDDesc, len );
+        len = pUSBRequest->wLength < sizeof(USBExtendedCompatIDDesc) ? pUSBRequest->wLength : sizeof(USBExtendedCompatIDDesc);
+        USBDCDSendDataEP0( 0, (uint8_t *) &USBExtendedCompatIDDesc, len );
     }
 
-    if ( ( (pUSBRequest->bmRequestType == (USB_RTYPE_DIR_IN | USB_RTYPE_VENDOR | USB_RTYPE_INTERFACE) )
-        || (pUSBRequest->bmRequestType == (USB_RTYPE_DIR_IN | USB_RTYPE_VENDOR) ) ) // workaround for Renesus USB3.0 driver
-      && (pUSBRequest->bRequest      == USB_MS_OS_VENDOR_CODE)
-      && (pUSBRequest->wValue        == USB_WINUSB_INTERFACE_NUM)
-      && (pUSBRequest->wIndex        == USB_MS_EXTENDED_PROPERTY_TYPE)
+    if (       (   (pUSBRequest->bmRequestType == (USB_RTYPE_DIR_IN | USB_RTYPE_VENDOR | USB_RTYPE_INTERFACE) )
+                || (pUSBRequest->bmRequestType == (USB_RTYPE_DIR_IN | USB_RTYPE_VENDOR) ) ) // workaround for Renesus USB3.0 driver
+            && (pUSBRequest->bRequest      == USB_MS_OS_VENDOR_CODE)
+            && (pUSBRequest->wValue        == USB_WINUSB_INTERFACE_NUM)
+            && (pUSBRequest->wIndex        == USB_MS_EXTENDED_PROPERTY_TYPE)
        ) {
-        len = pUSBRequest->wLength < sizeof(g_USBExtendedPropIfGUIDDesc) ? pUSBRequest->wLength : sizeof(g_USBExtendedPropIfGUIDDesc);
-        USBDCDSendDataEP0( 0, (uint8_t *)& g_USBExtendedPropIfGUIDDesc, len );
+        len = pUSBRequest->wLength < sizeof(USBExtendedPropIfGUIDDesc) ? pUSBRequest->wLength : sizeof(USBExtendedPropIfGUIDDesc);
+        USBDCDSendDataEP0( 0, (uint8_t *) &USBExtendedPropIfGUIDDesc, len );
     }
 }

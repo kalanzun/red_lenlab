@@ -19,7 +19,9 @@
 #ifndef MS_OS_DESCRIPTOR_H_
 #define MS_OS_DESCRIPTOR_H_
 
+
 #include "usblib/usblib.h"
+
 
 //
 // Microsoft OS String Descriptor
@@ -27,6 +29,7 @@
 
 #define USB_MS_OS_STRING_DESC_IDX 0xEE
 #define USB_MS_OS_STRING_DESC_SIGNATURE { 'M', 0, 'S', 0, 'F', 0, 'T', 0, '1', 0, '0', 0, '0', 0 }
+
 
 typedef struct _USB_MS_OS_STRING_DESCRIPTOR
 {
@@ -37,7 +40,9 @@ typedef struct _USB_MS_OS_STRING_DESCRIPTOR
     uint8_t  bPad;                  // Pad field
 } PACKED tUSB_MS_OS_STRING_DESCRIPTOR;
 
-#define USB_MS_OS_STRING_DESCRIPTOR( vendor_code ) { \
+
+#define USB_MS_OS_STRING_DESCRIPTOR( vendor_code ) \
+{ \
     .bLength         = sizeof(tUSB_MS_OS_STRING_DESCRIPTOR), \
     .bDescriptorType = USB_DTYPE_STRING, \
     .qwSignature     = USB_MS_OS_STRING_DESC_SIGNATURE, \
@@ -57,6 +62,7 @@ typedef struct _USB_MS_OS_STRING_DESCRIPTOR
 #define USB_SUBCOMPATID_NONE {0}
 #define USB_COMPATID_WINUSB "WINUSB\0"
 
+
 typedef struct _MS_EXTENDED_COMPAT_ID_HEADER
 {
     uint32_t dwLength;              // length of the complete descriptors set
@@ -66,13 +72,16 @@ typedef struct _MS_EXTENDED_COMPAT_ID_HEADER
     uint8_t  rgbReserved[7];        // reserved
 } PACKED tMS_EXTENDED_COMPAT_ID_HEADER;
 
-#define MS_EXTENDED_COMPAT_ID_HEADER( size, count ) { \
+
+#define MS_EXTENDED_COMPAT_ID_HEADER( size, count ) \
+{ \
     .dwLength       = size, \
     .bcdVersion     = USB_MS_EXTENDED_COMPAT_ID_VERSION, \
     .wIndex         = USB_MS_EXTENDED_COMPAT_ID_TYPE, \
     .bCount         = count, \
     .rgbReserved    = {0} \
 }
+
 
 typedef struct _MS_EXTENDED_COMPAT_ID_FUNCTION
 {
@@ -83,7 +92,9 @@ typedef struct _MS_EXTENDED_COMPAT_ID_FUNCTION
     uint8_t  rgbReserved[6];        // reserved
 } PACKED tMS_EXTENDED_COMPAT_ID_FUNCTION;
 
-#define MS_EXTENDED_COMPAT_ID_FUNCTION( interfaceNo, id, subID ) { \
+
+#define MS_EXTENDED_COMPAT_ID_FUNCTION( interfaceNo, id, subID ) \
+{ \
     .bFirstInterfaceNumber = interfaceNo, \
     .bReserved             = 0x01, \
     .compatibleID          = id, \
@@ -109,6 +120,7 @@ typedef struct _MS_EXTENDED_COMPAT_ID_FUNCTION
 
 #define USB_EX_PROPERTY_DATA_LEN_DWORD 4
 
+
 typedef struct _MS_EXTENDED_PROPERTY_HEADER
 {
     uint32_t dwLength;              // length of the complete descriptors set
@@ -117,17 +129,21 @@ typedef struct _MS_EXTENDED_PROPERTY_HEADER
     uint16_t wCount;                // number of custom property sections
 } PACKED tMS_EXTENDED_PROPERTY_HEADER;
 
-#define MS_EXTENDED_PROPERTY_HEADER( size, count ) { \
+
+#define MS_EXTENDED_PROPERTY_HEADER( size, count ) \
+{ \
     .dwLength   = size, \
     .bcdVersion = USB_MS_EXTENDED_PROPERTY_VERSION, \
     .wIndex     = USB_MS_EXTENDED_PROPERTY_TYPE, \
     .wCount     = count \
 }
 
+
 // DeviceInterfaceGUID - interface GUID for WinUSB
 
 #define USB_EX_PROPERTY_NAME_LENGTH_IFGUID 0x0028
 #define USB_EX_PROPERTY_DATA_LEN_IFGUID 0x0000004E
+
 
 typedef struct _MS_EXTENDED_PROPERTY_INTERFACE_GUID
 {
@@ -139,7 +155,9 @@ typedef struct _MS_EXTENDED_PROPERTY_INTERFACE_GUID
     uint16_t bPropertyData[USB_EX_PROPERTY_DATA_LEN_IFGUID / sizeof(uint16_t)];      // property data
 } PACKED tMS_EXTENDED_PROPERTY_INTERFACE_GUID;
 
-#define MS_EXTENDED_PROPERTY_INTERFACE_GUID( guid ) { \
+
+#define MS_EXTENDED_PROPERTY_INTERFACE_GUID( guid ) \
+{ \
     .dwSize               = sizeof( tMS_EXTENDED_PROPERTY_INTERFACE_GUID ), \
     .dwPropertyDataType   = USB_EX_PROPERTY_REG_SZ, \
     .wPropertyNameLength  = USB_EX_PROPERTY_NAME_LENGTH_IFGUID, \
@@ -147,5 +165,6 @@ typedef struct _MS_EXTENDED_PROPERTY_INTERFACE_GUID
     .dwPropertyDataLength = USB_EX_PROPERTY_DATA_LEN_IFGUID, \
     .bPropertyData        = guid \
 }
+
 
 #endif /* MS_OS_DESCRIPTOR_H_ */
