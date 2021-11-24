@@ -23,11 +23,27 @@ def build(project_path: Path):
             "-ccs.copyIntoWorkspace",
             "-ccs.location",
             project_path,
-            "-ccs.autoBuild",
         ]
         print(f"Workspace: {workspace_path}")
         print(f"Command: {' '.join(str(x) for x in command)}")
-        run(command)
+        run(command, check=True)
+
+        command = [
+            ccs_path,
+            "-noSplash",
+            "-data",
+            workspace_path,
+            "-application",
+            "com.ti.ccstudio.apps.projectBuild",
+            "-ccs.projects",
+            project_name,
+            "-ccs.configuration",
+            "Release",
+        ]
+        print(f"Workspace: {workspace_path}")
+        print(f"Command: {' '.join(str(x) for x in command)}")
+        run(command, check=True)
+
         with open(workspace_path / project_name / "Debug" / f"{project_name}.out", "rb") as firmware_file:
             firmware = firmware_file.read()
 
@@ -48,4 +64,4 @@ def flash(firmware_path: Path, target_configuration_path: Path):
         firmware_path.absolute(),
     ]
     print(f"Command: {' '.join(str(x) for x in command)}")
-    run(command)
+    run(command, check=True)
