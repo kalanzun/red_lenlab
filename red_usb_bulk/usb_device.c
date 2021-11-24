@@ -138,6 +138,8 @@ const uint8_t * const g_ppui8StringDescriptors[] =
 struct USBDevice {
     volatile bool dma_pending;
     volatile bool tx_pending;
+    volatile uint32_t rx_count;
+    volatile uint32_t tx_count;
 };
 
 
@@ -195,6 +197,7 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         case USB_EVENT_RX_AVAILABLE:
             size = USBDBulkRxPacketAvailable(&bulk_device);
             USBDBulkPacketRead(&bulk_device, buffer, size, true);
+            usb_device.rx_count += 1000; // send 1000 packets at once
             return size;
     }
 
@@ -209,6 +212,7 @@ YourUSBTransmitEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Ms
         case USB_EVENT_TX_COMPLETE:
         {
             usb_device.tx_pending = false;
+            ++usb_device.tx_count;
 
             return 0;
         }
@@ -248,27 +252,28 @@ USBDeviceMain(void)
 
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
-    return;
-
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
-        //
-        // Configure the address and size of the data to transfer.
-        //
-        uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), length);
-        // works only with multiples of 16 and up to 1024
+        if (usb_device.rx_count > usb_device.tx_count) {
+            //
+            // Configure the address and size of the data to transfer.
+            //
+            uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), length);
+            // works only with multiples of 16 and up to 1024
 
-        USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
 
-        //
-        // Start the transfer.
-        //
-        IntDisable(INT_USB0);
+            //
+            // Start the transfer.
+            //
+            IntDisable(INT_USB0);
 
-        usb_device.dma_pending = true;
-        USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-        uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+            usb_device.tx_pending = true;
+            usb_device.dma_pending = true;
+            USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+            uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
 
-        IntEnable(INT_USB0);
+            IntEnable(INT_USB0);
+        }
     }
 }
 
