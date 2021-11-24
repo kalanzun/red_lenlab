@@ -16,14 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef USB_DEVICE_H_
-#define USB_DEVICE_H_
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "int_timer.h"
 
 
-void USBDeviceTick(void);
+struct IntTimer int_timer;
 
-void USBDeviceMain(void);
 
-void USBDeviceInit(void);
-
-#endif /* USB_DEVICE_H_ */
+void
+Timer0AIntHandler(void)
+{
+    IntTimerIntHandler();
+}

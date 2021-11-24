@@ -27,6 +27,7 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
+#include "driverlib/sysctl.h"
 
 #include "usblib/usb-ids.h"
 #include "usblib/usblib.h"
@@ -34,6 +35,7 @@
 #include "usblib/device/usbdbulk.h"
 
 #include "lenlab_protocol.h"
+#include "int_timer.h"
 
 
 //*****************************************************************************
@@ -138,8 +140,12 @@ const uint8_t * const g_ppui8StringDescriptors[] =
 struct USBDevice {
     volatile bool dma_pending;
     volatile bool tx_pending;
+
     volatile uint32_t rx_count;
     volatile uint32_t tx_count;
+
+    volatile uint32_t kibi_packets_to_send;
+    volatile uint32_t ms_packets_to_send;
 };
 
 
@@ -196,8 +202,19 @@ YourUSBReceiveEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32Msg
         //
         case USB_EVENT_RX_AVAILABLE:
             size = USBDBulkRxPacketAvailable(&bulk_device);
-            USBDBulkPacketRead(&bulk_device, buffer, size, true);
-            usb_device.rx_count += 1000; // send 1000 packets at once
+            if (!size) return 0;
+
+            size = USBDBulkPacketRead(&bulk_device, buffer, size, true);
+            if (!size) return 0;
+
+            ++usb_device.rx_count;
+            if (buffer[0] == 1) {
+                usb_device.kibi_packets_to_send = 2000;
+            }
+            else if (buffer[0] == 2) {
+                usb_device.ms_packets_to_send = 20000;
+                IntTimerStart(1);
+            }
             return size;
     }
 
@@ -244,6 +261,21 @@ USB0IntHandler(void)
     }
 }
 
+
+void
+USBDeviceTick(void)
+{
+    static uint8_t buffer[64];
+
+    if (usb_device.ms_packets_to_send) {
+        if (USBDBulkPacketWrite(&bulk_device, buffer, 64, true)) --usb_device.ms_packets_to_send;
+    }
+    else {
+        IntTimerStop();
+    }
+}
+
+
 void
 USBDeviceMain(void)
 {
@@ -253,7 +285,8 @@ USBDeviceMain(void)
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
-        if (usb_device.rx_count > usb_device.tx_count) {
+        if (usb_device.kibi_packets_to_send) {
+            --usb_device.kibi_packets_to_send;
             //
             // Configure the address and size of the data to transfer.
             //
@@ -308,6 +341,11 @@ USBDeviceInit()
     //
     //MAP_uDMAChannelAttributeDisable(ui32Channel, UDMA_ATTR_ALL);
     uDMAChannelAttributeDisable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_ALL);
+
+    //
+    // Enable uDMA burst mode.
+    //
+    uDMAChannelAttributeEnable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_USEBURST);
 
     //
     // Configure the uDMA channel for the pipe

@@ -27,6 +27,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/udma.h"
 
+#include "red_clock.h"
+#include "int_timer.h"
 #include "usb_device.h"
 
 
@@ -53,6 +55,7 @@ const uint32_t peripherals[] = {
     SYSCTL_PERIPH_GPIOE,
     SYSCTL_PERIPH_GPIOF,
 
+    SYSCTL_PERIPH_TIMER0, // int_timer
     SYSCTL_PERIPH_UDMA,
 };
 
@@ -146,6 +149,16 @@ int main(void)
     // Configure uDMA
     //
     ConfigureuDMA();
+
+    //
+    // Configure Clock
+    //
+    RedClockInit();
+
+    //
+    // Configure Interrupt Timer
+    //
+    IntTimerInit();
 
     //
     // Configure USB

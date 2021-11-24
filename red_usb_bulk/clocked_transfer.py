@@ -13,17 +13,16 @@ assert dev
 
 dev.set_configuration()
 
-size = 1_024 * 2000
 command = bytearray(64)
-command[0] = 1  # send 2000 blocks à 1024 bytes
+command[0] = 2  # send 20 thousand packets, one per millisecond, 20 seconds
 dev.write(0x1, command)
-received = 0
-start = time()
-while size:
-    reply = dev.read(0x81, size)
-    size -= len(reply)
-    received += len(reply)
-duration = time() - start
 
-rate = received / duration
-print(f"{rate / 1000} kB/s")
+count = 20_000
+start = time()
+while count:
+    # dev.read may raise a timeout exception
+    reply = dev.read(0x81, 64)
+    assert len(reply) == 64
+    count -= 1
+duration = time() - start
+print(f"{duration} s")
