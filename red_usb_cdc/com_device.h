@@ -18,12 +18,9 @@ struct COMDevice {
 };
 
 
-extern struct COMDevice com_device;
+void COMDeviceInit(void);
 
-
-void COMDeviceInit();
-
-void COMDeviceMain();
+void COMDeviceMain(void);
 
 
 #endif /* COM_DEVICE_H_ */

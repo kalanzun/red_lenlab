@@ -5,14 +5,12 @@
  *      Author: kalan
  */
 
-
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "com_device.h"
 
 #include "lenlab_protocol.h"
-#include "lenlab_version.h"
 
 #include "driverlib/usb.h"
 
@@ -126,15 +124,11 @@ const uint8_t * const g_ppui8StringDescriptors[] =
 // CDC device callback function prototypes.
 //
 //*****************************************************************************
-uint32_t RxHandler(void *pvCBData, uint32_t ui32Event,
-                   uint32_t ui32MsgValue, void *pvMsgData);
-uint32_t TxHandler(void *pvCBData, uint32_t ui32Event,
-                   uint32_t ui32MsgValue, void *pvMsgData);
-uint32_t ControlHandler(void *pvCBData, uint32_t ui32Event,
-                        uint32_t ui32MsgValue, void *pvMsgData);
+static uint32_t RxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsgData);
+static uint32_t TxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsgData);
+static uint32_t ControlHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsgData);
 
-
-tUSBDCDCDevice g_sCDCDevice =
+static tUSBDCDCDevice g_sCDCDevice =
     {
     //
     // The Vendor ID you have been assigned by USB-IF.
@@ -190,7 +184,7 @@ tUSBDCDCDevice g_sCDCDevice =
     NUM_STRING_DESCRIPTORS
 };
 
-struct COMDevice com_device;
+static struct COMDevice com_device;
 
 //*****************************************************************************
 //
@@ -223,7 +217,7 @@ GetLineCoding(tLineCoding *psLineCoding)
 // \return The return value is event-specific.
 //
 //*****************************************************************************
-uint32_t
+static uint32_t
 ControlHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsgData)
 {
     //uint32_t ui32IntsOff;
@@ -284,21 +278,19 @@ ControlHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *
             GetLineCoding(pvMsgData);
             break;
 
-        /*
-
         //
         // Set the current serial communication parameters.
         //
         case USBD_CDC_EVENT_SET_LINE_CODING:
-            SetLineCoding(pvMsgData);
             break;
 
         //
         // Set the current serial communication parameters.
         //
         case USBD_CDC_EVENT_SET_CONTROL_LINE_STATE:
-            SetControlLineState((uint16_t)ui32MsgValue);
             break;
+
+        /*
 
         //
         // Send a break condition on the serial line.
@@ -356,7 +348,7 @@ ControlHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *
 // \return The return value is event-specific.
 //
 //*****************************************************************************
-uint32_t
+static uint32_t
 TxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsgData)
 {
     //
@@ -403,7 +395,7 @@ TxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsg
 // \return The return value is event-specific.
 //
 //*****************************************************************************
-uint32_t
+static uint32_t
 RxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue, void *pvMsgData)
 {
     static uint8_t buffer[64];
@@ -463,8 +455,10 @@ static uint8_t buffer[64];
 
 
 void
-COMDeviceInit()
+COMDeviceInit(void)
 {
+    uint32_t i;
+
     //
     // Set the USB stack mode to Device mode with VBUS monitoring.
     //
@@ -476,12 +470,16 @@ COMDeviceInit()
     //
     com_device.device = USBDCDCInit(0, &g_sCDCDevice);
 
+    for (i = 0; i < 32; ++i) buffer[i] = 'a' + i;
+    for (i = 32; i < 64; ++i) buffer[i] = 'A' + i;
+
     com_device.buffer = buffer;
     com_device.length = 64;
 }
 
 
-void COMDeviceMain()
+void
+COMDeviceMain(void)
 {
     if (com_device.connected) {
         if(USBDCDCTxPacketAvailable(com_device.device)) {
