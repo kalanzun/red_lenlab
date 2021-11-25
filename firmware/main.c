@@ -27,6 +27,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/udma.h"
 
+#include "command_handler.h"
+#include "reply_handler.h"
 #include "usb_device.h"
 
 
@@ -155,6 +157,7 @@ main(void)
 
     while (1) {
         USBDeviceMain();
+        CommandHandlerMain();
 
         SysCtlSleep();
     }

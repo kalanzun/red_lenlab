@@ -28,6 +28,9 @@
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
 
+#include "command_handler.h"
+#include "reply_handler.h"
+
 #include "lenlab_protocol.h"
 #include "lenlab_version.h"
 
@@ -117,8 +120,8 @@ static struct USBDevice usb_device = {
 static uint32_t
 RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
+    uint8_t *command;
     uint32_t size;
-    static uint8_t buffer[64];
 
     // USB does not signal software disconnect. This function or the interrupt handler
     // is not called, if Lenlab on the host disappears.
@@ -126,11 +129,16 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
     switch(ui32Event)
     {
         case USB_EVENT_RX_AVAILABLE:
-            size = USBDBulkRxPacketAvailable(&usb_device);
-            if (!size) return 0;
+            if (command_queue.full) return 0;
 
-            size = USBDBulkPacketRead(&usb_device, buffer, size, true);
-            if (!size) return 0;
+            command = RingAcquire(&command_queue);
+            size = USBDBulkPacketRead(&usb_device, command, command_queue.element_size, true);
+            if (size) {
+                RingWrite(&command_queue);
+                return size;
+            }
+
+            return 0;
     }
 
     return 0;
@@ -158,6 +166,8 @@ USB0IntHandler(void)
         // Handle the DMA complete case.
         usb_device.dma_pending = false;
         USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+
+        RingRelease(&page_queue);
     }
     else {
         // Pass on to usblib
@@ -166,31 +176,46 @@ USB0IntHandler(void)
 }
 
 
+static void
+USBDeviceStartuDMA(uint8_t *buffer, uint32_t size)
+{
+    ASSERT(size % 16 == 0);
+    ASSERT(size <= 1024);
+
+    // Configure the address and size of the data to transfer.
+    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), size);
+    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+
+    // Start the transfer.
+    IntDisable(INT_USB0);
+
+    usb_device.tx_pending = true;
+    usb_device.dma_pending = true;
+    USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+    uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
+
+    IntEnable(INT_USB0);
+}
+
+
 void
 USBDeviceMain(void)
 {
-    static uint8_t buffer[1024];
-    static uint32_t length = 1024;
+    uint8_t *reply;
 
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
-        if (0) {
-            // Configure the address and size of the data to transfer.
-            uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), length);
-            // works only with multiples of 16 and up to 1024
-
-            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
-
-            // Start the transfer.
-            IntDisable(INT_USB0);
-
-            usb_device.tx_pending = true;
-            usb_device.dma_pending = true;
-            USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-            uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
-
-            IntEnable(INT_USB0);
+        if (!page_queue.empty) {
+            reply = RingRead(&page_queue);
+            USBDeviceStartuDMA(reply, page_queue.element_size);
+        }
+        else if (!reply_queue.empty) {
+            reply = RingRead(&reply_queue);
+            if (USBDBulkPacketWrite(&usb_device, reply, reply_queue.element_size, true)) {
+                usb_device.tx_pending = true;
+                RingRelease(&reply_queue);
+            }
         }
     }
 }
@@ -224,4 +249,8 @@ USBDeviceInit(void)
     // Configure the uDMA channel for the pipe
     uDMAChannelControlSet(UDMA_CHANNEL_USBEP1TX, UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_64);
     USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN); // for now
+
+    // Assumptions
+    ASSERT(command_queue.element_size == 64);
+    ASSERT(reply_queue.element_size == 64);
 }
