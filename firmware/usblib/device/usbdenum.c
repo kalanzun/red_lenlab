@@ -2056,6 +2056,15 @@ USBDGetDescriptor(void *pvInstance, tUSBRequest *psUSBRequest)
         //
         case USB_DTYPE_STRING:
         {
+            // PATCH for Microsoft OS Descriptor Support
+            // Handle request for string descriptor at index 0xEE
+            extern bool MSOSDescriptorHandleStringRequest(uint8_t **ppui8EP0Data, volatile uint32_t *pui32EP0DataRemain, uint16_t ui16Lang, uint16_t ui16Index);
+
+            if (MSOSDescriptorHandleStringRequest(&psUSBControl->pui8EP0Data, &psUSBControl->ui32EP0DataRemain, psUSBRequest->wIndex, psUSBRequest->wValue & 0xFF))
+            {
+                break;
+            }
+
             //
             // Determine the correct descriptor index based on the requested
             // language ID and index.
