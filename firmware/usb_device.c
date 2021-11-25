@@ -129,7 +129,7 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
     switch(ui32Event)
     {
         case USB_EVENT_RX_AVAILABLE:
-            if (command_queue.full) return 0;
+            if (!command_queue.has_space) return 0;
 
             command = RingAcquire(&command_queue);
             size = USBDBulkPacketRead(&usb_device, command, command_queue.element_size, true);
@@ -206,11 +206,11 @@ USBDeviceMain(void)
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
-        if (!page_queue.empty) {
+        if (page_queue.has_content) {
             reply = RingRead(&page_queue);
             USBDeviceStartuDMA(reply, page_queue.element_size);
         }
-        else if (!reply_queue.empty) {
+        else if (reply_queue.has_content) {
             reply = RingRead(&reply_queue);
             if (USBDBulkPacketWrite(&usb_device, reply, reply_queue.element_size, true)) {
                 usb_device.tx_pending = true;

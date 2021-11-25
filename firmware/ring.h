@@ -31,8 +31,8 @@ struct Ring {
     volatile uint32_t read;
     volatile uint32_t write;
 
-    volatile bool empty;
-    volatile bool full;
+    volatile bool has_content;
+    volatile bool has_space;
 };
 
 
@@ -40,14 +40,15 @@ struct Ring {
     .array = (uint8_t *) (_array), \
     .length = sizeof(_array) / sizeof((_array)[0]), \
     .element_size = sizeof((_array)[0]), \
-    .empty = true \
+    .has_space = true \
 }
 
 
 inline uint8_t *
 RingAcquire(struct Ring *self)
 {
-    ASSERT(!self->full);
+    ASSERT(self->has_space);
+
     return self->array + self->write * self->element_size;
 }
 
@@ -55,17 +56,19 @@ RingAcquire(struct Ring *self)
 inline void
 RingWrite(struct Ring *self)
 {
-    ASSERT(!self->full);
+    ASSERT(self->has_space);
+
     self->write = (self->write + 1) % self->length;
-    self->empty = false;
-    if (self->read == self->write) self->full = true;
+    self->has_content = true;
+    if (self->read == self->write) self->has_space = false;
 }
 
 
 inline uint8_t *
 RingRead(struct Ring *self)
 {
-    ASSERT(!self->empty);
+    ASSERT(self->has_content);
+
     return self->array + self->read * self->element_size;
 }
 
@@ -73,10 +76,11 @@ RingRead(struct Ring *self)
 inline void
 RingRelease(struct Ring *self)
 {
-    ASSERT(!self->empty);
+    ASSERT(self->has_content);
+
     self->read = (self->read + 1) % self->length;
-    if (self->read == self->write) self->empty = true;
-    self->full = false;
+    if (self->read == self->write) self->has_content = false;
+    self->has_space = true;
 }
 
 
