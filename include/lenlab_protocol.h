@@ -19,63 +19,71 @@
 #ifndef LENLAB_PROTOCOL_H
 #define LENLAB_PROTOCOL_H
 
+
 #define LENLAB_VID 0x1CBE
 #define LENLAB_PID 0x0270
 
+
 /*
-
-command packets, up to 64 bytes, from host to device
-reply packets, up to 64 bytes, from device to host
-data packets, 1024 bytes, from device to host only
-
-packet header, 4 bytes
-- one byte packet id (command name or reply name)
-- one byte argument type (this is a helper for checking of programming errors during encoding and decoding)
-- two bytes for custom use, int alignment
+ * Lenlab has command, reply, and data messages.
+ * A command message travels from the host to the device.
+ * Reply and data messages travel from the device to the host.
+ *
+ * Command and reply messages are 64 bytes.
+ * On this Launchpad, the usblib bulk device driver uses 64 bytes USB packets.
+ *
+ * Data messages are 1024 bytes.
+ * On this microcontroller, uDMA works up to 1024 bytes at once.
+ *
+ * A message has a 4 bytes head and a 60 or 1020 bytes body.
+ * The head consists of
+ *   - one byte message code (command code or reply code)
+ *   - one byte message type (this is a helper to check for programming errors
+ *     during encoding and decoding)
+ *   - two bytes argument for custom use (message counter, length, error code, ...)
+ *
  */
 
-#define LENLAB_PACKET_HEAD_LENGTH 4
-#define LENLAB_PACKET_BODY_LENGTH 60 // command and reply packet
-
-// in case of changes, please also update lenlab/protocol/message.cpp
 
 enum Command {
-    noCommand,
-    init,
-    getName,
-    getVersion,
-    setSignalSine,
-    stopSignal,
-    startOscilloscope,
-    startTrigger,
-    startLogger,
-    stopLogger,
-    startOscilloscopeLinearTestData,
-    startTriggerLinearTestData,
+    nullCommand,
+    startInit,
+    getEcho,
+    getPages,
     NUM_COMMANDS
 };
 
+
 enum Reply {
-    noReply,
+    nullReply,
     Init,
-    Name,
-    Version,
-    Signal,
-    OscilloscopeData,
-    Oscilloscope,
-    LoggerData,
-    Logger,
-    Error,
+    Echo,
+    Page,
     NUM_REPLIES
 };
 
+
 enum Type {
-    noType,
+    nullType,
     String,
     ByteArray,
     ShortArray,
     IntArray,
     NUM_TYPES
 };
+
+
+struct Message {
+    union {
+        enum Command command;
+        enum Reply reply;
+    };
+    enum Type type;
+
+    uint16_t argument;
+
+    uint8_t body;
+};
+
 
 #endif // LENLAB_PROTOCOL_H

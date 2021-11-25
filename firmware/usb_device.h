@@ -20,19 +20,6 @@
 #define USB_DEVICE_H_
 
 
-#include "usblib/usblib.h"
-#include "usblib/device/usbdevice.h"
-#include "usblib/device/usbdbulk.h"
-
-
-struct USBDevice {
-    tUSBDBulkDevice bulk_device;
-
-    volatile bool dma_pending;
-    volatile bool tx_pending;
-};
-
-
 void USBDeviceMain(void);
 
 void USBDeviceInit(void);

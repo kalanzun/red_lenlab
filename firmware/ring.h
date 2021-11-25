@@ -22,6 +22,18 @@
 
 #include "driverlib/debug.h"
 
+#include "lenlab_protocol.h"
+
+
+/*
+ * Note, Message does not know the element (its own) size.
+ * RING_NEW saves the element size in ring.element_size.
+ * That way, Ring supports 64 bytes commands and replies
+ * as well as 1024 bytes data messages.
+ *
+ * The Message body size is 4 bytes smaller than the element_size.
+ */
+
 
 struct Ring {
     uint8_t *const array;
@@ -36,7 +48,7 @@ struct Ring {
 };
 
 
-#define RING_NEW(_array) { \
+#define NEW_RING(_array) { \
     .array = (uint8_t *) (_array), \
     .length = sizeof(_array) / sizeof((_array)[0]), \
     .element_size = sizeof((_array)[0]), \
@@ -44,12 +56,12 @@ struct Ring {
 }
 
 
-inline uint8_t *
+inline struct Message *
 RingAcquire(struct Ring *self)
 {
     ASSERT(self->has_space);
 
-    return self->array + self->write * self->element_size;
+    return (struct Message *) (self->array + self->write * self->element_size);
 }
 
 
@@ -64,12 +76,12 @@ RingWrite(struct Ring *self)
 }
 
 
-inline uint8_t *
+inline struct Message *
 RingRead(struct Ring *self)
 {
     ASSERT(self->has_content);
 
-    return self->array + self->read * self->element_size;
+    return (struct Message *) (self->array + self->read * self->element_size);
 }
 
 

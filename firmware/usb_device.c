@@ -27,12 +27,15 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
-
-#include "command_handler.h"
-#include "reply_handler.h"
+#include "usblib/usblib.h"
+#include "usblib/device/usbdevice.h"
+#include "usblib/device/usbdbulk.h"
 
 #include "lenlab_protocol.h"
 #include "lenlab_version.h"
+
+#include "command_handler.h"
+#include "reply_handler.h"
 
 
 static const uint8_t LangDescriptor[] = {
@@ -97,6 +100,14 @@ static const uint8_t * const StringDescriptors[] = {
 #define NUM_STRING_DESCRIPTORS (sizeof(StringDescriptors) / sizeof(uint8_t *))
 
 
+struct USBDevice {
+    tUSBDBulkDevice bulk_device;
+
+    volatile bool dma_pending;
+    volatile bool tx_pending;
+};
+
+
 static uint32_t RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData);
 static uint32_t TxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData);
 
@@ -120,7 +131,7 @@ static struct USBDevice usb_device = {
 static uint32_t
 RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData)
 {
-    uint8_t *command;
+    struct Message *command;
     uint32_t size;
 
     // USB does not signal software disconnect. This function or the interrupt handler
@@ -132,7 +143,7 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
             if (!command_queue.has_space) return 0;
 
             command = RingAcquire(&command_queue);
-            size = USBDBulkPacketRead(&usb_device, command, command_queue.element_size, true);
+            size = USBDBulkPacketRead(&usb_device, (uint8_t *) command, command_queue.element_size, true);
             if (size) {
                 RingWrite(&command_queue);
                 return size;
@@ -177,13 +188,13 @@ USB0IntHandler(void)
 
 
 static void
-USBDeviceStartuDMA(uint8_t *buffer, uint32_t size)
+USBDeviceStartuDMA(uint8_t *data, uint32_t size)
 {
     ASSERT(size % 16 == 0);
     ASSERT(size <= 1024);
 
     // Configure the address and size of the data to transfer.
-    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, buffer, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), size);
+    uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, data, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), size);
     USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
 
     // Start the transfer.
@@ -201,18 +212,18 @@ USBDeviceStartuDMA(uint8_t *buffer, uint32_t size)
 void
 USBDeviceMain(void)
 {
-    uint8_t *reply;
+    struct Message *reply;
 
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
         if (page_queue.has_content) {
             reply = RingRead(&page_queue);
-            USBDeviceStartuDMA(reply, page_queue.element_size);
+            USBDeviceStartuDMA((uint8_t *) reply, page_queue.element_size);
         }
         else if (reply_queue.has_content) {
             reply = RingRead(&reply_queue);
-            if (USBDBulkPacketWrite(&usb_device, reply, reply_queue.element_size, true)) {
+            if (USBDBulkPacketWrite(&usb_device, (uint8_t *) reply, reply_queue.element_size, true)) {
                 usb_device.tx_pending = true;
                 RingRelease(&reply_queue);
             }
@@ -253,4 +264,5 @@ USBDeviceInit(void)
     // Assumptions
     ASSERT(command_queue.element_size == 64);
     ASSERT(reply_queue.element_size == 64);
+    ASSERT(page_queue.element_size == 1024);
 }

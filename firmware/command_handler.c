@@ -25,24 +25,77 @@
 
 static uint8_t commands[8][64] __attribute__ ((aligned(4)));
 
-struct Ring command_queue = RING_NEW(commands);
+struct Ring command_queue = NEW_RING(commands);
+
+
+static void
+start_init(struct Message *command)
+{
+    struct Message *reply = RingAcquire(&reply_queue);
+
+    reply->reply = Init;
+    reply->type = nullType;
+    reply->argument = 0;
+
+    RingWrite(&reply_queue);
+}
+
+
+static void
+get_echo(struct Message *command)
+{
+    uint32_t i;
+    struct Message *reply = RingAcquire(&reply_queue);
+
+    for (i = 0; i < reply_queue.element_size / 4; ++i) {
+        ((uint32_t *) reply)[i] = ((uint32_t *) command)[i];
+    }
+
+    RingWrite(&reply_queue);
+}
+
+
+static void
+get_pages(struct Message *command)
+{
+    struct Message *page;
+
+    ASSERT(!page_queue.has_content);
+    while (page_queue.has_space) {
+        page = RingAcquire(&page_queue);
+        page->reply = Page;
+        page->type = nullType;
+        page->argument = 0;
+        RingWrite(&page_queue);
+    }
+}
 
 
 void
 CommandHandlerMain(void)
 {
-    uint32_t i;
-    uint8_t *command;
-    uint8_t *reply;
+    struct Message *command;
 
-    if (!command_queue.empty && !reply_queue.full) {
+    if (command_queue.has_content && reply_queue.has_space) {
         command = RingRead(&command_queue);
 
-        reply = RingAcquire(&reply_queue);
-        for (i = 0; i < command_queue.element_size; ++i) {
-            reply[i] = command[i];
+        switch (command->command) {
+        case startInit:
+            start_init(command);
+            break;
+
+        case getEcho:
+            get_echo(command);
+            break;
+
+        case getPages:
+            get_pages(command);
+            break;
+
+        default:
+            ASSERT(false);
+            break;
         }
-        RingWrite(&reply_queue);
 
         RingRelease(&command_queue);
     }
