@@ -54,7 +54,8 @@ extern uint32_t __STACK_TOP;
 // External declarations for the interrupt handlers used by the application.
 //
 //*****************************************************************************
-// To be added by user
+extern void USB0IntHandler(void);
+extern void uDMAErrorHandler(void);
 
 //*****************************************************************************
 //
@@ -127,10 +128,10 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // Hibernate
-    IntDefaultHandler,                      // USB0
+    USB0IntHandler,                         // USB0
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
-    IntDefaultHandler,                      // uDMA Error
+    uDMAErrorHandler,                       // uDMA Error
     IntDefaultHandler,                      // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2

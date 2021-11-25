@@ -16,12 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LENLAB_VERSION_H
-#define LENLAB_VERSION_H
+#ifndef USB_DEVICE_H_
+#define USB_DEVICE_H_
 
 
-#define LENLAB_MAJOR 8
-#define LENLAB_MINOR 0
+#include "usblib/usblib.h"
+#include "usblib/device/usbdevice.h"
+#include "usblib/device/usbdbulk.h"
 
 
-#endif // LENLAB_VERSION_H
+struct USBDevice {
+    tUSBDBulkDevice bulk_device;
+
+    volatile bool dma_pending;
+    volatile bool tx_pending;
+};
+
+
+void USBDeviceMain(void);
+
+void USBDeviceInit(void);
+
+
+#endif /* USB_DEVICE_H_ */
