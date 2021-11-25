@@ -38,8 +38,7 @@
 // to a 1024 byte boundary.
 //
 //*****************************************************************************
-#pragma DATA_ALIGN(ControlTable, 1024)
-static uint8_t ControlTable[1024];
+static uint8_t ControlTable[1024] __attribute__ ((aligned(1024)));
 
 
 //*****************************************************************************

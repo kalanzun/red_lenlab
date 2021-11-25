@@ -22,11 +22,11 @@
 #include "reply_handler.h"
 
 
-static uint32_t replies[8][64 / 4];
+static uint8_t replies[8][64] __attribute__ ((aligned(4)));
 
 struct Ring reply_queue = RING_NEW(replies);
 
 
-static uint32_t pages[24][1024 / 4]; // uint32_t alignment for uDMA
+static uint8_t pages[24][1024] __attribute__ ((aligned(4))); // uint32_t alignment for uDMA
 
 struct Ring page_queue = RING_NEW(pages);
