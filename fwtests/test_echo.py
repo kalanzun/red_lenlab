@@ -2,6 +2,7 @@ from time import time
 
 import pytest
 import usb.util
+from usb.core import USBTimeoutError
 
 from red_board import RedBoard
 from lenlab_protocol import protocol
@@ -63,7 +64,6 @@ def test_pages(board: RedBoard, pages: bytearray):
 
 def test_pages_repeatedly(board: RedBoard, pages: bytearray):
     for i in range(16):
-        set_index(pages, i)
         board.write(pages)
         size = len(board.read(24 * 1024))
         assert size == 24 * 1024
@@ -81,7 +81,6 @@ def test_autoset_by_dma(board: RedBoard, echo: bytearray, pages: bytearray):
 
 def test_interleaved(board: RedBoard, echo: bytearray, pages: bytearray):
     for i in range(16):
-        set_index(pages, i)
         board.write(pages)
         size = len(board.read(24 * 1024))
         assert size == 24 * 1024
@@ -113,7 +112,41 @@ def test_dma_transfer_speed(board: RedBoard, pages: bytearray):
     assert speed > 800_000  # kB/s
 
 
-@pytest.mark.skip(reason="it crashes the firmware")
+def test_usb_blocks(board: RedBoard, echo: bytearray):
+    tx = 0
+    try:
+        while True:
+            set_index(echo, tx)
+            board.write(echo)
+            tx += 1
+    except USBTimeoutError:
+        assert tx > 16  # command_queue and reply_queue
+        for rx in range(tx):
+            set_index(echo, rx)
+            reply = board.read(64)
+            assert reply == echo
+
+    # firmware recovers
+    for i in range(32):
+        set_index(echo, i)
+        board.write(echo)
+        reply = board.read(64)
+        assert reply == echo
+
+
+@pytest.mark.skip(reason="fw crash in get_pages")
+def test_dma_tx_queue(board: RedBoard, pages: bytearray):
+    board.write(pages)
+    board.write(pages)
+
+    size = len(board.read(24 * 1024))
+    assert size == 24 * 1024
+
+    size = len(board.read(24 * 1024))
+    assert size == 24 * 1024
+
+
+@pytest.mark.skip(reason="fw crash in get_pages")
 def test_dma_transfer_speed_queued(board: RedBoard):
     start = time()
     size = 0

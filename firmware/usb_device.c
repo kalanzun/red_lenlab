@@ -117,7 +117,7 @@ static uint32_t RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui3
 static uint32_t TxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData);
 
 
-static struct USBDevice usb_device = {
+struct USBDevice usb_device = {
     .bulk_device = {
         LENLAB_VID,
         LENLAB_PID,
@@ -148,7 +148,8 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
             if (!command_queue.has_space) return 0;
 
             command = RingAcquire(&command_queue);
-            size = USBDBulkPacketRead(&usb_device, (uint8_t *) command, command_queue.element_size, true);
+            size = USBDBulkPacketRead(&usb_device, (uint8_t *) command, command_queue.element_size, false);
+            ASSERT(size); // the event is USB_EVENT_RX_AVAILABLE
             if (size) {
                 RingWrite(&command_queue);
                 return size;
@@ -157,7 +158,7 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
             return 0;
 
         case USB_EVENT_CONNECTED:
-            // the usbdbulk driver just overwrote our settings
+            // the usbdbulk driver just changed the settings and removed the USB_EP_AUTO_SET bit
             USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
 
             return 0;
@@ -173,6 +174,7 @@ TxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
     switch(ui32Event)
     {
         case USB_EVENT_TX_COMPLETE:
+            ASSERT(usb_device.tx_pending);
             usb_device.tx_pending = false;
             ++usb_device.tx_stops;
             return 0;
@@ -223,16 +225,27 @@ USBDeviceStartuDMA(uint8_t *data, uint32_t size)
 }
 
 
+static void
+USBDeviceStartTx(uint8_t *data, uint32_t size)
+{
+    ASSERT(size == 64);
+
+    size = USBDBulkPacketWrite(&usb_device, data, size, false);
+    ASSERT(size); // we did locking with tx_pending and dma_pending
+    usb_device.tx_pending = true;
+    ++usb_device.tx_starts;
+}
+
+
 void
 USBDeviceMain(void)
 {
+    uint32_t size;
+    struct Message *reply;
 
 #ifdef DEBUG
-    uint32_t max_packet_size;
     uint32_t flags = USB_EP_DEV_IN;
 #endif
-
-    struct Message *reply;
 
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
@@ -241,7 +254,7 @@ USBDeviceMain(void)
 #ifdef DEBUG
         if (page_queue.has_content || reply_queue.has_content) {
             // is our configuration still good?
-            USBDevEndpointConfigGet(USB0_BASE, USB_EP_1, &max_packet_size, &flags);
+            USBDevEndpointConfigGet(USB0_BASE, USB_EP_1, &size, &flags);
             ASSERT(flags & USB_EP_AUTO_SET);
         }
 #endif
@@ -252,11 +265,8 @@ USBDeviceMain(void)
         }
         else if (reply_queue.has_content) {
             reply = RingRead(&reply_queue);
-            if (USBDBulkPacketWrite(&usb_device, (uint8_t *) reply, reply_queue.element_size, false)) {
-                usb_device.tx_pending = true;
-                ++usb_device.tx_starts;
-                RingRelease(&reply_queue);
-            }
+            USBDeviceStartTx((uint8_t *) reply, reply_queue.element_size);
+            RingRelease(&reply_queue);
         }
     }
 }
