@@ -28,8 +28,8 @@ def command(code):
 
 
 def set_index(message, index):
-    message[2] = (index >> 8) & 0xFF
-    message[3] = index & 0xFF
+    message[2] = index & 0xFF
+    message[3] = (index >> 8) & 0xFF
 
 
 @pytest.fixture()
@@ -40,6 +40,11 @@ def echo():
 @pytest.fixture()
 def pages():
     return command(protocol.enum["Command"]["getPages"])
+
+
+@pytest.fixture()
+def ticks():
+    return command(protocol.enum["Command"]["getTicks"])
 
 
 def test_echo(board: RedBoard, echo: bytearray):
@@ -155,3 +160,22 @@ def test_dma_transfer_speed_queued(board: RedBoard, pages: bytearray):
     size += len(board.read(24 * 1024))
     speed = size / (time() - start)
     assert speed > 800_000  # kB/s
+
+
+def test_ticks(board: RedBoard, ticks: bytearray):
+    count = 512
+    set_index(ticks, count)
+    board.write(ticks)
+    size = 64 * count
+    while size:
+        size -= len(board.read(size))
+
+
+@pytest.mark.slow
+def test_ticks_long_time(board: RedBoard, ticks: bytearray):
+    count = 20_000
+    set_index(ticks, count)
+    board.write(ticks)
+    size = 64 * count
+    while size:
+        size -= len(board.read(size))

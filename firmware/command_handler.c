@@ -20,6 +20,8 @@
 #include <stdint.h>
 
 #include "command_handler.h"
+
+#include "int_timer.h"
 #include "reply_handler.h"
 
 
@@ -79,6 +81,16 @@ get_pages(struct Message *command)
 }
 
 
+static bool
+get_ticks(struct Message *command)
+{
+    // TODO locking of modules, red fw state machine
+    IntTimerStart(1, command->argument);
+
+    return true;
+}
+
+
 void
 CommandHandlerMain(void)
 {
@@ -100,6 +112,10 @@ CommandHandlerMain(void)
 
         case getPages:
             success = get_pages(command);
+            break;
+
+        case getTicks:
+            success = get_ticks(command);
             break;
 
         default:

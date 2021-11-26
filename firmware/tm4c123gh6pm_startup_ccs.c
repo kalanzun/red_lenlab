@@ -54,8 +54,9 @@ extern uint32_t __STACK_TOP;
 // External declarations for the interrupt handlers used by the application.
 //
 //*****************************************************************************
+extern void Timer0AIntHandler(void);
 extern void USB0IntHandler(void);
-extern void uDMAErrorHandler(void);
+extern void uDMAErrorIntHandler(void);
 
 //*****************************************************************************
 //
@@ -103,7 +104,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    IntDefaultHandler,                      // Timer 0 subtimer A
+    Timer0AIntHandler,                      // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
     IntDefaultHandler,                      // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B
@@ -131,7 +132,7 @@ void (* const g_pfnVectors[])(void) =
     USB0IntHandler,                         // USB0
     IntDefaultHandler,                      // PWM Generator 3
     IntDefaultHandler,                      // uDMA Software Transfer
-    uDMAErrorHandler,                       // uDMA Error
+    uDMAErrorIntHandler,                    // uDMA Error
     IntDefaultHandler,                      // ADC1 Sequence 0
     IntDefaultHandler,                      // ADC1 Sequence 1
     IntDefaultHandler,                      // ADC1 Sequence 2

@@ -29,6 +29,7 @@
 
 #include "command_handler.h"
 #include "reply_handler.h"
+#include "int_timer.h"
 #include "usb_device.h"
 
 
@@ -53,6 +54,8 @@ static const uint32_t peripherals[] = {
     SYSCTL_PERIPH_GPIOD,
     SYSCTL_PERIPH_GPIOE,
     SYSCTL_PERIPH_GPIOF,
+
+    SYSCTL_PERIPH_TIMER0, // int_timer
 
     SYSCTL_PERIPH_UDMA,
 };
@@ -97,7 +100,7 @@ __error__(char *filename, uint32_t line)
 //
 //*****************************************************************************
 void
-uDMAErrorHandler(void)
+uDMAErrorIntHandler(void)
 {
     uDMAErrorStatusClear();
     while (1) {
@@ -148,6 +151,11 @@ main(void)
     // Configure uDMA
     //
     ConfigureuDMA();
+
+    //
+    // Initialize IntTimer
+    //
+    IntTimerInit();
 
     //
     // Initialize USB

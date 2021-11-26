@@ -50,6 +50,7 @@ enum Command {
     startInit,
     getEcho,
     getPages,
+    getTicks,
     NUM_COMMANDS
 };
 
@@ -59,6 +60,7 @@ enum Reply {
     Init,
     Echo,
     Page,
+    Tick,
     NUM_REPLIES
 };
 
