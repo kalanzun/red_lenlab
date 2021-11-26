@@ -6,12 +6,10 @@ from lenlab_version import version
 
 
 class RedBoard:
-
     def __init__(self):
         self.dev = usb.core.find(
-            idVendor=protocol.VID,
-            idProduct=protocol.PID,
-            backend=backend)
+            idVendor=protocol.VID, idProduct=protocol.PID, backend=backend
+        )
         assert self.dev
 
         assert self.dev.manufacturer == "Karlsruhe Institute of Technology"

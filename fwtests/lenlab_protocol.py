@@ -4,7 +4,6 @@ from header_file import HeaderFile
 
 
 class Protocol(HeaderFile):
-
     def __init__(self):
         super().__init__(Path("../include/lenlab_protocol.h"))
 
