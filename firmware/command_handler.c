@@ -25,7 +25,7 @@
 #include "reply_handler.h"
 
 
-static uint8_t commands[8][64] __attribute__ ((aligned(4)));
+static uint8_t commands[4][64] __attribute__ ((aligned(4)));
 
 struct Ring command_queue = NEW_RING(commands);
 

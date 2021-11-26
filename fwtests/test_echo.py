@@ -125,7 +125,8 @@ def test_usb_blocks(board: RedBoard, echo: bytearray):
             board.write(echo)
             tx += 1
     except USBTimeoutError:
-        assert tx > 16  # command_queue and reply_queue
+        # queues full
+        assert tx > 12  # command_queue and reply_queue
         for rx in range(tx):
             set_index(echo, rx)
             reply = board.read(64)
@@ -173,6 +174,8 @@ def test_ticks(board: RedBoard, ticks: bytearray):
 
 @pytest.mark.slow
 def test_ticks_long_time(board: RedBoard, ticks: bytearray):
+    # the firmware crashes if the reply_queue is too short
+    # firmware version 7 did crash in this scenario
     count = 20_000
     set_index(ticks, count)
     board.write(ticks)
