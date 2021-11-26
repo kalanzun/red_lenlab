@@ -155,9 +155,13 @@ main(void)
     USBDeviceInit();
 
     while (1) {
-        USBDeviceMain();
+        // it handles the command
         CommandHandlerMain();
 
+        // it sends the reply
+        USBDeviceMain();
+
+        // it sleeps until it receives a command
         SysCtlSleep();
     }
 }

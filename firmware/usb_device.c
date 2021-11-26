@@ -105,6 +105,11 @@ struct USBDevice {
 
     volatile bool dma_pending;
     volatile bool tx_pending;
+
+    volatile uint32_t dma_starts;
+    volatile uint32_t dma_stops;
+    volatile uint32_t tx_starts;
+    volatile uint32_t tx_stops;
 };
 
 
@@ -150,6 +155,12 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
             }
 
             return 0;
+
+        case USB_EVENT_CONNECTED:
+            // the usbdbulk driver just overwrote our settings
+            USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
+
+            return 0;
     }
 
     return 0;
@@ -163,6 +174,7 @@ TxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
     {
         case USB_EVENT_TX_COMPLETE:
             usb_device.tx_pending = false;
+            ++usb_device.tx_stops;
             return 0;
     }
 
@@ -176,6 +188,7 @@ USB0IntHandler(void)
     if (usb_device.dma_pending && uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP) {
         // Handle the DMA complete case.
         usb_device.dma_pending = false;
+        ++usb_device.dma_stops;
         USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
 
         RingRelease(&page_queue);
@@ -195,13 +208,14 @@ USBDeviceStartuDMA(uint8_t *data, uint32_t size)
 
     // Configure the address and size of the data to transfer.
     uDMAChannelTransferSet(UDMA_CHANNEL_USBEP1TX, UDMA_MODE_BASIC, data, (void *) USBFIFOAddrGet(USB0_BASE, USB_EP_1), size);
-    USBEndpointDMAConfigSet(USB0_BASE, USB_EP_1, USB_EP_MODE_BULK | USB_EP_DEV_IN | USB_EP_DMA_MODE_1 | USB_EP_AUTO_SET);
 
     // Start the transfer.
     IntDisable(INT_USB0);
 
-    usb_device.tx_pending = true;
     usb_device.dma_pending = true;
+    ++usb_device.dma_starts;
+    usb_device.tx_pending = true;
+    ++usb_device.tx_starts;
     USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
     uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
 
@@ -212,19 +226,35 @@ USBDeviceStartuDMA(uint8_t *data, uint32_t size)
 void
 USBDeviceMain(void)
 {
+
+#ifdef DEBUG
+    uint32_t max_packet_size;
+    uint32_t flags = USB_EP_DEV_IN;
+#endif
+
     struct Message *reply;
 
     //USBDBulkTxPacketAvailable(&bulk_device); // it does not "see" a DMA transfer
 
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
+
+#ifdef DEBUG
+        if (page_queue.has_content || reply_queue.has_content) {
+            // is our configuration still good?
+            USBDevEndpointConfigGet(USB0_BASE, USB_EP_1, &max_packet_size, &flags);
+            ASSERT(flags & USB_EP_AUTO_SET);
+        }
+#endif
+
         if (page_queue.has_content) {
             reply = RingRead(&page_queue);
             USBDeviceStartuDMA((uint8_t *) reply, page_queue.element_size);
         }
         else if (reply_queue.has_content) {
             reply = RingRead(&reply_queue);
-            if (USBDBulkPacketWrite(&usb_device, (uint8_t *) reply, reply_queue.element_size, true)) {
+            if (USBDBulkPacketWrite(&usb_device, (uint8_t *) reply, reply_queue.element_size, false)) {
                 usb_device.tx_pending = true;
+                ++usb_device.tx_starts;
                 RingRelease(&reply_queue);
             }
         }
