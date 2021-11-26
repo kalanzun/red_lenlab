@@ -106,10 +106,11 @@ struct USBDevice {
     volatile bool dma_pending;
     volatile bool tx_pending;
 
-    volatile uint32_t dma_starts;
-    volatile uint32_t dma_stops;
-    volatile uint32_t tx_starts;
-    volatile uint32_t tx_stops;
+    volatile uint32_t dma_pending_event;
+    volatile uint32_t dma_complete_event;
+    volatile uint32_t tx_pending_event;
+    volatile uint32_t tx_complete_event;
+    volatile uint32_t rx_available_event;
 };
 
 
@@ -147,15 +148,14 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
         case USB_EVENT_RX_AVAILABLE:
             if (!command_queue.has_space) return 0;
 
+            ++usb_device.rx_available_event;
+
             command = RingAcquire(&command_queue);
             size = USBDBulkPacketRead(&usb_device, (uint8_t *) command, command_queue.element_size, false);
             ASSERT(size); // the event is USB_EVENT_RX_AVAILABLE
-            if (size) {
-                RingWrite(&command_queue);
-                return size;
-            }
+            RingWrite(&command_queue);
 
-            return 0;
+            return size;
 
         case USB_EVENT_CONNECTED:
             // the usbdbulk driver just changed the settings and removed the USB_EP_AUTO_SET bit
@@ -176,7 +176,8 @@ TxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
         case USB_EVENT_TX_COMPLETE:
             ASSERT(usb_device.tx_pending);
             usb_device.tx_pending = false;
-            ++usb_device.tx_stops;
+            ++usb_device.tx_complete_event;
+
             return 0;
     }
 
@@ -190,13 +191,13 @@ USB0IntHandler(void)
     if (usb_device.dma_pending && uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP) {
         // Handle the DMA complete case.
         usb_device.dma_pending = false;
-        ++usb_device.dma_stops;
+        ++usb_device.dma_complete_event;
         USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
 
         RingRelease(&page_queue);
     }
     else {
-        // Pass on to usblib
+        // Pass on to usblib.
         USB0DeviceIntHandler();
     }
 }
@@ -215,9 +216,10 @@ USBDeviceStartuDMA(uint8_t *data, uint32_t size)
     IntDisable(INT_USB0);
 
     usb_device.dma_pending = true;
-    ++usb_device.dma_starts;
+    ++usb_device.dma_pending_event;
     usb_device.tx_pending = true;
-    ++usb_device.tx_starts;
+    ++usb_device.tx_pending_event;
+
     USBEndpointDMAEnable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
     uDMAChannelEnable(UDMA_CHANNEL_USBEP1TX);
 
@@ -232,8 +234,9 @@ USBDeviceStartTx(uint8_t *data, uint32_t size)
 
     size = USBDBulkPacketWrite(&usb_device, data, size, false);
     ASSERT(size); // we did locking with tx_pending and dma_pending
+
     usb_device.tx_pending = true;
-    ++usb_device.tx_starts;
+    ++usb_device.tx_pending_event;
 }
 
 
