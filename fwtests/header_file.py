@@ -16,14 +16,16 @@ class HeaderFile:
         with self.h_file_path.open("r") as file:
             self.content = file.read()
 
-        self.define = {
-            match.group(1): match.group(2)
+        self.elements = {
+            match.group(1): eval(match.group(2))
             for match in self.define_pattern.finditer(self.content)
         }
-        self.enum = {
-            match.group(1): {
+
+        for match in self.enum_pattern.finditer(self.content):
+            self.elements[match.group(1)] = {
                 element.strip(): i
                 for i, element in enumerate(match.group(2).split(","))
             }
-            for match in self.enum_pattern.finditer(self.content)
-        }
+
+    def __getitem__(self, item):
+        return self.elements.__getitem__(item)
