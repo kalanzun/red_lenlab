@@ -28,7 +28,7 @@ static uint8_t commands[8][64] __attribute__ ((aligned(4)));
 struct Ring command_queue = NEW_RING(commands);
 
 
-static void
+static bool
 start_init(struct Message *command)
 {
     struct Message *reply = RingAcquire(&reply_queue);
@@ -38,13 +38,16 @@ start_init(struct Message *command)
     reply->argument = 0;
 
     RingWrite(&reply_queue);
+
+    return true;
 }
 
 
-static void
+static bool
 get_echo(struct Message *command)
 {
     uint32_t i;
+
     struct Message *reply = RingAcquire(&reply_queue);
 
     for (i = 0; i < reply_queue.element_size / 4; ++i) {
@@ -52,15 +55,18 @@ get_echo(struct Message *command)
     }
 
     RingWrite(&reply_queue);
+
+    return true;
 }
 
 
-static void
+static bool
 get_pages(struct Message *command)
 {
     struct Message *page;
 
-    ASSERT(!page_queue.has_content);
+    if (page_queue.has_content) return false;
+
     while (page_queue.has_space) {
         page = RingAcquire(&page_queue);
         page->reply = Page;
@@ -68,12 +74,16 @@ get_pages(struct Message *command)
         page->argument = 0;
         RingWrite(&page_queue);
     }
+
+    return true;
 }
 
 
 void
 CommandHandlerMain(void)
 {
+    bool success;
+
     struct Message *command;
 
     if (command_queue.has_content && reply_queue.has_space) {
@@ -81,15 +91,15 @@ CommandHandlerMain(void)
 
         switch (command->command) {
         case startInit:
-            start_init(command);
+            success = start_init(command);
             break;
 
         case getEcho:
-            get_echo(command);
+            success = get_echo(command);
             break;
 
         case getPages:
-            get_pages(command);
+            success = get_pages(command);
             break;
 
         default:
@@ -97,6 +107,6 @@ CommandHandlerMain(void)
             break;
         }
 
-        RingRelease(&command_queue);
+        if (success) RingRelease(&command_queue);
     }
 }

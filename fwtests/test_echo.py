@@ -134,7 +134,6 @@ def test_usb_blocks(board: RedBoard, echo: bytearray):
         assert reply == echo
 
 
-@pytest.mark.skip(reason="fw crash in get_pages")
 def test_dma_tx_queue(board: RedBoard, pages: bytearray):
     board.write(pages)
     board.write(pages)
@@ -146,8 +145,7 @@ def test_dma_tx_queue(board: RedBoard, pages: bytearray):
     assert size == 24 * 1024
 
 
-@pytest.mark.skip(reason="fw crash in get_pages")
-def test_dma_transfer_speed_queued(board: RedBoard):
+def test_dma_transfer_speed_queued(board: RedBoard, pages: bytearray):
     start = time()
     size = 0
     board.write(pages)
@@ -156,5 +154,4 @@ def test_dma_transfer_speed_queued(board: RedBoard):
         size += len(board.read(24 * 1024))
     size += len(board.read(24 * 1024))
     speed = size / (time() - start)
-    print(speed)
     assert speed > 800_000  # kB/s
