@@ -22,6 +22,7 @@
 #include "command_handler.h"
 
 #include "int_timer.h"
+#include "message.h"
 #include "reply_handler.h"
 
 
@@ -35,9 +36,7 @@ start_init(struct Message *command)
 {
     struct Message *reply = RingAcquire(&reply_queue);
 
-    reply->reply = Init;
-    reply->type = nullType;
-    reply->argument = 0;
+    setReply(reply, Init, nullType, command->reference);
 
     RingWrite(&reply_queue);
 
@@ -71,9 +70,7 @@ get_pages(struct Message *command)
 
     while (page_queue.has_space) {
         page = RingAcquire(&page_queue);
-        page->reply = Page;
-        page->type = nullType;
-        page->argument = 0;
+        setReply(page, Page, nullType, command->reference);
         RingWrite(&page_queue);
     }
 
@@ -84,8 +81,11 @@ get_pages(struct Message *command)
 static bool
 get_ticks(struct Message *command)
 {
+    uint32_t interval = getInt(command, 0);
+    uint32_t count = getInt(command, 1);
+
     // TODO locking of modules, red fw state machine
-    IntTimerStart(1, command->argument);
+    IntTimerStart(interval, count, command->reference);
 
     return true;
 }

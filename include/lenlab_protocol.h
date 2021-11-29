@@ -33,14 +33,15 @@
  * On this Launchpad, the usblib bulk device driver uses 64 bytes USB packets.
  *
  * Data messages are 1024 bytes.
- * On this microcontroller, uDMA works up to 1024 bytes at once.
+ * On this microcontroller, uDMA for USB works up to 1024 bytes at once.
  *
  * A message has a 4 bytes head and a 60 or 1020 bytes body.
  * The head consists of
  *   - one byte message code (command code or reply code)
  *   - one byte message type (this is a helper to check for programming errors
  *     during encoding and decoding)
- *   - two bytes argument for custom use (message counter, length, error code, ...)
+ *   - two bytes reference (the firmware replies with the corresponding command
+ *     reference value)
  *
  */
 
@@ -82,7 +83,7 @@ struct Message {
     };
     enum Type type;
 
-    uint16_t argument;
+    uint16_t reference;
 
     uint8_t body;
 };

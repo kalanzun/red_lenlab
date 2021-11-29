@@ -17,20 +17,32 @@ def board():
     usb.util.dispose_resources(board.dev)
 
 
-def command(code):
+def command(code, type=0):
     message = bytearray(64)
-    for i in range(64):
-        message[i] = i
 
     message[0] = code
-    message[1] = 0  # nullType
+    message[1] = type
+
+    for i in range(4, 64):
+        message[i] = i
 
     return message
 
 
-def set_index(message, index):
-    message[2] = index & 0xFF
-    message[3] = (index >> 8) & 0xFF
+def get_reference(message):
+    return message[2] + (message[3] << 8)
+
+
+def set_reference(message, reference):
+    message[2] = reference & 0xFF
+    message[3] = (reference >> 8) & 0xFF
+
+
+def set_int(message, index, value):
+    message[4 + 4 * index] = value & 0xFF
+    message[4 + 4 * index + 1] = (value >> 8) & 0xFF
+    message[4 + 4 * index + 2] = (value >> 16) & 0xFF
+    message[4 + 4 * index + 3] = (value >> 24) & 0xFF
 
 
 @pytest.fixture()
@@ -45,7 +57,7 @@ def pages():
 
 @pytest.fixture()
 def ticks():
-    return command(lenlab_protocol["Command"]["getTicks"])
+    return command(lenlab_protocol["Command"]["getTicks"], lenlab_protocol["Type"]["IntArray"])
 
 
 def test_usb_descriptor(board: RedBoard):
@@ -62,7 +74,7 @@ def test_echo(board: RedBoard, echo: bytearray):
 
 def test_echo_repeatedly(board: RedBoard, echo: bytearray):
     for i in range(2048):
-        set_index(echo, i)
+        set_reference(echo, i)
         board.write(echo)
         reply = board.read(64)
         assert reply == echo
@@ -70,22 +82,30 @@ def test_echo_repeatedly(board: RedBoard, echo: bytearray):
 
 def test_pages(board: RedBoard, pages: bytearray):
     board.write(pages)
-    size = len(board.read(24 * 1024))
+    reply = board.read(24 * 1024)
+    assert get_reference(reply) == 0
+    size = len(reply)
     assert size == 24 * 1024
 
 
 def test_pages_repeatedly(board: RedBoard, pages: bytearray):
     for i in range(16):
+        set_reference(pages, i)
         board.write(pages)
-        size = len(board.read(24 * 1024))
+        reply = board.read(24 * 1024)
+        assert get_reference(reply) == i
+        size = len(reply)
         assert size == 24 * 1024
 
 
 def test_autoset_by_dma(board: RedBoard, echo: bytearray, pages: bytearray):
     board.write(pages)  # this did set autoset
-    assert len(board.read(24 * 1024)) == 24 * 1024
+    reply = board.read(24 * 1024)
+    assert get_reference(reply) == 0
+    size = len(reply)
+    assert size == 24 * 1024
     for i in range(32):
-        set_index(echo, i)
+        set_reference(echo, i)
         board.write(echo)  # and echo failed
         reply = board.read(64)
         assert reply == echo
@@ -94,10 +114,12 @@ def test_autoset_by_dma(board: RedBoard, echo: bytearray, pages: bytearray):
 def test_interleaved(board: RedBoard, echo: bytearray, pages: bytearray):
     for i in range(16):
         board.write(pages)
-        size = len(board.read(24 * 1024))
+        reply = board.read(24 * 1024)
+        assert get_reference(reply) == 0
+        size = len(reply)
         assert size == 24 * 1024
 
-        set_index(echo, i)
+        set_reference(echo, i)
         board.write(echo)
         reply = board.read(64)
         assert reply == echo
@@ -128,33 +150,39 @@ def test_usb_blocks(board: RedBoard, echo: bytearray):
     tx = 0
     try:
         while True:
-            set_index(echo, tx)
+            set_reference(echo, tx)
             board.write(echo)
             tx += 1
     except USBTimeoutError:
         # queues full
         assert tx > 12  # command_queue and reply_queue
         for rx in range(tx):
-            set_index(echo, rx)
+            set_reference(echo, rx)
             reply = board.read(64)
             assert reply == echo
 
     # firmware recovers
     for i in range(32):
-        set_index(echo, i)
+        set_reference(echo, i)
         board.write(echo)
         reply = board.read(64)
         assert reply == echo
 
 
 def test_dma_tx_queue(board: RedBoard, pages: bytearray):
+    set_reference(pages, 100)
     board.write(pages)
+    set_reference(pages, 110)
     board.write(pages)
 
-    size = len(board.read(24 * 1024))
+    reply = board.read(24 * 1024)
+    assert get_reference(reply) == 100
+    size = len(reply)
     assert size == 24 * 1024
 
-    size = len(board.read(24 * 1024))
+    reply = board.read(24 * 1024)
+    assert get_reference(reply) == 110
+    size = len(reply)
     assert size == 24 * 1024
 
 
@@ -171,8 +199,10 @@ def test_dma_transfer_speed_queued(board: RedBoard, pages: bytearray):
 
 
 def test_ticks(board: RedBoard, ticks: bytearray):
+    interval = 1  # ms
     count = 512
-    set_index(ticks, count)
+    set_int(ticks, 0, interval)
+    set_int(ticks, 1, count)
     board.write(ticks)
     size = 64 * count
     while size:
@@ -183,8 +213,10 @@ def test_ticks(board: RedBoard, ticks: bytearray):
 def test_ticks_long_time(board: RedBoard, ticks: bytearray):
     # the firmware crashes if the reply_queue is too short
     # firmware version 7 did crash in this scenario
+    interval = 1  # ms
     count = 20_000
-    set_index(ticks, count)
+    set_int(ticks, 0, interval)
+    set_int(ticks, 1, count)
     board.write(ticks)
     size = 64 * count
     while size:

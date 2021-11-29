@@ -30,6 +30,9 @@ struct IntTimer {
     const uint32_t base;
     const uint32_t timer;
 
+    uint32_t interval;
+    uint32_t reference;
+
     volatile uint32_t count;
 };
 
@@ -38,9 +41,11 @@ extern struct IntTimer int_timer;
 
 
 inline void
-IntTimerStart(uint32_t interval, uint32_t count)
+IntTimerStart(uint32_t interval, uint32_t count, uint16_t reference)
 {
+    int_timer.interval = interval;
     int_timer.count = count;
+    int_timer.reference = reference;
 
     // interval in ms
     TimerLoadSet64(int_timer.base, (uint64_t) interval * SysCtlClockGet() / 1000);
