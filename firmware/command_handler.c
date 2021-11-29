@@ -32,11 +32,11 @@ struct Ring command_queue = NEW_RING(commands);
 
 
 static bool
-start_init(struct Message *command)
+set_up(struct Message *command)
 {
     struct Message *reply = RingAcquire(&reply_queue);
 
-    setReply(reply, Init, nullType, command->reference);
+    setReply(reply, Setup, nullType, command->reference);
 
     RingWrite(&reply_queue);
 
@@ -102,8 +102,8 @@ CommandHandlerMain(void)
         command = RingRead(&command_queue);
 
         switch (command->command) {
-        case startInit:
-            success = start_init(command);
+        case setUp:
+            success = set_up(command);
             break;
 
         case getEcho:

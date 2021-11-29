@@ -48,7 +48,7 @@
 
 enum Command {
     nullCommand,
-    startInit,
+    setUp,
     getEcho,
     getPages,
     getTicks,
@@ -58,7 +58,7 @@ enum Command {
 
 enum Reply {
     nullReply,
-    Init,
+    Setup,
     Echo,
     Page,
     Tick,
