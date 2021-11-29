@@ -84,8 +84,7 @@ def test_pages(board: RedBoard, pages: bytearray):
     board.write(pages)
     reply = board.read(24 * 1024)
     assert get_reference(reply) == 0
-    size = len(reply)
-    assert size == 24 * 1024
+    assert len(reply) == 24 * 1024
 
 
 def test_pages_repeatedly(board: RedBoard, pages: bytearray):
@@ -94,16 +93,14 @@ def test_pages_repeatedly(board: RedBoard, pages: bytearray):
         board.write(pages)
         reply = board.read(24 * 1024)
         assert get_reference(reply) == i
-        size = len(reply)
-        assert size == 24 * 1024
+        assert len(reply) == 24 * 1024
 
 
 def test_autoset_by_dma(board: RedBoard, echo: bytearray, pages: bytearray):
     board.write(pages)  # this did set autoset
     reply = board.read(24 * 1024)
     assert get_reference(reply) == 0
-    size = len(reply)
-    assert size == 24 * 1024
+    assert len(reply) == 24 * 1024
     for i in range(32):
         set_reference(echo, i)
         board.write(echo)  # and echo failed
@@ -116,8 +113,7 @@ def test_interleaved(board: RedBoard, echo: bytearray, pages: bytearray):
         board.write(pages)
         reply = board.read(24 * 1024)
         assert get_reference(reply) == 0
-        size = len(reply)
-        assert size == 24 * 1024
+        assert len(reply) == 24 * 1024
 
         set_reference(echo, i)
         board.write(echo)
@@ -156,10 +152,11 @@ def test_usb_blocks(board: RedBoard, echo: bytearray):
     except USBTimeoutError:
         # queues full
         assert tx > 12  # command_queue and reply_queue
-        for rx in range(tx):
-            set_reference(echo, rx)
-            reply = board.read(64)
-            assert reply == echo
+
+    for rx in range(tx):
+        set_reference(echo, rx)
+        reply = board.read(64)
+        assert reply == echo
 
     # firmware recovers
     for i in range(32):
@@ -177,13 +174,11 @@ def test_dma_tx_queue(board: RedBoard, pages: bytearray):
 
     reply = board.read(24 * 1024)
     assert get_reference(reply) == 100
-    size = len(reply)
-    assert size == 24 * 1024
+    assert len(reply) == 24 * 1024
 
     reply = board.read(24 * 1024)
     assert get_reference(reply) == 110
-    size = len(reply)
-    assert size == 24 * 1024
+    assert len(reply) == 24 * 1024
 
 
 def test_dma_transfer_speed_queued(board: RedBoard, pages: bytearray):
