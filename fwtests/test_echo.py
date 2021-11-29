@@ -4,9 +4,9 @@ import pytest
 import usb.util
 from usb.core import USBTimeoutError
 
-from red_board import RedBoard
-from lenlab_protocol import protocol
-from lenlab_version import version
+from fwutils.red_board import RedBoard
+from fwutils.lenlab_protocol import lenlab_protocol
+from fwutils.lenlab_version import lenlab_version
 
 
 @pytest.fixture()
@@ -35,23 +35,23 @@ def set_index(message, index):
 
 @pytest.fixture()
 def echo():
-    return command(protocol["Command"]["getEcho"])
+    return command(lenlab_protocol["Command"]["getEcho"])
 
 
 @pytest.fixture()
 def pages():
-    return command(protocol["Command"]["getPages"])
+    return command(lenlab_protocol["Command"]["getPages"])
 
 
 @pytest.fixture()
 def ticks():
-    return command(protocol["Command"]["getTicks"])
+    return command(lenlab_protocol["Command"]["getTicks"])
 
 
 def test_usb_descriptor(board: RedBoard):
     assert board.dev.manufacturer == "Karlsruhe Institute of Technology"
     assert board.dev.product == "Lenlab Red Board"
-    assert board.dev.serial_number == f"{version['LENLAB_MAJOR']}.{version['LENLAB_MINOR']}"
+    assert board.dev.serial_number == f"{lenlab_version['LENLAB_MAJOR']}.{lenlab_version['LENLAB_MINOR']}"
 
 
 def test_echo(board: RedBoard, echo: bytearray):

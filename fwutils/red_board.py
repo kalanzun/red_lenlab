@@ -1,13 +1,13 @@
 import usb.core
 
-from backend import backend
-from lenlab_protocol import protocol
+from .backend import backend
+from .lenlab_protocol import lenlab_protocol
 
 
 class RedBoard:
     def __init__(self):
         self.dev = usb.core.find(
-            idVendor=protocol["LENLAB_VID"], idProduct=protocol["LENLAB_PID"], backend=backend
+            idVendor=lenlab_protocol["LENLAB_VID"], idProduct=lenlab_protocol["LENLAB_PID"], backend=backend
         )
         assert self.dev
 
