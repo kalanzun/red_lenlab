@@ -5,3 +5,4 @@ libusb/
 red_lenlab.pro.user
 .idea/
 lenlab_flash/red_firmware.out
+__pycache__/
