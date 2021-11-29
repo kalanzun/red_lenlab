@@ -55,8 +55,6 @@ static const uint32_t peripherals[] = {
     SYSCTL_PERIPH_GPIOE,
     SYSCTL_PERIPH_GPIOF,
 
-    SYSCTL_PERIPH_TIMER0, // int_timer
-
     SYSCTL_PERIPH_UDMA,
 };
 

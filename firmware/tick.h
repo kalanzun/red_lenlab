@@ -63,6 +63,10 @@ TickStop(void)
 inline void
 TickInit(void)
 {
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_TIMER0)) {
+    }
+
     TimerConfigure(tick.timer_base, TIMER_CFG_PERIODIC);
     TimerIntEnable(tick.timer_base, TIMER_TIMA_TIMEOUT);
 
