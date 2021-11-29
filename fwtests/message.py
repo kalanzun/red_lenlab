@@ -1,4 +1,3 @@
-
 def command(code, type=0):
     message = bytearray(64)
 

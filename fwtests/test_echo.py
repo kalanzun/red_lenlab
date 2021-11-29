@@ -31,13 +31,18 @@ def pages():
 
 @pytest.fixture()
 def ticks():
-    return command(lenlab_protocol["Command"]["getTicks"], lenlab_protocol["Type"]["IntArray"])
+    return command(
+        lenlab_protocol["Command"]["getTicks"], lenlab_protocol["Type"]["IntArray"]
+    )
 
 
 def test_usb_descriptor(board: RedBoard):
     assert board.dev.manufacturer == "Karlsruhe Institute of Technology"
     assert board.dev.product == "Lenlab Red Board"
-    assert board.dev.serial_number == f"{lenlab_version['LENLAB_MAJOR']}.{lenlab_version['LENLAB_MINOR']}"
+    assert (
+        board.dev.serial_number
+        == f"{lenlab_version['LENLAB_MAJOR']}.{lenlab_version['LENLAB_MINOR']}"
+    )
 
 
 def test_echo(board: RedBoard, echo: bytearray):

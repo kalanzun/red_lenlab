@@ -20,7 +20,9 @@ def build(project_path: Path, debug=True):
     # https://software-dl.ti.com/ccs/esd/documents/ccs_projects-command-line.html
 
     project_path = project_path.resolve()  # it might be .
-    project_name = project_path.name  # we assume those are equal (ccs does not require it)
+    project_name = (
+        project_path.name
+    )  # we assume those are equal (ccs does not require it)
 
     with TemporaryDirectory() as workspace:
         workspace_path = Path(workspace)
@@ -57,7 +59,9 @@ def build(project_path: Path, debug=True):
         print(f"Command: {' '.join(str(x) for x in command)}")
         run(command, check=True)
 
-        with open(workspace_path / project_name / configuration / f"{project_name}.out", "rb") as firmware_file:
+        with open(
+            workspace_path / project_name / configuration / f"{project_name}.out", "rb"
+        ) as firmware_file:
             firmware = firmware_file.read()
 
     return firmware
@@ -73,9 +77,11 @@ def uniflash(firmware, target_configuration_path: Path):
     firmware_path = Path(name)
     try:
         command = [
-            "cmd.exe", "/c",
+            "cmd.exe",
+            "/c",
             uniflash_path,
-            "-c", target_configuration_path.absolute(),
+            "-c",
+            target_configuration_path.absolute(),
             "-e",
             "-f",
             firmware_path.resolve(),

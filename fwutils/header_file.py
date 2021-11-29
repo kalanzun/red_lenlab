@@ -21,10 +21,13 @@ class HeaderFile:
             for match in self.define_pattern.finditer(self.content)
         }
 
-        self.enum = {match.group(1): {
+        self.enum = {
+            match.group(1): {
                 element.strip(): i
                 for i, element in enumerate(match.group(2).split(","))
-            } for match in self.enum_pattern.finditer(self.content)}
+            }
+            for match in self.enum_pattern.finditer(self.content)
+        }
 
         self.elements = self.define | self.enum
 
