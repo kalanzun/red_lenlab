@@ -21,9 +21,9 @@
 
 #include "command_handler.h"
 
-#include "int_timer.h"
 #include "message.h"
 #include "reply_handler.h"
+#include "tick.h"
 
 
 static uint8_t commands[4][64] __attribute__ ((aligned(4)));
@@ -85,7 +85,7 @@ get_ticks(struct Message *command)
     uint32_t count = getInt(command, 1);
 
     // TODO locking of modules, red fw state machine
-    IntTimerStart(interval, count, command->reference);
+    TickStart(interval, count, command->reference);
 
     return true;
 }

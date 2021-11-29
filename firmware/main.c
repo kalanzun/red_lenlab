@@ -29,7 +29,7 @@
 
 #include "command_handler.h"
 #include "reply_handler.h"
-#include "int_timer.h"
+#include "tick.h"
 #include "usb_device.h"
 
 
@@ -153,9 +153,9 @@ main(void)
     ConfigureuDMA();
 
     //
-    // Initialize IntTimer
+    // Initialize Tick
     //
-    IntTimerInit();
+    TickInit();
 
     //
     // Initialize USB

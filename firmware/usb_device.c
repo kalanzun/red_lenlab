@@ -27,9 +27,6 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
-#include "usblib/usblib.h"
-#include "usblib/device/usbdevice.h"
-#include "usblib/device/usbdbulk.h"
 
 #include "lenlab_protocol.h"
 #include "lenlab_version.h"
@@ -98,20 +95,6 @@ static const uint8_t * const StringDescriptors[] = {
 };
 
 #define NUM_STRING_DESCRIPTORS (sizeof(StringDescriptors) / sizeof(uint8_t *))
-
-
-struct USBDevice {
-    tUSBDBulkDevice bulk_device;
-
-    volatile bool dma_pending;
-    volatile bool tx_pending;
-
-    volatile uint32_t dma_pending_event;
-    volatile uint32_t dma_complete_event;
-    volatile uint32_t tx_pending_event;
-    volatile uint32_t tx_complete_event;
-    volatile uint32_t rx_available_event;
-};
 
 
 static uint32_t RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void *pvMsgData);

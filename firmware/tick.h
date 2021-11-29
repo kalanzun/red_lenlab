@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INT_TIMER_H_
-#define INT_TIMER_H_
+#ifndef TICK_H_
+#define TICK_H_
 
 
 #include "inc/hw_ints.h"
@@ -26,8 +26,8 @@
 #include "driverlib/timer.h"
 
 
-struct IntTimer {
-    const uint32_t base;
+struct Tick {
+    const uint32_t timer_base;
     const uint32_t timer;
 
     uint32_t interval;
@@ -37,37 +37,37 @@ struct IntTimer {
 };
 
 
-extern struct IntTimer int_timer;
+extern struct Tick tick;
 
 
 inline void
-IntTimerStart(uint32_t interval, uint32_t count, uint16_t reference)
+TickStart(uint32_t interval, uint32_t count, uint16_t reference)
 {
-    int_timer.interval = interval;
-    int_timer.count = count;
-    int_timer.reference = reference;
+    tick.interval = interval;
+    tick.count = count;
+    tick.reference = reference;
 
     // interval in ms
-    TimerLoadSet64(int_timer.base, (uint64_t) interval * SysCtlClockGet() / 1000);
-    TimerEnable(int_timer.base, int_timer.timer);
+    TimerLoadSet64(tick.timer_base, (uint64_t) tick.interval * SysCtlClockGet() / 1000);
+    TimerEnable(tick.timer_base, tick.timer);
 }
 
 
 inline void
-IntTimerStop(void)
+TickStop(void)
 {
-    TimerDisable(int_timer.base, int_timer.timer);
+    TimerDisable(tick.timer_base, tick.timer);
 }
 
 
 inline void
-IntTimerInit(void)
+TickInit(void)
 {
-    TimerConfigure(int_timer.base, TIMER_CFG_PERIODIC);
-    TimerIntEnable(int_timer.base, TIMER_TIMA_TIMEOUT);
+    TimerConfigure(tick.timer_base, TIMER_CFG_PERIODIC);
+    TimerIntEnable(tick.timer_base, TIMER_TIMA_TIMEOUT);
 
     IntEnable(INT_TIMER0A);
 }
 
 
-#endif /* INT_TIMER_H_ */
+#endif /* TICK_H_ */

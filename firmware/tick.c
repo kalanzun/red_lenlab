@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "int_timer.h"
+#include "tick.h"
 
 #include "inc/hw_memmap.h"
 #include "driverlib/debug.h"
@@ -28,8 +28,8 @@
 #include "reply_handler.h"
 
 
-struct IntTimer int_timer = {
-    .base = TIMER0_BASE,
+struct Tick tick = {
+    .timer_base = TIMER0_BASE,
     .timer = TIMER_A
 };
 
@@ -39,14 +39,14 @@ Timer0AIntHandler(void)
 {
     struct Message *reply;
 
-    TimerIntClear(int_timer.base, TIMER_TIMA_TIMEOUT);
+    TimerIntClear(tick.timer_base, TIMER_TIMA_TIMEOUT);
 
-    if (int_timer.count == 0) return;
-    if (--int_timer.count == 0) IntTimerStop();
+    if (tick.count == 0) return;
+    if (--tick.count == 0) TickStop();
 
     ASSERT(reply_queue.has_space);
     reply = RingAcquire(&reply_queue);
-    setReply(reply, Tick, IntArray, int_timer.reference);
-    setInt(reply, 0, int_timer.count);
+    setReply(reply, Tick, IntArray, tick.reference);
+    setInt(reply, 0, tick.count);
     RingWrite(&reply_queue);
 }
