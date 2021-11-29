@@ -283,7 +283,7 @@ USBDeviceInit(void)
     // Enable uDMA burst mode.
     uDMAChannelAttributeEnable(UDMA_CHANNEL_USBEP1TX, UDMA_ATTR_USEBURST);
 
-    // Configure the uDMA channel for the pipe
+    // Configure the uDMA channel for the USB TX FIFO
     uDMAChannelControlSet(UDMA_CHANNEL_USBEP1TX, UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_64);
     USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN); // for now
 
