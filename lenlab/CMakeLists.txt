@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
@@ -26,25 +26,37 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET lenlab APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
-    if(ANDROID)
-        add_library(lenlab SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(lenlab
-            ${PROJECT_SOURCES}
-        )
-    endif()
+    add_executable(lenlab
+        ${PROJECT_SOURCES}
+    )
 endif()
 
 target_link_libraries(lenlab PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+find_path(LENLAB_INCLUDE_DIR
+    NAMES lenlab_protocol.h
+    PATH_SUFFIXES "../include"
+    REQUIRED
+)
+
+target_include_directories(lenlab PRIVATE ${LENLAB_INCLUDE_DIR})
+
+find_path(LIBUSB_INCLUDE_DIR
+    NAMES libusb.h
+    PATH_SUFFIXES "../libusb/include/libusb-1.0"
+    REQUIRED
+)
+
+target_include_directories(lenlab PRIVATE ${LIBUSB_INCLUDE_DIR})
+
+find_library(LIBUSB_LIBRARY
+    NAMES "libusb-1.0"
+    PATH_SUFFIXES "../libusb/MinGW64/dll"
+    REQUIRED
+)
+
+target_link_libraries(lenlab PRIVATE ${LIBUSB_LIBRARY})
 
 set_target_properties(lenlab PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
