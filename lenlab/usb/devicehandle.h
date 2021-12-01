@@ -8,9 +8,9 @@ namespace usb {
 class DeviceHandle
 {
 public:
-    libusb_device_handle *m_dev_handle;
+    libusb_device_handle* m_dev_handle;
 
-    DeviceHandle(libusb_device *dev);
+    DeviceHandle(libusb_device* dev);
     DeviceHandle(const DeviceHandle&) = delete;
 
     ~DeviceHandle();

@@ -6,14 +6,14 @@
 
 namespace usb {
 
-DeviceListIterator::DeviceListIterator(libusb_device **list, ssize_t i)
+DeviceListIterator::DeviceListIterator(libusb_device** list, ssize_t i)
     : list(list)
     , i(i)
 {
 
 }
 
-bool DeviceListIterator::operator!=(const DeviceListIterator &other)
+bool DeviceListIterator::operator!=(const DeviceListIterator& other)
 {
     return i != other.i;
 }
