@@ -51,7 +51,9 @@ get_echo(struct Message *command)
 
     struct Message *reply = RingAcquire(&reply_queue);
 
-    for (i = 0; i < reply_queue.element_size / 4; ++i) {
+    reply->size = 60;
+
+    for (i = 0; i < 15; ++i) {
         ((uint32_t *) reply)[i] = ((uint32_t *) command)[i];
     }
 

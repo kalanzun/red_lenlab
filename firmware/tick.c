@@ -47,6 +47,7 @@ Timer0AIntHandler(void)
     ASSERT(reply_queue.has_space);
     reply = RingAcquire(&reply_queue);
     setReply(reply, Tick, IntArray, tick.reference);
+    reply->size = 8;
     setInt(reply, 0, tick.count);
     RingWrite(&reply_queue);
 }

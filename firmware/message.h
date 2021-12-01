@@ -29,6 +29,8 @@ setReply(struct Message *message, enum Reply reply, enum Type type, uint16_t ref
     message->reply = reply;
     message->type = type;
     message->reference = reference;
+
+    message->size = 4;
 }
 
 

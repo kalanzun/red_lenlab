@@ -1,12 +1,10 @@
-def command(code, type=0):
-    message = bytearray(64)
+from array import array
 
-    message[0] = code
-    message[1] = type
 
-    for i in range(4, 64):
-        message[i] = i
-
+def command(code, type=0, size=0):
+    # body size
+    message = array("B", [code, type, 0, 0])
+    message.extend(range(size))
     return message
 
 

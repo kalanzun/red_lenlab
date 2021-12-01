@@ -1,3 +1,4 @@
+from array import array
 from time import time
 
 import pytest
@@ -21,7 +22,7 @@ def board():
 
 @pytest.fixture()
 def echo():
-    return command(lenlab_protocol["Command"]["getEcho"])
+    return command(lenlab_protocol["Command"]["getEcho"], size=56)
 
 
 @pytest.fixture()
@@ -32,7 +33,7 @@ def pages():
 @pytest.fixture()
 def ticks():
     return command(
-        lenlab_protocol["Command"]["getTicks"], lenlab_protocol["Type"]["IntArray"]
+        lenlab_protocol["Command"]["getTicks"], lenlab_protocol["Type"]["IntArray"], size=8
     )
 
 
@@ -45,13 +46,13 @@ def test_usb_descriptor(board: RedBoard):
     )
 
 
-def test_echo(board: RedBoard, echo: bytearray):
+def test_echo(board: RedBoard, echo: array):
     board.write(echo)
     reply = board.read(64)
     assert reply == echo
 
 
-def test_echo_repeatedly(board: RedBoard, echo: bytearray):
+def test_echo_repeatedly(board: RedBoard, echo: array):
     for i in range(2048):
         set_reference(echo, i)
         board.write(echo)
@@ -59,14 +60,14 @@ def test_echo_repeatedly(board: RedBoard, echo: bytearray):
         assert reply == echo
 
 
-def test_pages(board: RedBoard, pages: bytearray):
+def test_pages(board: RedBoard, pages: array):
     board.write(pages)
     reply = board.read(24 * 1024)
     assert get_reference(reply) == 0
     assert len(reply) == 24 * 1024
 
 
-def test_pages_repeatedly(board: RedBoard, pages: bytearray):
+def test_pages_repeatedly(board: RedBoard, pages: array):
     for i in range(16):
         set_reference(pages, i)
         board.write(pages)
@@ -75,7 +76,7 @@ def test_pages_repeatedly(board: RedBoard, pages: bytearray):
         assert len(reply) == 24 * 1024
 
 
-def test_autoset_by_dma(board: RedBoard, echo: bytearray, pages: bytearray):
+def test_autoset_by_dma(board: RedBoard, echo: array, pages: array):
     board.write(pages)  # this did set autoset
     reply = board.read(24 * 1024)
     assert get_reference(reply) == 0
@@ -87,7 +88,7 @@ def test_autoset_by_dma(board: RedBoard, echo: bytearray, pages: bytearray):
         assert reply == echo
 
 
-def test_interleaved(board: RedBoard, echo: bytearray, pages: bytearray):
+def test_interleaved(board: RedBoard, echo: array, pages: array):
     for i in range(16):
         board.write(pages)
         reply = board.read(24 * 1024)
@@ -100,7 +101,7 @@ def test_interleaved(board: RedBoard, echo: bytearray, pages: bytearray):
         assert reply == echo
 
 
-def test_transfer_speed(board: RedBoard, echo: bytearray):
+def test_transfer_speed(board: RedBoard, echo: array):
     start = time()
     size = 0
     for i in range(2048):
@@ -111,7 +112,7 @@ def test_transfer_speed(board: RedBoard, echo: bytearray):
     assert speed > 200_000  # kB/s
 
 
-def test_dma_transfer_speed(board: RedBoard, pages: bytearray):
+def test_dma_transfer_speed(board: RedBoard, pages: array):
     start = time()
     size = 0
     for i in range(16):
@@ -121,7 +122,7 @@ def test_dma_transfer_speed(board: RedBoard, pages: bytearray):
     assert speed > 800_000  # kB/s
 
 
-def test_usb_blocks(board: RedBoard, echo: bytearray):
+def test_usb_blocks(board: RedBoard, echo: array):
     tx = 0
     try:
         while True:
@@ -145,7 +146,7 @@ def test_usb_blocks(board: RedBoard, echo: bytearray):
         assert reply == echo
 
 
-def test_dma_tx_queue(board: RedBoard, pages: bytearray):
+def test_dma_tx_queue(board: RedBoard, pages: array):
     set_reference(pages, 100)
     board.write(pages)
     set_reference(pages, 110)
@@ -160,7 +161,7 @@ def test_dma_tx_queue(board: RedBoard, pages: bytearray):
     assert len(reply) == 24 * 1024
 
 
-def test_dma_transfer_speed_queued(board: RedBoard, pages: bytearray):
+def test_dma_transfer_speed_queued(board: RedBoard, pages: array):
     start = time()
     size = 0
     board.write(pages)
@@ -172,19 +173,19 @@ def test_dma_transfer_speed_queued(board: RedBoard, pages: bytearray):
     assert speed > 800_000  # kB/s
 
 
-def test_ticks(board: RedBoard, ticks: bytearray):
+def test_ticks(board: RedBoard, ticks: array):
     interval = 1  # ms
     count = 512
     set_int(ticks, 0, interval)
     set_int(ticks, 1, count)
     board.write(ticks)
-    size = 64 * count
+    size = 8 * count
     while size:
         size -= len(board.read(size))
 
 
 @pytest.mark.slow
-def test_ticks_long_time(board: RedBoard, ticks: bytearray):
+def test_ticks_long_time(board: RedBoard, ticks: array):
     # the firmware crashes if the reply_queue is too short
     # firmware version 7 did crash in this scenario
     interval = 1  # ms
@@ -192,6 +193,6 @@ def test_ticks_long_time(board: RedBoard, ticks: bytearray):
     set_int(ticks, 0, interval)
     set_int(ticks, 1, count)
     board.write(ticks)
-    size = 64 * count
+    size = 8 * count
     while size:
         size -= len(board.read(size))

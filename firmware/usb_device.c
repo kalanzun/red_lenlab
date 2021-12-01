@@ -33,6 +33,7 @@
 
 #include "command_handler.h"
 #include "reply_handler.h"
+#include "message.h"
 
 
 static const uint8_t LangDescriptor[] = {
@@ -136,6 +137,7 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
             command = RingAcquire(&command_queue);
             size = USBDBulkPacketRead(&usb_device, (uint8_t *) command, command_queue.element_size, false);
             ASSERT(size); // the event is USB_EVENT_RX_AVAILABLE
+            // TODO implement setSize for commands
             RingWrite(&command_queue);
 
             return size;
@@ -189,6 +191,8 @@ USB0IntHandler(void)
 static void
 USBDeviceStartuDMA(uint8_t *data, uint32_t size)
 {
+    ASSERT(size == 1024); // automatic sending might not work for smaller packets (USB_EP_AUTO_SET)
+
     ASSERT(size % 16 == 0);
     ASSERT(size <= 1024);
 
@@ -213,23 +217,25 @@ USBDeviceStartuDMA(uint8_t *data, uint32_t size)
 static void
 USBDeviceStartTx(uint8_t *data, uint32_t size)
 {
-    ASSERT(size == 64);
-
-    size = USBDBulkPacketWrite(&usb_device, data, size, false);
-    ASSERT(size); // we did locking with tx_pending and dma_pending
+    ASSERT(size < 64); // do not trigger automatic sending with USB_EP_AUTO_SET for size == 64
 
     usb_device.tx_pending = true;
     ++usb_device.tx_pending_event;
+
+    size = USBDBulkPacketWrite(&usb_device, data, size, true);
+    // we tell it explicitly to send the packet (true)
+    // for size == 64, this would crash with the automatic sending due to USB_EP_AUTO_SET
+    ASSERT(size); // we did locking with tx_pending and dma_pending
 }
 
 
 void
 USBDeviceMain(void)
 {
-    uint32_t size;
     struct Message *reply;
 
 #ifdef DEBUG
+    uint32_t size;
     uint32_t flags = USB_EP_DEV_IN;
 #endif
 
@@ -251,7 +257,7 @@ USBDeviceMain(void)
         }
         else if (reply_queue.has_content) {
             reply = RingRead(&reply_queue);
-            USBDeviceStartTx((uint8_t *) reply, reply_queue.element_size);
+            USBDeviceStartTx((uint8_t *) reply, reply->size);
             RingRelease(&reply_queue);
         }
     }

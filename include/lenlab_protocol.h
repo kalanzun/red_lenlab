@@ -29,24 +29,39 @@
  * A command message travels from the host to the device.
  * Reply and data messages travel from the device to the host.
  *
- * Command and reply messages are 64 bytes.
+ * Command and reply messages are max 60 bytes.
  * On this Launchpad, the usblib bulk device driver uses 64 bytes USB packets.
+ * The messages are shorter, so that the bulk driver recognizes
+ * the end of a transfer and signals it (especially on the host side).
  *
  * Data messages are 1024 bytes.
  * On this microcontroller, uDMA for USB works up to 1024 bytes at once.
+ * uDMA messages cannot be smaller. The bulk driver would not
+ * realize the end of a transfer and would wait.
  *
- * A message has a 4 bytes head and a 60 or 1020 bytes body.
+ * A message has a 4 bytes head and a 56 or 1020 bytes body.
  * The head consists of
  *   - one byte message code (command code or reply code)
  *   - one byte message type (this is a helper to check for programming errors
  *     during encoding and decoding)
  *   - two bytes reference (the firmware replies with the corresponding command
  *     reference value)
+ * A command or reply uses 64 bytes memory and stores the actual
+ * size in the last 4 bytes.
  *
  */
 
 
-enum Command {
+#if defined(__cplusplus)
+#include <stdint.h>
+#define ENUM_TYPE : uint8_t
+#define _Static_assert(x, y) static_assert(x, y)
+#else
+#define ENUM_TYPE
+#endif
+
+
+enum Command ENUM_TYPE {
     nullCommand,
     setUp,
     getEcho,
@@ -56,7 +71,7 @@ enum Command {
 };
 
 
-enum Reply {
+enum Reply ENUM_TYPE {
     nullReply,
     Setup,
     Echo,
@@ -66,7 +81,7 @@ enum Reply {
 };
 
 
-enum Type {
+enum Type ENUM_TYPE {
     nullType,
     String,
     ByteArray,
@@ -85,8 +100,13 @@ struct Message {
 
     uint16_t reference;
 
-    uint8_t body;
+    uint8_t body[56];
+
+    uint32_t size;
 };
+
+
+_Static_assert(sizeof(struct Message) == 64, "struct Message is 64 bytes");
 
 
 #endif // LENLAB_PROTOCOL_H

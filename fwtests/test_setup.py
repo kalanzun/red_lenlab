@@ -1,3 +1,5 @@
+from array import array
+
 import pytest
 import usb.util
 
@@ -20,8 +22,8 @@ def setup():
     return command(lenlab_protocol["Command"]["setUp"])
 
 
-def test_setup(board: RedBoard, setup: bytearray):
-    set_reference(setup, 123)
+def test_setup(board: RedBoard, setup: array):
+    set_reference(setup, 12345)
     board.write(setup)
     reply = board.read(64)
-    assert get_reference(reply) == 123
+    assert get_reference(reply) == 12345

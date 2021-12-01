@@ -15,10 +15,18 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp
-        app/mainwindow.cpp
-        app/mainwindow.h
-        app/mainwindow.ui
+    main.cpp
+    app/mainwindow.h app/mainwindow.cpp app/mainwindow.ui
+    protocol/board.h protocol/board.cpp
+    protocol/thread.h protocol/thread.cpp
+    usb/context.h usb/context.cpp
+    usb/device.h usb/device.cpp
+    usb/devicehandle.h usb/devicehandle.cpp
+    usb/devicelist.h usb/devicelist.cpp
+    usb/interface.h usb/interface.cpp
+    usb/packet.h usb/packet.cpp
+    usb/transfer.h usb/transfer.cpp
+    usb/usbexception.h usb/usbexception.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
