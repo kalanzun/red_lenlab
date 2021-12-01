@@ -7,17 +7,15 @@ namespace usb {
 
 class USBException
 {
-    libusb_error m_error;
-    const char *m_message;
-
 public:
+    libusb_error m_error;
+    const char* m_message;
+
     USBException(ssize_t error);
-    USBException(const char *message);
+    USBException(const char* message);
     USBException(const USBException&) = delete;
 
     USBException& operator=(const USBException&) = delete;
-
-    const char *message() const;
 };
 
 } // namespace usb

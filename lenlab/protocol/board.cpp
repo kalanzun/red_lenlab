@@ -50,7 +50,7 @@ void Board::poll()
             mPollTimer.start(mPollTime);
         }
     } catch (usb::USBException const &exception) {
-        qDebug() << exception.message();
+        qDebug() << exception.m_message;
         mPollTimer.start(mRetryTime);
     }
 }
