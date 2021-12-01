@@ -7,7 +7,7 @@ namespace usb {
 
 class Context
 {
-    struct libusb_context* m_ctx;
+    struct libusb_context* ctx;
 
 public:
     Context();

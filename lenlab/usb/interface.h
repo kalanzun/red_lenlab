@@ -1,7 +1,7 @@
 #ifndef USB_INTERFACE_H
 #define USB_INTERFACE_H
 
-#include "libusb.h"
+#include <memory>
 
 #include "devicehandle.h"
 
@@ -9,10 +9,10 @@ namespace usb {
 
 class Interface
 {
-    libusb_device_handle *m_dev_handle;
-
 public:
-    Interface(DeviceHandle &device_handle);
+    std::shared_ptr< DeviceHandle > device_handle;
+
+    Interface(std::shared_ptr< DeviceHandle > device_handle);
     Interface(const Interface&) = delete;
 
     ~Interface();

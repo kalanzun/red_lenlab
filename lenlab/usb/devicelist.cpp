@@ -2,13 +2,11 @@
 
 #include "usbexception.h"
 
-#include <QDebug>
-
 namespace usb {
 
 DeviceListIterator::DeviceListIterator(libusb_device** list, ssize_t i)
-    : list(list)
-    , i(i)
+    : list{list}
+    , i{i}
 {
 
 }

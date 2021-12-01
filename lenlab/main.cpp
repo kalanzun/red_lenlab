@@ -1,12 +1,12 @@
 #include "app/mainwindow.h"
-#include "protocol/board.h"
+#include "protocol/manager.h"
 
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
-    protocol::Board board;
-    QTimer::singleShot(0, &board, &protocol::Board::lookForBoard);
+    protocol::Manager manager;
+    QTimer::singleShot(0, &manager, &protocol::Manager::lookForBoard);
 
     QApplication a(argc, argv);
     app::MainWindow w;

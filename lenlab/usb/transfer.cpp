@@ -6,42 +6,114 @@
 
 namespace usb {
 
-Transfer::Transfer(std::shared_ptr< Packet >& packet, DeviceHandle& device_handle, unsigned char endpoint)
-    : m_packet(packet)
+TransferCallback::TransferCallback()
 {
+
+}
+
+void TransferCallback::set(void* object, std::function< void(Transfer*, void*) > callback)
+{
+    this->object = object;
+    this->callback = callback;
+}
+
+void TransferCallback::call(Transfer *self)
+{
+    if (callback) callback(self, object);
+}
+
+Transfer::Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint)
+    : interface{std::move(interface)}
+{
+    qDebug() << "Transfer";
+
     xfr = libusb_alloc_transfer(0);
     if (!xfr) throw USBException("Allocation failed");
 
-    xfr->dev_handle = device_handle.m_dev_handle;
+    active.lock();
+
+    xfr->dev_handle = this->interface->device_handle->dev_handle;
     xfr->endpoint = endpoint;
     xfr->type = LIBUSB_TRANSFER_TYPE_BULK;
-    xfr->timeout = 0;
-
-    xfr->buffer = m_packet->buffer;
-    xfr->length = m_packet->length;
+    xfr->callback = callbackComplete;
     xfr->user_data = this;
-    xfr->callback = &callbackComplete;
+    xfr->timeout = 0;
 }
 
 Transfer::~Transfer()
 {
+    qDebug() << "~Transfer";
+
+    // wait for LIBUSB_TRANSFER_CANCELLED callback
+    std::lock_guard< std::mutex > lock(active);
     libusb_free_transfer(xfr);
+}
+
+void Transfer::submit(std::shared_ptr< Packet > packet)
+{
+    current = std::move(packet); // keep the packet around during the transfer
+    xfr->buffer = current->buffer;
+    xfr->length = current->length;
+
+    auto error = libusb_submit_transfer(xfr);
+    if (error) throw USBException(error);
+}
+
+void Transfer::cancel()
+{
+    if (libusb_cancel_transfer(xfr)) active.unlock(); // if it can't cancel, unlock it right away
+}
+
+std::shared_ptr< Packet > Transfer::getPacket()
+{
+    return current;
+}
+
+const char* Transfer::getMessage()
+{
+    switch(xfr->status) {
+    case LIBUSB_TRANSFER_COMPLETED:
+        return "LIBUSB_TRANSFER_COMPLETED";
+    case LIBUSB_TRANSFER_CANCELLED:
+        return "LIBUSB_TRANSFER_CANCELLED";
+    case LIBUSB_TRANSFER_NO_DEVICE:
+        return "LIBUSB_TRANSFER_NO_DEVICE";
+    case LIBUSB_TRANSFER_TIMED_OUT:
+        return "LIBUSB_TRANSFER_TIMED_OUT";
+    case LIBUSB_TRANSFER_ERROR:
+        return "LIBUSB_TRANSFER_ERROR";
+    case LIBUSB_TRANSFER_STALL:
+        return "LIBUSB_TRANSFER_STALL";
+    case LIBUSB_TRANSFER_OVERFLOW:
+        return "LIBUSB_TRANSFER_OVERFLOW";
+    default:
+        return "";
+    }
 }
 
 void LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer* xfr)
 {
     auto transfer = static_cast< Transfer* >(xfr->user_data);
-    qDebug() << "Transfer::callbackComplete";
-    transfer->m_packet->length = xfr->length;
-    if (transfer->m_receive_callback) transfer->m_receive_callback(transfer->m_object, transfer->m_packet);
-    delete transfer;
-}
 
-void Transfer::submit()
-{
-    // TODO why not inside the constructor?
-    auto error = libusb_submit_transfer(xfr);
-    if (error) throw USBException(error);
+    switch(xfr->status) {
+    case LIBUSB_TRANSFER_COMPLETED:
+        transfer->current->length = xfr->actual_length;
+        transfer->complete_callback.call(transfer);
+        break;
+    case LIBUSB_TRANSFER_CANCELLED:
+        transfer->active.unlock();
+        break;
+    case LIBUSB_TRANSFER_NO_DEVICE:
+    case LIBUSB_TRANSFER_TIMED_OUT:
+    case LIBUSB_TRANSFER_ERROR:
+        transfer->error_callback.call(transfer);
+        transfer->reset_callback.call(transfer);
+        break;
+    case LIBUSB_TRANSFER_STALL:
+    case LIBUSB_TRANSFER_OVERFLOW:
+        transfer->error_callback.call(transfer);
+        break;
+    }
 }
 
 } // namespace usb

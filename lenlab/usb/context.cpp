@@ -1,18 +1,24 @@
 #include "context.h"
 
+#include <QDebug>
+
 #include "usbexception.h"
 
 namespace usb {
 
 Context::Context()
 {
-    auto error = libusb_init(&m_ctx);
+    qDebug() << "Context";
+
+    auto error = libusb_init(&ctx);
     if (error) throw USBException(error);
 }
 
 Context::~Context()
 {
-    libusb_exit(m_ctx);
+    qDebug() << "~Context";
+
+    libusb_exit(ctx);
 }
 
 } // namespace usb

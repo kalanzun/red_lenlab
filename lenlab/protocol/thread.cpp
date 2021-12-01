@@ -6,35 +6,28 @@
 
 namespace protocol {
 
-Thread::Thread(std::shared_ptr< usb::Device >& device, QObject* parent)
-    : QThread(parent)
-    , m_device(device)
+Thread::Thread(QObject *parent)
+    : QThread{parent}
 {
-
+    qDebug() << "Thread";
 }
 
-void Thread::receiveCallback(void* object, std::shared_ptr< usb::Packet >& packet)
+Thread::~Thread()
 {
-    auto thread = static_cast< Thread* >(object);
-    qDebug() << "Thread::receiveCallback";
-    emit thread->receive(packet);
+    qDebug() << "~Thread";
+    wait();
 }
 
 void Thread::run()
 {
-    m_device->m_object = this;
-    m_device->m_receive_callback = receiveCallback;
+    qDebug() << "thread starts";
 
     while(!isInterruptionRequested()) {
-        qDebug() << "ping";
         libusb_handle_events(nullptr);
+        qDebug() << "thread wakes up";
     }
-}
 
-void Thread::transmit(std::shared_ptr< usb::Packet >& packet)
-{
-    qDebug() << "Thread::transmit";
-    m_device->transmit(packet);
+    qDebug() << "thread stops";
 }
 
 } // namespace protocol

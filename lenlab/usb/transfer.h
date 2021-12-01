@@ -3,33 +3,60 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 
 #include "libusb.h"
 
-#include "devicehandle.h"
+#include "interface.h"
 #include "packet.h"
 
 namespace usb {
 
-class Transfer
-{
-    struct libusb_transfer* xfr;
-    std::shared_ptr< Packet > m_packet;
+class Transfer;
 
-    static void LIBUSB_CALL callbackComplete(struct libusb_transfer* xfr);
+class TransferCallback
+{
+    void* object = nullptr;
+    std::function< void(Transfer*, void*) > callback = nullptr;
 
 public:
-    void* m_object;
-    std::function< void(void*, std::shared_ptr< Packet >&) > m_receive_callback;
+    TransferCallback();
+    TransferCallback(const TransferCallback&) = delete;
 
-    Transfer(std::shared_ptr< Packet >& packet, DeviceHandle& device_handle, unsigned char endpoint);
+    TransferCallback& operator=(const TransferCallback&) = delete;
+
+    void set(void* object, std::function< void(Transfer*, void*) > callback);
+    void call(Transfer *self);
+};
+
+class Transfer
+{
+    std::shared_ptr< Interface > interface; // keep it around while xfr has a dev_handle pointer
+    struct libusb_transfer* xfr;
+
+    std::mutex active;
+    std::shared_ptr< Packet > current;
+
+public:
+    Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
     Transfer(const Transfer&) = delete;
 
     ~Transfer();
 
     Transfer& operator=(const Transfer&) = delete;
 
-    void submit();
+    TransferCallback complete_callback;
+    TransferCallback error_callback;
+    TransferCallback reset_callback;
+
+    void submit(std::shared_ptr< Packet > packet);
+    void cancel();
+
+    std::shared_ptr< Packet > getPacket();
+    const char* getMessage();
+
+private:
+    static void LIBUSB_CALL callbackComplete(struct libusb_transfer* xfr);
 };
 
 } // namespace usb

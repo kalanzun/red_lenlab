@@ -3,17 +3,24 @@
 namespace usb {
 
 USBException::USBException(ssize_t error)
-    : m_error(static_cast< libusb_error >(error))
-    , m_message(libusb_strerror(m_error))
+    : error{static_cast< libusb_error >(error)}
+    , message{libusb_strerror(error)}
 {
 
 }
 
 USBException::USBException(const char* message)
-    : m_error(LIBUSB_SUCCESS)
-    , m_message(message)
+    : error{LIBUSB_SUCCESS}
+    , message{message}
 {
 
+}
+
+QDebug operator<<(QDebug debug, const USBException& exception)
+{
+    //QDebugStateSaver saver(debug);
+    debug.nospace() << "USBException(\"" << exception.message << "\")";
+    return debug;
 }
 
 } // namespace usb
