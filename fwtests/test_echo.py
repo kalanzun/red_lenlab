@@ -6,7 +6,6 @@ import usb.util
 from usb.core import USBTimeoutError
 
 from fwutils.red_board import RedBoard
-from fwutils.lenlab_protocol import lenlab_protocol
 from fwutils.lenlab_version import lenlab_version
 
 from .message import command, get_reference, set_reference, set_int
@@ -22,19 +21,17 @@ def board():
 
 @pytest.fixture()
 def echo():
-    return command(lenlab_protocol["Command"]["getEcho"], size=56)
+    return command("getEcho", body_size=56)
 
 
 @pytest.fixture()
 def pages():
-    return command(lenlab_protocol["Command"]["getPages"])
+    return command("getPages")
 
 
 @pytest.fixture()
 def ticks():
-    return command(
-        lenlab_protocol["Command"]["getTicks"], lenlab_protocol["Type"]["IntArray"], size=8
-    )
+    return command("getTicks", "IntArray", body_size=8)
 
 
 def test_usb_descriptor(board: RedBoard):

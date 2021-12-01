@@ -1,10 +1,15 @@
 from array import array
 
+from fwutils.lenlab_protocol import lenlab_protocol
 
-def command(code, type=0, size=0):
-    # body size
+
+def command(code, type=0, body_size=0):
+    if isinstance(code, str):
+        code = lenlab_protocol["Command"][code]
+    if isinstance(type, str):
+        type = lenlab_protocol["Type"][type]
     message = array("B", [code, type, 0, 0])
-    message.extend(range(size))
+    message.extend(range(body_size))
     return message
 
 

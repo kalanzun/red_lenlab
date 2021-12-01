@@ -4,7 +4,6 @@ import pytest
 import usb.util
 
 from fwutils.red_board import RedBoard
-from fwutils.lenlab_protocol import lenlab_protocol
 
 from .message import command, get_reference, set_reference
 
@@ -19,7 +18,7 @@ def board():
 
 @pytest.fixture()
 def setup():
-    return command(lenlab_protocol["Command"]["setUp"])
+    return command("setUp")
 
 
 def test_setup(board: RedBoard, setup: array):
