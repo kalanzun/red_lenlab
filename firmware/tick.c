@@ -21,17 +21,13 @@
 
 #include "tick.h"
 
-#include "inc/hw_memmap.h"
 #include "driverlib/debug.h"
 
 #include "message.h"
 #include "reply_handler.h"
 
 
-struct Tick tick = {
-    .timer_base = TIMER0_BASE,
-    .timer = TIMER_A
-};
+struct Tick tick;
 
 
 void
@@ -39,15 +35,20 @@ Timer0AIntHandler(void)
 {
     struct Message *reply;
 
-    TimerIntClear(tick.timer_base, TIMER_TIMA_TIMEOUT);
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
     if (tick.count == 0) return;
+
     if (--tick.count == 0) TickStop();
 
-    ASSERT(reply_queue.has_space);
-    reply = RingAcquire(&reply_queue);
-    setReply(reply, Tick, IntArray, tick.reference);
-    reply->size = 8;
-    setInt(reply, 0, tick.count);
-    RingWrite(&reply_queue);
+    if (reply_queue.has_space) {
+        reply = RingAcquire(&reply_queue);
+        setReply(reply, Tick, IntArray, tick.reference);
+        reply->size = 8;
+        setInt(reply, 0, tick.count);
+        RingWrite(&reply_queue);
+    }
+    else {
+        TickStop();
+    }
 }

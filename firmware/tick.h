@@ -21,17 +21,20 @@
 
 
 #include "inc/hw_ints.h"
+#include "inc/hw_memmap.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 
 
-struct Tick {
-    const uint32_t timer_base;
-    const uint32_t timer;
+#define TICK_TIMER_BASE TIMER0_BASE
+#define TICK_TIMER TIMER_A
+// TickInit and the interrupt handler are specific for timer 0A
 
+
+struct Tick {
     uint32_t interval;
-    uint32_t reference;
+    uint16_t reference;
 
     volatile uint32_t count;
 };
@@ -48,15 +51,15 @@ TickStart(uint32_t interval, uint32_t count, uint16_t reference)
     tick.reference = reference;
 
     // interval in ms
-    TimerLoadSet64(tick.timer_base, (uint64_t) tick.interval * SysCtlClockGet() / 1000);
-    TimerEnable(tick.timer_base, tick.timer);
+    TimerLoadSet64(TICK_TIMER_BASE, (uint64_t) tick.interval * SysCtlClockGet() / 1000);
+    TimerEnable(TICK_TIMER_BASE, TICK_TIMER);
 }
 
 
 inline void
 TickStop(void)
 {
-    TimerDisable(tick.timer_base, tick.timer);
+    TimerDisable(TICK_TIMER_BASE, TICK_TIMER);
 }
 
 
@@ -67,8 +70,8 @@ TickInit(void)
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_TIMER0)) {
     }
 
-    TimerConfigure(tick.timer_base, TIMER_CFG_PERIODIC);
-    TimerIntEnable(tick.timer_base, TIMER_TIMA_TIMEOUT);
+    TimerConfigure(TICK_TIMER_BASE, TIMER_CFG_PERIODIC);
+    TimerIntEnable(TICK_TIMER_BASE, TIMER_TIMA_TIMEOUT);
 
     IntEnable(INT_TIMER0A);
 }
