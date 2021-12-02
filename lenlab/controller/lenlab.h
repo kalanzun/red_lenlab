@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "logger.h"
 #include "manager.h"
 
 namespace controller {
@@ -12,6 +13,8 @@ class Lenlab : public QObject
     Q_OBJECT
 
     Manager *manager;
+
+    Logger *logger;
 
 public:
     explicit Lenlab(QObject *parent = nullptr);

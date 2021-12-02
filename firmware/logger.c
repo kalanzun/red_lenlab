@@ -57,7 +57,7 @@ LoggerMain(void)
 
     if (LogSeqGroupReady() && reply_queue.has_space) {
         reply = RingAcquire(&reply_queue);
-        setReply(reply, Logger, IntArray, 0); // TODO logger.reference
+        setReply(reply, Log, IntArray, 0); // TODO logger.reference
         reply->size = 4 + 5 * sizeof(uint32_t); // time and 4 channels
 
         ASSERT(log_seq_group.log_seq[0].count == log_seq_group.log_seq[1].count);

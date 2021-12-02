@@ -1,5 +1,7 @@
 #include "device.h"
 
+#include <QDebug>
+
 namespace controller {
 
 Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *parent)
@@ -44,11 +46,12 @@ void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
     // callback runs in the thread
     qDebug() << "callbackRxComplete" << transfer->packet;
 
-    transfer->submit(std::make_shared< usb::Packet >());
-
     // signal back to main thread
     auto device = static_cast< Device* >(object);
     emit device->reply(transfer->packet);
+
+    // create new transfer->packet
+    transfer->submit(std::make_shared< usb::Packet >());
 }
 
 void Device::errorCallback(usb::Transfer* transfer, void* object)

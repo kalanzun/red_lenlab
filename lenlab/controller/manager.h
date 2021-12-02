@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "usb/context.h"
+#include "usb/packet.h"
 
 #include "device.h"
 
@@ -28,10 +29,16 @@ class Manager : public QObject
 public:
     explicit Manager(QObject *parent = nullptr);
 
+    void command(std::shared_ptr< usb::Packet > packet);
+
 signals:
+    void setup(std::shared_ptr< usb::Packet > packet);
+    void reply(std::shared_ptr< usb::Packet > packet);
+    void teardown();
 
 public slots:
     void lookForBoard();
+    void handleReply(std::shared_ptr< usb::Packet > packet);
 
 private slots:
     void poll();

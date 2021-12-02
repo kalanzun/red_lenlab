@@ -20,6 +20,7 @@ set(PROJECT_SOURCES
     controller/device.h controller/device.cpp
     controller/eventloop.h controller/eventloop.cpp
     controller/lenlab.h controller/lenlab.cpp
+    controller/logger.h controller/logger.cpp
     controller/manager.h controller/manager.cpp
     controller/usbthread.h controller/usbthread.cpp
     usb/context.h usb/context.cpp

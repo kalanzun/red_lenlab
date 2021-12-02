@@ -79,7 +79,7 @@ enum Reply ENUM_TYPE {
     Echo,
     Page,
     Tick,
-    Logger,
+    Log,
     NUM_REPLIES
 };
 

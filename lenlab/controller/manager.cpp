@@ -17,9 +17,26 @@ Manager::Manager(QObject *parent)
     poll_timer->setSingleShot(true);
 }
 
+void Manager::command(std::shared_ptr< usb::Packet > packet)
+{
+    if (device) device->send(std::move(packet));
+}
+
 void Manager::lookForBoard()
 {
     poll_timer->start(poll_time);
+}
+
+void Manager::handleReply(std::shared_ptr< usb::Packet > packet)
+{
+    qDebug() << "handleReply" << packet;
+
+    if (packet->buffer[0] == setUp) {
+        emit setup(std::move(packet));
+    }
+    else {
+        emit reply(std::move(packet));
+    }
 }
 
 void Manager::poll()
@@ -30,9 +47,8 @@ void Manager::poll()
             qDebug() << "board connected";
 
             device = std::make_shared< Device >(std::move(device_handle));
+            connect(device.get(), &Device::reply, this, &Manager::handleReply);
             connect(device.get(), &Device::error, this, &Manager::clearDevice);
-            //connect(thread, &Device::finished, thread, &QObject::deleteLater);
-            //connect(this, &Board::send, device, &Device::send);
 
             auto packet = std::make_shared< usb::Packet >();
             packet->buffer[0] = setUp;
@@ -53,6 +69,7 @@ void Manager::poll()
 
 void Manager::clearDevice()
 {
+    emit teardown();
     device = nullptr;
     poll_timer->start(retry_time);
 }
