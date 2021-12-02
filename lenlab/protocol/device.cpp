@@ -1,7 +1,5 @@
 #include "device.h"
 
-#include <QDebug>
-
 namespace protocol {
 
 Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *parent)
@@ -13,8 +11,6 @@ Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *pare
     , receiver0{std::make_unique< usb::Transfer >(interface, 0x81)}
     , receiver1{std::make_unique< usb::Transfer >(interface, 0x81)}
 {
-    qDebug() << "Device";
-
     sender->error_callback.set(errorCallback, this);
 
     receiver0->complete_callback.set(rxCompleteCallback, this);
@@ -29,8 +25,6 @@ Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *pare
 
 Device::~Device()
 {
-    qDebug() << "~Device";
-
     sender->cancel();
     receiver0->cancel();
     receiver1->cancel();
@@ -44,8 +38,6 @@ void Device::send(std::shared_ptr< usb::Packet > packet)
 void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
 {
     // callback runs in the thread
-    qDebug() << "callbackRxComplete" << transfer->packet;
-
     // signal back to main thread
     auto device = static_cast< Device* >(object);
     emit device->reply(transfer->packet);
@@ -57,8 +49,6 @@ void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
 void Device::errorCallback(usb::Transfer* transfer, void* object)
 {
     // callback runs in the thread
-    qDebug() << "callbackError" << transfer->getErrorMessage();
-
     // signal back to main thread
     auto device = static_cast< Device* >(object);
     emit device->error();

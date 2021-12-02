@@ -1,7 +1,5 @@
 #include "devicehandle.h"
 
-#include <QDebug>
-
 #include "devicelist.h"
 #include "usbexception.h"
 
@@ -9,16 +7,12 @@ namespace usb {
 
 DeviceHandle::DeviceHandle(libusb_device* dev)
 {
-    qDebug() << "DeviceHandle";
-
     auto error = libusb_open(dev, &dev_handle);
     if (error) throw USBException(error);
 }
 
 DeviceHandle::~DeviceHandle()
 {
-    qDebug() << "~DeviceHandle";
-
     libusb_close(dev_handle);
 }
 

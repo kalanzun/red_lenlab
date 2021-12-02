@@ -16,11 +16,4 @@ USBException::USBException(const char* message)
 
 }
 
-QDebug operator<<(QDebug debug, const USBException& exception)
-{
-    //QDebugStateSaver saver(debug);
-    debug.nospace() << "USBException(\"" << exception.message << "\")";
-    return debug;
-}
-
 } // namespace usb

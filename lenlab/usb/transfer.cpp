@@ -1,7 +1,5 @@
 #include "transfer.h"
 
-#include <QDebug>
-
 #include "usbexception.h"
 
 namespace usb {
@@ -25,8 +23,6 @@ void TransferCallback::call(Transfer *transfer)
 Transfer::Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint)
     : interface{std::move(interface)}
 {
-    qDebug() << "Transfer";
-
     xfr = libusb_alloc_transfer(0);
     if (!xfr) throw USBException("Allocation failed");
 
@@ -42,8 +38,6 @@ Transfer::Transfer(std::shared_ptr< Interface > interface, unsigned char endpoin
 
 Transfer::~Transfer()
 {
-    qDebug() << "~Transfer";
-
     // wait for LIBUSB_TRANSFER_CANCELLED callback
     std::lock_guard< std::mutex > lock(active);
     libusb_free_transfer(xfr);

@@ -27,8 +27,6 @@ void Board::lookForDevice()
 
 void Board::handleReply(std::shared_ptr< usb::Packet > packet)
 {
-    qDebug() << "handleReply" << packet;
-
     if (packet->buffer[0] == setUp) {
         emit setup(std::move(packet));
     }
@@ -42,8 +40,6 @@ void Board::poll()
     try {
         auto device_handle = usb::DeviceHandle::query(LENLAB_VID, LENLAB_PID);
         if (device_handle) {
-            qDebug() << "board connected";
-
             device = std::make_shared< Device >(std::move(device_handle));
             connect(device.get(), &Device::reply, this, &Board::handleReply);
             connect(device.get(), &Device::error, this, &Board::clearDevice);
@@ -60,7 +56,6 @@ void Board::poll()
             poll_timer->start(poll_time);
         }
     } catch (usb::USBException const &exception) {
-        qDebug() << exception.message;
         poll_timer->start(retry_time);
     }
 }
