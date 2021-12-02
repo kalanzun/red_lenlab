@@ -38,12 +38,12 @@ public:
     void send(std::shared_ptr< usb::Packet > packet);
 
 signals:
-    void reset();
+    void reply(std::shared_ptr< usb::Packet > packet);
+    void error();
 
 private:
     static void callbackRxComplete(usb::Transfer* transfer, void* object);
     static void callbackError(usb::Transfer* transfer, void* object);
-    static void callbackReset(usb::Transfer* transfer, void* object);
 };
 
 } // namespace protocol

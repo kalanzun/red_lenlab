@@ -15,16 +15,13 @@ Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *pare
 {
     qDebug() << "Device";
 
-    sender.error_callback.set(this, callbackError);
-    sender.reset_callback.set(this, callbackReset);
+    sender.error_callback.set(callbackError, this);
 
-    receiver0.complete_callback.set(this, callbackRxComplete);
-    receiver0.error_callback.set(this, callbackError);
-    receiver0.reset_callback.set(this, callbackReset);
+    receiver0.complete_callback.set(callbackRxComplete, this);
+    receiver0.error_callback.set(callbackError, this);
 
-    receiver1.complete_callback.set(this, callbackRxComplete);
-    receiver1.error_callback.set(this, callbackError);
-    receiver1.reset_callback.set(this, callbackReset);
+    receiver1.complete_callback.set(callbackRxComplete, this);
+    receiver1.error_callback.set(callbackError, this);
 
     receiver0.submit(std::make_shared< usb::Packet >());
     receiver1.submit(std::make_shared< usb::Packet >());
@@ -46,24 +43,24 @@ void Device::send(std::shared_ptr< usb::Packet > packet)
 
 void Device::callbackRxComplete(usb::Transfer* transfer, void* object)
 {
-    auto device = static_cast< Device* >(object);
+    // callback runs in the thread
     qDebug() << "callbackRxComplete" << transfer->getPacket();
 
     transfer->submit(std::make_shared< usb::Packet >());
+
+    // signal back to main thread
+    auto device = static_cast< Device* >(object);
+    emit device->reply(transfer->getPacket());
 }
 
 void Device::callbackError(usb::Transfer* transfer, void* object)
 {
-    auto device = static_cast< Device* >(object);
+    // callback runs in the thread
     qDebug() << "callbackError" << transfer->getMessage();
-}
 
-void Device::callbackReset(usb::Transfer* transfer, void* object)
-{
+    // signal back to main thread
     auto device = static_cast< Device* >(object);
-    qDebug() << "callbackReset";
-
-    emit device->reset();
+    emit device->error();
 }
 
 } // namespace protocol

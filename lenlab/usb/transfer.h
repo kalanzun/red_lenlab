@@ -16,8 +16,8 @@ class Transfer;
 
 class TransferCallback
 {
-    void* object = nullptr;
     std::function< void(Transfer*, void*) > callback = nullptr;
+    void* object = nullptr;
 
 public:
     TransferCallback();
@@ -25,7 +25,7 @@ public:
 
     TransferCallback& operator=(const TransferCallback&) = delete;
 
-    void set(void* object, std::function< void(Transfer*, void*) > callback);
+    void set(std::function< void(Transfer*, void*) > callback, void* object);
     void call(Transfer *self);
 };
 
@@ -47,7 +47,6 @@ public:
 
     TransferCallback complete_callback;
     TransferCallback error_callback;
-    TransferCallback reset_callback;
 
     void submit(std::shared_ptr< Packet > packet);
     void cancel();

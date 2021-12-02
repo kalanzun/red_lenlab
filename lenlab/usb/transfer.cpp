@@ -11,10 +11,10 @@ TransferCallback::TransferCallback()
 
 }
 
-void TransferCallback::set(void* object, std::function< void(Transfer*, void*) > callback)
+void TransferCallback::set(std::function< void(Transfer*, void*) > callback, void* object)
 {
-    this->object = object;
     this->callback = callback;
+    this->object = object;
 }
 
 void TransferCallback::call(Transfer *self)
@@ -106,9 +106,6 @@ void LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer* xfr)
     case LIBUSB_TRANSFER_NO_DEVICE:
     case LIBUSB_TRANSFER_TIMED_OUT:
     case LIBUSB_TRANSFER_ERROR:
-        transfer->error_callback.call(transfer);
-        transfer->reset_callback.call(transfer);
-        break;
     case LIBUSB_TRANSFER_STALL:
     case LIBUSB_TRANSFER_OVERFLOW:
         transfer->error_callback.call(transfer);

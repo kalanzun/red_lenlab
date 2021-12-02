@@ -1,5 +1,7 @@
 #include "manager.h"
 
+#include <QDebug>
+
 #include "lenlab_protocol.h"
 
 #include "usb/usbexception.h"
@@ -28,7 +30,7 @@ void Manager::poll()
             qDebug() << "board connected";
 
             mDevice = std::make_shared< Device >(std::move(device_handle));
-            connect(mDevice.get(), &Device::reset, this, &Manager::resetDevice);
+            connect(mDevice.get(), &Device::error, this, &Manager::resetDevice);
             //connect(thread, &Device::finished, thread, &QObject::deleteLater);
             //connect(this, &Board::send, device, &Device::send);
 
