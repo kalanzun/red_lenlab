@@ -19,36 +19,61 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "tick.h"
+#include "logger.h"
 
-#include "driverlib/debug.h"
-
+#include "log_seq.h"
 #include "message.h"
 #include "reply_handler.h"
 
 
-struct Tick tick;
+void
+LoggerStart(uint32_t interval)
+{
+    ADCGroupSetHardwareOversample(5); // oversampling factor 32
+
+    LogSeqGroupEnable(interval);
+}
 
 
 void
-Timer0AIntHandler(void)
+LoggerStop(void)
 {
+    LogSeqGroupDisable();
+}
+
+
+void
+LoggerMain(void)
+{
+    int count;
     struct Message *reply;
 
-    TimerIntClear(TICK_BASE, TICK_INT_FLAG);
+    if (LogSeqGroupError()) {
+        LoggerStop();
 
-    if (tick.count == 0) return;
+        ASSERT(0); // TODO Logger error handling in release build
+        return;
+    }
 
-    if (--tick.count == 0) TickStop();
-
-    if (reply_queue.has_space) {
+    if (LogSeqGroupReady() && reply_queue.has_space) {
         reply = RingAcquire(&reply_queue);
-        setReply(reply, Tick, IntArray, tick.reference);
-        reply->size = 8;
-        setInt(reply, 0, tick.count);
+        setReply(reply, Logger, IntArray, 0); // TODO logger.reference
+        reply->size = 4 + 5 * sizeof(uint32_t); // time and 4 channels
+
+        ASSERT(log_seq_group.log_seq[0].count == log_seq_group.log_seq[1].count);
+        setInt(reply, 0, log_seq_group.log_seq[0].count);
+
+        count = LogSeqGroupDataGet((uint32_t *) &reply->body + 1);
+        ASSERT(count == 4);
+
+        LogSeqGroupRelease();
         RingWrite(&reply_queue);
     }
-    else {
-        TickStop();
-    }
+}
+
+
+void
+LoggerInit(void)
+{
+    LogSeqGroupInit();
 }

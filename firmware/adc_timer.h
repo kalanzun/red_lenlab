@@ -16,39 +16,49 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "tick.h"
-
-#include "driverlib/debug.h"
-
-#include "message.h"
-#include "reply_handler.h"
+#ifndef ADC_TIMER_H_
+#define ADC_TIMER_H_
 
 
-struct Tick tick;
+#include "inc/hw_memmap.h"
+
+#include "driverlib/sysctl.h"
+#include "driverlib/timer.h"
 
 
-void
-Timer0AIntHandler(void)
+#define ADC_TIMER_BASE TIMER1_BASE
+#define ADC_TIMER_TIMER TIMER_A
+
+
+inline void
+ADCTimerSetInterval(uint32_t interval)
 {
-    struct Message *reply;
-
-    TimerIntClear(TICK_BASE, TICK_INT_FLAG);
-
-    if (tick.count == 0) return;
-
-    if (--tick.count == 0) TickStop();
-
-    if (reply_queue.has_space) {
-        reply = RingAcquire(&reply_queue);
-        setReply(reply, Tick, IntArray, tick.reference);
-        reply->size = 8;
-        setInt(reply, 0, tick.count);
-        RingWrite(&reply_queue);
-    }
-    else {
-        TickStop();
-    }
+    // interval in us
+    TimerLoadSet64(ADC_TIMER_BASE, (uint64_t) interval * (SysCtlClockGet() / 1000 / 1000));
 }
+
+
+inline void
+ADCTimerStart(uint32_t interval)
+{
+    ADCTimerSetInterval(interval);
+    TimerEnable(ADC_TIMER_BASE, ADC_TIMER_TIMER);
+}
+
+
+inline void
+ADCTimerStop(void)
+{
+    TimerDisable(ADC_TIMER_BASE, ADC_TIMER_TIMER);
+}
+
+
+inline void
+ADCTimerInit(void)
+{
+    TimerConfigure(ADC_TIMER_BASE, TIMER_CFG_PERIODIC);
+    TimerControlTrigger(ADC_TIMER_BASE, ADC_TIMER_TIMER, 1);
+}
+
+
+#endif /* ADC_TIMER_H_ */

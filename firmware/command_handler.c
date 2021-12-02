@@ -21,6 +21,7 @@
 
 #include "command_handler.h"
 
+#include "logger.h"
 #include "message.h"
 #include "reply_handler.h"
 #include "tick.h"
@@ -93,6 +94,26 @@ get_ticks(struct Message *command)
 }
 
 
+static bool
+start_logger(struct Message *command)
+{
+    uint32_t interval = getInt(command, 0);
+
+    LoggerStart(interval);
+
+    return true;
+}
+
+
+static bool
+stop_logger(struct Message *command)
+{
+    LoggerStop();
+
+    return true;
+}
+
+
 void
 CommandHandlerMain(void)
 {
@@ -118,6 +139,14 @@ CommandHandlerMain(void)
 
         case getTicks:
             success = get_ticks(command);
+            break;
+
+        case startLogger:
+            success = start_logger(command);
+            break;
+
+        case stopLogger:
+            success = stop_logger(command);
             break;
 
         default:

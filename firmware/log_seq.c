@@ -19,36 +19,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "tick.h"
-
-#include "driverlib/debug.h"
-
-#include "message.h"
-#include "reply_handler.h"
+#include "log_seq.h"
 
 
-struct Tick tick;
+struct LogSeqGroup log_seq_group;
 
 
 void
-Timer0AIntHandler(void)
+ADC0SS1IntHandler(void)
 {
-    struct Message *reply;
-
-    TimerIntClear(TICK_BASE, TICK_INT_FLAG);
-
-    if (tick.count == 0) return;
-
-    if (--tick.count == 0) TickStop();
-
-    if (reply_queue.has_space) {
-        reply = RingAcquire(&reply_queue);
-        setReply(reply, Tick, IntArray, tick.reference);
-        reply->size = 8;
-        setInt(reply, 0, tick.count);
-        RingWrite(&reply_queue);
-    }
-    else {
-        TickStop();
-    }
+    ADCIntClear(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM);
+    LogSeqIntHandler(&log_seq_group.log_seq[0]);
 }
+
+
+void
+ADC1SS1IntHandler(void)
+{
+    ADCIntClear(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM);
+    LogSeqIntHandler(&log_seq_group.log_seq[1]);
+}
+

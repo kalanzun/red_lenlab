@@ -27,7 +27,9 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/udma.h"
 
+#include "adc.h"
 #include "command_handler.h"
+#include "logger.h"
 #include "reply_handler.h"
 #include "tick.h"
 #include "usb_device.h"
@@ -55,6 +57,12 @@ static const uint32_t peripherals[] = {
     SYSCTL_PERIPH_GPIOE,
     SYSCTL_PERIPH_GPIOF,
 
+    SYSCTL_PERIPH_ADC0, // ADC
+    SYSCTL_PERIPH_ADC1, // ADC
+
+    SYSCTL_PERIPH_TIMER0, // Tick
+    SYSCTL_PERIPH_TIMER1, // ADCTimer
+
     SYSCTL_PERIPH_UDMA,
 };
 
@@ -64,14 +72,17 @@ static const uint32_t peripherals[] = {
 static inline void
 ConfigurePeripherals(void)
 {
-    uint8_t i;
+    int i;
+    bool ready = false;
 
-    for (i=0; i<NUM_PERIPHERALS; i++) {
+    for (i = 0; i < NUM_PERIPHERALS; ++i) {
         SysCtlPeripheralEnable(peripherals[i]);
     }
 
-    for (i=0; i<NUM_PERIPHERALS; i++) {
-        while(!SysCtlPeripheralReady(peripherals[i])) {
+    while (!ready) {
+        ready = true;
+        for (i = 0; i < NUM_PERIPHERALS; ++i) {
+            ready &= SysCtlPeripheralReady(peripherals[i]);
         }
     }
 }
@@ -151,16 +162,17 @@ main(void)
     ConfigureuDMA();
 
     //
-    // Initialize Tick
+    // Initialize Modules
     //
     TickInit();
-
-    //
-    // Initialize USB
-    //
+    ADCGroupInit();
+    LoggerInit();
     USBDeviceInit();
 
     while (1) {
+        // it handles the modules
+        LoggerMain();
+
         // it handles the command
         CommandHandlerMain();
 

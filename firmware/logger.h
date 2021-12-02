@@ -16,39 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "tick.h"
-
-#include "driverlib/debug.h"
-
-#include "message.h"
-#include "reply_handler.h"
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 
-struct Tick tick;
+void LoggerStart(uint32_t interval);
+
+void LoggerStop(void);
+
+void LoggerMain(void);
+
+void LoggerInit(void);
 
 
-void
-Timer0AIntHandler(void)
-{
-    struct Message *reply;
-
-    TimerIntClear(TICK_BASE, TICK_INT_FLAG);
-
-    if (tick.count == 0) return;
-
-    if (--tick.count == 0) TickStop();
-
-    if (reply_queue.has_space) {
-        reply = RingAcquire(&reply_queue);
-        setReply(reply, Tick, IntArray, tick.reference);
-        reply->size = 8;
-        setInt(reply, 0, tick.count);
-        RingWrite(&reply_queue);
-    }
-    else {
-        TickStop();
-    }
-}
+#endif /* LOGGER_H_ */

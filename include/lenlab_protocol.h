@@ -67,6 +67,8 @@ enum Command ENUM_TYPE {
     getEcho,
     getPages,
     getTicks,
+    startLogger,
+    stopLogger,
     NUM_COMMANDS
 };
 
@@ -77,6 +79,7 @@ enum Reply ENUM_TYPE {
     Echo,
     Page,
     Tick,
+    Logger,
     NUM_REPLIES
 };
 
