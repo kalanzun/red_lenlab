@@ -7,14 +7,13 @@ namespace usb {
 
 class Context
 {
+public:
     struct libusb_context* ctx;
 
-public:
     Context();
-    Context(const Context&) = delete;
-
     ~Context();
 
+    Context(const Context&) = delete;
     Context& operator=(const Context&) = delete;
 };
 

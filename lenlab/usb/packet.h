@@ -12,8 +12,8 @@ public:
     unsigned int length = sizeof(buffer);
 
     Packet();
-    Packet(const Packet&) = delete;
 
+    Packet(const Packet&) = delete;
     Packet& operator=(const Packet&) = delete;
 
     friend QDebug operator<<(QDebug debug, const std::shared_ptr< Packet >& packet);

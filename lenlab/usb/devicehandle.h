@@ -13,10 +13,9 @@ public:
     libusb_device_handle* dev_handle;
 
     DeviceHandle(libusb_device* dev);
-    DeviceHandle(const DeviceHandle&) = delete;
-
     ~DeviceHandle();
 
+    DeviceHandle(const DeviceHandle&) = delete;
     DeviceHandle& operator=(const DeviceHandle&) = delete;
 
     static std::shared_ptr< DeviceHandle > query(uint16_t vid, uint16_t pid);

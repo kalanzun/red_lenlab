@@ -17,9 +17,9 @@ void TransferCallback::set(std::function< void(Transfer*, void*) > callback, voi
     this->object = object;
 }
 
-void TransferCallback::call(Transfer *self)
+void TransferCallback::call(Transfer *transfer)
 {
-    if (callback) callback(self, object);
+    if (callback) callback(transfer, object);
 }
 
 Transfer::Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint)
@@ -51,9 +51,9 @@ Transfer::~Transfer()
 
 void Transfer::submit(std::shared_ptr< Packet > packet)
 {
-    current = std::move(packet); // keep the packet around during the transfer
-    xfr->buffer = current->buffer;
-    xfr->length = current->length;
+    this->packet = std::move(packet); // keep the packet around during the transfer
+    xfr->buffer = this->packet->buffer;
+    xfr->length = this->packet->length;
 
     auto error = libusb_submit_transfer(xfr);
     if (error) throw USBException(error);
@@ -64,12 +64,7 @@ void Transfer::cancel()
     if (libusb_cancel_transfer(xfr)) active.unlock(); // if it can't cancel, unlock it right away
 }
 
-std::shared_ptr< Packet > Transfer::getPacket()
-{
-    return current;
-}
-
-const char* Transfer::getMessage()
+const char* Transfer::getErrorMessage()
 {
     switch(xfr->status) {
     case LIBUSB_TRANSFER_COMPLETED:
@@ -97,7 +92,7 @@ void LIBUSB_CALL Transfer::callbackComplete(struct libusb_transfer* xfr)
 
     switch(xfr->status) {
     case LIBUSB_TRANSFER_COMPLETED:
-        transfer->current->length = xfr->actual_length;
+        transfer->packet->length = xfr->actual_length;
         transfer->complete_callback.call(transfer);
         break;
     case LIBUSB_TRANSFER_CANCELLED:

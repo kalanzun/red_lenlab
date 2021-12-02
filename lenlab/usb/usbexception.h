@@ -15,8 +15,8 @@ public:
 
     USBException(ssize_t error);
     USBException(const char* message);
-    USBException(const USBException&) = delete;
 
+    USBException(const USBException&) = delete;
     USBException& operator=(const USBException&) = delete;
 
     friend QDebug operator<<(QDebug debug, const USBException& exception);

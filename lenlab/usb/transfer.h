@@ -21,12 +21,12 @@ class TransferCallback
 
 public:
     TransferCallback();
-    TransferCallback(const TransferCallback&) = delete;
 
+    TransferCallback(const TransferCallback&) = delete;
     TransferCallback& operator=(const TransferCallback&) = delete;
 
     void set(std::function< void(Transfer*, void*) > callback, void* object);
-    void call(Transfer *self);
+    void call(Transfer *transfer);
 };
 
 class Transfer
@@ -35,24 +35,23 @@ class Transfer
     struct libusb_transfer* xfr;
 
     std::mutex active;
-    std::shared_ptr< Packet > current;
 
 public:
-    Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
-    Transfer(const Transfer&) = delete;
-
-    ~Transfer();
-
-    Transfer& operator=(const Transfer&) = delete;
-
     TransferCallback complete_callback;
     TransferCallback error_callback;
+
+    std::shared_ptr< Packet > packet;
+
+    Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
+    ~Transfer();
+
+    Transfer(const Transfer&) = delete;
+    Transfer& operator=(const Transfer&) = delete;
 
     void submit(std::shared_ptr< Packet > packet);
     void cancel();
 
-    std::shared_ptr< Packet > getPacket();
-    const char* getMessage();
+    const char* getErrorMessage();
 
 private:
     static void LIBUSB_CALL callbackComplete(struct libusb_transfer* xfr);

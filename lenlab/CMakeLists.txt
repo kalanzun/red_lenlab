@@ -17,10 +17,11 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 set(PROJECT_SOURCES
     main.cpp
     app/mainwindow.h app/mainwindow.cpp app/mainwindow.ui
-    protocol/device.h protocol/device.cpp
-    protocol/eventloop.h protocol/eventloop.cpp
-    protocol/manager.h protocol/manager.cpp
-    protocol/thread.h protocol/thread.cpp
+    controller/device.h controller/device.cpp
+    controller/eventloop.h controller/eventloop.cpp
+    controller/lenlab.h controller/lenlab.cpp
+    controller/manager.h controller/manager.cpp
+    controller/usbthread.h controller/usbthread.cpp
     usb/context.h usb/context.cpp
     usb/devicehandle.h usb/devicehandle.cpp
     usb/devicelist.h usb/devicelist.cpp

@@ -13,10 +13,9 @@ public:
     std::shared_ptr< DeviceHandle > device_handle;
 
     Interface(std::shared_ptr< DeviceHandle > device_handle);
-    Interface(const Interface&) = delete;
-
     ~Interface();
 
+    Interface(const Interface&) = delete;
     Interface& operator=(const Interface&) = delete;
 };
 
