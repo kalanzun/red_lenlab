@@ -1,15 +1,17 @@
 #include <QApplication>
 
 #include "app/mainwindow.h"
-#include "controller/lenlab.h"
+#include "model/lenlab.h"
+#include "usb/context.h"
 
 int main(int argc, char *argv[])
 {
     QApplication application(argc, argv);
-    controller::Lenlab lenlab;
+    usb::Context context;
+    model::Lenlab lenlab;
     app::MainWindow window;
 
     window.show();
-    lenlab.lookForBoard();
+    lenlab.lookForDevice();
     return application.exec();
 }

@@ -1,6 +1,6 @@
 #include "eventloop.h"
 
-namespace controller {
+namespace protocol {
 
 EventLoop::EventLoop(std::shared_ptr< USBThread > usb_thread, QObject *parent)
     : QObject{parent}
@@ -14,4 +14,4 @@ EventLoop::~EventLoop()
     usb_thread->requestInterruption();
 }
 
-} // namespace controller
+} // namespace protocol

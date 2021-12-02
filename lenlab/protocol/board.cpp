@@ -1,33 +1,31 @@
-#include "manager.h"
+#include "board.h"
 
 #include "lenlab_protocol.h"
-
 #include "usb/usbexception.h"
 
-namespace controller {
+namespace protocol {
 
-Manager::Manager(QObject *parent)
+Board::Board(QObject *parent)
     : QObject{parent}
-    , context{std::make_unique< usb::Context >()}
     , poll_timer{new QTimer(this)}
 {
     connect(poll_timer, &QTimer::timeout,
-            this, &Manager::poll);
+            this, &Board::poll);
 
     poll_timer->setSingleShot(true);
 }
 
-void Manager::command(std::shared_ptr< usb::Packet > packet)
+void Board::command(std::shared_ptr< usb::Packet > packet)
 {
     if (device) device->send(std::move(packet));
 }
 
-void Manager::lookForBoard()
+void Board::lookForDevice()
 {
     poll_timer->start(poll_time);
 }
 
-void Manager::handleReply(std::shared_ptr< usb::Packet > packet)
+void Board::handleReply(std::shared_ptr< usb::Packet > packet)
 {
     qDebug() << "handleReply" << packet;
 
@@ -39,7 +37,7 @@ void Manager::handleReply(std::shared_ptr< usb::Packet > packet)
     }
 }
 
-void Manager::poll()
+void Board::poll()
 {
     try {
         auto device_handle = usb::DeviceHandle::query(LENLAB_VID, LENLAB_PID);
@@ -47,8 +45,8 @@ void Manager::poll()
             qDebug() << "board connected";
 
             device = std::make_shared< Device >(std::move(device_handle));
-            connect(device.get(), &Device::reply, this, &Manager::handleReply);
-            connect(device.get(), &Device::error, this, &Manager::clearDevice);
+            connect(device.get(), &Device::reply, this, &Board::handleReply);
+            connect(device.get(), &Device::error, this, &Board::clearDevice);
 
             auto packet = std::make_shared< usb::Packet >();
             packet->buffer[0] = setUp;
@@ -67,11 +65,11 @@ void Manager::poll()
     }
 }
 
-void Manager::clearDevice()
+void Board::clearDevice()
 {
     emit teardown();
     device = nullptr;
     poll_timer->start(retry_time);
 }
 
-} // namespace controller
+} // namespace protocol

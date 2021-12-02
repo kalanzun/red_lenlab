@@ -1,19 +1,14 @@
-#ifndef CONTROLLER_DEVICE_H
-#define CONTROLLER_DEVICE_H
+#ifndef PROTOCOL_DEVICE_H
+#define PROTOCOL_DEVICE_H
 
 #include <memory>
 
 #include <QObject>
 
-#include "usb/devicehandle.h"
-#include "usb/interface.h"
-#include "usb/packet.h"
 #include "usb/transfer.h"
-
 #include "eventloop.h"
-#include "usbthread.h"
 
-namespace controller {
+namespace protocol {
 
 class Device : public QObject
 {
@@ -45,6 +40,6 @@ private:
     static void errorCallback(usb::Transfer* transfer, void* object);
 };
 
-} // namespace controller
+} // namespace protocol
 
-#endif // CONTROLLER_DEVICE_H
+#endif // PROTOCOL_DEVICE_H

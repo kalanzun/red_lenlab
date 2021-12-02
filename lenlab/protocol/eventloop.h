@@ -1,5 +1,5 @@
-#ifndef CONTROLLER_EVENTLOOP_H
-#define CONTROLLER_EVENTLOOP_H
+#ifndef PROTOCOL_EVENTLOOP_H
+#define PROTOCOL_EVENTLOOP_H
 
 #include <memory>
 
@@ -7,7 +7,7 @@
 
 #include "usbthread.h"
 
-namespace controller {
+namespace protocol {
 
 class EventLoop : public QObject
 {
@@ -23,6 +23,6 @@ signals:
 
 };
 
-} // namespace controller
+} // namespace protocol
 
-#endif // CONTROLLER_EVENTLOOP_H
+#endif // PROTOCOL_EVENTLOOP_H

@@ -1,33 +1,27 @@
-#ifndef CONTROLLER_MANAGER_H
-#define CONTROLLER_MANAGER_H
+#ifndef PROTOCOL_BOARD_H
+#define PROTOCOL_BOARD_H
 
 #include <memory>
 
 #include <QObject>
 #include <QTimer>
 
-#include "usb/context.h"
-#include "usb/packet.h"
-
 #include "device.h"
 
-namespace controller {
+namespace protocol {
 
-class Manager : public QObject
+class Board : public QObject
 {
     Q_OBJECT
 
     static int const poll_time = 300;
     static int const retry_time = 1000;
 
-    std::unique_ptr< usb::Context > context;
-
     QTimer *poll_timer;
-
     std::shared_ptr< Device > device = nullptr;
 
 public:
-    explicit Manager(QObject *parent = nullptr);
+    explicit Board(QObject *parent = nullptr);
 
     void command(std::shared_ptr< usb::Packet > packet);
 
@@ -37,7 +31,7 @@ signals:
     void teardown();
 
 public slots:
-    void lookForBoard();
+    void lookForDevice();
     void handleReply(std::shared_ptr< usb::Packet > packet);
 
 private slots:
@@ -45,6 +39,6 @@ private slots:
     void clearDevice();
 };
 
-} // namespace controller
+} // namespace protocol
 
-#endif // CONTROLLER_MANAGER_H
+#endif // PROTOCOL_BOARD_H

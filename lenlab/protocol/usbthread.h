@@ -1,9 +1,9 @@
-#ifndef CONTROLLER_USBTHREAD_H
-#define CONTROLLER_USBTHREAD_H
+#ifndef PROTOCOL_USBTHREAD_H
+#define PROTOCOL_USBTHREAD_H
 
 #include <QThread>
 
-namespace controller {
+namespace protocol {
 
 class USBThread : public QThread
 {
@@ -16,6 +16,6 @@ public:
     void run() override;
 };
 
-} // namespace controller
+} // namespace protocol
 
-#endif // CONTROLLER_USBTHREAD_H
+#endif // PROTOCOL_USBTHREAD_H

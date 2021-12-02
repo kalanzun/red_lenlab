@@ -4,19 +4,19 @@
 
 #include "lenlab_protocol.h"
 
-namespace controller {
+namespace model {
 
-Logger::Logger(Manager *manager)
-    : QObject{manager}
-    , manager{manager}
+Logger::Logger(protocol::Board* board)
+    : QObject{board}
+    , board{board}
 {
-    connect(manager, &Manager::setup,
+    connect(board, &protocol::Board::setup,
             this, &Logger::setup);
 
-    connect(manager, &Manager::reply,
+    connect(board, &protocol::Board::reply,
             this, &Logger::reply);
 
-    connect(manager, &Manager::teardown,
+    connect(board, &protocol::Board::teardown,
             this, &Logger::teardown);
 }
 
@@ -34,7 +34,7 @@ void Logger::setup(std::shared_ptr< usb::Packet > packet)
     command->buffer[6] = 0;
     command->buffer[7] = 0;
     command->length = 8;
-    manager->command(std::move(command));
+    board->command(std::move(command));
 }
 
 void Logger::reply(std::shared_ptr< usb::Packet > packet)
@@ -50,7 +50,7 @@ void Logger::reply(std::shared_ptr< usb::Packet > packet)
             command->buffer[2] = 0;
             command->buffer[3] = 0;
             command->length = 4;
-            manager->command(std::move(command));
+            board->command(std::move(command));
         }
     }
 }
@@ -61,4 +61,4 @@ void Logger::teardown()
 }
 
 
-} // namespace controller
+} // namespace model

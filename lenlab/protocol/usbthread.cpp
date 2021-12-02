@@ -2,7 +2,7 @@
 
 #include "libusb.h"
 
-namespace controller {
+namespace protocol {
 
 USBThread::USBThread(QObject *parent)
     : QThread{parent}
@@ -22,4 +22,4 @@ void USBThread::run()
     }
 }
 
-} // namespace controller
+} // namespace protocol

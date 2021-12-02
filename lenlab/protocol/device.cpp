@@ -2,7 +2,7 @@
 
 #include <QDebug>
 
-namespace controller {
+namespace protocol {
 
 Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *parent)
     : QObject{parent}
@@ -64,4 +64,4 @@ void Device::errorCallback(usb::Transfer* transfer, void* object)
     emit device->error();
 }
 
-} // namespace controller
+} // namespace protocol
