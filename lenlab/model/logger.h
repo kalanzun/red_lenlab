@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "protocol/board.h"
+#include "waveform.h"
 
 namespace model {
 
@@ -12,6 +13,7 @@ class Logger : public QObject
     Q_OBJECT
 
     protocol::Board* board;
+    Waveform* waveform;
 
 public:
     explicit Logger(protocol::Board* board);

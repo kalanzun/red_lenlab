@@ -9,6 +9,7 @@ namespace model {
 Logger::Logger(protocol::Board* board)
     : QObject{board}
     , board{board}
+    , waveform{new Waveform(this)}
 {
     connect(board, &protocol::Board::setup,
             this, &Logger::setup);
@@ -23,6 +24,11 @@ Logger::Logger(protocol::Board* board)
 void Logger::setup(std::shared_ptr< usb::Packet > packet)
 {
     qDebug() << "setup";
+
+    waveform->deleteLater();
+    waveform = new Waveform(this);
+    waveform->interval = 1024;
+
     // TODO Message helpers
     auto command = std::make_shared< usb::Packet >();
     command->buffer[0] = startLogger;
@@ -43,6 +49,14 @@ void Logger::reply(std::shared_ptr< usb::Packet > packet)
     if (packet->buffer[0] == Log) {
         qDebug() << "Log" << packet->buffer[4];
 
+        uint32_t* payload = (uint32_t*) packet->buffer + 1;
+        float x = (float) (payload[0] * waveform->interval) / 1000.0;
+        float y[4];
+        for (int i = 0; i < 4; ++i) {
+            y[i] = (float) payload[1 + i] / 4096.0 * 3.3;
+        }
+        waveform->append(x, y, 4);
+
         if (packet->buffer[4] == 10) {
             auto command = std::make_shared< usb::Packet >();
             command->buffer[0] = stopLogger;
@@ -51,6 +65,8 @@ void Logger::reply(std::shared_ptr< usb::Packet > packet)
             command->buffer[3] = 0;
             command->length = 4;
             board->command(std::move(command));
+
+            waveform->csv(std::cerr);
         }
     }
 }
