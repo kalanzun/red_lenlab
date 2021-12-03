@@ -11,7 +11,7 @@ class DeviceListIterator
     ssize_t i;
 
 public:
-    DeviceListIterator(libusb_device** list, ssize_t i);
+    explicit DeviceListIterator(libusb_device** list, ssize_t i);
 
     DeviceListIterator(const DeviceListIterator&) = delete;
     DeviceListIterator& operator=(const DeviceListIterator&) = delete;
@@ -27,7 +27,7 @@ class DeviceList
     ssize_t length;
 
 public:
-    DeviceList();
+    explicit DeviceList();
     ~DeviceList();
 
     DeviceList(const DeviceList&) = delete;

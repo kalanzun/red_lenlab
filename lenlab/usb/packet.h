@@ -9,7 +9,7 @@ public:
     unsigned char buffer[1024];
     unsigned int length = sizeof(buffer);
 
-    Packet();
+    explicit Packet();
 
     Packet(const Packet&) = delete;
     Packet& operator=(const Packet&) = delete;

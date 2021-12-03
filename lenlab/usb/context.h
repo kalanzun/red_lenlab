@@ -10,7 +10,7 @@ class Context
 public:
     struct libusb_context* ctx;
 
-    Context();
+    explicit Context();
     ~Context();
 
     Context(const Context&) = delete;

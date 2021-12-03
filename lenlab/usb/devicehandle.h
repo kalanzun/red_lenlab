@@ -12,7 +12,7 @@ class DeviceHandle
 public:
     libusb_device_handle* dev_handle;
 
-    DeviceHandle(libusb_device* dev);
+    explicit DeviceHandle(libusb_device* dev);
     ~DeviceHandle();
 
     DeviceHandle(const DeviceHandle&) = delete;

@@ -11,8 +11,8 @@ public:
     libusb_error error;
     const char* message;
 
-    USBException(ssize_t error);
-    USBException(const char* message);
+    explicit USBException(ssize_t error);
+    explicit USBException(const char* message);
 
     USBException(const USBException&) = delete;
     USBException& operator=(const USBException&) = delete;

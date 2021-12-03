@@ -12,7 +12,7 @@ class Interface
 public:
     std::shared_ptr< DeviceHandle > device_handle;
 
-    Interface(std::shared_ptr< DeviceHandle > device_handle);
+    explicit Interface(std::shared_ptr< DeviceHandle > device_handle);
     ~Interface();
 
     Interface(const Interface&) = delete;

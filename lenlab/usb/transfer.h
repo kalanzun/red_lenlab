@@ -20,7 +20,7 @@ class TransferCallback
     void* object = nullptr;
 
 public:
-    TransferCallback();
+    explicit TransferCallback();
 
     TransferCallback(const TransferCallback&) = delete;
     TransferCallback& operator=(const TransferCallback&) = delete;
@@ -42,7 +42,7 @@ public:
 
     std::shared_ptr< Packet > packet;
 
-    Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
+    explicit Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
     ~Transfer();
 
     Transfer(const Transfer&) = delete;
