@@ -14,9 +14,9 @@ class Lenlab : public QObject
 
     protocol::Board *board;
 
+public:
     Logger *logger;
 
-public:
     explicit Lenlab(QObject *parent = nullptr);
 
     void lookForDevice();

@@ -2,6 +2,7 @@
 #define MODEL_LOGGER_H
 
 #include <QObject>
+#include <QSharedPointer>
 
 #include "protocol/board.h"
 #include "waveform.h"
@@ -13,12 +14,13 @@ class Logger : public QObject
     Q_OBJECT
 
     protocol::Board* board;
-    Waveform* waveform;
+    QSharedPointer< Waveform > waveform;
 
 public:
     explicit Logger(protocol::Board* board);
 
 signals:
+    void newWaveform(QSharedPointer< Waveform >& waveform);
 
 public slots:
     void setup(std::shared_ptr< usb::Packet > packet);

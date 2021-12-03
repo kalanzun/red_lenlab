@@ -11,12 +11,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets Charts REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Charts REQUIRED)
 
 set(PROJECT_SOURCES
     main.cpp
     app/mainwindow.h app/mainwindow.cpp app/mainwindow.ui
+    app/labchart.h app/labchart.cpp
     model/lenlab.h model/lenlab.cpp
     model/logger.h model/logger.cpp
     model/waveform.h model/waveform.cpp
@@ -44,7 +45,7 @@ else()
     )
 endif()
 
-target_link_libraries(lenlab PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(lenlab PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Charts)
 
 find_path(LENLAB_INCLUDE_DIR
     NAMES lenlab_protocol.h

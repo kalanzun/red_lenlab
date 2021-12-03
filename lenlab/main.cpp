@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
     model::Lenlab lenlab;
     app::MainWindow window;
 
+    window.setModel(&lenlab);
+
     window.show();
     lenlab.lookForDevice();
     return application.exec();
