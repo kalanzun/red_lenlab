@@ -13,9 +13,11 @@ Board::Board(QObject *parent)
             this, &Board::setupDevice);
 }
 
-void Board::command(std::shared_ptr< usb::Packet > packet)
+void Board::command(std::shared_ptr< usb::Packet >& packet)
 {
-    if (device) device->send(std::move(packet));
+    assert(device);
+
+    if (device) device->send(packet);
 }
 
 void Board::lookForDevice()
@@ -40,16 +42,16 @@ void Board::setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle)
     packet->buffer[2] = 0;
     packet->buffer[3] = 0;
     packet->length = 4;
-    device->send(std::move(packet));
+    device->send(packet);
 }
 
-void Board::handleReply(std::shared_ptr< usb::Packet > packet)
+void Board::handleReply(std::shared_ptr< usb::Packet >& packet)
 {
     if (packet->buffer[0] == setUp) {
-        emit setup(std::move(packet));
+        emit setup(packet);
     }
     else {
-        emit reply(std::move(packet));
+        emit reply(packet);
     }
 }
 

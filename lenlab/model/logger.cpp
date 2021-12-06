@@ -21,11 +21,12 @@ Logger::Logger(protocol::Board* board)
             this, &Logger::error);
 }
 
-void Logger::setup(std::shared_ptr< usb::Packet > packet)
+void Logger::setup(std::shared_ptr< usb::Packet >& packet)
 {
     qDebug() << "setup";
 
-    waveform.reset(new Waveform(this));
+    waveform->deleteLater();
+    waveform = new Waveform(this);
     waveform->interval = 256;
 
     // TODO Message helpers
@@ -39,10 +40,10 @@ void Logger::setup(std::shared_ptr< usb::Packet > packet)
     command->buffer[6] = 0;
     command->buffer[7] = 0;
     command->length = 8;
-    board->command(std::move(command));
+    board->command(command);
 }
 
-void Logger::reply(std::shared_ptr< usb::Packet > packet)
+void Logger::reply(std::shared_ptr< usb::Packet >& packet)
 {
     qDebug() << "reply";
     if (packet->buffer[0] == Log) {
@@ -63,7 +64,7 @@ void Logger::reply(std::shared_ptr< usb::Packet > packet)
             command->buffer[2] = 0;
             command->buffer[3] = 0;
             command->length = 4;
-            board->command(std::move(command));
+            board->command(command);
 
             waveform->csv(std::cerr);
             emit newWaveform(waveform);

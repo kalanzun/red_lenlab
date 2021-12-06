@@ -49,6 +49,7 @@ public:
     Transfer& operator=(const Transfer&) = delete;
 
     void submit(std::shared_ptr< Packet > packet);
+    void submit();
     void cancel();
 
     const char* getErrorMessage();

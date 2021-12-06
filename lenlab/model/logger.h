@@ -14,17 +14,17 @@ class Logger : public QObject
     Q_OBJECT
 
     protocol::Board* board;
-    QSharedPointer< Waveform > waveform;
+    Waveform* waveform;
 
 public:
     explicit Logger(protocol::Board* board);
 
 signals:
-    void newWaveform(QSharedPointer< Waveform >& waveform);
+    void newWaveform(Waveform* waveform);
 
 public slots:
-    void setup(std::shared_ptr< usb::Packet > packet);
-    void reply(std::shared_ptr< usb::Packet > packet);
+    void setup(std::shared_ptr< usb::Packet >& packet);
+    void reply(std::shared_ptr< usb::Packet >& packet);
     void error();
 };
 

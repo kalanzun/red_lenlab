@@ -29,10 +29,10 @@ public:
     Device(const Device&) = delete;
     Device& operator=(const Device&) = delete;
 
-    void send(std::shared_ptr< usb::Packet > packet);
+    void send(std::shared_ptr< usb::Packet >& packet);
 
 signals:
-    void reply(std::shared_ptr< usb::Packet > packet);
+    void reply(std::shared_ptr< usb::Packet >& packet);
     void error();
 
 private:

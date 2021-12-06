@@ -19,8 +19,8 @@ Device::Device(std::shared_ptr< usb::DeviceHandle >& device_handle, QObject *par
     receiver1->complete_callback.set(rxCompleteCallback, this);
     receiver1->error_callback.set(errorCallback, this);
 
-    receiver0->submit(std::make_shared< usb::Packet >());
-    receiver1->submit(std::make_shared< usb::Packet >());
+    receiver0->submit();
+    receiver1->submit();
 }
 
 Device::~Device()
@@ -30,9 +30,9 @@ Device::~Device()
     receiver1->cancel();
 }
 
-void Device::send(std::shared_ptr< usb::Packet > packet)
+void Device::send(std::shared_ptr< usb::Packet >& packet)
 {
-    sender->submit(std::move(packet));
+    sender->submit(packet);
 }
 
 void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
@@ -43,7 +43,7 @@ void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
     emit device->reply(transfer->packet);
 
     // create new transfer->packet
-    transfer->submit(std::make_shared< usb::Packet >());
+    transfer->submit();
 }
 
 void Device::errorCallback(usb::Transfer* transfer, void* object)

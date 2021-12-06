@@ -21,11 +21,11 @@ class Board : public QObject
 public:
     explicit Board(QObject *parent = nullptr);
 
-    void command(std::shared_ptr< usb::Packet > packet);
+    void command(std::shared_ptr< usb::Packet >& packet);
 
 signals:
-    void setup(std::shared_ptr< usb::Packet > packet);
-    void reply(std::shared_ptr< usb::Packet > packet);
+    void setup(std::shared_ptr< usb::Packet >& packet);
+    void reply(std::shared_ptr< usb::Packet >& packet);
     void error();
 
 public slots:
@@ -33,7 +33,7 @@ public slots:
 
 private slots:
     void setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle);
-    void handleReply(std::shared_ptr< usb::Packet > packet);
+    void handleReply(std::shared_ptr< usb::Packet >& packet);
     void handleError();
 };
 

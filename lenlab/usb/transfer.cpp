@@ -53,6 +53,11 @@ void Transfer::submit(std::shared_ptr< Packet > packet)
     if (error) throw USBException(error);
 }
 
+void Transfer::submit()
+{
+    submit(std::make_shared< Packet >());
+}
+
 void Transfer::cancel()
 {
     if (libusb_cancel_transfer(xfr)) active.unlock(); // if it can't cancel, unlock it right away
