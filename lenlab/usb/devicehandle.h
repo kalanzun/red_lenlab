@@ -17,8 +17,6 @@ public:
 
     DeviceHandle(const DeviceHandle&) = delete;
     DeviceHandle& operator=(const DeviceHandle&) = delete;
-
-    static std::shared_ptr< DeviceHandle > query(uint16_t vid, uint16_t pid);
 };
 
 } // namespace usb

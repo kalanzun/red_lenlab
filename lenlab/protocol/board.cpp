@@ -7,12 +7,10 @@ namespace protocol {
 
 Board::Board(QObject *parent)
     : QObject{parent}
-    , poll_timer{new QTimer(this)}
+    , query_thread{std::make_unique< QueryThread >(LENLAB_VID, LENLAB_PID)}
 {
-    connect(poll_timer, &QTimer::timeout,
-            this, &Board::poll);
-
-    poll_timer->setSingleShot(true);
+    connect(query_thread.get(), &QueryThread::DeviceHandleCreated,
+            this, &Board::setupDevice);
 }
 
 void Board::command(std::shared_ptr< usb::Packet > packet)
@@ -22,7 +20,27 @@ void Board::command(std::shared_ptr< usb::Packet > packet)
 
 void Board::lookForDevice()
 {
-    poll_timer->start(poll_time);
+    assert(!query_thread->isRunning());
+
+    query_thread->start();
+}
+
+void Board::setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle)
+{
+    assert(!device);
+
+    device = new Device(device_handle, this);
+    connect(device.get(), &Device::reply, this, &Board::handleReply);
+    connect(device.get(), &Device::error, this, &Board::handleError);
+    connect(device.get(), &Device::destroyed, this, &Board::lookForDevice);
+
+    auto packet = std::make_shared< usb::Packet >();
+    packet->buffer[0] = setUp;
+    packet->buffer[1] = nullType;
+    packet->buffer[2] = 0;
+    packet->buffer[3] = 0;
+    packet->length = 4;
+    device->send(std::move(packet));
 }
 
 void Board::handleReply(std::shared_ptr< usb::Packet > packet)
@@ -35,36 +53,13 @@ void Board::handleReply(std::shared_ptr< usb::Packet > packet)
     }
 }
 
-void Board::poll()
+void Board::handleError()
 {
-    try {
-        auto device_handle = usb::DeviceHandle::query(LENLAB_VID, LENLAB_PID);
-        if (device_handle) {
-            device = std::make_shared< Device >(std::move(device_handle));
-            connect(device.get(), &Device::reply, this, &Board::handleReply);
-            connect(device.get(), &Device::error, this, &Board::clearDevice);
+    assert(device);
 
-            auto packet = std::make_shared< usb::Packet >();
-            packet->buffer[0] = setUp;
-            packet->buffer[1] = nullType;
-            packet->buffer[2] = 0;
-            packet->buffer[3] = 0;
-            packet->length = 4;
-            device->send(std::move(packet));
-        }
-        else {
-            poll_timer->start(poll_time);
-        }
-    } catch (usb::USBException const &exception) {
-        poll_timer->start(retry_time);
-    }
-}
+    device->deleteLater();
 
-void Board::clearDevice()
-{
-    emit teardown();
-    device = nullptr;
-    poll_timer->start(retry_time);
+    emit error();
 }
 
 } // namespace protocol

@@ -2,10 +2,10 @@
 
 namespace protocol {
 
-Device::Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *parent)
+Device::Device(std::shared_ptr< usb::DeviceHandle >& device_handle, QObject *parent)
     : QObject{parent}
     , usb_thread{std::make_shared< USBThread >()}
-    , interface{std::make_shared< usb::Interface >(std::move(device_handle))}
+    , interface{std::make_shared< usb::Interface >(device_handle)}
     , event_loop{std::make_shared< EventLoop >(usb_thread)}
     , sender{std::make_unique< usb::Transfer >(interface, 0x01)}
     , receiver0{std::make_unique< usb::Transfer >(interface, 0x81)}

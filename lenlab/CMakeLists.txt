@@ -30,6 +30,7 @@ set(PROJECT_SOURCES
     protocol/board.h protocol/board.cpp
     protocol/device.h protocol/device.cpp
     protocol/eventloop.h protocol/eventloop.cpp
+    protocol/querythread.h protocol/querythread.cpp
     protocol/usbthread.h protocol/usbthread.cpp
     usb/context.h usb/context.cpp
     usb/devicehandle.h usb/devicehandle.cpp

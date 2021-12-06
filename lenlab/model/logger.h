@@ -25,7 +25,7 @@ signals:
 public slots:
     void setup(std::shared_ptr< usb::Packet > packet);
     void reply(std::shared_ptr< usb::Packet > packet);
-    void teardown();
+    void error();
 };
 
 } // namespace model

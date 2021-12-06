@@ -20,8 +20,8 @@ void TransferCallback::call(Transfer *transfer)
     if (callback) callback(transfer, object);
 }
 
-Transfer::Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint)
-    : interface{std::move(interface)}
+Transfer::Transfer(std::shared_ptr< Interface >& interface, unsigned char endpoint)
+    : interface{interface}
 {
     xfr = libusb_alloc_transfer(0);
     if (!xfr) throw USBException("Allocation failed");

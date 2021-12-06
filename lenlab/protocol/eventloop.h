@@ -16,7 +16,7 @@ class EventLoop : public QObject
     std::shared_ptr< USBThread > usb_thread;
 
 public:
-    explicit EventLoop(std::shared_ptr< USBThread > usb_thread, QObject *parent = nullptr);
+    explicit EventLoop(std::shared_ptr< USBThread >& usb_thread, QObject *parent = nullptr);
     ~EventLoop();
 
 signals:

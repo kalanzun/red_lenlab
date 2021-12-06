@@ -17,8 +17,8 @@ Logger::Logger(protocol::Board* board)
     connect(board, &protocol::Board::reply,
             this, &Logger::reply);
 
-    connect(board, &protocol::Board::teardown,
-            this, &Logger::teardown);
+    connect(board, &protocol::Board::error,
+            this, &Logger::error);
 }
 
 void Logger::setup(std::shared_ptr< usb::Packet > packet)
@@ -71,7 +71,7 @@ void Logger::reply(std::shared_ptr< usb::Packet > packet)
     }
 }
 
-void Logger::teardown()
+void Logger::error()
 {
 
 }

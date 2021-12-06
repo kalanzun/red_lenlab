@@ -23,7 +23,7 @@ class Device : public QObject
     std::unique_ptr< usb::Transfer > receiver1;
 
 public:
-    explicit Device(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *parent = nullptr);
+    explicit Device(std::shared_ptr< usb::DeviceHandle >& device_handle, QObject *parent = nullptr);
     ~Device();
 
     Device(const Device&) = delete;

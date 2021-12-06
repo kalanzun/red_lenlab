@@ -16,20 +16,4 @@ DeviceHandle::~DeviceHandle()
     libusb_close(dev_handle);
 }
 
-std::shared_ptr< DeviceHandle > DeviceHandle::query(uint16_t vid, uint16_t pid)
-{
-    struct libusb_device_descriptor desc;
-    DeviceList list; // may throw
-
-    for(auto dev: list) {
-        libusb_get_device_descriptor(dev, &desc);
-
-        if(desc.idVendor == vid && desc.idProduct == pid) {
-            return std::make_shared< DeviceHandle >(dev); // may throw
-        }
-    }
-
-    return nullptr;
-}
-
 } // namespace usb

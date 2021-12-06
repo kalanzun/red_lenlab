@@ -4,9 +4,10 @@
 #include <memory>
 
 #include <QObject>
-#include <QTimer>
+#include <QPointer>
 
 #include "device.h"
+#include "querythread.h"
 
 namespace protocol {
 
@@ -14,11 +15,8 @@ class Board : public QObject
 {
     Q_OBJECT
 
-    static int const poll_time = 300;
-    static int const retry_time = 1000;
-
-    QTimer *poll_timer;
-    std::shared_ptr< Device > device = nullptr;
+    std::unique_ptr< QueryThread > query_thread;
+    QPointer< Device > device;
 
 public:
     explicit Board(QObject *parent = nullptr);
@@ -28,15 +26,15 @@ public:
 signals:
     void setup(std::shared_ptr< usb::Packet > packet);
     void reply(std::shared_ptr< usb::Packet > packet);
-    void teardown();
+    void error();
 
 public slots:
     void lookForDevice();
-    void handleReply(std::shared_ptr< usb::Packet > packet);
 
 private slots:
-    void poll();
-    void clearDevice();
+    void setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle);
+    void handleReply(std::shared_ptr< usb::Packet > packet);
+    void handleError();
 };
 
 } // namespace protocol

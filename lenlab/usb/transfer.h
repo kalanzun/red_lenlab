@@ -42,7 +42,7 @@ public:
 
     std::shared_ptr< Packet > packet;
 
-    explicit Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
+    explicit Transfer(std::shared_ptr< Interface >& interface, unsigned char endpoint);
     ~Transfer();
 
     Transfer(const Transfer&) = delete;
