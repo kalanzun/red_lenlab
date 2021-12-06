@@ -17,9 +17,15 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets Charts REQUIRED)
 set(PROJECT_SOURCES
     main.cpp
     app/mainwindow.h app/mainwindow.cpp app/mainwindow.ui
-    app/labchart.h app/labchart.cpp
+    app/labchart.h app/labchart.cpp app/labchart.ui
+    app/labpage.h app/labpage.cpp app/labpage.ui
+    app/frequencyform.h app/frequencyform.cpp app/frequencyform.ui
+    app/loggerform.h app/loggerform.cpp app/loggerform.ui
+    app/oscilloscopeform.h app/oscilloscopeform.cpp app/oscilloscopeform.ui
+    model/frequencysweep.h model/frequencysweep.cpp
     model/lenlab.h model/lenlab.cpp
     model/logger.h model/logger.cpp
+    model/oscilloscope.h model/oscilloscope.cpp
     model/waveform.h model/waveform.cpp
     protocol/board.h protocol/board.cpp
     protocol/device.h protocol/device.cpp

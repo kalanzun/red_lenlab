@@ -4,7 +4,9 @@
 #include <QObject>
 
 #include "protocol/board.h"
+#include "frequencysweep.h"
 #include "logger.h"
+#include "oscilloscope.h"
 
 namespace model {
 
@@ -12,10 +14,12 @@ class Lenlab : public QObject
 {
     Q_OBJECT
 
-    protocol::Board *board;
+    protocol::Board* board;
 
 public:
-    Logger *logger;
+    Logger* logger;
+    Oscilloscope* oscilloscope;
+    FrequencySweep* frequency;
 
     explicit Lenlab(QObject *parent = nullptr);
 

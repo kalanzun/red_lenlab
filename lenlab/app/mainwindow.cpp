@@ -9,8 +9,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    lab_chart = new LabChart(this);
-    lab_chart->setChartView(ui->graphicsView);
+    logger_form = new LoggerForm(ui->logger_tab->contents());
+    oscilloscope_form = new OscilloscopeForm(ui->oscilloscope_tab->contents());
+    frequency_form = new FrequencyForm(ui->frequency_tab->contents());
 }
 
 MainWindow::~MainWindow()
@@ -22,9 +23,14 @@ void MainWindow::setModel(model::Lenlab* lenlab)
 {
     this->lenlab = lenlab;
 
-    connect(lenlab->logger, &model::Logger::newWaveform,
-            lab_chart, &LabChart::setWaveform);
-}
+    logger_form->setModel(lenlab);
+    logger_form->setupChart(ui->logger_tab->lab_chart());
 
+    oscilloscope_form->setModel(lenlab);
+    oscilloscope_form->setupChart(ui->oscilloscope_tab->lab_chart());
+
+    frequency_form->setModel(lenlab);
+    frequency_form->setupChart(ui->frequency_tab->lab_chart());
+}
 
 } // namespace app

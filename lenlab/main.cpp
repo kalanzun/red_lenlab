@@ -12,8 +12,9 @@ int main(int argc, char *argv[])
     app::MainWindow window;
 
     window.setModel(&lenlab);
-
     window.show();
+
     lenlab.lookForDevice();
+
     return application.exec();
 }

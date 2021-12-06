@@ -4,7 +4,9 @@
 #include <QMainWindow>
 
 #include "model/lenlab.h"
-#include "labchart.h"
+#include "frequencyform.h"
+#include "loggerform.h"
+#include "oscilloscopeform.h"
 
 namespace app {
 
@@ -15,7 +17,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     model::Lenlab* lenlab;
-    LabChart* lab_chart;
+
+    LoggerForm* logger_form;
+    OscilloscopeForm* oscilloscope_form;
+    FrequencyForm* frequency_form;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

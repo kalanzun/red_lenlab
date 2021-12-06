@@ -1,30 +1,37 @@
 #include "labchart.h"
-
-#include <QDebug>
+#include "app/ui_labchart.h"
 
 namespace app {
 
-LabChart::LabChart(QObject *parent)
-    : QObject{parent}
+LabChart::LabChart(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::LabChart)
 {
+    ui->setupUi(this);
 
+    chart = ui->chart_view->chart();
 }
 
-void LabChart::setChartView(QChartView* chart_view)
+LabChart::~LabChart()
 {
-    //chart = new QChart();
+    delete ui;
+}
 
-    this->chart_view = chart_view;
-    this->chart = chart_view->chart();
-    //this->chart_view->setChart(chart);
+void LabChart::setModel(model::Lenlab* lenlab)
+{
+    this->lenlab = lenlab;
+}
 
-    for (int i = 0; i < model::Waveform::channels; ++i) {
-        auto s = new QLineSeries();
-        s->setName(QString("Kanal ") + QString::number(i + 1));
-        series.append(s);
-        chart->addSeries(s);
-    }
+void LabChart::createSeries(const QString& name)
+{
+    auto s = new QLineSeries();
+    s->setName(name);
+    series.append(s);
+    chart->addSeries(s);
+}
 
+void LabChart::createDefaultAxes()
+{
     chart->createDefaultAxes();
 }
 

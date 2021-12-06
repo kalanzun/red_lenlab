@@ -2,34 +2,40 @@
 #define APP_LABCHART_H
 
 #include <QtCharts/QChart>
-#include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
-#include <QObject>
+#include <QWidget>
 
-#include "model/waveform.h"
+#include "model/lenlab.h"
 
 namespace app {
 
-class LabChart : public QObject
+namespace Ui {
+class LabChart;
+}
+
+class LabChart : public QWidget
 {
     Q_OBJECT
-public:
+
     QChart* chart;
     QVector< QLineSeries* > series;
 
-    QChartView* chart_view;
+    model::Lenlab* lenlab;
 
-    explicit LabChart(QObject *parent = nullptr);
+public:
+    explicit LabChart(QWidget *parent = nullptr);
+    ~LabChart();
 
-    void setChartView(QChartView* chart_view);
+    void setModel(model::Lenlab* lenlab);
 
-signals:
+    void createSeries(const QString& name);
+    void createDefaultAxes();
 
-public slots:
     void setWaveform(QSharedPointer< model::Waveform >& waveform);
 
+private:
+    Ui::LabChart *ui;
 };
 
 } // namespace app
-
 #endif // APP_LABCHART_H
