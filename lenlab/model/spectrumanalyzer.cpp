@@ -2,21 +2,28 @@
 
 namespace model {
 
+const QStringList SpectrumAnalyzer::names = {
+    "Amplitude",
+    "Phase"
+};
+
 SpectrumAnalyzer::SpectrumAnalyzer(protocol::Board* board)
     : Component{board}
-    , board{board}
 {
 
 }
 
-QVector< QString > SpectrumAnalyzer::channel_names()
+const QStringList& SpectrumAnalyzer::channel_names()
 {
+    return names;
+    /*
     QVector< QString > labels;
 
     labels.append(QString("Amplitude"));
     labels.append(QString("Phase"));
 
     return labels;
+    */
 }
 
 } // namespace model

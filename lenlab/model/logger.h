@@ -16,10 +16,12 @@ class Logger : public Component
 
     Waveform* waveform;
 
+    static const QStringList names;
+
 public:
     explicit Logger(protocol::Board* board);
 
-    QVector< QString > channel_names();
+    const QStringList& channel_names();
 
 signals:
     void newWaveform(Waveform* waveform);

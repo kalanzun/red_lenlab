@@ -2,14 +2,21 @@
 
 namespace model {
 
+const QStringList Oscilloscope::names = {
+    "Kanal 1",
+    "Kanal 2"
+};
+
 Oscilloscope::Oscilloscope(protocol::Board* board)
     : Component{board}
 {
 
 }
 
-QVector< QString > Oscilloscope::channel_names()
+const QStringList& Oscilloscope::channel_names()
 {
+    return names;
+    /*
     QVector< QString > labels;
 
     for (int i = 0; i < 2; ++i) {
@@ -17,6 +24,7 @@ QVector< QString > Oscilloscope::channel_names()
     }
 
     return labels;
+    */
 }
 
 } // namespace model

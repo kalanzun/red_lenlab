@@ -2,6 +2,7 @@
 #define MODEL_COMPONENT_H
 
 #include <QObject>
+#include <QStringList>
 
 #include "protocol/board.h"
 
@@ -17,7 +18,7 @@ protected:
 public:
     explicit Component(protocol::Board* board);
 
-    virtual QVector< QString > channel_names() = 0;
+    virtual const QStringList& channel_names() = 0;
 
 signals:
 

@@ -11,10 +11,12 @@ class Oscilloscope : public Component
 {
     Q_OBJECT
 
+    static const QStringList names;
+
 public:
     explicit Oscilloscope(protocol::Board* board);
 
-    QVector< QString > channel_names();
+    const QStringList& channel_names();
 
 signals:
 

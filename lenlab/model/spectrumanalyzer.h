@@ -11,12 +11,12 @@ class SpectrumAnalyzer : public Component
 {
     Q_OBJECT
 
-    protocol::Board* board;
+    static const QStringList names;
 
 public:
     explicit SpectrumAnalyzer(protocol::Board* board);
 
-    QVector< QString > channel_names();
+    const QStringList& channel_names();
 
 signals:
 
