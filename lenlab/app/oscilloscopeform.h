@@ -11,8 +11,6 @@ class Lenlab;
 
 namespace app {
 
-class LabChart;
-
 namespace Ui {
 class OscilloscopeForm;
 }
@@ -29,7 +27,7 @@ public:
 
     void setModel(model::Lenlab* lenlab);
 
-    void setupChart(LabChart* lab_chart) const;
+    void setupChart() const;
 
 private:
     Ui::OscilloscopeForm *ui;

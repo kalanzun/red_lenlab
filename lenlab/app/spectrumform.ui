@@ -1,7 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <author/>
- <comment/>
- <exportmacro/>
  <class>app::SpectrumForm</class>
  <widget class="QWidget" name="app::SpectrumForm">
   <property name="geometry">
@@ -15,7 +13,173 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item>
+    <widget class="app::LabChart" name="labChart" native="true"/>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="startButton">
+         <property name="text">
+          <string>Start</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="stopButton">
+         <property name="text">
+          <string>Stop</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>362</width>
+          <height>246</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Legende</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="mLabel">
+             <property name="text">
+              <string>Amplitude [dB]</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="phLabel">
+             <property name="text">
+              <string>Phase [°]</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveButton">
+           <property name="text">
+            <string>Speichern</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Messaufbau</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Kanal 1 (PD0)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>DAC Kanal A (Pin 14)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>ADC0</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Ausgang der Schaltung</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Kanal 2 (PD1)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Eingang der Schaltung</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>ADC1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Signalgenerator</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>149</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
- <pixmapfunction/>
+ <customwidgets>
+  <customwidget>
+   <class>app::LabChart</class>
+   <extends>QWidget</extends>
+   <header>app/labchart.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
  <connections/>
 </ui>

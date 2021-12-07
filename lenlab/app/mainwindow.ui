@@ -20,17 +20,17 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="app::LabPage" name="logger_page">
+      <widget class="app::LoggerForm" name="loggerForm">
        <attribute name="title">
         <string>Logger</string>
        </attribute>
       </widget>
-      <widget class="app::LabPage" name="oscilloscope_page">
+      <widget class="app::OscilloscopeForm" name="oscilloscopeForm">
        <attribute name="title">
         <string>Oszilloskop</string>
        </attribute>
       </widget>
-      <widget class="app::LabPage" name="spectrum_page">
+      <widget class="app::SpectrumForm" name="spectrumForm">
        <attribute name="title">
         <string>Spektrumanalysator</string>
        </attribute>
@@ -53,9 +53,21 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>app::LabPage</class>
+   <class>app::LoggerForm</class>
    <extends>QWidget</extends>
-   <header>app/labpage.h</header>
+   <header>app/loggerform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>app::OscilloscopeForm</class>
+   <extends>QWidget</extends>
+   <header>app/oscilloscopeform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>app::SpectrumForm</class>
+   <extends>QWidget</extends>
+   <header>app/spectrumform.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

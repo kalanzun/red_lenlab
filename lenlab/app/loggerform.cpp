@@ -2,7 +2,6 @@
 #include "app/ui_loggerform.h"
 
 #include "model/lenlab.h"
-#include "labchart.h"
 
 namespace app {
 
@@ -21,19 +20,21 @@ LoggerForm::~LoggerForm()
 void LoggerForm::setModel(model::Lenlab* lenlab)
 {
     this->lenlab = lenlab;
+
+    setupChart();
 }
 
-void LoggerForm::setupChart(LabChart* lab_chart) const
+void LoggerForm::setupChart() const
 {
-    lab_chart->setXLabel("Zeit [s]");
-    lab_chart->setYLabel("Spannung [V]");
+    ui->labChart->setXLabel("Zeit [s]");
+    ui->labChart->setYLabel("Spannung [V]");
 
-    lab_chart->createChannel("Kanal 1");
-    lab_chart->createChannel("Kanal 2", false);
-    lab_chart->createChannel("Kanal 3", false);
-    lab_chart->createChannel("Kanal 4", false);
+    ui->labChart->createChannel("Kanal 1");
+    ui->labChart->createChannel("Kanal 2", false);
+    ui->labChart->createChannel("Kanal 3", false);
+    ui->labChart->createChannel("Kanal 4", false);
 
-    lab_chart->createDefaultAxes();
+    ui->labChart->createDefaultAxes();
 }
 
 } // namespace app

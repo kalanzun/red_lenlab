@@ -7,13 +7,9 @@ namespace model {
 
 class Lenlab;
 
-}
+} // namespace model
 
 namespace app {
-
-class LoggerForm;
-class OscilloscopeForm;
-class SpectrumForm;
 
 namespace Ui { class MainWindow; }
 
@@ -22,10 +18,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     model::Lenlab* lenlab;
-
-    LoggerForm* logger_form;
-    OscilloscopeForm* oscilloscope_form;
-    SpectrumForm* spectrum_form;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
