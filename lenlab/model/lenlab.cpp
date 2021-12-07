@@ -7,7 +7,7 @@ Lenlab::Lenlab(QObject *parent)
     , board{new protocol::Board(this)}
     , logger{new Logger(board)}
     , oscilloscope{new Oscilloscope(board)}
-    , frequency{new FrequencySweep(board)}
+    , spectrum{new SpectrumAnalyzer(board)}
 {
 
 }

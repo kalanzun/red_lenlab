@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     logger_form = new LoggerForm(ui->logger_tab->contents());
     oscilloscope_form = new OscilloscopeForm(ui->oscilloscope_tab->contents());
-    frequency_form = new FrequencyForm(ui->frequency_tab->contents());
+    spectrum_form = new SpectrumForm(ui->frequency_tab->contents());
 }
 
 MainWindow::~MainWindow()
@@ -29,8 +29,8 @@ void MainWindow::setModel(model::Lenlab* lenlab)
     oscilloscope_form->setModel(lenlab);
     oscilloscope_form->setupChart(ui->oscilloscope_tab->lab_chart());
 
-    frequency_form->setModel(lenlab);
-    frequency_form->setupChart(ui->frequency_tab->lab_chart());
+    spectrum_form->setModel(lenlab);
+    spectrum_form->setupChart(ui->oscilloscope_tab->lab_chart());
 }
 
 } // namespace app

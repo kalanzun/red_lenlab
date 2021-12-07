@@ -19,13 +19,13 @@ set(PROJECT_SOURCES
     app/mainwindow.h app/mainwindow.cpp app/mainwindow.ui
     app/labchart.h app/labchart.cpp app/labchart.ui
     app/labpage.h app/labpage.cpp app/labpage.ui
-    app/frequencyform.h app/frequencyform.cpp app/frequencyform.ui
     app/loggerform.h app/loggerform.cpp app/loggerform.ui
     app/oscilloscopeform.h app/oscilloscopeform.cpp app/oscilloscopeform.ui
-    model/frequencysweep.h model/frequencysweep.cpp
+    app/spectrumform.h app/spectrumform.cpp app/spectrumform.ui
     model/lenlab.h model/lenlab.cpp
     model/logger.h model/logger.cpp
     model/oscilloscope.h model/oscilloscope.cpp
+    model/spectrumanalyzer.h model/spectrumanalyzer.cpp
     model/waveform.h model/waveform.cpp
     protocol/board.h protocol/board.cpp
     protocol/device.h protocol/device.cpp

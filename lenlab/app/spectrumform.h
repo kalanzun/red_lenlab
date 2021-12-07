@@ -1,5 +1,5 @@
-#ifndef FREQUENCYFORM_H
-#define FREQUENCYFORM_H
+#ifndef APP_SPECTRUMFORM_H
+#define APP_SPECTRUMFORM_H
 
 #include <QWidget>
 
@@ -9,25 +9,26 @@
 namespace app {
 
 namespace Ui {
-class FrequencyForm;
+class SpectrumForm;
 }
 
-class FrequencyForm : public QWidget
+class SpectrumForm : public QWidget
 {
     Q_OBJECT
 
     model::Lenlab* lenlab;
 
 public:
-    explicit FrequencyForm(QWidget *parent = nullptr);
-    ~FrequencyForm();
+    explicit SpectrumForm(QWidget *parent = nullptr);
+    ~SpectrumForm();
 
     void setModel(model::Lenlab* lenlab);
     void setupChart(LabChart* lab_chart);
 
 private:
-    Ui::FrequencyForm *ui;
+    Ui::SpectrumForm *ui;
 };
 
+
 } // namespace app
-#endif // FREQUENCYFORM_H
+#endif // APP_SPECTRUMFORM_H

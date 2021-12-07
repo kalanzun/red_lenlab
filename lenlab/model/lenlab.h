@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "protocol/board.h"
-#include "frequencysweep.h"
+#include "spectrumanalyzer.h"
 #include "logger.h"
 #include "oscilloscope.h"
 
@@ -19,7 +19,7 @@ class Lenlab : public QObject
 public:
     Logger* logger;
     Oscilloscope* oscilloscope;
-    FrequencySweep* frequency;
+    SpectrumAnalyzer* spectrum;
 
     explicit Lenlab(QObject *parent = nullptr);
 

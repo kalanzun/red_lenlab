@@ -4,9 +4,9 @@
 #include <QMainWindow>
 
 #include "model/lenlab.h"
-#include "frequencyform.h"
 #include "loggerform.h"
 #include "oscilloscopeform.h"
+#include "spectrumform.h"
 
 namespace app {
 
@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow
 
     LoggerForm* logger_form;
     OscilloscopeForm* oscilloscope_form;
-    FrequencyForm* frequency_form;
+    SpectrumForm* spectrum_form;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
