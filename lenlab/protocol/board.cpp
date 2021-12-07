@@ -1,7 +1,11 @@
 #include "board.h"
 
 #include "lenlab_protocol.h"
+#include "usb/devicehandle.h"
+#include "usb/packet.h"
 #include "usb/usbexception.h"
+#include "device.h"
+#include "querythread.h"
 
 namespace protocol {
 

@@ -6,10 +6,17 @@
 #include <QObject>
 #include <QPointer>
 
-#include "device.h"
-#include "querythread.h"
+namespace usb {
+
+class DeviceHandle;
+class Packet;
+
+}
 
 namespace protocol {
+
+class Device;
+class QueryThread;
 
 class Board : public QObject
 {

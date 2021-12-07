@@ -3,7 +3,11 @@
 
 #include <QWidget>
 
-#include "model/lenlab.h"
+namespace model {
+
+class Lenlab;
+
+}
 
 namespace app {
 

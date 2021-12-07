@@ -1,5 +1,7 @@
 #include "oscilloscope.h"
 
+#include "protocol/board.h"
+
 namespace model {
 
 const QStringList Oscilloscope::names = {

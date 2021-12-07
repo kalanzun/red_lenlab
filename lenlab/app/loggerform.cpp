@@ -1,6 +1,8 @@
 #include "loggerform.h"
 #include "app/ui_loggerform.h"
 
+#include "model/lenlab.h"
+
 namespace app {
 
 LoggerForm::LoggerForm(QWidget *parent) :

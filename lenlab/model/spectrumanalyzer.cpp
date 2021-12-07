@@ -1,5 +1,7 @@
 #include "spectrumanalyzer.h"
 
+#include "protocol/board.h"
+
 namespace model {
 
 const QStringList SpectrumAnalyzer::names = {

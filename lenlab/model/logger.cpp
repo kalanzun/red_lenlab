@@ -3,6 +3,9 @@
 #include <QDebug>
 
 #include "lenlab_protocol.h"
+#include "protocol/board.h"
+#include "usb/packet.h"
+#include "waveform.h"
 
 namespace model {
 

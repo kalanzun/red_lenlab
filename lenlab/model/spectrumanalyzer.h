@@ -3,8 +3,6 @@
 
 #include "component.h"
 
-#include "protocol/board.h"
-
 namespace model {
 
 class SpectrumAnalyzer : public Component

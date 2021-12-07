@@ -3,12 +3,17 @@
 
 #include <QObject>
 
-#include "protocol/board.h"
-#include "spectrumanalyzer.h"
-#include "logger.h"
-#include "oscilloscope.h"
+namespace protocol {
+
+class Board;
+
+}
 
 namespace model {
+
+class Logger;
+class Oscilloscope;
+class SpectrumAnalyzer;
 
 class Lenlab : public QObject
 {

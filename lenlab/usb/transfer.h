@@ -7,10 +7,11 @@
 
 #include "libusb.h"
 
-#include "interface.h"
-#include "packet.h"
-
 namespace usb {
+
+class Interface;
+
+class Packet;
 
 class Transfer;
 

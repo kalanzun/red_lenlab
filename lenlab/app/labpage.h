@@ -3,9 +3,9 @@
 
 #include <QWidget>
 
-#include "labchart.h"
-
 namespace app {
+
+class LabChart;
 
 namespace Ui {
 class LabPage;

@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "devicehandle.h"
-
 namespace usb {
+
+class DeviceHandle;
 
 class Interface
 {

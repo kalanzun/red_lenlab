@@ -1,6 +1,8 @@
 #include "oscilloscopeform.h"
 #include "app/ui_oscilloscopeform.h"
 
+#include "model/lenlab.h"
+
 namespace app {
 
 OscilloscopeForm::OscilloscopeForm(QWidget *parent) :

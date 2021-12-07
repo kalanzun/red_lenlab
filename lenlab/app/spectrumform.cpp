@@ -1,6 +1,8 @@
 #include "spectrumform.h"
 #include "ui_spectrumform.h"
 
+#include "model/lenlab.h"
+
 namespace app {
 
 SpectrumForm::SpectrumForm(QWidget *parent) :

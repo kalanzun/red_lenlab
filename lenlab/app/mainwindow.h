@@ -3,12 +3,17 @@
 
 #include <QMainWindow>
 
-#include "model/lenlab.h"
-#include "loggerform.h"
-#include "oscilloscopeform.h"
-#include "spectrumform.h"
+namespace model {
+
+class Lenlab;
+
+}
 
 namespace app {
+
+class LoggerForm;
+class OscilloscopeForm;
+class SpectrumForm;
 
 namespace Ui { class MainWindow; }
 

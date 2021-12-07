@@ -1,5 +1,12 @@
 #include "device.h"
 
+#include "usb/devicehandle.h"
+#include "usb/interface.h"
+#include "usb/packet.h"
+#include "usb/transfer.h"
+#include "eventloop.h"
+#include "usbthread.h"
+
 namespace protocol {
 
 Device::Device(std::shared_ptr< usb::DeviceHandle >& device_handle, QObject *parent)

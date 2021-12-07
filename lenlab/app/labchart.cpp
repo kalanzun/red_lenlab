@@ -1,6 +1,9 @@
 #include "labchart.h"
 #include "app/ui_labchart.h"
 
+#include "model/component.h"
+#include "model/waveform.h"
+
 namespace app {
 
 LabChart::LabChart(QWidget *parent) :

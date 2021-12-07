@@ -4,9 +4,12 @@
 #include <memory>
 
 #include <QThread>
-#include <QObject>
 
-#include "usb/devicehandle.h"
+namespace usb {
+
+class DeviceHandle;
+
+} // namespace usb
 
 namespace protocol {
 

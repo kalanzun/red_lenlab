@@ -3,12 +3,15 @@
 
 #include "component.h"
 
-#include <QSharedPointer>
+namespace usb {
 
-#include "protocol/board.h"
-#include "waveform.h"
+class Packet;
+
+}
 
 namespace model {
+
+class Waveform;
 
 class Logger : public Component
 {

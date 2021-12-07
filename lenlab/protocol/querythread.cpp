@@ -6,6 +6,7 @@
 
 #include "libusb.h"
 
+#include "usb/devicehandle.h"
 #include "usb/devicelist.h"
 
 namespace protocol {

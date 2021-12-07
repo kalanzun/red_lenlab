@@ -5,9 +5,9 @@
 
 #include <QObject>
 
-#include "usbthread.h"
-
 namespace protocol {
+
+class USBThread;
 
 class EventLoop : public QObject
 {

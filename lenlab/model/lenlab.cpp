@@ -1,5 +1,10 @@
 #include "lenlab.h"
 
+#include "protocol/board.h"
+#include "logger.h"
+#include "oscilloscope.h"
+#include "spectrumanalyzer.h"
+
 namespace model {
 
 Lenlab::Lenlab(QObject *parent)

@@ -1,6 +1,16 @@
 #include "mainwindow.h"
 #include "app/ui_mainwindow.h"
 
+#include "model/lenlab.h"
+#include "model/logger.h"
+#include "model/oscilloscope.h"
+#include "model/spectrumanalyzer.h"
+#include "labchart.h"
+#include "loggerform.h"
+#include "oscilloscopeform.h"
+#include "spectrumform.h"
+
+
 namespace app {
 
 MainWindow::MainWindow(QWidget *parent)

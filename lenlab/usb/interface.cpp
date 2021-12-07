@@ -2,6 +2,7 @@
 
 #include "libusb.h"
 
+#include "devicehandle.h"
 #include "usbexception.h"
 
 namespace usb {

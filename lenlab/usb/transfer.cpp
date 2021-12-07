@@ -1,5 +1,8 @@
 #include "transfer.h"
 
+#include "devicehandle.h"
+#include "interface.h"
+#include "packet.h"
 #include "usbexception.h"
 
 namespace usb {

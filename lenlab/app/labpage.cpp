@@ -1,6 +1,8 @@
 #include "labpage.h"
 #include "app/ui_labpage.h"
 
+#include "labchart.h"
+
 namespace app {
 
 LabPage::LabPage(QWidget *parent) :

@@ -5,10 +5,19 @@
 
 #include <QObject>
 
-#include "usb/transfer.h"
-#include "eventloop.h"
+namespace usb {
+
+class DeviceHandle;
+class Interface;
+class Packet;
+class Transfer;
+
+}
 
 namespace protocol {
+
+class EventLoop;
+class USBThread;
 
 class Device : public QObject
 {

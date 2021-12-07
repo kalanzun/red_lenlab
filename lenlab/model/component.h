@@ -4,7 +4,11 @@
 #include <QObject>
 #include <QStringList>
 
-#include "protocol/board.h"
+namespace protocol {
+
+class Board;
+
+}
 
 namespace model {
 

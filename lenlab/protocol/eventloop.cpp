@@ -1,5 +1,7 @@
 #include "eventloop.h"
 
+#include "usbthread.h"
+
 namespace protocol {
 
 EventLoop::EventLoop(std::shared_ptr< USBThread >& usb_thread, QObject *parent)

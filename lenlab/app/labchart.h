@@ -5,8 +5,12 @@
 #include <QtCharts/QLineSeries>
 #include <QWidget>
 
-#include "model/component.h"
-#include "model/waveform.h"
+namespace model {
+
+class Component;
+class Waveform;
+
+}
 
 namespace app {
 
