@@ -11,6 +11,8 @@ class Lenlab;
 
 namespace app {
 
+class LabChart;
+
 namespace Ui {
 class SpectrumForm;
 }
@@ -26,6 +28,8 @@ public:
     ~SpectrumForm();
 
     void setModel(model::Lenlab* lenlab);
+
+    void setupChart(LabChart* lab_chart) const;
 
 private:
     Ui::SpectrumForm *ui;

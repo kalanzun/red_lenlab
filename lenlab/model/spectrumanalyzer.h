@@ -14,11 +14,6 @@ class SpectrumAnalyzer : public Component
 public:
     explicit SpectrumAnalyzer(protocol::Board* board);
 
-    const QString x_label() const;
-    const QString y_label() const;
-    const QString y2_label() const;
-    const QStringList& channel_names() const;
-
 signals:
 
 };

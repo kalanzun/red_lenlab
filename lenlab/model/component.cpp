@@ -11,9 +11,4 @@ Component::Component(protocol::Board* board)
 
 }
 
-const QString Component::y2_label() const
-{
-    return QString();
-}
-
 } // namespace model

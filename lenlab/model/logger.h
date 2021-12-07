@@ -19,14 +19,8 @@ class Logger : public Component
 
     Waveform* waveform;
 
-    static const QStringList names;
-
 public:
     explicit Logger(protocol::Board* board);
-
-    const QString x_label() const;
-    const QString y_label() const;
-    const QStringList& channel_names() const;
 
 signals:
     void newWaveform(Waveform* waveform);

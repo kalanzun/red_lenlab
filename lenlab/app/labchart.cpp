@@ -15,6 +15,7 @@ LabChart::LabChart(QWidget *parent) :
     chart = ui->chart_view->chart();
 
     chart->legend()->hide();
+    ui->y2_label->hide();
 }
 
 LabChart::~LabChart()
@@ -22,29 +23,47 @@ LabChart::~LabChart()
     delete ui;
 }
 
+void LabChart::setXLabel(const QString& label)
+{
+    ui->x_label->setText(label);
+}
+
+void LabChart::setYLabel(const QString& label)
+{
+    ui->y_label->setText(label);
+}
+
+void LabChart::setY2Label(const QString& label)
+{
+    ui->y2_label->setText(label);
+    ui->y2_label->show();
+}
+
+void LabChart::addAxis(QAbstractAxis* axis, Qt::Alignment alignment)
+{
+    chart->addAxis(axis, alignment);
+}
+
+void LabChart::createChannel(const QString& name, bool visible, QAbstractAxis* xAxis, QAbstractAxis* yAxis)
+{
+    auto s = new QLineSeries();
+    s->setName(name);
+    s->setVisible(visible);
+    series.append(s);
+    chart->addSeries(s);
+
+    if (xAxis) s->attachAxis(xAxis);
+    if (yAxis) s->attachAxis(yAxis);
+}
+
+void LabChart::createDefaultAxes()
+{
+    chart->createDefaultAxes();
+}
+
 void LabChart::setModel(model::Component* component)
 {
     this->component = component;
-
-    ui->x_label->setText(component->x_label());
-    ui->y_label->setText(component->y_label());
-
-    auto y2_label = component->y2_label();
-    if (y2_label.isEmpty()) {
-        ui->y2_label->hide();
-    }
-    else {
-        ui->y2_label->setText(y2_label);
-    }
-
-    for (auto name : component->channel_names()) {
-        auto s = new QLineSeries();
-        s->setName(name);
-        series.append(s);
-        chart->addSeries(s);
-    }
-
-    chart->createDefaultAxes();
 }
 
 void LabChart::setWaveform(model::Waveform* waveform)

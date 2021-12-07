@@ -9,13 +9,6 @@
 
 namespace model {
 
-const QStringList Logger::names = {
-    "Kanal 1",
-    "Kanal 2",
-    "Kanal 3",
-    "Kanal 4"
-};
-
 Logger::Logger(protocol::Board* board)
     : Component{board}
     , waveform{new Waveform(this)}
@@ -28,30 +21,6 @@ Logger::Logger(protocol::Board* board)
 
     connect(board, &protocol::Board::error,
             this, &Logger::error);
-}
-
-const QString Logger::x_label() const
-{
-    return QString("Zeit [s]");
-}
-
-const QString Logger::y_label() const
-{
-    return QString("Spannung [V]");
-}
-
-const QStringList& Logger::channel_names() const
-{
-    return names;
-    /*
-    QVector< QString > labels;
-
-    for (int i = 0; i < 4; ++i) {
-        labels.append(QString("Kanal ") + QString::number(i + 1));
-    }
-
-    return labels;
-    */
 }
 
 void Logger::setup(std::shared_ptr< usb::Packet >& packet)

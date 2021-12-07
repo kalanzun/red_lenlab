@@ -2,9 +2,6 @@
 #include "app/ui_mainwindow.h"
 
 #include "model/lenlab.h"
-#include "model/logger.h"
-#include "model/oscilloscope.h"
-#include "model/spectrumanalyzer.h"
 #include "labchart.h"
 #include "loggerform.h"
 #include "oscilloscopeform.h"
@@ -34,13 +31,13 @@ void MainWindow::setModel(model::Lenlab* lenlab)
     this->lenlab = lenlab;
 
     logger_form->setModel(lenlab);
-    ui->logger_page->lab_chart()->setModel(lenlab->logger);
+    logger_form->setupChart(ui->logger_page->lab_chart());
 
     oscilloscope_form->setModel(lenlab);
-    ui->oscilloscope_page->lab_chart()->setModel(lenlab->oscilloscope);
+    oscilloscope_form->setupChart(ui->oscilloscope_page->lab_chart());
 
     spectrum_form->setModel(lenlab);
-    ui->spectrum_page->lab_chart()->setModel(lenlab->spectrum);
+    spectrum_form->setupChart(ui->spectrum_page->lab_chart());
 }
 
 } // namespace app

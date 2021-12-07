@@ -11,6 +11,8 @@ class Lenlab;
 
 namespace app {
 
+class LabChart;
+
 namespace Ui {
 class LoggerForm;
 }
@@ -26,6 +28,8 @@ public:
     ~LoggerForm();
 
     void setModel(model::Lenlab* lenlab);
+
+    void setupChart(LabChart* lab_chart) const;
 
 private:
     Ui::LoggerForm *ui;
