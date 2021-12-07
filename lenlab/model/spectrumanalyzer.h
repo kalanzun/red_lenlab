@@ -1,13 +1,13 @@
 #ifndef MODEL_SPECTRUMANALYZER_H
 #define MODEL_SPECTRUMANALYZER_H
 
-#include <QObject>
+#include "component.h"
 
 #include "protocol/board.h"
 
 namespace model {
 
-class SpectrumAnalyzer : public QObject
+class SpectrumAnalyzer : public Component
 {
     Q_OBJECT
 

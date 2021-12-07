@@ -3,7 +3,7 @@
 namespace model {
 
 SpectrumAnalyzer::SpectrumAnalyzer(protocol::Board* board)
-    : QObject{board}
+    : Component{board}
     , board{board}
 {
 

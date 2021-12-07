@@ -1,7 +1,8 @@
 #ifndef MODEL_LOGGER_H
 #define MODEL_LOGGER_H
 
-#include <QObject>
+#include "component.h"
+
 #include <QSharedPointer>
 
 #include "protocol/board.h"
@@ -9,11 +10,10 @@
 
 namespace model {
 
-class Logger : public QObject
+class Logger : public Component
 {
     Q_OBJECT
 
-    protocol::Board* board;
     Waveform* waveform;
 
 public:

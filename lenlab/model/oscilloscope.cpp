@@ -3,8 +3,7 @@
 namespace model {
 
 Oscilloscope::Oscilloscope(protocol::Board* board)
-    : QObject{board}
-    , board{board}
+    : Component{board}
 {
 
 }

@@ -7,8 +7,7 @@
 namespace model {
 
 Logger::Logger(protocol::Board* board)
-    : QObject{board}
-    , board{board}
+    : Component{board}
     , waveform{new Waveform(this)}
 {
     connect(board, &protocol::Board::setup,

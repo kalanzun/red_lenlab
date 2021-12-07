@@ -1,17 +1,15 @@
 #ifndef MODEL_OSCILLOSCOPE_H
 #define MODEL_OSCILLOSCOPE_H
 
-#include <QObject>
+#include "component.h"
 
 #include "protocol/board.h"
 
 namespace model {
 
-class Oscilloscope : public QObject
+class Oscilloscope : public Component
 {
     Q_OBJECT
-
-    protocol::Board* board;
 
 public:
     explicit Oscilloscope(protocol::Board* board);
