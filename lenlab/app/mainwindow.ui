@@ -20,19 +20,19 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="app::LabPage" name="logger_tab">
+      <widget class="app::LabPage" name="logger_page">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Logger</string>
        </attribute>
       </widget>
-      <widget class="app::LabPage" name="oscilloscope_tab">
+      <widget class="app::LabPage" name="oscilloscope_page">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Oszilloskop</string>
        </attribute>
       </widget>
-      <widget class="app::LabPage" name="frequency_tab">
+      <widget class="app::LabPage" name="spectrum_page">
        <attribute name="title">
-        <string>Seite</string>
+        <string>Spektrumanalysator</string>
        </attribute>
       </widget>
      </widget>

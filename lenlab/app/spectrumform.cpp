@@ -20,9 +20,4 @@ void SpectrumForm::setModel(model::Lenlab* lenlab)
     this->lenlab = lenlab;
 }
 
-void SpectrumForm::setupChart(LabChart* lab_chart)
-{
-
-}
-
 } // namespace app

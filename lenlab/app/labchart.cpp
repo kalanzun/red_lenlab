@@ -17,25 +17,21 @@ LabChart::~LabChart()
     delete ui;
 }
 
-void LabChart::setModel(model::Lenlab* lenlab)
+void LabChart::setModel(model::Component* component)
 {
-    this->lenlab = lenlab;
-}
+    this->component = component;
 
-void LabChart::createSeries(const QString& name)
-{
-    auto s = new QLineSeries();
-    s->setName(name);
-    series.append(s);
-    chart->addSeries(s);
-}
+    for (auto name : component->channel_names()) {
+        auto s = new QLineSeries();
+        s->setName(name);
+        series.append(s);
+        chart->addSeries(s);
+    }
 
-void LabChart::createDefaultAxes()
-{
     chart->createDefaultAxes();
 }
 
-void LabChart::setWaveform(QSharedPointer< model::Waveform >& waveform)
+void LabChart::setWaveform(model::Waveform* waveform)
 {
     qDebug() << "setWaveform";
 

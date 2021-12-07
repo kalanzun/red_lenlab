@@ -16,6 +16,8 @@ class SpectrumAnalyzer : public Component
 public:
     explicit SpectrumAnalyzer(protocol::Board* board);
 
+    QVector< QString > channel_names();
+
 signals:
 
 };

@@ -20,6 +20,17 @@ Logger::Logger(protocol::Board* board)
             this, &Logger::error);
 }
 
+QVector< QString > Logger::channel_names()
+{
+    QVector< QString > labels;
+
+    for (int i = 0; i < 4; ++i) {
+        labels.append(QString("Kanal ") + QString::number(i + 1));
+    }
+
+    return labels;
+}
+
 void Logger::setup(std::shared_ptr< usb::Packet >& packet)
 {
     qDebug() << "setup";

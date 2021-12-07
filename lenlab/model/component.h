@@ -17,6 +17,8 @@ protected:
 public:
     explicit Component(protocol::Board* board);
 
+    virtual QVector< QString > channel_names() = 0;
+
 signals:
 
 };

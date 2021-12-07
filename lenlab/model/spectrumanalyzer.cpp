@@ -9,4 +9,14 @@ SpectrumAnalyzer::SpectrumAnalyzer(protocol::Board* board)
 
 }
 
+QVector< QString > SpectrumAnalyzer::channel_names()
+{
+    QVector< QString > labels;
+
+    labels.append(QString("Amplitude"));
+    labels.append(QString("Phase"));
+
+    return labels;
+}
+
 } // namespace model

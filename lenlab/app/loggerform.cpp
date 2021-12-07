@@ -20,13 +20,4 @@ void LoggerForm::setModel(model::Lenlab* lenlab)
     this->lenlab = lenlab;
 }
 
-void LoggerForm::setupChart(LabChart* lab_chart)
-{
-    for (int i = 0; i < model::Waveform::channels; ++i) {
-        lab_chart->createSeries(QString("Kanal ") + QString::number(i + 1));
-    }
-
-    lab_chart->createDefaultAxes();
-}
-
 } // namespace app

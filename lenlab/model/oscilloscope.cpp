@@ -8,4 +8,15 @@ Oscilloscope::Oscilloscope(protocol::Board* board)
 
 }
 
+QVector< QString > Oscilloscope::channel_names()
+{
+    QVector< QString > labels;
+
+    for (int i = 0; i < 2; ++i) {
+        labels.append(QString("Kanal ") + QString::number(i + 1));
+    }
+
+    return labels;
+}
+
 } // namespace model

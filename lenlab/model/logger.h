@@ -19,6 +19,8 @@ class Logger : public Component
 public:
     explicit Logger(protocol::Board* board);
 
+    QVector< QString > channel_names();
+
 signals:
     void newWaveform(Waveform* waveform);
 

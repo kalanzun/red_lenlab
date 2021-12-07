@@ -4,7 +4,6 @@
 #include <QWidget>
 
 #include "model/lenlab.h"
-#include "labchart.h"
 
 namespace app {
 
@@ -23,7 +22,6 @@ public:
     ~SpectrumForm();
 
     void setModel(model::Lenlab* lenlab);
-    void setupChart(LabChart* lab_chart);
 
 private:
     Ui::SpectrumForm *ui;

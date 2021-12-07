@@ -5,7 +5,8 @@
 #include <QtCharts/QLineSeries>
 #include <QWidget>
 
-#include "model/lenlab.h"
+#include "model/component.h"
+#include "model/waveform.h"
 
 namespace app {
 
@@ -20,18 +21,15 @@ class LabChart : public QWidget
     QChart* chart;
     QVector< QLineSeries* > series;
 
-    model::Lenlab* lenlab;
+    model::Component* component;
 
 public:
     explicit LabChart(QWidget *parent = nullptr);
     ~LabChart();
 
-    void setModel(model::Lenlab* lenlab);
+    void setModel(model::Component* component);
 
-    void createSeries(const QString& name);
-    void createDefaultAxes();
-
-    void setWaveform(QSharedPointer< model::Waveform >& waveform);
+    void setWaveform(model::Waveform* waveform);
 
 private:
     Ui::LabChart *ui;

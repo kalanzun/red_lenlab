@@ -20,9 +20,4 @@ void OscilloscopeForm::setModel(model::Lenlab* lenlab)
     this->lenlab = lenlab;
 }
 
-void OscilloscopeForm::setupChart(LabChart* lab_chart)
-{
-
-}
-
 } // namespace app
