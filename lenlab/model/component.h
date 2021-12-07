@@ -22,7 +22,10 @@ protected:
 public:
     explicit Component(protocol::Board* board);
 
-    virtual const QStringList& channel_names() = 0;
+    virtual const QString x_label() const = 0;
+    virtual const QString y_label() const = 0;
+    virtual const QString y2_label() const;
+    virtual const QStringList& channel_names() const = 0;
 
 signals:
 

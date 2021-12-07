@@ -15,7 +15,22 @@ SpectrumAnalyzer::SpectrumAnalyzer(protocol::Board* board)
 
 }
 
-const QStringList& SpectrumAnalyzer::channel_names()
+const QString SpectrumAnalyzer::x_label() const
+{
+    return QString("Frequenz [Hz]");
+}
+
+const QString SpectrumAnalyzer::y_label() const
+{
+    return QString("Amplitude [dB]");
+}
+
+const QString SpectrumAnalyzer::y2_label() const
+{
+    return QString("Phase [°]");
+}
+
+const QStringList& SpectrumAnalyzer::channel_names() const
 {
     return names;
     /*

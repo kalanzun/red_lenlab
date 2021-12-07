@@ -30,7 +30,17 @@ Logger::Logger(protocol::Board* board)
             this, &Logger::error);
 }
 
-const QStringList& Logger::channel_names()
+const QString Logger::x_label() const
+{
+    return QString("Zeit [s]");
+}
+
+const QString Logger::y_label() const
+{
+    return QString("Spannung [V]");
+}
+
+const QStringList& Logger::channel_names() const
 {
     return names;
     /*

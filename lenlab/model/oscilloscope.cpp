@@ -15,7 +15,17 @@ Oscilloscope::Oscilloscope(protocol::Board* board)
 
 }
 
-const QStringList& Oscilloscope::channel_names()
+const QString Oscilloscope::x_label() const
+{
+    return QString("Zeit [ms]");
+}
+
+const QString Oscilloscope::y_label() const
+{
+    return QString("Spannung [V]");
+}
+
+const QStringList& Oscilloscope::channel_names() const
 {
     return names;
     /*

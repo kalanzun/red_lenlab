@@ -14,7 +14,9 @@ class Oscilloscope : public Component
 public:
     explicit Oscilloscope(protocol::Board* board);
 
-    const QStringList& channel_names();
+    const QString x_label() const;
+    const QString y_label() const;
+    const QStringList& channel_names() const;
 
 signals:
 

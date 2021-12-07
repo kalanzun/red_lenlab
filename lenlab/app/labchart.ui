@@ -15,9 +15,12 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QLabel" name="y_label">
+    <widget class="app::VLabel" name="y_label">
      <property name="text">
       <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -29,6 +32,19 @@
      <property name="text">
       <string>TextLabel</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="app::VLabel" name="y2_label">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
    </item>
   </layout>
@@ -38,6 +54,11 @@
    <class>QChartView</class>
    <extends>QGraphicsView</extends>
    <header>qtcharts/qchartview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>app::VLabel</class>
+   <extends>QLabel</extends>
+   <header>app/vlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

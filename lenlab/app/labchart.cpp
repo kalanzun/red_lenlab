@@ -13,6 +13,8 @@ LabChart::LabChart(QWidget *parent) :
     ui->setupUi(this);
 
     chart = ui->chart_view->chart();
+
+    chart->legend()->hide();
 }
 
 LabChart::~LabChart()
@@ -23,6 +25,17 @@ LabChart::~LabChart()
 void LabChart::setModel(model::Component* component)
 {
     this->component = component;
+
+    ui->x_label->setText(component->x_label());
+    ui->y_label->setText(component->y_label());
+
+    auto y2_label = component->y2_label();
+    if (y2_label.isEmpty()) {
+        ui->y2_label->hide();
+    }
+    else {
+        ui->y2_label->setText(y2_label);
+    }
 
     for (auto name : component->channel_names()) {
         auto s = new QLineSeries();

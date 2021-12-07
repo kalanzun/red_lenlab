@@ -22,6 +22,7 @@ set(PROJECT_SOURCES
     app/loggerform.h app/loggerform.cpp app/loggerform.ui
     app/oscilloscopeform.h app/oscilloscopeform.cpp app/oscilloscopeform.ui
     app/spectrumform.h app/spectrumform.cpp app/spectrumform.ui
+    app/vlabel.h app/vlabel.cpp
     model/component.h model/component.cpp
     model/lenlab.h model/lenlab.cpp
     model/logger.h model/logger.cpp
