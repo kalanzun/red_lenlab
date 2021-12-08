@@ -3,9 +3,9 @@
 
 #include "component.h"
 
-namespace usb {
+namespace protocol {
 
-class Packet;
+class Message;
 
 }
 
@@ -23,8 +23,8 @@ public:
     void reset();
 
 public slots:
-    void setup(std::shared_ptr< usb::Packet >& packet);
-    void reply(std::shared_ptr< usb::Packet >& packet);
+    void setup(std::shared_ptr< protocol::Message >& message);
+    void reply(std::shared_ptr< protocol::Message >& message);
     void error();
 };
 

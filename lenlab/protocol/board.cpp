@@ -2,11 +2,10 @@
 
 #include <QDebug>
 
-#include "lenlab_protocol.h"
 #include "usb/devicehandle.h"
-#include "usb/packet.h"
 #include "usb/usbexception.h"
 #include "device.h"
+#include "message.h"
 #include "querythread.h"
 
 namespace protocol {
@@ -22,11 +21,11 @@ Board::Board(QObject *parent)
             this, &Board::handleQueryThreadStatistics);
 }
 
-void Board::command(std::shared_ptr< usb::Packet >& packet)
+void Board::command(std::shared_ptr< Message >& message)
 {
     assert(device);
 
-    if (device) device->send(packet);
+    if (device) device->send(message);
 }
 
 void Board::lookForDevice()
@@ -45,13 +44,8 @@ void Board::setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle)
     connect(device.get(), &Device::error, this, &Board::handleError);
     connect(device.get(), &Device::destroyed, this, &Board::lookForDevice);
 
-    auto packet = std::make_shared< usb::Packet >();
-    packet->buffer[0] = setUp;
-    packet->buffer[1] = nullType;
-    packet->buffer[2] = 0;
-    packet->buffer[3] = 0;
-    packet->length = 4;
-    device->send(packet);
+    auto setup = Message::createCommand(setUp);
+    command(setup);
 }
 
 void Board::handleQueryThreadStatistics(int count, int interval, int runtime)
@@ -59,13 +53,13 @@ void Board::handleQueryThreadStatistics(int count, int interval, int runtime)
     qDebug() << "QueryThreadStatistics" << count << interval << runtime;
 }
 
-void Board::handleReply(std::shared_ptr< usb::Packet >& packet)
+void Board::handleReply(std::shared_ptr< Message >& message)
 {
-    if (packet->buffer[0] == setUp) {
-        emit setup(packet);
+    if (message->head->reply == Setup) {
+        emit setup(message);
     }
     else {
-        emit reply(packet);
+        emit reply(message);
     }
 }
 

@@ -37,7 +37,7 @@ set_up(struct Message *command)
 {
     struct Message *reply = RingAcquire(&reply_queue);
 
-    setReply(reply, Setup, nullType, command->reference);
+    setReply(reply, Setup, nullType, command->head.reference);
 
     RingWrite(&reply_queue);
 
@@ -73,7 +73,7 @@ get_pages(struct Message *command)
 
     while (page_queue.has_space) {
         page = RingAcquire(&page_queue);
-        setReply(page, Page, nullType, command->reference);
+        setReply(page, Page, nullType, command->head.reference);
         RingWrite(&page_queue);
     }
 
@@ -88,7 +88,7 @@ get_ticks(struct Message *command)
     uint32_t count = getInt(command, 1);
 
     // TODO locking of modules, red fw state machine
-    TickStart(interval, count, command->reference);
+    TickStart(interval, count, command->head.reference);
 
     return true;
 }
@@ -124,7 +124,7 @@ CommandHandlerMain(void)
     if (command_queue.has_content && reply_queue.has_space) {
         command = RingRead(&command_queue);
 
-        switch (command->command) {
+        switch (command->head.command) {
         case setUp:
             success = set_up(command);
             break;

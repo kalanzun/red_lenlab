@@ -23,21 +23,31 @@
 #include "lenlab_protocol.h"
 
 
+struct Message {
+    struct Head head;
+    uint8_t body[56];
+    uint32_t size;
+};
+
+
+_Static_assert(sizeof(struct Message) == 64, "struct Message is 64 bytes");
+
+
 inline void
 setReply(struct Message *message, enum Reply reply, enum Type type, uint16_t reference)
 {
-    message->reply = reply;
-    message->type = type;
-    message->reference = reference;
+    message->head.reply = reply;
+    message->head.type = type;
+    message->head.reference = reference;
 
-    message->size = 4;
+    message->size = sizeof(struct Head);
 }
 
 
 inline uint32_t
 getInt(struct Message *message, uint32_t index)
 {
-    ASSERT(message->type == IntArray);
+    ASSERT(message->head.type == IntArray);
     return ((uint32_t *) &message->body)[index];
 }
 
@@ -45,7 +55,7 @@ getInt(struct Message *message, uint32_t index)
 inline void
 setInt(struct Message *message, uint32_t index, uint32_t value)
 {
-    ASSERT(message->type == IntArray);
+    ASSERT(message->head.type == IntArray);
     ((uint32_t *) &message->body)[index] = value;
 }
 

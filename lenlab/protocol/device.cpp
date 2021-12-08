@@ -5,6 +5,7 @@
 #include "usb/packet.h"
 #include "usb/transfer.h"
 #include "eventloop.h"
+#include "message.h"
 #include "usbthread.h"
 
 namespace protocol {
@@ -37,9 +38,9 @@ Device::~Device()
     receiver1->cancel();
 }
 
-void Device::send(std::shared_ptr< usb::Packet >& packet)
+void Device::send(std::shared_ptr< Message >& message)
 {
-    sender->submit(packet);
+    sender->submit(message->packet);
 }
 
 void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
@@ -47,7 +48,8 @@ void Device::rxCompleteCallback(usb::Transfer* transfer, void* object)
     // callback runs in the thread
     // signal back to main thread
     auto device = static_cast< Device* >(object);
-    emit device->reply(transfer->packet);
+    auto message = std::make_shared< Message >(transfer->packet);
+    emit device->reply(message);
 
     // create new transfer->packet
     transfer->submit();

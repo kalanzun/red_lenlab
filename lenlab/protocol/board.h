@@ -9,13 +9,13 @@
 namespace usb {
 
 class DeviceHandle;
-class Packet;
 
 }
 
 namespace protocol {
 
 class Device;
+class Message;
 class QueryThread;
 
 class Board : public QObject
@@ -28,11 +28,11 @@ class Board : public QObject
 public:
     explicit Board(QObject *parent = nullptr);
 
-    void command(std::shared_ptr< usb::Packet >& packet);
+    void command(std::shared_ptr< Message >& message);
 
 signals:
-    void setup(std::shared_ptr< usb::Packet >& packet);
-    void reply(std::shared_ptr< usb::Packet >& packet);
+    void setup(std::shared_ptr< Message >& message);
+    void reply(std::shared_ptr< Message >& message);
     void error();
 
 public slots:
@@ -41,7 +41,7 @@ public slots:
 private slots:
     void setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle);
     void handleQueryThreadStatistics(int count, int interval, int runtime);
-    void handleReply(std::shared_ptr< usb::Packet >& packet);
+    void handleReply(std::shared_ptr< Message >& message);
     void handleError();
 };
 

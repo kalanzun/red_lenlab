@@ -94,7 +94,7 @@ enum Type ENUM_TYPE {
 };
 
 
-struct Message {
+struct Head {
     union {
         enum Command command;
         enum Reply reply;
@@ -102,14 +102,10 @@ struct Message {
     enum Type type;
 
     uint16_t reference;
-
-    uint8_t body[56];
-
-    uint32_t size;
 };
 
 
-_Static_assert(sizeof(struct Message) == 64, "struct Message is 64 bytes");
+_Static_assert(sizeof(struct Head) == 4, "struct Head is 4 bytes");
 
 
 #endif // LENLAB_PROTOCOL_H

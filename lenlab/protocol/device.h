@@ -9,7 +9,6 @@ namespace usb {
 
 class DeviceHandle;
 class Interface;
-class Packet;
 class Transfer;
 
 }
@@ -17,6 +16,7 @@ class Transfer;
 namespace protocol {
 
 class EventLoop;
+class Message;
 class USBThread;
 
 class Device : public QObject
@@ -38,10 +38,10 @@ public:
     Device(const Device&) = delete;
     Device& operator=(const Device&) = delete;
 
-    void send(std::shared_ptr< usb::Packet >& packet);
+    void send(std::shared_ptr< Message >& message);
 
 signals:
-    void reply(std::shared_ptr< usb::Packet >& packet);
+    void reply(std::shared_ptr< Message >& message);
     void error();
 
 private:
