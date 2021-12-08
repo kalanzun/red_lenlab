@@ -14,23 +14,30 @@ struct Point
     float y;
 };
 
-class ChannelIterator
+struct Sample
+{
+    static const int channels = 4;
+    float x;
+    float y[channels];
+};
+
+class Waveform;
+
+class PointIterator
 {
     QVector< float >::const_iterator x;
     QVector< float >::const_iterator y;
 
 public:
-    explicit ChannelIterator(QVector< float >::const_iterator x, QVector< float >::const_iterator y);
+    explicit PointIterator(QVector< float >::const_iterator x, QVector< float >::const_iterator y);
 
-    ChannelIterator(const ChannelIterator&) = delete;
-    const ChannelIterator& operator=(const ChannelIterator&) = delete;
+    PointIterator(const PointIterator&) = delete;
+    const PointIterator& operator=(const PointIterator&) = delete;
 
-    bool operator!=(const ChannelIterator& other);
+    bool operator!=(const PointIterator& other);
     struct Point operator*();
-    ChannelIterator& operator++();
+    PointIterator& operator++();
 };
-
-class Waveform;
 
 class Channel
 {
@@ -43,9 +50,8 @@ public:
     Channel(const Channel&) = delete;
     const Channel& operator=(const Channel&) = delete;
 
-    ChannelIterator begin();
-    ChannelIterator end();
-
+    PointIterator begin();
+    PointIterator end();
 };
 
 class Waveform : public QObject
@@ -53,7 +59,7 @@ class Waveform : public QObject
     Q_OBJECT
 
 public:
-    static const int channels = 4;
+    static const int channels = Sample::channels;
     static const char* const delimiter;
     uint32_t interval = 0;
 
@@ -62,7 +68,7 @@ public:
 
     explicit Waveform(QObject *parent = nullptr);
 
-    void append(float x, float* y, int length);
+    void appendSample(struct Sample& sample);
 
     int getLength();
     Channel getChannel(int channel);
@@ -70,7 +76,7 @@ public:
     void csv(std::ostream& out);
 
 signals:
-
+    void SampleAppended(struct Sample& sample);
 };
 
 } // namespace model

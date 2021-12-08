@@ -11,19 +11,16 @@ class Packet;
 
 namespace model {
 
-class Waveform;
-
 class Logger : public Component
 {
     Q_OBJECT
 
-    Waveform* waveform;
-
 public:
     explicit Logger(protocol::Board* board);
 
-signals:
-    void newWaveform(Waveform* waveform);
+    void start();
+    void stop();
+    void reset();
 
 public slots:
     void setup(std::shared_ptr< usb::Packet >& packet);

@@ -2,6 +2,7 @@
 #include "app/ui_loggerform.h"
 
 #include "model/lenlab.h"
+#include "model/logger.h"
 
 namespace app {
 
@@ -20,7 +21,9 @@ LoggerForm::~LoggerForm()
 void LoggerForm::setModel(model::Lenlab* lenlab)
 {
     this->lenlab = lenlab;
+    this->logger = lenlab->logger;
 
+    ui->labChart->setModel(lenlab->logger);
     setupChart();
 }
 
@@ -35,6 +38,16 @@ void LoggerForm::setupChart() const
     ui->labChart->createChannel("Kanal 4", false);
 
     ui->labChart->createDefaultAxes();
+}
+
+void LoggerForm::on_startButton_clicked()
+{
+    logger->start();
+}
+
+void LoggerForm::on_stopButton_clicked()
+{
+    logger->stop();
 }
 
 } // namespace app

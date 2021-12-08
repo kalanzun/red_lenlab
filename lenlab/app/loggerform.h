@@ -6,6 +6,7 @@
 namespace model {
 
 class Lenlab;
+class Logger;
 
 }
 
@@ -20,6 +21,7 @@ class LoggerForm : public QWidget
     Q_OBJECT
 
     model::Lenlab* lenlab;
+    model::Logger* logger;
 
 public:
     explicit LoggerForm(QWidget *parent = nullptr);
@@ -31,6 +33,10 @@ public:
 
 private:
     Ui::LoggerForm *ui;
+
+private slots:
+    void on_startButton_clicked();
+    void on_stopButton_clicked();
 };
 
 } // namespace app

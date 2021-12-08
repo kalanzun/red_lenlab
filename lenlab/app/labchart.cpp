@@ -64,6 +64,8 @@ void LabChart::createDefaultAxes()
 void LabChart::setModel(model::Component* component)
 {
     this->component = component;
+
+    setWaveform(component->getWaveform());
 }
 
 void LabChart::setWaveform(model::Waveform* waveform)
@@ -79,6 +81,18 @@ void LabChart::setWaveform(model::Waveform* waveform)
         }
         series.at(i)->replace(list);
         list.clear();
+    }
+
+    waveform->connect(waveform, &model::Waveform::SampleAppended,
+                      this, &LabChart::appendSample);
+}
+
+void LabChart::appendSample(struct model::Sample& sample)
+{
+    qDebug() << "appendSample";
+
+    for (int i = 0; i < sample.channels && i < series.size(); ++i) {
+        series.at(i)->append(sample.x, sample.y[i]);
     }
 }
 

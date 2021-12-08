@@ -2,24 +2,24 @@
 
 namespace model {
 
-ChannelIterator::ChannelIterator(QVector< float >::const_iterator x, QVector< float >::const_iterator y)
+PointIterator::PointIterator(QVector< float >::const_iterator x, QVector< float >::const_iterator y)
     : x{std::move(x)}
     , y{std::move(y)}
 {
 
 }
 
-bool ChannelIterator::operator!=(const ChannelIterator& other)
+bool PointIterator::operator!=(const PointIterator& other)
 {
     return x != other.x;
 }
 
-struct Point ChannelIterator::operator*()
+struct Point PointIterator::operator*()
 {
     return {*x, *y};
 }
 
-ChannelIterator& ChannelIterator::operator++()
+PointIterator& PointIterator::operator++()
 {
     ++x;
     ++y;
@@ -34,14 +34,14 @@ Channel::Channel(int channel, Waveform* waveform)
 
 }
 
-ChannelIterator Channel::begin()
+PointIterator Channel::begin()
 {
-    return ChannelIterator(std::move(waveform->x_values.constBegin()), std::move(waveform->y_values[channel].constBegin()));
+    return PointIterator(std::move(waveform->x_values.constBegin()), std::move(waveform->y_values[channel].constBegin()));
 }
 
-ChannelIterator Channel::end()
+PointIterator Channel::end()
 {
-    return ChannelIterator(std::move(waveform->x_values.constEnd()), std::move(waveform->y_values[channel].constEnd()));
+    return PointIterator(std::move(waveform->x_values.constEnd()), std::move(waveform->y_values[channel].constEnd()));
 }
 
 Waveform::Waveform(QObject *parent)
@@ -50,13 +50,15 @@ Waveform::Waveform(QObject *parent)
 
 }
 
-void Waveform::append(float x, float* y, int length)
+void Waveform::appendSample(struct Sample& sample)
 {
-    x_values.append(x);
+    x_values.append(sample.x);
 
-    for (int i = 0; i < channels && i < length; ++i) {
-        y_values[i].append(y[i]);
+    for (int i = 0; i < channels; ++i) {
+        y_values[i].append(sample.y[i]);
     }
+
+    emit SampleAppended(sample);
 }
 
 int Waveform::getLength()

@@ -8,6 +8,7 @@
 namespace model {
 
 class Component;
+struct Sample;
 class Waveform;
 
 }
@@ -44,6 +45,9 @@ public:
 
 private:
     Ui::LabChart *ui;
+
+private slots:
+    void appendSample(struct model::Sample& sample);
 };
 
 } // namespace app
