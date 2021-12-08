@@ -1,5 +1,7 @@
 #include "board.h"
 
+#include <QDebug>
+
 #include "lenlab_protocol.h"
 #include "usb/devicehandle.h"
 #include "usb/packet.h"
@@ -15,6 +17,9 @@ Board::Board(QObject *parent)
 {
     connect(query_thread.get(), &QueryThread::DeviceHandleCreated,
             this, &Board::setupDevice);
+
+    connect(query_thread.get(), &QueryThread::Statistics,
+            this, &Board::handleQueryThreadStatistics);
 }
 
 void Board::command(std::shared_ptr< usb::Packet >& packet)
@@ -47,6 +52,11 @@ void Board::setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle)
     packet->buffer[3] = 0;
     packet->length = 4;
     device->send(packet);
+}
+
+void Board::handleQueryThreadStatistics(int count, int interval, int runtime)
+{
+    qDebug() << "QueryThreadStatistics" << count << interval << runtime;
 }
 
 void Board::handleReply(std::shared_ptr< usb::Packet >& packet)

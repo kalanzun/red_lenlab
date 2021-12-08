@@ -2,8 +2,6 @@
 
 #include <chrono>
 
-#include <QDebug>
-
 #include "libusb.h"
 
 #include "usb/devicehandle.h"
@@ -28,11 +26,12 @@ QueryThread::~QueryThread()
 void QueryThread::run()
 {
     struct libusb_device_descriptor desc;
+    int count = 0;
 
     while(!isInterruptionRequested()) {
         auto start = std::chrono::steady_clock::now();
 
-        usb::DeviceList list; // slow and may throw
+        usb::DeviceList list; // may throw
 
         for(auto dev: list) {
             libusb_get_device_descriptor(dev, &desc);
@@ -44,9 +43,13 @@ void QueryThread::run()
             }
         }
 
-        auto interval = std::chrono::duration_cast< std::chrono::milliseconds >(
-                    std::chrono::steady_clock::now() - start);
-        qDebug() << "QueryThread loop interval [ms]:" << interval.count();
+        ++count;
+        auto runtime = std::chrono::duration_cast< std::chrono::milliseconds >(
+                    std::chrono::steady_clock::now() - start).count();
+
+        emit Statistics(count, interval, runtime);
+
+        if (runtime < interval) msleep(interval - runtime); // rate limiter
     }
 }
 

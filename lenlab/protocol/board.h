@@ -40,6 +40,7 @@ public slots:
 
 private slots:
     void setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle);
+    void handleQueryThreadStatistics(int count, int interval, int runtime);
     void handleReply(std::shared_ptr< usb::Packet >& packet);
     void handleError();
 };
