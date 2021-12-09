@@ -22,10 +22,10 @@
 #include "page_handler.h"
 
 
-static uint8_t pages0[12][1024] __attribute__ ((aligned(4))); // uint32_t alignment for uDMA
-static uint8_t pages1[12][1024] __attribute__ ((aligned(4))); // uint32_t alignment for uDMA
+static uint8_t pages_0[12][1024] __attribute__ ((aligned(4))); // uint32_t alignment for uDMA
+static uint8_t pages_1[12][1024] __attribute__ ((aligned(4))); // uint32_t alignment for uDMA
 
 struct Ring page_queue[] = {
-    NEW_RING(pages0),
-    NEW_RING(pages1)
+    NEW_RING(pages_0),
+    NEW_RING(pages_1)
 };

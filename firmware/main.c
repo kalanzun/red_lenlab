@@ -27,7 +27,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/udma.h"
 
-#include "adc.h"
+#include "adc_group.h"
 #include "command_handler.h"
 #include "logger.h"
 #include "reply_handler.h"

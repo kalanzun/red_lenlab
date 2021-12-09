@@ -22,14 +22,11 @@
 
 #include "driverlib/debug.h"
 
-#include "adc.h"
+#include "adc_group.h"
 
 
 #define LOG_SEQ_SEQUENCE_NUM 1 // shall be different from osc_seq
 #define LOG_SEQ_PRIORITY 1 // shall be different from osc_seq
-
-#define LOG_SEQ_ADC0_INT INT_ADC0SS1
-#define LOG_SEQ_ADC1_INT INT_ADC1SS1
 
 
 struct LogSeq {
@@ -40,11 +37,15 @@ struct LogSeq {
 
 
 struct LogSeqGroup {
-    struct LogSeq log_seq[2];
+    struct LogSeq log_seq[GROUP_SIZE];
 };
 
 
 extern struct LogSeqGroup log_seq_group;
+
+
+// struct LogSeq *log;
+#define FOREACH_LOG for (log = log_seq_group.log_seq; log != log_seq_group.log_seq + GROUP_SIZE; ++log)
 
 
 inline void
@@ -60,10 +61,10 @@ LogSeqIntHandler(struct LogSeq *self)
 inline bool
 LogSeqGroupReady(void)
 {
+    struct LogSeq *log;
     bool ready = true;
 
-    ready &= log_seq_group.log_seq[0].ready;
-    ready &= log_seq_group.log_seq[1].ready;
+    FOREACH_LOG ready &= log->ready;
 
     return ready;
 }
@@ -72,10 +73,10 @@ LogSeqGroupReady(void)
 inline bool
 LogSeqGroupError(void)
 {
+    struct LogSeq *log;
     bool error = false;
 
-    error |= log_seq_group.log_seq[0].error;
-    error |= log_seq_group.log_seq[1].error;
+    FOREACH_LOG error |= log->error;
 
     return error;
 }
@@ -84,18 +85,19 @@ LogSeqGroupError(void)
 inline void
 LogSeqGroupRelease(void)
 {
-    log_seq_group.log_seq[0].ready = false;
-    log_seq_group.log_seq[1].ready = false;
+    struct LogSeq *log;
+
+    FOREACH_LOG log->ready = false;
 }
 
 
 inline int
 LogSeqGroupDataGet(uint32_t *buffer)
 {
+    const struct ADC *adc;
     int count = 0; // sample count
 
-    count += ADCSequenceDataGet(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM, buffer + count);
-    count += ADCSequenceDataGet(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM, buffer + count);
+    FOREACH_ADC count += ADCSequenceDataGet(adc->base, LOG_SEQ_SEQUENCE_NUM, buffer + count);
 
     return count;
 }
@@ -113,6 +115,8 @@ LogSeqEnable(struct LogSeq *self)
 inline void
 LogSeqGroupEnable(uint32_t interval)
 {
+    const struct ADC *adc;
+    struct LogSeq *log;
     int count;
     uint32_t buffer[8]; // max FIFO length of SS1
 
@@ -120,16 +124,15 @@ LogSeqGroupEnable(uint32_t interval)
     count = LogSeqGroupDataGet(buffer);
     ASSERT(count == 0 || count == 8);
 
-    LogSeqEnable(&log_seq_group.log_seq[0]);
-    LogSeqEnable(&log_seq_group.log_seq[1]);
+    FOREACH_LOG LogSeqEnable(log);
 
-    ADCSequenceEnable(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM);
-    ADCIntEnable(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM); // Enable to generate direct ADC Interrupts, do not enable for DMA
-    IntEnable(LOG_SEQ_ADC0_INT); // Enable Interrupt in NVIC
+    FOREACH_ADC {
+        ADCSequenceEnable(adc->base, LOG_SEQ_SEQUENCE_NUM);
+        ADCIntEnable(adc->base, LOG_SEQ_SEQUENCE_NUM); // Enable to generate direct ADC Interrupts, do not enable for DMA
+    }
 
-    ADCSequenceEnable(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM);
-    ADCIntEnable(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM); // Enable to generate direct ADC Interrupts, do not enable for DMA
-    IntEnable(LOG_SEQ_ADC1_INT); // Enable Interrupt in NVIC
+    IntEnable(INT_ADC0SS1); // Enable Interrupt in NVIC
+    IntEnable(INT_ADC1SS1); // Enable Interrupt in NVIC
 
     // interval in ms
     ADCTimerStart(interval * 1000); // us
@@ -139,28 +142,30 @@ LogSeqGroupEnable(uint32_t interval)
 inline void
 LogSeqGroupDisable(void)
 {
+    const struct ADC *adc;
+
     ADCTimerStop();
 
-    IntDisable(LOG_SEQ_ADC0_INT);
-    ADCIntDisable(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM);
-    ADCSequenceDisable(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM);
+    IntDisable(INT_ADC0SS1);
+    IntDisable(INT_ADC1SS1);
 
-    IntDisable(LOG_SEQ_ADC1_INT);
-    ADCIntDisable(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM);
-    ADCSequenceDisable(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM);
+    FOREACH_ADC {
+        ADCIntDisable(adc->base, LOG_SEQ_SEQUENCE_NUM);
+        ADCSequenceDisable(adc->base, LOG_SEQ_SEQUENCE_NUM);
+    }
 }
 
 
 inline void
 LogSeqGroupInit(void)
 {
-    ADCSequenceConfigure(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM, ADC_TRIGGER_TIMER, LOG_SEQ_PRIORITY);
-    ADCSequenceStepConfigure(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM, 0, ADC0_CHANNEL0);
-    ADCSequenceStepConfigure(ADC0_BASE, LOG_SEQ_SEQUENCE_NUM, 1, ADC0_CHANNEL1 | ADC_CTL_IE | ADC_CTL_END);
+    const struct ADC *adc;
 
-    ADCSequenceConfigure(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM, ADC_TRIGGER_TIMER, LOG_SEQ_PRIORITY);
-    ADCSequenceStepConfigure(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM, 0, ADC1_CHANNEL0);
-    ADCSequenceStepConfigure(ADC1_BASE, LOG_SEQ_SEQUENCE_NUM, 1, ADC1_CHANNEL1 | ADC_CTL_IE | ADC_CTL_END);
+    FOREACH_ADC {
+        ADCSequenceConfigure(adc->base, LOG_SEQ_SEQUENCE_NUM, ADC_TRIGGER_TIMER, LOG_SEQ_PRIORITY);
+        ADCSequenceStepConfigure(adc->base, LOG_SEQ_SEQUENCE_NUM, 0, adc->channel);
+        ADCSequenceStepConfigure(adc->base, LOG_SEQ_SEQUENCE_NUM, 1, adc->channel_1 | ADC_CTL_IE | ADC_CTL_END);
+    }
 }
 
 
