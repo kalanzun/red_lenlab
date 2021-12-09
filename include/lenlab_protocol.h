@@ -53,7 +53,6 @@
 
 
 #if defined(__cplusplus)
-#include <stdint.h>
 #define ENUM_TYPE : uint8_t
 #define _Static_assert(x, y) static_assert(x, y)
 #else
