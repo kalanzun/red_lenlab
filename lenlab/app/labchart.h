@@ -6,18 +6,14 @@
 #include <QWidget>
 
 namespace model {
-
 class Component;
 struct Sample;
 class Waveform;
-
 }
 
 namespace app {
 
-namespace Ui {
-class LabChart;
-}
+namespace Ui { class LabChart; }
 
 class LabChart : public QWidget
 {

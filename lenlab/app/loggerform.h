@@ -4,17 +4,13 @@
 #include <QWidget>
 
 namespace model {
-
 class Lenlab;
 class Logger;
-
 }
 
 namespace app {
 
-namespace Ui {
-class LoggerForm;
-}
+namespace Ui { class LoggerForm; }
 
 class LoggerForm : public QWidget
 {

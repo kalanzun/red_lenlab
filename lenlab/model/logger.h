@@ -3,11 +3,7 @@
 
 #include "component.h"
 
-namespace protocol {
-
-class Message;
-
-}
+namespace protocol { class Message; }
 
 namespace model {
 

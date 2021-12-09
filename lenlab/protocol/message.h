@@ -5,11 +5,7 @@
 
 #include "lenlab_protocol.h"
 
-namespace usb {
-
-class Packet;
-
-} // namespace usb
+namespace usb { class Packet; }
 
 namespace protocol {
 

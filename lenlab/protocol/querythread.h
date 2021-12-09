@@ -5,11 +5,7 @@
 
 #include <QThread>
 
-namespace usb {
-
-class DeviceHandle;
-
-} // namespace usb
+namespace usb { class DeviceHandle; }
 
 namespace protocol {
 

@@ -3,11 +3,7 @@
 
 #include <QObject>
 
-namespace protocol {
-
-class Board;
-
-}
+namespace protocol { class Board; }
 
 namespace model {
 

@@ -3,17 +3,11 @@
 
 #include <QWidget>
 
-namespace model {
-
-class Lenlab;
-
-}
+namespace model { class Lenlab; }
 
 namespace app {
 
-namespace Ui {
-class OscilloscopeForm;
-}
+namespace Ui { class OscilloscopeForm; }
 
 class OscilloscopeForm : public QWidget
 {

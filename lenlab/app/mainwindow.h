@@ -4,10 +4,8 @@
 #include <QMainWindow>
 
 namespace model {
-
 class Lenlab;
-
-} // namespace model
+}
 
 namespace app {
 

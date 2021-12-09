@@ -10,9 +10,7 @@
 namespace usb {
 
 class Interface;
-
 class Packet;
-
 class Transfer;
 
 class TransferCallback

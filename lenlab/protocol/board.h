@@ -6,11 +6,7 @@
 #include <QObject>
 #include <QPointer>
 
-namespace usb {
-
-class DeviceHandle;
-
-}
+namespace usb { class DeviceHandle; }
 
 namespace protocol {
 

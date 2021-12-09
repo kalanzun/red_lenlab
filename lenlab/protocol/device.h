@@ -6,11 +6,9 @@
 #include <QObject>
 
 namespace usb {
-
 class DeviceHandle;
 class Interface;
 class Transfer;
-
 }
 
 namespace protocol {
