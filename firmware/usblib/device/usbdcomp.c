@@ -1037,7 +1037,7 @@ CompositeEPChange(tCompositeEntry *psCompDevice, uint8_t ui8Old,
 uint32_t
 BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
 {
-    uint32_t ui32Idx, ui32Offset, ui32CPIdx, ui32FixINT, ui32Dev;
+    uint32_t ui32Idx, ui32Offset, ui32CPIdx, ui32Dev;
     uint16_t ui16TotalLength, ui16Bytes;
     uint8_t ui8Interface, ui8INEndpoint, ui8OUTEndpoint;
     uint8_t *pui8Data, *pui8Config;
@@ -1059,7 +1059,6 @@ BuildCompositeDescriptor(tUSBDCompositeDevice *psCompDevice)
     ui8INEndpoint = 1;
     ui8OUTEndpoint = 1;
     ui32Offset = 0;
-    ui32FixINT = 0;
 	bINEndpointSet = false;
 	bOUTEndpointSet = false;
 
