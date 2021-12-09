@@ -25,7 +25,5 @@
 
 extern struct Ring reply_queue;
 
-extern struct Ring page_queue;
-
 
 #endif /* REPLY_HANDLER_H_ */

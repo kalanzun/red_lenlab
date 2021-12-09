@@ -25,8 +25,3 @@
 static uint8_t replies[8][64] __attribute__ ((aligned(4)));
 
 struct Ring reply_queue = NEW_RING(replies);
-
-
-static uint8_t pages[24][1024] __attribute__ ((aligned(4))); // uint32_t alignment for uDMA
-
-struct Ring page_queue = NEW_RING(pages);

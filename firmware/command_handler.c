@@ -23,6 +23,7 @@
 
 #include "logger.h"
 #include "message.h"
+#include "page_handler.h"
 #include "reply_handler.h"
 #include "tick.h"
 
@@ -35,7 +36,7 @@ struct Ring command_queue = NEW_RING(commands);
 static bool
 set_up(struct Message *command)
 {
-    struct Message *reply = RingAcquire(&reply_queue);
+    struct Message *reply = (struct Message *) RingAcquire(&reply_queue);
 
     setReply(reply, Setup, nullType, command->head.reference);
 
@@ -50,7 +51,7 @@ get_echo(struct Message *command)
 {
     uint32_t i;
 
-    struct Message *reply = RingAcquire(&reply_queue);
+    struct Message *reply = (struct Message *) RingAcquire(&reply_queue);
 
     reply->size = 60;
 
@@ -68,13 +69,21 @@ static bool
 get_pages(struct Message *command)
 {
     struct Message *page;
+    struct Message *reply;
+    int i;
 
-    if (page_queue.has_content) return false;
+    if (!page_queue[0].empty || !page_queue[1].empty) return false;
 
-    while (page_queue.has_space) {
-        page = RingAcquire(&page_queue);
-        setReply(page, Page, nullType, command->head.reference);
-        RingWrite(&page_queue);
+    for (i = 0; i < 2; ++i) {
+        while (page_queue[i].has_space) {
+            page = (struct Message *) RingAcquire(&page_queue[i]);
+            setReply(page, Page, nullType, command->head.reference);
+            RingWrite(&page_queue[i]);
+        }
+
+        reply = (struct Message *) RingAcquire(&reply_queue);
+        setPageQueue(reply, &page_queue[i]);
+        RingWrite(&reply_queue);
     }
 
     return true;
@@ -122,7 +131,7 @@ CommandHandlerMain(void)
     struct Message *command;
 
     if (command_queue.has_content && reply_queue.has_space) {
-        command = RingRead(&command_queue);
+        command = (struct Message *) RingPeak(&command_queue);
 
         switch (command->head.command) {
         case setUp:
@@ -154,6 +163,9 @@ CommandHandlerMain(void)
             break;
         }
 
-        if (success) RingRelease(&command_queue);
+        if (success) {
+            RingRead(&command_queue);
+            RingRelease(&command_queue);
+        }
     }
 }

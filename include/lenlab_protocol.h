@@ -89,6 +89,7 @@ enum Type ENUM_TYPE {
     ByteArray,
     ShortArray,
     IntArray,
+    PageQueue,
     NUM_TYPES
 };
 

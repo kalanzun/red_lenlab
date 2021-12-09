@@ -22,16 +22,11 @@
 
 #include "driverlib/debug.h"
 
-#include "lenlab_protocol.h"
-
 
 /*
- * Note, Message does not know the element (its own) size.
- * RING_NEW saves the element size in ring.element_size.
- * That way, Ring supports 64 bytes commands and replies
- * as well as 1024 bytes data messages.
- *
- * The Message body size is 4 bytes smaller than the element_size.
+ * RING_NEW saves the array element size in ring.element_size.
+ * Ring supports different element sizes,
+ * 64 bytes commands and replies as well as 1024 bytes data messages.
  */
 
 
@@ -40,11 +35,14 @@ struct Ring {
     const uint32_t length;
     const uint32_t element_size;
 
+    volatile uint32_t acquire;
     volatile uint32_t read;
     volatile uint32_t write;
+    volatile uint32_t release;
 
-    volatile bool has_content;
+    volatile bool empty;
     volatile bool has_space;
+    volatile bool has_content;
 };
 
 
@@ -52,46 +50,66 @@ struct Ring {
     .array = (uint8_t *) (_array), \
     .length = sizeof(_array) / sizeof((_array)[0]), \
     .element_size = sizeof((_array)[0]), \
+    .empty = true, \
     .has_space = true \
 }
 
 
-inline struct Message *
+inline uint8_t *
 RingAcquire(struct Ring *self)
 {
     ASSERT(self->has_space);
 
-    return (struct Message *) (self->array + self->write * self->element_size);
+    uint8_t *element = self->array + self->acquire * self->element_size;
+    self->acquire = (self->acquire + 1) % self->length;
+
+    self->empty = false;
+    if (self->acquire == self->release) self->has_space = false;
+
+    return element;
 }
 
 
 inline void
 RingWrite(struct Ring *self)
 {
-    ASSERT(self->has_space);
+    ASSERT(!self->empty);
 
     self->write = (self->write + 1) % self->length;
     self->has_content = true;
-    if (self->read == self->write) self->has_space = false;
 }
 
 
-inline struct Message *
+inline uint8_t *
+RingPeak(struct Ring *self)
+{
+    ASSERT(self->has_content);
+
+    return self->array + self->read * self->element_size;
+}
+
+
+inline uint8_t *
 RingRead(struct Ring *self)
 {
     ASSERT(self->has_content);
 
-    return (struct Message *) (self->array + self->read * self->element_size);
+    uint8_t *element = self->array + self->read * self->element_size;
+    self->read = (self->read + 1) % self->length;
+
+    if (self->read == self->write) self->has_content = false;
+
+    return element;
 }
 
 
 inline void
 RingRelease(struct Ring *self)
 {
-    ASSERT(self->has_content);
+    ASSERT(!self->empty);
 
-    self->read = (self->read + 1) % self->length;
-    if (self->read == self->write) self->has_content = false;
+    self->release = (self->release + 1) % self->length;
+    if (self->acquire == self->release) self->empty = true;
     self->has_space = true;
 }
 

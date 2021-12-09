@@ -56,7 +56,7 @@ LoggerMain(void)
     }
 
     if (LogSeqGroupReady() && reply_queue.has_space) {
-        reply = RingAcquire(&reply_queue);
+        reply = (struct Message *) RingAcquire(&reply_queue);
         setReply(reply, Log, IntArray, 0); // TODO logger.reference
         reply->size = 4 + 5 * sizeof(uint32_t); // time and 4 channels
 
@@ -64,7 +64,7 @@ LoggerMain(void)
         setInt(reply, 0, log_seq_group.log_seq[0].count);
 
         count = LogSeqGroupDataGet((uint32_t *) &reply->body + 1);
-        ASSERT(count == 4);
+        ASSERT(count == 4); // we might have two entries as well
 
         LogSeqGroupRelease();
         RingWrite(&reply_queue);

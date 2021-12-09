@@ -29,7 +29,6 @@
 #include "driverlib/usb.h"
 #include "driverlib/udma.h"
 
-#include "lenlab_protocol.h"
 #include "lenlab_version.h"
 
 #include "command_handler.h"
@@ -135,7 +134,7 @@ RxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
 
             ++usb_device.rx_available_event;
 
-            command = RingAcquire(&command_queue);
+            command = (struct Message *) RingAcquire(&command_queue);
             size = USBDBulkPacketRead(&usb_device, (uint8_t *) command, command_queue.element_size, false);
             ASSERT(size); // the event is USB_EVENT_RX_AVAILABLE
             // TODO implement setSize for commands
@@ -168,24 +167,6 @@ TxEventCallback(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgParam, void 
     }
 
     return 0;
-}
-
-
-void
-USB0IntHandler(void)
-{
-    if (usb_device.dma_pending && uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP) {
-        // Handle the DMA complete case.
-        usb_device.dma_pending = false;
-        ++usb_device.dma_complete_event;
-        USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
-
-        RingRelease(&page_queue);
-    }
-    else {
-        // Pass on to usblib.
-        USB0DeviceIntHandler();
-    }
 }
 
 
@@ -231,9 +212,37 @@ USBDeviceStartTx(uint8_t *data, uint32_t size)
 
 
 void
+USB0IntHandler(void)
+{
+    uint8_t *payload;
+
+    if (usb_device.dma_pending && uDMAChannelModeGet(UDMA_CHANNEL_USBEP1TX) == UDMA_MODE_STOP) {
+        // Handle the DMA complete case.
+        usb_device.dma_pending = false;
+        ++usb_device.dma_complete_event;
+        USBEndpointDMADisable(USB0_BASE, USB_EP_1, USB_EP_DEV_IN);
+
+        RingRelease(usb_device.page_queue);
+        if (usb_device.page_queue->has_content) {
+            payload = RingRead(usb_device.page_queue);
+            USBDeviceStartuDMA(payload, usb_device.page_queue->element_size);
+        }
+        else {
+            RingRelease(&reply_queue);
+        }
+    }
+    else {
+        // Pass on to usblib.
+        USB0DeviceIntHandler();
+    }
+}
+
+
+void
 USBDeviceMain(void)
 {
     struct Message *reply;
+    uint8_t *payload;
 
 #ifdef DEBUG
     uint32_t size;
@@ -244,22 +253,24 @@ USBDeviceMain(void)
 
     if (!usb_device.tx_pending && !usb_device.dma_pending) {
 
+        if (reply_queue.has_content) {
+
 #ifdef DEBUG
-        if (page_queue.has_content || reply_queue.has_content) {
             // is our configuration still good?
             USBDevEndpointConfigGet(USB0_BASE, USB_EP_1, &size, &flags);
             ASSERT(flags & USB_EP_AUTO_SET);
-        }
 #endif
 
-        if (page_queue.has_content) {
-            reply = RingRead(&page_queue);
-            USBDeviceStartuDMA((uint8_t *) reply, page_queue.element_size);
-        }
-        else if (reply_queue.has_content) {
-            reply = RingRead(&reply_queue);
-            USBDeviceStartTx((uint8_t *) reply, reply->size);
-            RingRelease(&reply_queue);
+            reply = (struct Message *) RingRead(&reply_queue);
+            if (reply->head.type == PageQueue) {
+                usb_device.page_queue = getPageQueue(reply);
+                payload = RingRead(usb_device.page_queue);
+                USBDeviceStartuDMA(payload, usb_device.page_queue->element_size);
+            }
+            else {
+                USBDeviceStartTx((uint8_t *) reply, reply->size);
+                RingRelease(&reply_queue);
+            }
         }
     }
 }
@@ -297,5 +308,4 @@ USBDeviceInit(void)
     // Assumptions
     ASSERT(command_queue.element_size == 64);
     ASSERT(reply_queue.element_size == 64);
-    ASSERT(page_queue.element_size == 1024);
 }

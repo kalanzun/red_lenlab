@@ -42,7 +42,7 @@ Timer0AIntHandler(void)
     if (--tick.count == 0) TickStop();
 
     if (reply_queue.has_space) {
-        reply = RingAcquire(&reply_queue);
+        reply = (struct Message *) RingAcquire(&reply_queue);
         setReply(reply, Tick, IntArray, tick.reference);
         reply->size = 8;
         setInt(reply, 0, tick.count);

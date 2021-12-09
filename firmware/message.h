@@ -25,8 +25,13 @@
 
 struct Message {
     struct Head head;
-    uint8_t body[56];
-    uint32_t size;
+    union {
+        struct {
+            uint8_t body[56];
+            uint32_t size;
+        };
+        struct Ring *page_queue;
+    };
 };
 
 
@@ -41,6 +46,28 @@ setReply(struct Message *message, enum Reply reply, enum Type type, uint16_t ref
     message->head.reference = reference;
 
     message->size = sizeof(struct Head);
+}
+
+
+inline struct Ring*
+getPageQueue(struct Message *message)
+{
+    ASSERT(message->head.reply == nullReply);
+    ASSERT(message->head.type == PageQueue);
+    ASSERT(message->head.reference == 0);
+
+    return message->page_queue;
+}
+
+
+inline void
+setPageQueue(struct Message *message, struct Ring *page_queue)
+{
+    message->head.reply = nullReply;
+    message->head.type = PageQueue;
+    message->head.reference = 0;
+
+    message->page_queue = page_queue;
 }
 
 
