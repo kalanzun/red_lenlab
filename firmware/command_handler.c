@@ -23,6 +23,7 @@
 
 #include "logger.h"
 #include "message.h"
+#include "oscilloscope.h"
 #include "page_handler.h"
 #include "reply_handler.h"
 #include "tick.h"
@@ -123,6 +124,17 @@ stop_logger(struct Message *command)
 }
 
 
+static bool
+start_oscilloscope(struct Message *command)
+{
+    uint32_t oversamples = getInt(command, 0);
+
+    OscilloscopeStart(oversamples);
+
+    return true;
+}
+
+
 void
 CommandHandlerMain(void)
 {
@@ -156,6 +168,10 @@ CommandHandlerMain(void)
 
         case stopLogger:
             success = stop_logger(command);
+            break;
+
+        case startOscilloscope:
+            success = start_oscilloscope(command);
             break;
 
         default:

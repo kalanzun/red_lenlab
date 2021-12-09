@@ -20,6 +20,8 @@
 #define MESSAGE_H_
 
 
+#include "driverlib/debug.h"
+
 #include "lenlab_protocol.h"
 
 

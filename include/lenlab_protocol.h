@@ -68,6 +68,7 @@ enum Command ENUM_TYPE {
     getTicks,
     startLogger,
     stopLogger,
+    startOscilloscope,
     NUM_COMMANDS
 };
 
@@ -79,6 +80,7 @@ enum Reply ENUM_TYPE {
     Page,
     Tick,
     Log,
+    OscilloscopeData,
     NUM_REPLIES
 };
 

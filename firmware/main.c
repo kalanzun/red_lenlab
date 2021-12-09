@@ -30,6 +30,7 @@
 #include "adc_group.h"
 #include "command_handler.h"
 #include "logger.h"
+#include "oscilloscope.h"
 #include "reply_handler.h"
 #include "tick.h"
 #include "usb_device.h"
@@ -167,11 +168,13 @@ main(void)
     TickInit();
     ADCGroupInit();
     LoggerInit();
+    OscilloscopeInit();
     USBDeviceInit();
 
     while (1) {
         // it handles the modules
         LoggerMain();
+        OscilloscopeMain();
 
         // it handles the command
         CommandHandlerMain();

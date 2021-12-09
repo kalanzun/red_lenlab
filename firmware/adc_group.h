@@ -41,6 +41,7 @@ struct ADC {
     uint32_t gpio_base;
     uint32_t gpio_pin;
     uint32_t gpio_pin_1;
+    uint32_t udma_channel;
 };
 
 
@@ -57,7 +58,8 @@ static const struct ADCGroup adc_group = {
             .channel_1 = ADC_CTL_CH5, // Pin PD2
             .gpio_base = GPIO_PORTD_BASE,
             .gpio_pin = GPIO_PIN_0,
-            .gpio_pin_1 = GPIO_PIN_2
+            .gpio_pin_1 = GPIO_PIN_2,
+            .udma_channel = UDMA_CHANNEL_ADC0
         },
         {
             .base = ADC1_BASE,
@@ -65,7 +67,8 @@ static const struct ADCGroup adc_group = {
             .channel_1 = ADC_CTL_CH4, // Pin PD3
             .gpio_base = GPIO_PORTD_BASE,
             .gpio_pin = GPIO_PIN_1,
-            .gpio_pin_1 = GPIO_PIN_3
+            .gpio_pin_1 = GPIO_PIN_3,
+            .udma_channel = 24 // UDMA_CHANNEL_ADC1 is wrong?!
         }
     },
 };
