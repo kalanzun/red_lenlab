@@ -24,13 +24,19 @@
 #include "osc_seq.h"
 
 
-struct OscData {
+struct Page { // TODO move to osc_seq; it needs to know about the values
     struct Head head;
-    uint8_t payload[1020];
+    uint16_t log2oversamples;
+    uint16_t trigger_config;
+    uint16_t channel;
+    uint16_t index;
+    uint16_t trigger;
+    uint16_t res[5];
+    uint16_t values[500];
 };
 
 
-_Static_assert(sizeof(struct OscData) == 1024, "struct OscData is 1024 bytes");
+_Static_assert(sizeof(struct Page) == 1024, "struct Page is 1024 bytes");
 
 
 struct Oscilloscope {

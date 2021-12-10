@@ -66,6 +66,9 @@ void LabChart::setModel(model::Component* component)
     this->component = component;
 
     setWaveform(component->getWaveform());
+
+    connect(component, &model::Component::WaveformCreated,
+            this, &LabChart::setWaveform);
 }
 
 void LabChart::setWaveform(model::Waveform* waveform)
@@ -83,8 +86,20 @@ void LabChart::setWaveform(model::Waveform* waveform)
         list.clear();
     }
 
-    waveform->connect(waveform, &model::Waveform::SampleAppended,
-                      this, &LabChart::appendSample);
+    setRange(waveform);
+
+    connect(waveform, &model::Waveform::SampleAppended,
+            this, &LabChart::appendSample);
+}
+
+void LabChart::setRange(model::Waveform* waveform)
+{
+    auto axes = chart->axes(Qt::Horizontal);
+    if (!axes.isEmpty()) axes.first()->setRange(0, 5000);
+
+    axes = chart->axes(Qt::Vertical);
+    if (!axes.isEmpty()) axes.first()->setRange(-2, 2);
+    if (axes.size() > 1) axes.at(1)->setRange(-180, 0);
 }
 
 void LabChart::appendSample(struct model::Sample& sample)

@@ -47,7 +47,11 @@ PointIterator Channel::end()
 Waveform::Waveform(QObject *parent)
     : QObject{parent}
 {
+    x_values.reserve(5000);
 
+    for (int i = 0; i < channels; ++i) {
+        y_values[i].reserve(5000);
+    }
 }
 
 void Waveform::appendSample(struct Sample& sample)

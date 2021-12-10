@@ -23,6 +23,8 @@ public:
 
     static std::shared_ptr< Message > createCommand(enum Command command, enum Type type = nullType, uint16_t reference = 0);
 
+    uint8_t* getBuffer();
+
     uint32_t getInt(int i);
     void addInt(uint32_t value);
 };

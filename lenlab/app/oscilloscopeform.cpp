@@ -2,6 +2,7 @@
 #include "app/ui_oscilloscopeform.h"
 
 #include "model/lenlab.h"
+#include "model/oscilloscope.h"
 
 namespace app {
 
@@ -20,7 +21,9 @@ OscilloscopeForm::~OscilloscopeForm()
 void OscilloscopeForm::setModel(model::Lenlab* lenlab)
 {
     this->lenlab = lenlab;
+    this->oscilloscope = lenlab->oscilloscope;
 
+    ui->labChart->setModel(lenlab->oscilloscope);
     setupChart();
 }
 
@@ -33,6 +36,11 @@ void OscilloscopeForm::setupChart() const
     ui->labChart->createChannel("Kanal 2", false);
 
     ui->labChart->createDefaultAxes();
+}
+
+void OscilloscopeForm::on_startButton_clicked()
+{
+    oscilloscope->start();
 }
 
 } // namespace app

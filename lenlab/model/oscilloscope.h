@@ -3,7 +3,20 @@
 
 #include "component.h"
 
+#include "protocol/message.h"
+
 namespace model {
+
+struct Page {
+    struct Head head;
+    uint16_t log2oversamples;
+    uint16_t trigger_config;
+    uint16_t channel;
+    uint16_t index;
+    uint16_t trigger;
+    uint16_t res[5];
+    uint16_t values[500];
+};
 
 class Oscilloscope : public Component
 {
@@ -12,8 +25,14 @@ class Oscilloscope : public Component
 public:
     explicit Oscilloscope(protocol::Board* board);
 
-signals:
+    void start();
+    void stop();
+    void reset();
 
+public slots:
+    void setup(std::shared_ptr< protocol::Message >& message);
+    void reply(std::shared_ptr< protocol::Message >& message);
+    void error();
 };
 
 } // namespace model

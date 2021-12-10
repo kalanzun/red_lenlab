@@ -45,8 +45,11 @@ OscilloscopeMain(void)
 {
     struct OscSeq *osc;
 
-    struct OscData *page;
+    struct Page *page;
     struct Message *reply;
+
+    uint16_t channel;
+    uint16_t index;
 
     if (!oscilloscope.active) return;
 
@@ -55,14 +58,22 @@ OscilloscopeMain(void)
         OscSeqGroupDisable();
         oscilloscope.active = false;
 
+        channel = 0;
         FOREACH_OSC {
-            for (page = (struct OscData *) osc->page_queue->array; page != (struct OscData *) osc->page_queue->array + osc->page_queue->length; ++page) {
+            index = 0;
+            for (page = (struct Page *) osc->page_queue->array; page != (struct Page *) osc->page_queue->array + osc->page_queue->length; ++page) {
                 setReply((struct Message *) page, OscilloscopeData, ShortArray, 0);
+                page->channel = channel;
+                page->index = index;
+
+                ++index;
             }
 
             reply = (struct Message *) RingAcquire(&reply_queue);
             setPageQueue(reply, osc->page_queue);
             RingWrite(&reply_queue);
+
+            ++channel;
         }
     }
 }

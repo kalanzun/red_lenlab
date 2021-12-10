@@ -33,19 +33,24 @@ std::shared_ptr< Message > Message::createCommand(enum Command command, enum Typ
     return message;
 }
 
+uint8_t* Message::getBuffer()
+{
+    return packet->buffer;
+}
+
 uint32_t Message::getInt(int i)
 {
     assert(head->type == IntArray);
     assert(sizeof(struct Head) + i * sizeof(uint32_t) < packet->length);
 
-    return *(uint32_t *) (packet->buffer + sizeof(struct Head) + i * sizeof(uint32_t));
+    return *(uint32_t*) (packet->buffer + sizeof(struct Head) + i * sizeof(uint32_t));
 }
 
 void Message::addInt(uint32_t value)
 {
     assert(head->type == IntArray);
 
-    *(uint32_t *) (packet->buffer + packet->length) = value;
+    *(uint32_t*) (packet->buffer + packet->length) = value;
     packet->length += sizeof(uint32_t);
 }
 

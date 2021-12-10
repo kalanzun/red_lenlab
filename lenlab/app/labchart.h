@@ -38,6 +38,7 @@ public:
     void setModel(model::Component* component);
 
     void setWaveform(model::Waveform* waveform);
+    void setRange(model::Waveform* waveform);
 
 private:
     Ui::LabChart *ui;

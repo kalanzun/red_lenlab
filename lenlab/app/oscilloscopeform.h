@@ -3,7 +3,10 @@
 
 #include <QWidget>
 
-namespace model { class Lenlab; }
+namespace model {
+class Lenlab;
+class Oscilloscope;
+}
 
 namespace app {
 
@@ -14,6 +17,7 @@ class OscilloscopeForm : public QWidget
     Q_OBJECT
 
     model::Lenlab* lenlab;
+    model::Oscilloscope* oscilloscope;
 
 public:
     explicit OscilloscopeForm(QWidget *parent = nullptr);
@@ -25,6 +29,9 @@ public:
 
 private:
     Ui::OscilloscopeForm *ui;
+
+private slots:
+    void on_startButton_clicked();
 };
 
 } // namespace app

@@ -51,7 +51,6 @@ void Logger::setup(std::shared_ptr< protocol::Message >& message)
 
 void Logger::reply(std::shared_ptr< protocol::Message >& message)
 {
-    qDebug() << "reply";
     if (message->head->reply == Log) {
         qDebug() << "Log" << message->getInt(0);
 
