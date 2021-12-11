@@ -14,7 +14,7 @@ Board::Board(QObject *parent)
     : QObject{parent}
     , query_thread{std::make_unique< QueryThread >(LENLAB_VID, LENLAB_PID)}
 {
-    connect(query_thread.get(), &QueryThread::DeviceHandleCreated,
+    connect(query_thread.get(), &QueryThread::DeviceCreated,
             this, &Board::setupDevice);
 
     connect(query_thread.get(), &QueryThread::Statistics,
@@ -36,14 +36,14 @@ void Board::lookForDevice()
     query_thread->start();
 }
 
-void Board::setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle)
+void Board::setupDevice(protocol::Device* device)
 {
     assert(!device);
 
-    device = new Device(device_handle, this);
-    connect(device.get(), &Device::reply, this, &Board::handleReply);
-    connect(device.get(), &Device::error, this, &Board::handleError);
-    connect(device.get(), &Device::destroyed, this, &Board::lookForDevice);
+    this->device = device;
+    connect(device, &Device::reply, this, &Board::handleReply);
+    connect(device, &Device::error, this, &Board::handleError);
+    connect(device, &Device::destroyed, this, &Board::lookForDevice);
 
     auto setup = Message::createCommand(setUp);
     command(setup);

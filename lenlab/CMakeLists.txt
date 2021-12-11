@@ -33,7 +33,9 @@ set(PROJECT_SOURCES
     protocol/eventloop.h protocol/eventloop.cpp
     protocol/message.h protocol/message.cpp
     protocol/querythread.h protocol/querythread.cpp
+    protocol/usbdevice.h protocol/usbdevice.cpp
     protocol/usbthread.h protocol/usbthread.cpp
+    protocol/virtualdevice.h protocol/virtualdevice.cpp
     usb/context.h usb/context.cpp
     usb/devicehandle.h usb/devicehandle.cpp
     usb/devicelist.h usb/devicelist.cpp

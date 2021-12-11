@@ -6,8 +6,6 @@
 #include <QObject>
 #include <QPointer>
 
-namespace usb { class DeviceHandle; }
-
 namespace protocol {
 
 class Device;
@@ -35,7 +33,7 @@ public slots:
     void lookForDevice();
 
 private slots:
-    void setupDevice(std::shared_ptr< usb::DeviceHandle >& device_handle);
+    void setupDevice(protocol::Device* device);
     void handleQueryThreadStatistics(int count, int interval, int runtime);
     void handleReply(std::shared_ptr< Message >& message);
     void handleError();
