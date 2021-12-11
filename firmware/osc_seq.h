@@ -51,8 +51,7 @@ struct OscSeqGroup {
 extern struct OscSeqGroup osc_seq_group;
 
 
-// struct OscSeq *osc;
-#define FOREACH_OSC for (osc = osc_seq_group.osc_seq; osc != osc_seq_group.osc_seq + GROUP_SIZE; ++osc)
+#define FOREACH_OSC(element) FOREACH(element, osc_seq_group.osc_seq)
 
 
 inline void
@@ -65,7 +64,7 @@ OscSeqGroupDisable(void)
     IntDisable(INT_ADC0SS0);
     IntDisable(INT_ADC1SS0);
 
-    FOREACH_ADC {
+    FOREACH_ADC(adc) {
         uDMAChannelDisable(adc->udma_channel); // this one cancels uDMA immediately.
         ADCSequenceDisable(adc->base, OSC_SEQ_SEQUENCE_NUM);
     }
@@ -143,7 +142,7 @@ OscSeqGroupPingPong(void)
 {
     struct OscSeq *osc;
 
-    FOREACH_OSC OscSeqPingPong(osc);
+    FOREACH_OSC(osc) OscSeqPingPong(osc);
 }
 
 
@@ -153,7 +152,7 @@ OscSeqGroupReady(void)
     struct OscSeq *osc;
     bool enable = false;
 
-    FOREACH_OSC enable |= osc->ping_enable | osc->pong_enable;
+    FOREACH_OSC(osc) enable |= osc->ping_enable | osc->pong_enable;
 
     return !enable;
 }
@@ -198,15 +197,14 @@ OscSeqEnable(struct OscSeq *self)
 inline void
 OscSeqGroupEnable(void)
 {
-    const struct ADC *adc;
     struct OscSeq *osc;
 
-    FOREACH_OSC OscSeqEnable(osc);
+    FOREACH_OSC(osc) {
+        OscSeqEnable(osc);
 
-    FOREACH_ADC {
-        ADCSequenceEnable(adc->base, OSC_SEQ_SEQUENCE_NUM);
-        ADCIntDisable(adc->base, OSC_SEQ_SEQUENCE_NUM);
-        uDMAChannelEnable(adc->udma_channel);
+        ADCSequenceEnable(osc->adc->base, OSC_SEQ_SEQUENCE_NUM);
+        ADCIntDisable(osc->adc->base, OSC_SEQ_SEQUENCE_NUM);
+        uDMAChannelEnable(osc->adc->udma_channel);
     }
 
     IntEnable(INT_ADC0SS0);
@@ -223,7 +221,7 @@ OscSeqGroupInit(void)
     int i;
     uint32_t config;
 
-    FOREACH_ADC {
+    FOREACH_ADC(adc) {
         ADCSequenceConfigure(adc->base, OSC_SEQ_SEQUENCE_NUM, ADC_TRIGGER_TIMER, OSC_SEQ_PRIORITY);
         for (i = 0; i < 8; ++i) {
             config = adc->channel;

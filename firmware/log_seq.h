@@ -30,6 +30,8 @@
 
 
 struct LogSeq {
+    const struct ADC * const adc;
+
     volatile bool ready;
     volatile bool error;
     volatile uint32_t count;
@@ -44,8 +46,7 @@ struct LogSeqGroup {
 extern struct LogSeqGroup log_seq_group;
 
 
-// struct LogSeq *log;
-#define FOREACH_LOG for (log = log_seq_group.log_seq; log != log_seq_group.log_seq + GROUP_SIZE; ++log)
+#define FOREACH_LOG(element) FOREACH(element, log_seq_group.log_seq)
 
 
 inline void
@@ -64,7 +65,7 @@ LogSeqGroupReady(void)
     struct LogSeq *log;
     bool ready = true;
 
-    FOREACH_LOG ready &= log->ready;
+    FOREACH_LOG(log) ready &= log->ready;
 
     return ready;
 }
@@ -76,7 +77,7 @@ LogSeqGroupError(void)
     struct LogSeq *log;
     bool error = false;
 
-    FOREACH_LOG error |= log->error;
+    FOREACH_LOG(log) error |= log->error;
 
     return error;
 }
@@ -87,7 +88,7 @@ LogSeqGroupRelease(void)
 {
     struct LogSeq *log;
 
-    FOREACH_LOG log->ready = false;
+    FOREACH_LOG(log) log->ready = false;
 }
 
 
@@ -97,7 +98,7 @@ LogSeqGroupDataGet(uint32_t *buffer)
     const struct ADC *adc;
     int count = 0; // sample count
 
-    FOREACH_ADC count += ADCSequenceDataGet(adc->base, LOG_SEQ_SEQUENCE_NUM, buffer + count);
+    FOREACH_ADC(adc) count += ADCSequenceDataGet(adc->base, LOG_SEQ_SEQUENCE_NUM, buffer + count);
 
     return count;
 }
@@ -115,7 +116,6 @@ LogSeqEnable(struct LogSeq *self)
 inline void
 LogSeqGroupEnable(uint32_t interval)
 {
-    const struct ADC *adc;
     struct LogSeq *log;
     int count;
     uint32_t buffer[8]; // max FIFO length of SS1
@@ -124,11 +124,11 @@ LogSeqGroupEnable(uint32_t interval)
     count = LogSeqGroupDataGet(buffer);
     ASSERT(count == 0 || count == 8);
 
-    FOREACH_LOG LogSeqEnable(log);
+    FOREACH_LOG(log) {
+        LogSeqEnable(log);
 
-    FOREACH_ADC {
-        ADCSequenceEnable(adc->base, LOG_SEQ_SEQUENCE_NUM);
-        ADCIntEnable(adc->base, LOG_SEQ_SEQUENCE_NUM); // Enable to generate direct ADC Interrupts, do not enable for DMA
+        ADCSequenceEnable(log->adc->base, LOG_SEQ_SEQUENCE_NUM);
+        ADCIntEnable(log->adc->base, LOG_SEQ_SEQUENCE_NUM); // Enable to generate direct ADC Interrupts, do not enable for DMA
     }
 
     IntEnable(INT_ADC0SS1); // Enable Interrupt in NVIC
@@ -149,7 +149,7 @@ LogSeqGroupDisable(void)
     IntDisable(INT_ADC0SS1);
     IntDisable(INT_ADC1SS1);
 
-    FOREACH_ADC {
+    FOREACH_ADC(adc) {
         ADCIntDisable(adc->base, LOG_SEQ_SEQUENCE_NUM);
         ADCSequenceDisable(adc->base, LOG_SEQ_SEQUENCE_NUM);
     }
@@ -161,7 +161,7 @@ LogSeqGroupInit(void)
 {
     const struct ADC *adc;
 
-    FOREACH_ADC {
+    FOREACH_ADC(adc) {
         ADCSequenceConfigure(adc->base, LOG_SEQ_SEQUENCE_NUM, ADC_TRIGGER_TIMER, LOG_SEQ_PRIORITY);
         ADCSequenceStepConfigure(adc->base, LOG_SEQ_SEQUENCE_NUM, 0, adc->channel);
         ADCSequenceStepConfigure(adc->base, LOG_SEQ_SEQUENCE_NUM, 1, adc->channel_1 | ADC_CTL_IE | ADC_CTL_END);

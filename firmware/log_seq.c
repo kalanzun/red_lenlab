@@ -22,7 +22,16 @@
 #include "log_seq.h"
 
 
-struct LogSeqGroup log_seq_group;
+struct LogSeqGroup log_seq_group = {
+    .log_seq = {
+        {
+            .adc = &adc_group.adc[0]
+        },
+        {
+            .adc = &adc_group.adc[1]
+        }
+    }
+};
 
 
 void

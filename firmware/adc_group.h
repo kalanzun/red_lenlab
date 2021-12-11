@@ -33,6 +33,8 @@
 
 #define GROUP_SIZE 2
 
+#define FOREACH(element, array) for (element = array; element != array + GROUP_SIZE; ++element)
+
 
 struct ADC {
     uint32_t base;
@@ -74,8 +76,7 @@ static const struct ADCGroup adc_group = {
 };
 
 
-// const struct ADC *adc;
-#define FOREACH_ADC for (adc = adc_group.adc; adc != adc_group.adc + GROUP_SIZE; ++adc)
+#define FOREACH_ADC(element) FOREACH(element, adc_group.adc)
 
 
 inline void
@@ -87,7 +88,7 @@ ADCGroupSetHardwareOversample(uint32_t log2oversamples)
     uint32_t factor = log2oversamples > 0 ? 1 << log2oversamples : 0;
     // a factor of 0 disables oversampling
 
-    FOREACH_ADC ADCHardwareOversampleConfigure(adc->base, factor);
+    FOREACH_ADC(adc) ADCHardwareOversampleConfigure(adc->base, factor);
 }
 
 
@@ -96,7 +97,7 @@ ADCGroupInit(void)
 {
     const struct ADC *adc;
 
-    FOREACH_ADC {
+    FOREACH_ADC(adc) {
         GPIOPinTypeADC(adc->gpio_base, adc->gpio_pin);
         GPIOPinTypeADC(adc->gpio_base, adc->gpio_pin_1);
 

@@ -59,7 +59,7 @@ OscilloscopeMain(void)
         oscilloscope.active = false;
 
         channel = 0;
-        FOREACH_OSC {
+        FOREACH_OSC(osc) {
             index = 0;
             for (page = (struct Page *) osc->page_queue->array; page != (struct Page *) osc->page_queue->array + osc->page_queue->length; ++page) {
                 setReply((struct Message *) page, OscilloscopeData, ShortArray, 0);
