@@ -21,6 +21,7 @@ Board::Board(QObject *parent)
             this, &Board::handleQueryThreadStatistics);
 }
 
+// TODO rename to send and receive (board->command() might create or send a command)
 void Board::command(std::shared_ptr< Message >& message)
 {
     assert(device);

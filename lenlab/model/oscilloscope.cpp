@@ -37,6 +37,14 @@ void Oscilloscope::reset()
 void Oscilloscope::setup(std::shared_ptr< protocol::Message >& message)
 {
     qDebug() << "setup";
+
+    auto set_signal_sine = protocol::Message::createCommand(setSignalSine, IntArray);
+    set_signal_sine->addInt(8); // mutliplier
+    set_signal_sine->addInt(2); // predivider
+    set_signal_sine->addInt(9); // divider
+    set_signal_sine->addInt(static_cast< uint32_t >(std::round((1<<11) * 1.65 / 1.65))); // amplitude
+    set_signal_sine->addInt(0); // second
+    board->command(set_signal_sine);
 }
 
 void Oscilloscope::reply(std::shared_ptr< protocol::Message >& message)
@@ -55,6 +63,10 @@ void Oscilloscope::reply(std::shared_ptr< protocol::Message >& message)
             qDebug() << "emit WaveformCreated";
             emit WaveformCreated(waveform);
         }
+    }
+
+    if (message->head->reply == SignalSine) {
+        qDebug() << "SignalSine";
     }
 }
 

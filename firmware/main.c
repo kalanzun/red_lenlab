@@ -32,6 +32,8 @@
 #include "logger.h"
 #include "oscilloscope.h"
 #include "reply_handler.h"
+#include "signal.h"
+#include "ssi.h"
 #include "tick.h"
 #include "usb_device.h"
 
@@ -167,8 +169,11 @@ main(void)
     //
     TickInit();
     ADCGroupInit();
+    SSIInit();
+
     LoggerInit();
     OscilloscopeInit();
+    SignalInit();
     USBDeviceInit();
 
     while (1) {

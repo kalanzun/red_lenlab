@@ -26,6 +26,7 @@
 #include "oscilloscope.h"
 #include "page_handler.h"
 #include "reply_handler.h"
+#include "signal.h"
 #include "tick.h"
 
 
@@ -135,6 +136,31 @@ start_oscilloscope(struct Message *command)
 }
 
 
+static bool
+set_signal_sine(struct Message *command)
+{
+    struct Message *reply;
+
+    uint32_t multiplier = getInt(command, 0);
+    uint32_t predivider = getInt(command, 1);
+    uint32_t divider    = getInt(command, 2);
+    uint32_t amplitude  = getInt(command, 3);
+    uint32_t second     = getInt(command, 4);
+
+    // this may need a long time
+    SignalSetSine(multiplier, predivider, divider, amplitude, second);
+
+    SignalStart();
+
+    // send a reply
+    reply = (struct Message *) RingAcquire(&reply_queue);
+    setReply(reply, Setup, nullType, command->head.reference);
+    RingWrite(&reply_queue);
+
+    return true;
+}
+
+
 void
 CommandHandlerMain(void)
 {
@@ -172,6 +198,10 @@ CommandHandlerMain(void)
 
         case startOscilloscope:
             success = start_oscilloscope(command);
+            break;
+
+        case setSignalSine:
+            success = set_signal_sine(command);
             break;
 
         default:
