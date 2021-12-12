@@ -46,7 +46,7 @@ void Logger::reset()
 
 void Logger::setup(std::shared_ptr< protocol::Message >& message)
 {
-    qDebug() << "setup";
+    qDebug() << "Logger::setup";
 }
 
 void Logger::reply(std::shared_ptr< protocol::Message >& message)
@@ -65,7 +65,7 @@ void Logger::reply(std::shared_ptr< protocol::Message >& message)
 
 void Logger::error()
 {
-    qDebug() << "error";
+    qDebug() << "Logger::error";
 }
 
 } // namespace model

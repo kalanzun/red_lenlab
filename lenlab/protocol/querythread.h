@@ -5,9 +5,11 @@
 
 #include <QThread>
 
-namespace protocol {
+namespace usb {
+class DeviceHandle;
+}
 
-class Device;
+namespace protocol {
 
 class QueryThread : public QThread
 {
@@ -19,6 +21,8 @@ class QueryThread : public QThread
     uint16_t pid;
 
 public:
+    bool retry = true;
+
     explicit QueryThread(uint16_t vid, uint16_t pid, QObject *parent = nullptr);
     ~QueryThread();
 
@@ -26,7 +30,7 @@ protected:
     void run() override;
 
 signals:
-    void DeviceCreated(protocol::Device* device);
+    void DeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle);
     void Statistics(int count, int interval, int runtime);
 };
 

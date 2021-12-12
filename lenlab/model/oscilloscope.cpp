@@ -36,7 +36,7 @@ void Oscilloscope::reset()
 
 void Oscilloscope::setup(std::shared_ptr< protocol::Message >& message)
 {
-    qDebug() << "setup";
+    qDebug() << "Oscilloscope::setup";
 
     auto set_signal_sine = protocol::Message::createCommand(setSignalSine, IntArray);
     set_signal_sine->addInt(8); // mutliplier
@@ -72,7 +72,7 @@ void Oscilloscope::reply(std::shared_ptr< protocol::Message >& message)
 
 void Oscilloscope::error()
 {
-    qDebug() << "error";
+    qDebug() << "Oscilloscope::error";
 }
 
 } // namespace model

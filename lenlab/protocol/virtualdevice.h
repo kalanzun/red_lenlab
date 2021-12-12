@@ -12,8 +12,14 @@ class VirtualDevice : public Device
 public:
     explicit VirtualDevice(QObject *parent = nullptr);
 
+signals:
+    void command(std::shared_ptr< Message >& message);
+
 public slots:
     void send(std::shared_ptr< Message >& message);
+
+private slots:
+    void handleCommand(std::shared_ptr< Message >& cmd);
 };
 
 } // namespace protocol

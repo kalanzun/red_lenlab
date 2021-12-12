@@ -4,7 +4,10 @@
 #include <memory>
 
 #include <QObject>
-#include <QPointer>
+
+namespace usb{
+class DeviceHandle;
+}
 
 namespace protocol {
 
@@ -17,7 +20,7 @@ class Board : public QObject
     Q_OBJECT
 
     std::unique_ptr< QueryThread > query_thread;
-    QPointer< Device > device;
+    std::shared_ptr< Device > device = nullptr;
 
 public:
     explicit Board(QObject *parent = nullptr);
@@ -30,13 +33,16 @@ signals:
     void error();
 
 public slots:
-    void lookForDevice();
+    void lookForDevice(bool create_virtual_device = false);
 
 private slots:
-    void setupDevice(protocol::Device* device);
+    void handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle);
     void handleQueryThreadStatistics(int count, int interval, int runtime);
     void handleReply(std::shared_ptr< Message >& message);
     void handleError();
+
+private:
+    void setupDevice();
 };
 
 } // namespace protocol

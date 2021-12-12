@@ -6,7 +6,6 @@
 
 #include "usb/devicehandle.h"
 #include "usb/devicelist.h"
-#include "usbdevice.h"
 
 namespace protocol {
 
@@ -39,8 +38,7 @@ void QueryThread::run()
 
             if(desc.idVendor == vid && desc.idProduct == pid) {
                 auto device_handle = std::make_shared< usb::DeviceHandle >(dev); // may throw
-                auto device = new USBDevice(device_handle); // may throw
-                emit DeviceCreated(static_cast< Device* >(device));
+                emit DeviceHandleCreated(device_handle);
                 return;
             }
         }
@@ -50,6 +48,8 @@ void QueryThread::run()
                     std::chrono::steady_clock::now() - start).count();
 
         emit Statistics(count, interval, runtime);
+
+        if (!retry) return;
 
         if (runtime < interval) msleep(interval - runtime); // rate limiter
     }
