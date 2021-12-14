@@ -9,6 +9,7 @@ namespace protocol {
 Message::Message()
     : packet{std::make_shared< usb::Packet >()}
     , head{(struct Head*) this->packet->buffer}
+    , page{(struct Page*) this->packet->buffer}
 {
 
 }
@@ -16,6 +17,7 @@ Message::Message()
 Message::Message(std::shared_ptr< usb::Packet > packet)
     : packet{std::move(packet)}
     , head{(struct Head*) this->packet->buffer}
+    , page{(struct Page*) this->packet->buffer}
 {
 
 }
@@ -25,6 +27,19 @@ std::shared_ptr< Message > Message::createCommand(enum Command command, enum Typ
     auto message = std::make_shared< Message >();
 
     message->head->command = command;
+    message->head->type = type;
+    message->head->reference = reference;
+
+    message->packet->length = sizeof(struct Head);
+
+    return message;
+}
+
+std::shared_ptr< Message > Message::createReply(enum Reply reply, enum Type type, uint16_t reference)
+{
+    auto message = std::make_shared< Message >();
+
+    message->head->reply = reply;
     message->head->type = type;
     message->head->reference = reference;
 

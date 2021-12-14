@@ -9,6 +9,9 @@ class VirtualDevice : public Device
 {
     Q_OBJECT
 
+    static const float pi;
+    static const float f;
+
 public:
     explicit VirtualDevice(QObject *parent = nullptr);
 
@@ -20,6 +23,10 @@ public slots:
 
 private slots:
     void handleCommand(const std::shared_ptr< Message >& cmd);
+
+private:
+    void set_up(const std::shared_ptr< Message >& cmd);
+    void start_oscilloscope(const std::shared_ptr< Message >& cmd);
 };
 
 } // namespace protocol
