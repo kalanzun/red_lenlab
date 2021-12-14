@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     window.setModel(&lenlab);
     window.show();
 
-    lenlab.lookForDevice();
+    lenlab.lookForDevice(true);
 
     return application.exec();
 }

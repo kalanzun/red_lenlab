@@ -21,8 +21,6 @@ class QueryThread : public QThread
     uint16_t pid;
 
 public:
-    bool retry = true;
-
     explicit QueryThread(uint16_t vid, uint16_t pid, QObject *parent = nullptr);
     ~QueryThread();
 

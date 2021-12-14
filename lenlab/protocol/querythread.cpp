@@ -49,8 +49,6 @@ void QueryThread::run()
 
         emit Statistics(count, interval, runtime);
 
-        if (!retry) return;
-
         if (runtime < interval) msleep(interval - runtime); // rate limiter
     }
 }

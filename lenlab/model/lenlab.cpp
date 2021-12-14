@@ -17,9 +17,9 @@ Lenlab::Lenlab(QObject *parent)
 
 }
 
-void Lenlab::lookForDevice()
+void Lenlab::lookForDevice(bool create_virtual_device)
 {
-    board->lookForDevice();
+    board->lookForDevice(create_virtual_device);
 }
 
 } // namespace protocol

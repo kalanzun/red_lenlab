@@ -16,10 +16,6 @@ Board::Board(QObject *parent)
     : QObject{parent}
     , query_thread{std::make_unique< QueryThread >(LENLAB_VID, LENLAB_PID)}
 {
-#ifndef NDEBUG
-    query_thread->retry = false;
-#endif
-
     connect(query_thread.get(), &QueryThread::DeviceHandleCreated,
             this, &Board::handleDeviceHandleCreated);
 
@@ -39,7 +35,14 @@ void Board::lookForDevice(bool create_virtual_device)
 {
     assert(!query_thread->isRunning());
 
-    query_thread->start();
+    if (create_virtual_device) {
+        assert(!device);
+        device = std::make_shared< VirtualDevice >();
+        setupDevice();
+    }
+    else {
+        query_thread->start();
+    }
 }
 
 void Board::setupDevice()
@@ -65,14 +68,6 @@ void Board::handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > devic
 void Board::handleQueryThreadStatistics(int count, int interval, int runtime)
 {
     qDebug() << "QueryThreadStatistics" << count << interval << runtime;
-
-#ifndef NDEBUG
-    query_thread->wait(); // it did not retry
-
-    assert(!device);
-    device = std::make_shared< VirtualDevice >();
-    setupDevice();
-#endif
 }
 
 void Board::handleReply(std::shared_ptr< Message >& message)

@@ -24,7 +24,7 @@ public:
 
     explicit Lenlab(QObject *parent = nullptr);
 
-    void lookForDevice();
+    void lookForDevice(bool create_virtual_device = false);
 
 signals:
 
