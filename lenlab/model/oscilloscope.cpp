@@ -27,7 +27,7 @@ void Oscilloscope::start()
 
     auto start_logger = protocol::Message::createCommand(startOscilloscope, IntArray);
     start_logger->addInt(waveform->interval);
-    board->command(start_logger);
+    board->send(start_logger);
 }
 
 void Oscilloscope::reset()
@@ -44,7 +44,7 @@ void Oscilloscope::setup(std::shared_ptr< protocol::Message >& message)
     set_signal_sine->addInt(9); // divider
     set_signal_sine->addInt(static_cast< uint32_t >(std::round((1<<11) * 1.65 / 1.65))); // amplitude
     set_signal_sine->addInt(0); // second
-    board->command(set_signal_sine);
+    board->send(set_signal_sine);
 }
 
 void Oscilloscope::reply(std::shared_ptr< protocol::Message >& message)

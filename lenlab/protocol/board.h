@@ -15,6 +15,14 @@ class Device;
 class Message;
 class QueryThread;
 
+struct QueryThreadStatistics {
+    int count;
+    int interval;
+    int runtime;
+    int runtime_min;
+    int runtime_max;
+};
+
 class Board : public QObject
 {
     Q_OBJECT
@@ -23,9 +31,9 @@ class Board : public QObject
     std::shared_ptr< Device > device = nullptr;
 
 public:
-    explicit Board(QObject *parent = nullptr);
+    struct QueryThreadStatistics query_thread_statistics;
 
-    void command(std::shared_ptr< Message >& message);
+    explicit Board(QObject *parent = nullptr);
 
 signals:
     void setup(std::shared_ptr< Message >& message);
@@ -34,15 +42,16 @@ signals:
 
 public slots:
     void lookForDevice(bool create_virtual_device = false);
+    void send(std::shared_ptr< Message >& message);
+
+private:
+    void setupDevice();
 
 private slots:
     void handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle);
     void handleQueryThreadStatistics(int count, int interval, int runtime);
     void handleReply(std::shared_ptr< Message >& message);
     void handleError();
-
-private:
-    void setupDevice();
 };
 
 } // namespace protocol

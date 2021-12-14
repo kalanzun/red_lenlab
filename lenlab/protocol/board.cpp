@@ -23,14 +23,6 @@ Board::Board(QObject *parent)
             this, &Board::handleQueryThreadStatistics);
 }
 
-// TODO rename to send and receive (board->command() might create or send a command)
-void Board::command(std::shared_ptr< Message >& message)
-{
-    assert(device);
-
-    if (device) device->send(message);
-}
-
 void Board::lookForDevice(bool create_virtual_device)
 {
     assert(!query_thread->isRunning());
@@ -45,6 +37,13 @@ void Board::lookForDevice(bool create_virtual_device)
     }
 }
 
+void Board::send(std::shared_ptr< Message >& message)
+{
+    assert(device);
+
+    if (device) device->send(message);
+}
+
 void Board::setupDevice()
 {
     assert(device);
@@ -54,7 +53,7 @@ void Board::setupDevice()
     connect(device.get(), &Device::destroyed, this, &Board::lookForDevice);
 
     auto setup = Message::createCommand(setUp);
-    command(setup);
+    send(setup);
 }
 
 void Board::handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle)
@@ -67,7 +66,11 @@ void Board::handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > devic
 
 void Board::handleQueryThreadStatistics(int count, int interval, int runtime)
 {
-    qDebug() << "QueryThreadStatistics" << count << interval << runtime;
+    query_thread_statistics.count = count;
+    query_thread_statistics.interval = interval;
+    query_thread_statistics.runtime = runtime;
+    if (runtime > query_thread_statistics.runtime_max) query_thread_statistics.runtime_max = runtime;
+    if (runtime < query_thread_statistics.runtime_min) query_thread_statistics.runtime_min = runtime;
 }
 
 void Board::handleReply(std::shared_ptr< Message >& message)

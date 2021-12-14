@@ -27,13 +27,13 @@ void Logger::start()
 {
     auto start_logger = protocol::Message::createCommand(startLogger, IntArray);
     start_logger->addInt(waveform->interval);
-    board->command(start_logger);
+    board->send(start_logger);
 }
 
 void Logger::stop()
 {
     auto stop_logger = protocol::Message::createCommand(stopLogger);
-    board->command(stop_logger);
+    board->send(stop_logger);
 }
 
 void Logger::reset()
