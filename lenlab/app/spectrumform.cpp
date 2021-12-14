@@ -33,19 +33,19 @@ void SpectrumForm::setupChart() const
     ui->labChart->setYLabel("Amplitude [dB]");
     ui->labChart->setY2Label("Phase [°]");
 
-    auto xAxis = new QLogValueAxis();
+    auto xAxis = new QLogValueAxis;
     // Note: With kHz, from 0.1 kHz it has rounding issues and the max tick is missing
     xAxis->setBase(10);
     xAxis->setLabelFormat("%g");
     xAxis->setMinorTickCount(-1); // automatic
     ui->labChart->addAxis(xAxis, Qt::AlignBottom);
 
-    auto mAxis = new QValueAxis();
+    auto mAxis = new QValueAxis;
     mAxis->setTickCount(7); // 6 intervals
     mAxis->setMinorTickCount(4); // 5 intervals in each major interval
     ui->labChart->addAxis(mAxis, Qt::AlignLeft);
 
-    auto phAxis = new QValueAxis();
+    auto phAxis = new QValueAxis;
     phAxis->setTickCount(7); // 6 intervals
     phAxis->setMinorTickCount(4); // 5 intervals in each major interval
     ui->labChart->addAxis(phAxis, Qt::AlignRight);

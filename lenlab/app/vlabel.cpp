@@ -5,13 +5,13 @@
 namespace app {
 
 VLabel::VLabel(QWidget *parent)
-    : QLabel(parent)
+    : QLabel{parent}
 {
 
 }
 
 VLabel::VLabel(const QString &text, QWidget *parent)
-    : QLabel(text, parent)
+    : QLabel{text, parent}
 {
 
 }
@@ -19,7 +19,7 @@ VLabel::VLabel(const QString &text, QWidget *parent)
 void
 VLabel::paintEvent(QPaintEvent*)
 {
-    QPainter painter(this);
+    QPainter painter{this};
     painter.translate(0, height());
     painter.rotate(270);
     painter.drawText(0, 0, height(), width(), alignment(), text());
@@ -28,15 +28,15 @@ VLabel::paintEvent(QPaintEvent*)
 QSize
 VLabel::minimumSizeHint() const
 {
-    QSize s = QLabel::minimumSizeHint();
-    return QSize(s.height(), s.width());
+    auto s = QLabel::minimumSizeHint();
+    return QSize{s.height(), s.width()};
 }
 
 QSize
 VLabel::sizeHint() const
 {
-    QSize s = QLabel::sizeHint();
-    return QSize(s.height(), s.width());
+    auto s = QLabel::sizeHint();
+    return QSize{s.height(), s.width()};
 }
 
 } // namespace app

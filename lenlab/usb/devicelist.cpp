@@ -39,12 +39,12 @@ DeviceList::~DeviceList()
 
 DeviceListIterator DeviceList::begin() const
 {
-    return DeviceListIterator(list, 0);
+    return DeviceListIterator{list, 0};
 }
 
 DeviceListIterator DeviceList::end() const
 {
-    return DeviceListIterator(list, length);
+    return DeviceListIterator{list, length};
 }
 
 } // namespace usb

@@ -7,8 +7,8 @@
 
 namespace usb {
 
-Interface::Interface(std::shared_ptr< DeviceHandle >& device_handle)
-    : device_handle{device_handle}
+Interface::Interface(std::shared_ptr< DeviceHandle > device_handle)
+    : device_handle{std::move(device_handle)}
 {
     auto error = libusb_claim_interface(this->device_handle->dev_handle, 0);
     if (error) throw USBException(error);

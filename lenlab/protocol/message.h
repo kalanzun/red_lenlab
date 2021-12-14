@@ -16,16 +16,16 @@ public:
     struct Head* const head;
 
     explicit Message();
-    explicit Message(std::shared_ptr< usb::Packet >& packet);
+    explicit Message(std::shared_ptr< usb::Packet > packet);
 
     Message(const Message&) = delete;
     Message& operator=(const Message&) = delete;
 
     static std::shared_ptr< Message > createCommand(enum Command command, enum Type type = nullType, uint16_t reference = 0);
 
-    uint8_t* getBuffer();
+    uint8_t* getBuffer() const;
 
-    uint32_t getInt(int i);
+    uint32_t getInt(int i) const;
     void addInt(uint32_t value);
 };
 

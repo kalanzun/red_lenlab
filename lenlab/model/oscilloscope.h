@@ -30,8 +30,8 @@ public:
     void reset();
 
 public slots:
-    void setup(std::shared_ptr< protocol::Message >& message);
-    void reply(std::shared_ptr< protocol::Message >& message);
+    void setup(const std::shared_ptr< protocol::Message >& message);
+    void reply(const std::shared_ptr< protocol::Message >& message);
     void error();
 };
 

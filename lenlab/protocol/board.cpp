@@ -37,7 +37,7 @@ void Board::lookForDevice(bool create_virtual_device)
     }
 }
 
-void Board::send(std::shared_ptr< Message >& message)
+void Board::send(const std::shared_ptr< Message >& message)
 {
     assert(device);
 
@@ -48,15 +48,17 @@ void Board::setupDevice()
 {
     assert(device);
 
-    connect(device.get(), &Device::reply, this, &Board::handleReply);
-    connect(device.get(), &Device::error, this, &Board::handleError);
-    connect(device.get(), &Device::destroyed, this, &Board::lookForDevice);
+    connect(device.get(), &Device::reply,
+            this, &Board::handleReply);
+
+    connect(device.get(), &Device::error,
+            this, &Board::handleError);
 
     auto setup = Message::createCommand(setUp);
     send(setup);
 }
 
-void Board::handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle)
+void Board::handleDeviceHandleCreated(const std::shared_ptr< usb::DeviceHandle >& device_handle)
 {
     assert(!device);
 
@@ -73,7 +75,7 @@ void Board::handleQueryThreadStatistics(int count, int interval, int runtime)
     if (runtime < query_thread_statistics.runtime_min) query_thread_statistics.runtime_min = runtime;
 }
 
-void Board::handleReply(std::shared_ptr< Message >& message)
+void Board::handleReply(const std::shared_ptr< Message >& message)
 {
     if (message->head->reply == Setup) {
         emit setup(message);
@@ -88,6 +90,7 @@ void Board::handleError()
     assert(device);
 
     device.reset();
+    lookForDevice();
 
     emit error();
 }

@@ -15,12 +15,12 @@ VirtualDevice::VirtualDevice(QObject *parent)
             Qt::QueuedConnection);
 }
 
-void VirtualDevice::send(std::shared_ptr< Message >& message)
+void VirtualDevice::send(const std::shared_ptr< Message >& message)
 {
     emit command(message);
 }
 
-void VirtualDevice::handleCommand(std::shared_ptr< Message >& cmd)
+void VirtualDevice::handleCommand(const std::shared_ptr< Message >& cmd)
 {
     auto rpl = std::make_shared< Message >();
     rpl->head->type = nullType;

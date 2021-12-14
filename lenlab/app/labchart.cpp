@@ -46,7 +46,7 @@ void LabChart::addAxis(QAbstractAxis* axis, Qt::Alignment alignment)
 
 void LabChart::createChannel(const QString& name, bool visible, QAbstractAxis* xAxis, QAbstractAxis* yAxis)
 {
-    auto s = new QLineSeries();
+    auto s = new QLineSeries;
     s->setName(name);
     s->setVisible(visible);
     series.append(s);
@@ -78,7 +78,7 @@ void LabChart::setWaveform(model::Waveform* waveform)
     QVector< QPointF > list;
     list.reserve(waveform->getLength());
 
-    for (int i = 0; i < waveform->channels && i < series.size(); ++i) {
+    for (auto i = 0; i < waveform->channels && i < series.size(); ++i) {
         for (auto point : waveform->getChannel(i)) {
             list.append({point.x, point.y});
         }
@@ -102,11 +102,11 @@ void LabChart::setRange(model::Waveform* waveform)
     if (axes.size() > 1) axes.at(1)->setRange(-180, 0);
 }
 
-void LabChart::appendSample(struct model::Sample& sample)
+void LabChart::appendSample(const struct model::Sample& sample)
 {
     qDebug() << "appendSample";
 
-    for (int i = 0; i < sample.channels && i < series.size(); ++i) {
+    for (auto i = 0; i < sample.channels && i < series.size(); ++i) {
         series.at(i)->append(sample.x, sample.y[i]);
     }
 }

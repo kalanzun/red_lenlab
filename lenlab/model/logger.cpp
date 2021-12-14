@@ -39,24 +39,24 @@ void Logger::stop()
 void Logger::reset()
 {
     waveform->deleteLater();
-    waveform = new Waveform(this);
+    waveform = new Waveform{this};
     waveform->interval = 256;
     emit WaveformCreated(waveform);
 }
 
-void Logger::setup(std::shared_ptr< protocol::Message >& message)
+void Logger::setup(const std::shared_ptr< protocol::Message >& message)
 {
     qDebug() << "Logger::setup";
 }
 
-void Logger::reply(std::shared_ptr< protocol::Message >& message)
+void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 {
     if (message->head->reply == Log) {
         qDebug() << "Log" << message->getInt(0);
 
         struct Sample sample;
         sample.x = (float) (message->getInt(1) * waveform->interval) / 1000.0;
-        for (int i = 0; i < sample.channels; ++i) {
+        for (auto i = 0; i < sample.channels; ++i) {
             sample.y[i] = (float) message->getInt(i + 1) / 4096.0 * 3.3;
         }
         waveform->appendSample(sample);

@@ -16,7 +16,7 @@ bool PointIterator::operator!=(const PointIterator& other)
 
 struct Point PointIterator::operator*()
 {
-    return {*x, *y};
+    return Point{*x, *y};
 }
 
 PointIterator& PointIterator::operator++()
@@ -27,21 +27,21 @@ PointIterator& PointIterator::operator++()
 }
 
 
-Channel::Channel(int channel, Waveform* waveform)
+Channel::Channel(int channel, const Waveform* waveform)
     : channel{channel}
     , waveform{waveform}
 {
 
 }
 
-PointIterator Channel::begin()
+PointIterator Channel::begin() const
 {
-    return PointIterator(std::move(waveform->x_values.constBegin()), std::move(waveform->y_values[channel].constBegin()));
+    return PointIterator{waveform->x_values.constBegin(), waveform->y_values[channel].constBegin()};
 }
 
-PointIterator Channel::end()
+PointIterator Channel::end() const
 {
-    return PointIterator(std::move(waveform->x_values.constEnd()), std::move(waveform->y_values[channel].constEnd()));
+    return PointIterator{waveform->x_values.constEnd(), waveform->y_values[channel].constEnd()};
 }
 
 Waveform::Waveform(QObject *parent)
@@ -49,40 +49,40 @@ Waveform::Waveform(QObject *parent)
 {
     x_values.reserve(5000);
 
-    for (int i = 0; i < channels; ++i) {
+    for (auto i = 0; i < channels; ++i) {
         y_values[i].reserve(5000);
     }
 }
 
-void Waveform::appendSample(struct Sample& sample)
+void Waveform::appendSample(const struct Sample& sample)
 {
     x_values.append(sample.x);
 
-    for (int i = 0; i < channels; ++i) {
+    for (auto i = 0; i < channels; ++i) {
         y_values[i].append(sample.y[i]);
     }
 
     emit SampleAppended(sample);
 }
 
-int Waveform::getLength()
+int Waveform::getLength() const
 {
     return x_values.size();
 }
 
-Channel Waveform::getChannel(int channel)
+Channel Waveform::getChannel(int channel) const
 {
-    return Channel(channel, this);
+    return Channel{channel, this};
 }
 
 const char* const Waveform::delimiter = ", ";
 
-void Waveform::csv(std::ostream& out)
+void Waveform::csv(std::ostream& out) const
 {
     // TODO QVector iterator
-    for (int i = 0; i < x_values.size(); ++i) {
+    for (auto i = 0; i < x_values.size(); ++i) {
         out << x_values[i];
-        for (int c = 0; c < channels; ++c) {
+        for (auto c = 0; c < channels; ++c) {
             out << delimiter << y_values[c][i];
         }
         out << "\n";

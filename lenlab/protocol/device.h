@@ -17,11 +17,11 @@ public:
     explicit Device(QObject *parent = nullptr);
 
 signals:
-    void reply(std::shared_ptr< Message >& message);
+    void reply(const std::shared_ptr< Message >& message);
     void error();
 
 public slots:
-    virtual void send(std::shared_ptr< Message >& message) = 0;
+    virtual void send(const std::shared_ptr< Message >& message) = 0;
 };
 
 } // namespace protocol

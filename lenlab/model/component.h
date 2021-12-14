@@ -20,7 +20,7 @@ protected:
 public:
     explicit Component(protocol::Board* board);
 
-    model::Waveform* getWaveform();
+    model::Waveform* getWaveform() const;
 
 signals:
     void WaveformCreated(model::Waveform* waveform);

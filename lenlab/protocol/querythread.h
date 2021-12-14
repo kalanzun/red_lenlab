@@ -28,7 +28,7 @@ protected:
     void run() override;
 
 signals:
-    void DeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle);
+    void DeviceHandleCreated(std::shared_ptr< usb::DeviceHandle >& device_handle);
     void Statistics(int count, int interval, int runtime);
 };
 

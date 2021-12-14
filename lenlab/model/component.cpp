@@ -8,12 +8,12 @@ namespace model {
 Component::Component(protocol::Board* board)
     : QObject{board}
     , board{board}
-    , waveform{new model::Waveform(this)}
+    , waveform{new model::Waveform{this}}
 {
 
 }
 
-model::Waveform* Component::getWaveform()
+model::Waveform* Component::getWaveform() const
 {
     return waveform;
 }

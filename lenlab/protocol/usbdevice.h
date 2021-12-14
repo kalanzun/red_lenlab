@@ -27,11 +27,11 @@ class USBDevice : public Device
     std::unique_ptr< usb::Transfer > receiver1;
 
 public:
-    explicit USBDevice(std::shared_ptr< usb::DeviceHandle >& device_handle, QObject *parent = nullptr);
+    explicit USBDevice(std::shared_ptr< usb::DeviceHandle > device_handle, QObject *parent = nullptr);
     ~USBDevice();
 
 public slots:
-    void send(std::shared_ptr< Message >& message);
+    void send(const std::shared_ptr< Message >& message);
 
 private:
     static void rxCompleteCallback(usb::Transfer* transfer, void* object);

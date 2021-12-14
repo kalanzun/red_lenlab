@@ -24,8 +24,8 @@ public:
     TransferCallback(const TransferCallback&) = delete;
     TransferCallback& operator=(const TransferCallback&) = delete;
 
-    void set(std::function< void(Transfer*, void*) > callback, void* object);
-    void call(Transfer *transfer);
+    void set(const std::function< void(Transfer*, void*) >& callback, void* object);
+    void call(Transfer *transfer) const;
 };
 
 class Transfer
@@ -41,7 +41,7 @@ public:
 
     std::shared_ptr< Packet > packet;
 
-    explicit Transfer(std::shared_ptr< Interface >& interface, unsigned char endpoint);
+    explicit Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint);
     ~Transfer();
 
     Transfer(const Transfer&) = delete;
@@ -51,7 +51,7 @@ public:
     void submit();
     void cancel();
 
-    const char* getErrorMessage();
+    const char* getErrorMessage() const;
 
 private:
     static void LIBUSB_CALL callbackComplete(struct libusb_transfer* xfr);

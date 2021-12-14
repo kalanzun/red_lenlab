@@ -12,19 +12,19 @@ TransferCallback::TransferCallback()
 
 }
 
-void TransferCallback::set(std::function< void(Transfer*, void*) > callback, void* object)
+void TransferCallback::set(const std::function< void(Transfer*, void*) >& callback, void* object)
 {
     this->callback = callback;
     this->object = object;
 }
 
-void TransferCallback::call(Transfer *transfer)
+void TransferCallback::call(Transfer *transfer) const
 {
     if (callback) callback(transfer, object);
 }
 
-Transfer::Transfer(std::shared_ptr< Interface >& interface, unsigned char endpoint)
-    : interface{interface}
+Transfer::Transfer(std::shared_ptr< Interface > interface, unsigned char endpoint)
+    : interface{std::move(interface)}
 {
     xfr = libusb_alloc_transfer(0);
     if (!xfr) throw USBException("Allocation failed");
@@ -66,7 +66,7 @@ void Transfer::cancel()
     if (libusb_cancel_transfer(xfr)) active.unlock(); // if it can't cancel, unlock it right away
 }
 
-const char* Transfer::getErrorMessage()
+const char* Transfer::getErrorMessage() const
 {
     switch(xfr->status) {
     case LIBUSB_TRANSFER_COMPLETED:

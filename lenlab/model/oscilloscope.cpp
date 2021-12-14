@@ -23,7 +23,7 @@ Oscilloscope::Oscilloscope(protocol::Board* board)
 void Oscilloscope::start()
 {
     waveform->deleteLater();
-    waveform = new Waveform(this);
+    waveform = new Waveform{this};
 
     auto start_logger = protocol::Message::createCommand(startOscilloscope, IntArray);
     start_logger->addInt(waveform->interval);
@@ -34,7 +34,7 @@ void Oscilloscope::reset()
 {
 }
 
-void Oscilloscope::setup(std::shared_ptr< protocol::Message >& message)
+void Oscilloscope::setup(const std::shared_ptr< protocol::Message >& message)
 {
     qDebug() << "Oscilloscope::setup";
 
@@ -47,14 +47,14 @@ void Oscilloscope::setup(std::shared_ptr< protocol::Message >& message)
     board->send(set_signal_sine);
 }
 
-void Oscilloscope::reply(std::shared_ptr< protocol::Message >& message)
+void Oscilloscope::reply(const std::shared_ptr< protocol::Message >& message)
 {
     if (message->head->reply == OscilloscopeData) {
-        struct Page* page = (struct Page*) message->getBuffer();
+        auto page = (struct Page*) message->getBuffer();
 
         qDebug() << "OscilloscopeData" << page->channel << page->index;
 
-        for (int i = 0; i < 500; ++i) {
+        for (auto i = 0; i < 500; ++i) {
             if (page->channel == 0) waveform->x_values.append((float) page->index * 500 + i);
             waveform->y_values[page->channel].append((float) page->values[i] / 4096.0 * 3.3 - 1.65);
         }

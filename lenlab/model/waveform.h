@@ -45,13 +45,13 @@ class Channel
     const Waveform* waveform;
 
 public:
-    explicit Channel(int channel, Waveform* waveform);
+    explicit Channel(int channel, const Waveform* waveform);
 
     Channel(const Channel&) = delete;
     const Channel& operator=(const Channel&) = delete;
 
-    PointIterator begin();
-    PointIterator end();
+    PointIterator begin() const;
+    PointIterator end() const;
 };
 
 class Waveform : public QObject
@@ -68,15 +68,15 @@ public:
 
     explicit Waveform(QObject *parent = nullptr);
 
-    void appendSample(struct Sample& sample);
+    void appendSample(const struct Sample& sample);
 
-    int getLength();
-    Channel getChannel(int channel);
+    int getLength() const;
+    Channel getChannel(int channel) const;
 
-    void csv(std::ostream& out);
+    void csv(std::ostream& out) const;
 
 signals:
-    void SampleAppended(struct Sample& sample);
+    void SampleAppended(const struct Sample& sample);
 };
 
 } // namespace model

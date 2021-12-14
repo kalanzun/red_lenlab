@@ -8,14 +8,14 @@ namespace protocol {
 
 Message::Message()
     : packet{std::make_shared< usb::Packet >()}
-    , head{(struct Head*) packet->buffer}
+    , head{(struct Head*) this->packet->buffer}
 {
 
 }
 
-Message::Message(std::shared_ptr< usb::Packet >& packet)
-    : packet{packet}
-    , head{(struct Head*) packet->buffer}
+Message::Message(std::shared_ptr< usb::Packet > packet)
+    : packet{std::move(packet)}
+    , head{(struct Head*) this->packet->buffer}
 {
 
 }
@@ -33,12 +33,12 @@ std::shared_ptr< Message > Message::createCommand(enum Command command, enum Typ
     return message;
 }
 
-uint8_t* Message::getBuffer()
+uint8_t* Message::getBuffer() const
 {
     return packet->buffer;
 }
 
-uint32_t Message::getInt(int i)
+uint32_t Message::getInt(int i) const
 {
     assert(head->type == IntArray);
     assert(sizeof(struct Head) + i * sizeof(uint32_t) < packet->length);

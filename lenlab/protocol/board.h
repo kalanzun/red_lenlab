@@ -36,21 +36,21 @@ public:
     explicit Board(QObject *parent = nullptr);
 
 signals:
-    void setup(std::shared_ptr< Message >& message);
-    void reply(std::shared_ptr< Message >& message);
+    void setup(const std::shared_ptr< Message >& message);
+    void reply(const std::shared_ptr< Message >& message);
     void error();
 
 public slots:
     void lookForDevice(bool create_virtual_device = false);
-    void send(std::shared_ptr< Message >& message);
+    void send(const std::shared_ptr< Message >& message);
 
 private:
     void setupDevice();
 
 private slots:
-    void handleDeviceHandleCreated(std::shared_ptr< usb::DeviceHandle > device_handle);
+    void handleDeviceHandleCreated(const std::shared_ptr< usb::DeviceHandle >& device_handle);
     void handleQueryThreadStatistics(int count, int interval, int runtime);
-    void handleReply(std::shared_ptr< Message >& message);
+    void handleReply(const std::shared_ptr< Message >& message);
     void handleError();
 };
 
