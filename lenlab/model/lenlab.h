@@ -15,9 +15,8 @@ class Lenlab : public QObject
 {
     Q_OBJECT
 
-    protocol::Board* board;
-
 public:
+    protocol::Board* board;
     Logger* logger;
     Oscilloscope* oscilloscope;
     SpectrumAnalyzer* spectrum;
