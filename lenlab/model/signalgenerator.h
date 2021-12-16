@@ -13,13 +13,6 @@ class SignalGenerator : public QObject
 {
     Q_OBJECT
 
-    static const float OVERHEAD;
-    static const int SYSCLK;
-    static const int CHANNELS;
-    static const int SAMPLES;
-    static const int BITS_PER_SAMPLE;
-    static const float BASE_FREQUENCY_KHZ;
-
     static const std::array< std::array< uint8_t, 3 >, 130 > frequency_values;
 
 public:

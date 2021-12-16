@@ -4,13 +4,6 @@
 
 namespace model {
 
-const float SignalGenerator::OVERHEAD = 16.0 / 17.5;
-const int SignalGenerator::SYSCLK = 80'000'000;
-const int SignalGenerator::CHANNELS = 2;
-const int SignalGenerator::SAMPLES = 500;
-const int SignalGenerator::BITS_PER_SAMPLE = 16;
-const float SignalGenerator::BASE_FREQUENCY_KHZ = OVERHEAD * SYSCLK / CHANNELS / SAMPLES / BITS_PER_SAMPLE / 1000.f;
-
 const std::array< std::array< uint8_t, 3 >, 130 > SignalGenerator::frequency_values{{
     {1, 2, 111}, // 0 20.59
     {1, 2, 106}, // 1 21.56
@@ -146,19 +139,26 @@ const std::array< std::array< uint8_t, 3 >, 130 > SignalGenerator::frequency_val
 
 const Parameter SignalGenerator::amplitude{
     18,
-    [](int index) { return 0.8f + 0.05f * index; },
-    "%1 V"
+    [](int index) { return 800 + 50 * index; },
+    "%1 mV"
 };
+
+#define SYSCLK 80'000'000
+#define CHANNELS 2
+#define SAMPLES 500
+#define BITS_PER_SAMPLE 16
+#define OVERHEAD 160 / 175
+#define BASE_FREQUENCY SYSCLK / CHANNELS / SAMPLES / BITS_PER_SAMPLE * OVERHEAD
 
 const Parameter SignalGenerator::frequency{
     frequency_values.size(),
-    [](int index) { return BASE_FREQUENCY_KHZ * frequency_values[index][0] / (frequency_values[index][1] * frequency_values[index][2]); },
+    [](int index) { return BASE_FREQUENCY * frequency_values[index][0] / (frequency_values[index][1] * frequency_values[index][2]); },
     "%1 kHz"
 };
 
 const Parameter SignalGenerator::multiplier{
     21,
-    [](int index) { return static_cast< float >(index); },
+    [](int index) { return index; },
     "%1"
 };
 

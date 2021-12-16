@@ -36,6 +36,9 @@ void LoggerForm::setModel(model::Lenlab* lenlab)
     setupChart();
 
     for (auto&& item : logger->interval) ui->intervalBox->addItem(item);
+    connect(ui->intervalBox, &QComboBox::currentIndexChanged,
+            logger, &model::Logger::setIntervalIndex);
+    ui->intervalBox->setCurrentIndex(logger->interval.default_index);
 }
 
 void LoggerForm::setupChart() const

@@ -11,20 +11,20 @@ const std::array< int, 3 > Oscilloscope::timerange_values{2, 4, 5};
 
 const Parameter Oscilloscope::samplerate{
     4,
-    [](int index) { return static_cast< float >(1'000 >> index); },
+    [](int index) { return 1'000 >> index; },
     "%1 kHz"
 };
 
 const Parameter Oscilloscope::timerange{
     timerange_values.size(),
-    [](int index) { return static_cast< float >(timerange_values[index]); },
+    [](int index) { return timerange_values[index]; },
     "%1 ms"
 };
 
 const Parameter Oscilloscope::valuerange{
     2,
-    [](int index) { return 1.65f / (index + 1); },
-    "%1 V"
+    [](int index) { return 1650 / (index + 1); },
+    "%1 mV"
 };
 
 Oscilloscope::Oscilloscope(protocol::Board* board)

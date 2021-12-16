@@ -19,6 +19,9 @@ VirtualDevice::VirtualDevice(QObject *parent)
     connect(this, &VirtualDevice::command,
             this, &VirtualDevice::handleCommand,
             Qt::QueuedConnection);
+
+    connect(&logger, &QTimer::timeout,
+            this, &VirtualDevice::logger_main);
 }
 
 void VirtualDevice::send(const std::shared_ptr< Message >& message)
@@ -32,6 +35,12 @@ void VirtualDevice::handleCommand(const std::shared_ptr< Message >& cmd)
     case setUp:
         set_up(cmd);
         break;
+    case startLogger:
+        start_logger(cmd);
+        break;
+    case stopLogger:
+        stop_logger(cmd);
+        break;
     case startOscilloscope:
         start_oscilloscope(cmd);
         break;
@@ -40,10 +49,34 @@ void VirtualDevice::handleCommand(const std::shared_ptr< Message >& cmd)
     }
 }
 
+void VirtualDevice::logger_main()
+{
+    auto rpl = Message::createReply(Log, IntArray, 0);
+
+    rpl->addInt(count);
+    for (auto i = 0; i < 4; ++i) rpl->addInt(4096 * (count % 10) / 10);
+
+    ++count;
+
+    emit reply(rpl);
+}
+
 void VirtualDevice::set_up(const std::shared_ptr< Message >& cmd)
 {
     auto rpl = Message::createReply(Setup, nullType, cmd->head->reference);
     emit reply(rpl);
+}
+
+void VirtualDevice::start_logger(const std::shared_ptr< Message >& cmd)
+{
+    count = 0;
+    logger.setInterval(cmd->getInt(0));
+    logger.start();
+}
+
+void VirtualDevice::stop_logger(const std::shared_ptr< Message >& cmd)
+{
+    logger.stop();
 }
 
 void VirtualDevice::start_oscilloscope(const std::shared_ptr< Message >& cmd)

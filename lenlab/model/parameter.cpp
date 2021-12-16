@@ -2,7 +2,7 @@
 
 namespace model {
 
-LabelIterator::LabelIterator(const std::function< float(int) > value, const QString label, int i)
+LabelIterator::LabelIterator(const std::function< int(int) > value, const QString label, int i)
     : value{value}
     , label{std::move(label)}
     , i{i}
@@ -26,10 +26,11 @@ LabelIterator& LabelIterator::operator++()
     return *this;
 }
 
-Parameter::Parameter(int length, const std::function< float(int) > value, const QString label)
+Parameter::Parameter(int length, const std::function< int(int) > value, const QString label, int default_index)
     : length{length}
     , value{value}
     , label{std::move(label)}
+    , default_index{default_index}
 {
 
 }

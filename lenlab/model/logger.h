@@ -12,7 +12,7 @@ class Logger : public Component
 {
     Q_OBJECT
 
-    static const std::array< const int, 6 > interval_values;
+    static const std::array< int, 6 > interval_values;
 
 public:
     static const Parameter interval;
@@ -27,6 +27,8 @@ public slots:
     void setup(const std::shared_ptr< protocol::Message >& message);
     void reply(const std::shared_ptr< protocol::Message >& message);
     void error();
+
+    void setIntervalIndex(int index);
 };
 
 } // namespace model
