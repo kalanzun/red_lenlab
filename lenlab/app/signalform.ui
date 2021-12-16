@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>gui::SignalForm</class>
- <widget class="QWidget" name="gui::SignalForm">
+ <class>app::SignalForm</class>
+ <widget class="QWidget" name="app::SignalForm">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>304</width>
-    <height>160</height>
+    <width>400</width>
+    <height>152</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,16 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="title">
-       <property name="text">
-        <string>Signalgenerator</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="signalTypeBox"/>
+      <widget class="QComboBox" name="signalBox"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -33,8 +26,8 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>0</width>
-         <height>0</height>
+         <width>40</width>
+         <height>20</height>
         </size>
        </property>
       </spacer>
@@ -43,8 +36,15 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="amplitudeLabel">
+       <property name="text">
+        <string>Amplitude</string>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="secondLabel">
+      <widget class="QLabel" name="bLabel">
        <property name="text">
         <string>Frequenzmultiplikator
 für Kanal B (Pin 10)</string>
@@ -54,33 +54,19 @@ für Kanal B (Pin 10)</string>
      <item row="1" column="1">
       <widget class="QComboBox" name="frequencyBox"/>
      </item>
-     <item row="1" column="2">
-      <widget class="QSlider" name="frequencySlider">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="frequencyLabel">
        <property name="text">
-        <string>Frequenz
+        <string>Frequenz auf
 Kanal A (Pin 14)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="secondBox"/>
-     </item>
-     <item row="2" column="2">
-      <widget class="QSlider" name="secondSlider">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="amplitudeBox"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="bBox"/>
      </item>
      <item row="0" column="2">
       <widget class="QSlider" name="amplitudeSlider">
@@ -89,11 +75,17 @@ Kanal A (Pin 14)</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="amplitudeLabel">
-       <property name="text">
-        <string>Amplitude
-</string>
+     <item row="1" column="2">
+      <widget class="QSlider" name="frequencySlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QSlider" name="bSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>

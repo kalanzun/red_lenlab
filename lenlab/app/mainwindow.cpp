@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->signalFrame->hide();
 }
 
 MainWindow::~MainWindow()
@@ -24,6 +26,12 @@ void MainWindow::setModel(model::Lenlab* lenlab)
     ui->loggerForm->setModel(lenlab);
     ui->oscilloscopeForm->setModel(lenlab);
     ui->spectrumForm->setModel(lenlab);
+}
+
+void MainWindow::on_signalButton_toggled(bool checked)
+{
+    if (checked) ui->signalFrame->show();
+    else ui->signalFrame->hide();
 }
 
 } // namespace app

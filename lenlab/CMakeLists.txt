@@ -20,6 +20,7 @@ set(PROJECT_SOURCES
     app/labchart.h app/labchart.cpp app/labchart.ui
     app/loggerform.h app/loggerform.cpp app/loggerform.ui
     app/oscilloscopeform.h app/oscilloscopeform.cpp app/oscilloscopeform.ui
+    app/signalform.h app/signalform.cpp app/signalform.ui
     app/spectrumform.h app/spectrumform.cpp app/spectrumform.ui
     app/vlabel.h app/vlabel.cpp
     model/component.h model/component.cpp

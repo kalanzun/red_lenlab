@@ -25,6 +25,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+private slots:
+    void on_signalButton_toggled(bool checked);
 };
 
 } // namespace app
