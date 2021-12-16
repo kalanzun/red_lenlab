@@ -3,6 +3,7 @@
 #include "protocol/board.h"
 #include "logger.h"
 #include "oscilloscope.h"
+#include "signalgenerator.h"
 #include "spectrumanalyzer.h"
 
 namespace model {
@@ -12,6 +13,7 @@ Lenlab::Lenlab(QObject *parent)
     , board{new protocol::Board{this}}
     , logger{new Logger{board}}
     , oscilloscope{new Oscilloscope{board}}
+    , signal{new SignalGenerator{board}}
     , spectrum{new SpectrumAnalyzer{board}}
 {
 

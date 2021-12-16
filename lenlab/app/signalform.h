@@ -3,6 +3,11 @@
 
 #include <QWidget>
 
+namespace model {
+class Lenlab;
+class SignalGenerator;
+}
+
 namespace app {
 
 namespace Ui {
@@ -13,9 +18,14 @@ class SignalForm : public QWidget
 {
     Q_OBJECT
 
+    model::Lenlab* lenlab;
+    model::SignalGenerator* signal;
+
 public:
     explicit SignalForm(QWidget *parent = nullptr);
     ~SignalForm();
+
+    void setModel(model::Lenlab* lenlab);
 
 private:
     Ui::SignalForm *ui;

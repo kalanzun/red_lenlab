@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
     model/lenlab.h model/lenlab.cpp
     model/logger.h model/logger.cpp
     model/oscilloscope.h model/oscilloscope.cpp
+    model/parameter.h model/parameter.cpp
+    model/signalgenerator.h model/signalgenerator.cpp
     model/spectrumanalyzer.h model/spectrumanalyzer.cpp
     model/waveform.h model/waveform.cpp
     protocol/board.h protocol/board.cpp

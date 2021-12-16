@@ -29,6 +29,7 @@ void MainWindow::setModel(model::Lenlab* lenlab)
 
     ui->loggerForm->setModel(lenlab);
     ui->oscilloscopeForm->setModel(lenlab);
+    ui->signalForm->setModel(lenlab);
     ui->spectrumForm->setModel(lenlab);
 
     connect(this->lenlab->board, &protocol::Board::setup,

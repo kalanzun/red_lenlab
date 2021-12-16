@@ -2,6 +2,7 @@
 #define MODEL_LOGGER_H
 
 #include "component.h"
+#include "parameter.h"
 
 namespace protocol { class Message; }
 
@@ -11,7 +12,11 @@ class Logger : public Component
 {
     Q_OBJECT
 
+    static const std::array< const int, 6 > interval_values;
+
 public:
+    static const Parameter interval;
+
     explicit Logger(protocol::Board* board);
 
     void start();

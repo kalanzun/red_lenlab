@@ -8,6 +8,14 @@
 
 namespace model {
 
+const std::array< const int, 6 > Logger::interval_values{100, 200, 500, 1000, 2000, 5000};
+
+const Parameter Logger::interval{
+    interval_values.size(),
+    [](int index) { return static_cast< float >(interval_values[index]); },
+    "%1 ms"
+};
+
 Logger::Logger(protocol::Board* board)
     : Component{board}
 {

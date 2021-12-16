@@ -2,6 +2,7 @@
 #define MODEL_OSCILLOSCOPE_H
 
 #include "component.h"
+#include "parameter.h"
 
 #include "protocol/message.h"
 
@@ -22,7 +23,13 @@ class Oscilloscope : public Component
 {
     Q_OBJECT
 
+    static const std::array< int, 3 > timerange_values;
+
 public:
+    static const Parameter samplerate;
+    static const Parameter timerange;
+    static const Parameter valuerange;
+
     explicit Oscilloscope(protocol::Board* board);
 
     void start();

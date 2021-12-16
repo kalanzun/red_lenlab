@@ -9,6 +9,7 @@ namespace model {
 
 class Logger;
 class Oscilloscope;
+class SignalGenerator;
 class SpectrumAnalyzer;
 
 class Lenlab : public QObject
@@ -19,14 +20,12 @@ public:
     protocol::Board* board;
     Logger* logger;
     Oscilloscope* oscilloscope;
+    SignalGenerator* signal;
     SpectrumAnalyzer* spectrum;
 
     explicit Lenlab(QObject *parent = nullptr);
 
     void lookForDevice(bool create_virtual_device = false);
-
-signals:
-
 };
 
 } // namespace model

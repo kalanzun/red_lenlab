@@ -34,6 +34,8 @@ void LoggerForm::setModel(model::Lenlab* lenlab)
 
     ui->labChart->setModel(lenlab->logger);
     setupChart();
+
+    for (auto&& item : logger->interval) ui->intervalBox->addItem(item);
 }
 
 void LoggerForm::setupChart() const

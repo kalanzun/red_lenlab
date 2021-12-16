@@ -30,6 +30,10 @@ void OscilloscopeForm::setModel(model::Lenlab* lenlab)
 
     ui->labChart->setModel(lenlab->oscilloscope);
     setupChart();
+
+    for (auto&& item : oscilloscope->samplerate) ui->samplerateBox->addItem(item);
+    for (auto&& item : oscilloscope->timerange) ui->xRangeBox->addItem(item);
+    for (auto&& item : oscilloscope->valuerange) ui->yRangeBox->addItem(item);
 }
 
 void OscilloscopeForm::setupChart() const

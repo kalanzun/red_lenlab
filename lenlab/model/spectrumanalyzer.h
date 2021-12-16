@@ -13,9 +13,6 @@ class SpectrumAnalyzer : public Component
 
 public:
     explicit SpectrumAnalyzer(protocol::Board* board);
-
-signals:
-
 };
 
 } // namespace model
