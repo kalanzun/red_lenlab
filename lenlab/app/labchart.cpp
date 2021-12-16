@@ -102,6 +102,11 @@ void LabChart::setRange(model::Waveform* waveform)
     if (axes.size() > 1) axes.at(1)->setRange(-180, 0);
 }
 
+void LabChart::setVisible(int channel, bool visible)
+{
+    series.at(channel)->setVisible(visible);
+}
+
 void LabChart::appendSample(const struct model::Sample& sample)
 {
     qDebug() << "appendSample";

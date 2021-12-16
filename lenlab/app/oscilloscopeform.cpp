@@ -11,6 +11,11 @@ OscilloscopeForm::OscilloscopeForm(QWidget *parent) :
     ui(new Ui::OscilloscopeForm)
 {
     ui->setupUi(this);
+
+    connect(ui->ch1CheckBox, &QCheckBox::toggled,
+            ui->labChart, [this](bool checked) { ui->labChart->setVisible(0, checked); });
+    connect(ui->ch2CheckBox, &QCheckBox::toggled,
+            ui->labChart, [this](bool checked) { ui->labChart->setVisible(1, checked); });
 }
 
 OscilloscopeForm::~OscilloscopeForm()

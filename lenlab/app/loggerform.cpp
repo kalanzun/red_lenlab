@@ -11,6 +11,15 @@ LoggerForm::LoggerForm(QWidget *parent) :
     ui(new Ui::LoggerForm)
 {
     ui->setupUi(this);
+
+    connect(ui->ch1CheckBox, &QCheckBox::toggled,
+            ui->labChart, [this](bool checked) { ui->labChart->setVisible(0, checked); });
+    connect(ui->ch2CheckBox, &QCheckBox::toggled,
+            ui->labChart, [this](bool checked) { ui->labChart->setVisible(1, checked); });
+    connect(ui->ch3CheckBox, &QCheckBox::toggled,
+            ui->labChart, [this](bool checked) { ui->labChart->setVisible(2, checked); });
+    connect(ui->ch4CheckBox, &QCheckBox::toggled,
+            ui->labChart, [this](bool checked) { ui->labChart->setVisible(3, checked); });
 }
 
 LoggerForm::~LoggerForm()

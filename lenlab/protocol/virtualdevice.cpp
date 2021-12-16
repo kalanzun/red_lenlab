@@ -54,7 +54,7 @@ void VirtualDevice::start_oscilloscope(const std::shared_ptr< Message >& cmd)
             rpl->page->channel = c;
             rpl->page->index = i;
             for (auto v = 0; v < 500; ++v) {
-                auto value = std::sin(2.f * pi * f * (500 * i + v) + pi * c);
+                auto value = std::sin(2.f * pi * f * (500 * i + v) + pi * c / 2.f);
                 rpl->page->values[v] = (uint16_t) ((value + 1.f) / 2.f * 4096.f);
             }
             emit reply(rpl);
