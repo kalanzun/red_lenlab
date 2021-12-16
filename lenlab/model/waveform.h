@@ -14,15 +14,6 @@ struct Point
     float y;
 };
 
-struct Sample
-{
-    static const int channels = 4;
-    float x;
-    float y[channels];
-};
-
-class Waveform;
-
 class PointIterator
 {
     QVector< float >::const_iterator x;
@@ -41,11 +32,11 @@ public:
 
 class Channel
 {
-    const int channel;
-    const Waveform* waveform;
+    const QVector< float >* x;
+    const QVector< float >* y;
 
 public:
-    explicit Channel(int channel, const Waveform* waveform);
+    explicit Channel(const QVector< float >* x, const QVector< float >* y);
 
     Channel(const Channel&) = delete;
     const Channel& operator=(const Channel&) = delete;
@@ -54,17 +45,25 @@ public:
     PointIterator end() const;
 };
 
+struct Sample
+{
+    static const int channels = 4;
+    float x;
+    float y[channels];
+};
+
 class Waveform : public QObject
 {
     Q_OBJECT
 
 public:
     static const int channels = Sample::channels;
+    static const int samples = 5500;
     static const char* const delimiter;
     uint32_t interval = 0;
 
-    QVector< float > x_values;
-    QVector< float > y_values[channels];
+    QVector< float > x;
+    QVector< float > y[channels];
 
     explicit Waveform(QObject *parent = nullptr);
 

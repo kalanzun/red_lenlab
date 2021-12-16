@@ -20,8 +20,6 @@ const Parameter Logger::interval{
 Logger::Logger(protocol::Board* board)
     : Component{board}
 {
-    waveform->interval = 256;
-
     connect(board, &protocol::Board::setup,
             this, &Logger::setup);
 
@@ -81,7 +79,6 @@ void Logger::error()
 
 void Logger::setIntervalIndex(int index)
 {
-    qDebug() << "setIntervalIndex";
     waveform->interval = interval.value(index);
 }
 

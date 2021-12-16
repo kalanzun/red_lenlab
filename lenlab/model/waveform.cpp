@@ -27,39 +27,39 @@ PointIterator& PointIterator::operator++()
 }
 
 
-Channel::Channel(int channel, const Waveform* waveform)
-    : channel{channel}
-    , waveform{waveform}
+Channel::Channel(const QVector<float>* x, const QVector<float>* y)
+    : x{x}
+    , y{y}
 {
 
 }
 
 PointIterator Channel::begin() const
 {
-    return PointIterator{waveform->x_values.constBegin(), waveform->y_values[channel].constBegin()};
+    return PointIterator{x->constBegin(), y->constBegin()};
 }
 
 PointIterator Channel::end() const
 {
-    return PointIterator{waveform->x_values.constEnd(), waveform->y_values[channel].constEnd()};
+    return PointIterator{x->constEnd(), y->constEnd()};
 }
 
 Waveform::Waveform(QObject *parent)
     : QObject{parent}
 {
-    x_values.reserve(5000);
+    x.reserve(samples);
 
     for (auto i = 0; i < channels; ++i) {
-        y_values[i].reserve(5000);
+        y[i].reserve(samples);
     }
 }
 
 void Waveform::appendSample(const struct Sample& sample)
 {
-    x_values.append(sample.x);
+    x.append(sample.x);
 
     for (auto i = 0; i < channels; ++i) {
-        y_values[i].append(sample.y[i]);
+        y[i].append(sample.y[i]);
     }
 
     emit SampleAppended(sample);
@@ -67,23 +67,22 @@ void Waveform::appendSample(const struct Sample& sample)
 
 int Waveform::getLength() const
 {
-    return x_values.size();
+    return x.size();
 }
 
 Channel Waveform::getChannel(int channel) const
 {
-    return Channel{channel, this};
+    return Channel{&x, &y[channel]};
 }
 
 const char* const Waveform::delimiter = ", ";
 
 void Waveform::csv(std::ostream& out) const
 {
-    // TODO QVector iterator
-    for (auto i = 0; i < x_values.size(); ++i) {
-        out << x_values[i];
+    for (auto i = 0; i < x.size(); ++i) {
+        out << x.at(i);
         for (auto c = 0; c < channels; ++c) {
-            out << delimiter << y_values[c][i];
+            out << delimiter << y[c].at(i);
         }
         out << "\n";
     }

@@ -75,8 +75,8 @@ void Oscilloscope::reply(const std::shared_ptr< protocol::Message >& message)
         qDebug() << "OscilloscopeData" << page->channel << page->index;
 
         for (auto i = 0; i < 500; ++i) {
-            if (page->channel == 0) waveform->x_values.append((float) page->index * 500 + i);
-            waveform->y_values[page->channel].append((float) page->values[i] / 4096.0 * 3.3 - 1.65);
+            if (page->channel == 0) waveform->x.append((float) page->index * 500 + i);
+            waveform->y[page->channel].append((float) page->values[i] / 4096.0 * 3.3 - 1.65);
         }
 
         if (page->index == 11 && page->channel == 1) {
