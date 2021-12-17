@@ -42,9 +42,9 @@ void Logger::start()
         waveform->setLocked();
     }
 
-    auto start_logger = protocol::Message::createCommand(startLogger, IntArray);
-    start_logger->addInt(waveform->getInterval());
-    board->send(start_logger);
+    auto cmd = protocol::Message::createCommand(startLogger, IntArray);
+    cmd->addInt(waveform->getInterval());
+    board->send(cmd);
 }
 
 void Logger::stop()
@@ -52,19 +52,17 @@ void Logger::stop()
     if (!running) return;
     running = false;
 
-    auto stop_logger = protocol::Message::createCommand(stopLogger);
-    board->send(stop_logger);
+    auto cmd = protocol::Message::createCommand(stopLogger);
+    board->send(cmd);
 }
 
 void Logger::reset()
 {
     if (running) stop();
 
-    waveform->deleteLater();
-
-    waveform = new Waveform{this};
+    waveform = std::make_shared< Waveform >();
     setupWaveform();
-    emit WaveformCreated(waveform);
+    emit WaveformCreated(waveform.get());
 }
 
 void Logger::setup(const std::shared_ptr< protocol::Message >& message)

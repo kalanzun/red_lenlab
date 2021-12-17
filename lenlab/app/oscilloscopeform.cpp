@@ -12,6 +12,8 @@ OscilloscopeForm::OscilloscopeForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setupChart();
+
     connect(ui->ch1CheckBox, &QCheckBox::toggled,
             ui->labChart, [this](bool checked) { ui->labChart->setVisible(0, checked); });
     connect(ui->ch2CheckBox, &QCheckBox::toggled,
@@ -26,10 +28,9 @@ OscilloscopeForm::~OscilloscopeForm()
 void OscilloscopeForm::setModel(model::Lenlab* lenlab)
 {
     this->lenlab = lenlab;
-    this->oscilloscope = lenlab->oscilloscope;
+    oscilloscope = lenlab->oscilloscope;
 
     ui->labChart->setModel(lenlab->oscilloscope);
-    setupChart();
 
     for (auto&& item : oscilloscope->samplerate) ui->samplerateBox->addItem(item);
     connect(ui->samplerateBox, &QComboBox::activated,

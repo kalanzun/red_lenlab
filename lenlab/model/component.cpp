@@ -8,14 +8,14 @@ namespace model {
 Component::Component(protocol::Board* board)
     : QObject{board}
     , board{board}
-    , waveform{new model::Waveform{this}}
+    , waveform{std::make_shared< model::Waveform >()}
 {
 
 }
 
 model::Waveform* Component::getWaveform() const
 {
-    return waveform;
+    return waveform.get();
 }
 
 } // namespace model

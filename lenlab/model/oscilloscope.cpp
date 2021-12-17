@@ -28,6 +28,8 @@ const Parameter Oscilloscope::valuerange{
 Oscilloscope::Oscilloscope(protocol::Board* board)
     : Component{board}
 {
+    setupWaveform();
+
     connect(board, &protocol::Board::setup,
             this, &Oscilloscope::setup);
 
@@ -40,20 +42,26 @@ Oscilloscope::Oscilloscope(protocol::Board* board)
 
 void Oscilloscope::start()
 {
-    waveform->deleteLater();
-    waveform = new Waveform{this};
+    if (running) return;
+    running = true;
 
-    auto start_logger = protocol::Message::createCommand(startOscilloscope, IntArray);
-    start_logger->addInt(waveform->getInterval());
-    board->send(start_logger);
+    incoming = std::make_shared< model::Waveform >();
+
+    auto cmd = protocol::Message::createCommand(startOscilloscope, IntArray);
+    cmd->addInt(samplerate.getIndex());
+    board->send(cmd);
 }
 
-void Oscilloscope::reset()
+void Oscilloscope::stop()
 {
+    if (!running) return;
+    running = false;
 }
 
 void Oscilloscope::setup(const std::shared_ptr< protocol::Message >& message)
 {
+    running = false;
+
     auto set_signal_sine = protocol::Message::createCommand(setSignalSine, IntArray);
     set_signal_sine->addInt(8); // mutliplier
     set_signal_sine->addInt(2); // predivider
@@ -65,22 +73,35 @@ void Oscilloscope::setup(const std::shared_ptr< protocol::Message >& message)
 
 void Oscilloscope::reply(const std::shared_ptr< protocol::Message >& message)
 {
+    if (!running) return;
+
     if (message->head->reply == OscilloscopeData) {
         auto page = (struct Page*) message->getBuffer();
 
         for (auto i = 0; i < 500; ++i) {
-            if (page->channel == 0) waveform->x.append((float) page->index * 500 + i);
-            waveform->y[page->channel].append((float) page->values[i] / 4096.0 * 3.3 - 1.65);
+            if (page->channel == 0) incoming->x.append((page->index * 500 + i) / 1e3f); // ms
+            incoming->y[page->channel].append(page->values[i] / 4096.f * 3.3f - 1.65f); // V
         }
 
         if (page->index == 11 && page->channel == 1) {
-            emit WaveformCreated(waveform);
+            waveform.swap(incoming);
+            setupWaveform();
+            emit WaveformCreated(waveform.get());
         }
     }
 }
 
 void Oscilloscope::error()
 {
+    running = false;
+}
+
+void Oscilloscope::setupWaveform()
+{
+    waveform->x_range.a = -2.f;
+    waveform->x_range.b = 2.f;
+    waveform->y_range.a = -1.65f;
+    waveform->y_range.b = 1.65f;
 }
 
 } // namespace model

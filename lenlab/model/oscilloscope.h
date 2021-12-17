@@ -34,12 +34,16 @@ public:
 
     void start();
     void stop();
-    void reset();
 
 public slots:
     void setup(const std::shared_ptr< protocol::Message >& message);
     void reply(const std::shared_ptr< protocol::Message >& message);
     void error();
+
+private:
+    std::shared_ptr< model::Waveform > incoming;
+
+    void setupWaveform();
 };
 
 } // namespace model

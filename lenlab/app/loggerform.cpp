@@ -13,6 +13,8 @@ LoggerForm::LoggerForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setupChart();
+
     connect(ui->ch1CheckBox, &QCheckBox::toggled,
             ui->labChart, [this](bool checked) { ui->labChart->setVisible(0, checked); });
     connect(ui->ch2CheckBox, &QCheckBox::toggled,
@@ -37,7 +39,6 @@ void LoggerForm::setModel(model::Lenlab* lenlab)
             this, &LoggerForm::setWaveform);
     setWaveform(logger->getWaveform());
 
-    setupChart();
     ui->labChart->setModel(logger);
 
     for (auto&& item : logger->interval) ui->intervalBox->addItem(item);
