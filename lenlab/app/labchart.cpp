@@ -97,11 +97,11 @@ void LabChart::setWaveform(model::Waveform* waveform)
 void LabChart::setRange(model::Waveform* waveform)
 {
     auto axes = chart->axes(Qt::Horizontal);
-    if (!axes.isEmpty()) axes.first()->setRange(0, 5000);
+    if (!axes.isEmpty()) axes.first()->setRange(waveform->x_range.a, waveform->x_range.b);
 
     axes = chart->axes(Qt::Vertical);
-    if (!axes.isEmpty()) axes.first()->setRange(-2, 2);
-    if (axes.size() > 1) axes.at(1)->setRange(-180, 0);
+    if (!axes.isEmpty()) axes.first()->setRange(waveform->y_range.a, waveform->y_range.b);
+    if (axes.size() > 1) axes.at(1)->setRange(waveform->y2_range.a, waveform->y2_range.b);
 }
 
 void LabChart::appendSample(const struct model::Sample& sample)
@@ -109,6 +109,9 @@ void LabChart::appendSample(const struct model::Sample& sample)
     for (auto i = 0; i < sample.channels && i < series.size(); ++i) {
         series.at(i)->append(sample.x, sample.y[i]);
     }
+
+    auto axes = chart->axes(Qt::Horizontal);
+    if (!axes.isEmpty()) axes.first()->setRange(sample.x_range.a, sample.x_range.b);
 }
 
 } // namespace app

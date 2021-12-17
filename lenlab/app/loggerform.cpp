@@ -31,14 +31,14 @@ LoggerForm::~LoggerForm()
 void LoggerForm::setModel(model::Lenlab* lenlab)
 {
     this->lenlab = lenlab;
-    this->logger = lenlab->logger;
+    logger = lenlab->logger;
 
     connect(logger, &model::Logger::WaveformCreated,
             this, &LoggerForm::setWaveform);
     setWaveform(logger->getWaveform());
 
-    ui->labChart->setModel(logger);
     setupChart();
+    ui->labChart->setModel(logger);
 
     for (auto&& item : logger->interval) ui->intervalBox->addItem(item);
     connect(ui->intervalBox, &QComboBox::activated,

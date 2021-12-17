@@ -46,6 +46,9 @@ PointIterator Channel::end() const
 
 Waveform::Waveform(QObject *parent)
     : QObject{parent}
+    , x_range{0.f, 1.f}
+    , y_range{0.f, 1.f}
+    , y2_range{0.f, 1.f}
 {
     x.reserve(samples);
 
@@ -57,6 +60,8 @@ Waveform::Waveform(QObject *parent)
 void Waveform::appendSample(const struct Sample& sample)
 {
     x.append(sample.x);
+    x_range.a = sample.x_range.a;
+    x_range.b = sample.x_range.b;
 
     for (auto i = 0; i < channels; ++i) {
         y[i].append(sample.y[i]);
@@ -109,6 +114,11 @@ void Waveform::csv(std::ostream& out) const
         }
         out << "\n";
     }
+}
+
+int Waveform::round_up_towards(int base, int value)
+{
+    return base * (value / base + static_cast< bool >(value % base));
 }
 
 } // namespace model

@@ -1,5 +1,7 @@
 #include "logger.h"
 
+#include <QDebug>
+
 #include "protocol/board.h"
 #include "protocol/message.h"
 #include "waveform.h"
@@ -18,6 +20,8 @@ const Parameter Logger::interval{
 Logger::Logger(protocol::Board* board)
     : Component{board}
 {
+    setupWaveform();
+
     connect(board, &protocol::Board::setup,
             this, &Logger::setup);
 
@@ -59,6 +63,7 @@ void Logger::reset()
     waveform->deleteLater();
 
     waveform = new Waveform{this};
+    setupWaveform();
     emit WaveformCreated(waveform);
 }
 
@@ -74,9 +79,11 @@ void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 
     if (message->head->reply == Log) {
         struct Sample sample;
-        sample.x = (float) (message->getInt(1) * waveform->getInterval()) / 1000.0;
+        sample.x = (waveform->getLength() * waveform->getInterval()) / 1000.f;
+        sample.x_range.a = 0.f;
+        sample.x_range.b = (waveform->round_up_towards(40, waveform->getLength()) * waveform->getInterval()) / 1000.f;
         for (auto i = 0; i < sample.channels; ++i) {
-            sample.y[i] = (float) message->getInt(i + 1) / 4096.0 * 3.3;
+            sample.y[i] = message->getInt(i + 1) / 4096.f * 3.3f;
         }
         waveform->appendSample(sample);
     }
@@ -85,6 +92,12 @@ void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 void Logger::error()
 {
     running = false;
+}
+
+void Logger::setupWaveform()
+{
+    waveform->x_range.b = 40.f;
+    waveform->y_range.b = 3.3f;
 }
 
 } // namespace model

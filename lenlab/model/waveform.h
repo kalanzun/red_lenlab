@@ -45,10 +45,17 @@ public:
     PointIterator end() const;
 };
 
+struct Range
+{
+    float a;
+    float b;
+};
+
 struct Sample
 {
     static const int channels = 4;
     float x;
+    struct Range x_range;
     float y[channels];
 };
 
@@ -67,6 +74,10 @@ public:
     QVector< float > x;
     QVector< float > y[channels];
 
+    struct Range x_range;
+    struct Range y_range;
+    struct Range y2_range;
+
     explicit Waveform(QObject *parent = nullptr);
 
     void appendSample(const struct Sample& sample);
@@ -81,6 +92,8 @@ public:
     void setInterval(int interval);
 
     void csv(std::ostream& out) const;
+
+    static int round_up_towards(int base, int value);
 
 signals:
     void SampleAppended(const struct Sample& sample);

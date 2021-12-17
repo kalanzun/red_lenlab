@@ -56,7 +56,7 @@ void VirtualDevice::logger_main()
     auto rpl = Message::createReply(Log, IntArray, 0);
 
     rpl->addInt(count);
-    for (auto i = 0; i < 4; ++i) rpl->addInt(4096 * (count % 10) / 10);
+    for (auto i = 0; i < 4; ++i) rpl->addInt((4096 >> 4 >> i) * (count & 0xF));
 
     ++count;
 
