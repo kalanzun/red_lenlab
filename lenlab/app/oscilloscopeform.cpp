@@ -32,8 +32,19 @@ void OscilloscopeForm::setModel(model::Lenlab* lenlab)
     setupChart();
 
     for (auto&& item : oscilloscope->samplerate) ui->samplerateBox->addItem(item);
+    connect(ui->samplerateBox, &QComboBox::activated,
+            &oscilloscope->samplerate, &model::Parameter::setIndex);
+    ui->samplerateBox->setCurrentIndex(oscilloscope->samplerate.getIndex());
+
     for (auto&& item : oscilloscope->timerange) ui->xRangeBox->addItem(item);
+    connect(ui->xRangeBox, &QComboBox::activated,
+            &oscilloscope->timerange, &model::Parameter::setIndex);
+    ui->xRangeBox->setCurrentIndex(oscilloscope->timerange.getIndex());
+
     for (auto&& item : oscilloscope->valuerange) ui->yRangeBox->addItem(item);
+    connect(ui->yRangeBox, &QComboBox::activated,
+            &oscilloscope->valuerange, &model::Parameter::setIndex);
+    ui->yRangeBox->setCurrentIndex(oscilloscope->valuerange.getIndex());
 }
 
 void OscilloscopeForm::setupChart() const

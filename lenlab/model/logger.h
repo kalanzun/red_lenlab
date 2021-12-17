@@ -27,8 +27,6 @@ public slots:
     void setup(const std::shared_ptr< protocol::Message >& message);
     void reply(const std::shared_ptr< protocol::Message >& message);
     void error();
-
-    void setIntervalIndex(int index);
 };
 
 } // namespace model

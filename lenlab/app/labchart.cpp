@@ -65,16 +65,18 @@ void LabChart::setModel(model::Component* component)
 {
     this->component = component;
 
-    setWaveform(component->getWaveform());
-
     connect(component, &model::Component::WaveformCreated,
             this, &LabChart::setWaveform);
+    setWaveform(component->getWaveform());
+}
+
+void LabChart::setVisible(int channel, bool visible)
+{
+    series.at(channel)->setVisible(visible);
 }
 
 void LabChart::setWaveform(model::Waveform* waveform)
 {
-    qDebug() << "setWaveform";
-
     QVector< QPointF > list;
     list.reserve(waveform->getLength());
 
@@ -102,15 +104,8 @@ void LabChart::setRange(model::Waveform* waveform)
     if (axes.size() > 1) axes.at(1)->setRange(-180, 0);
 }
 
-void LabChart::setVisible(int channel, bool visible)
-{
-    series.at(channel)->setVisible(visible);
-}
-
 void LabChart::appendSample(const struct model::Sample& sample)
 {
-    qDebug() << "appendSample";
-
     for (auto i = 0; i < sample.channels && i < series.size(); ++i) {
         series.at(i)->append(sample.x, sample.y[i]);
     }

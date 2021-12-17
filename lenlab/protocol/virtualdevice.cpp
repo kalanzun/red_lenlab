@@ -51,6 +51,8 @@ void VirtualDevice::handleCommand(const std::shared_ptr< Message >& cmd)
 
 void VirtualDevice::logger_main()
 {
+    qDebug() << "VirtualDevice" << "Log" << count;
+
     auto rpl = Message::createReply(Log, IntArray, 0);
 
     rpl->addInt(count);
@@ -63,12 +65,16 @@ void VirtualDevice::logger_main()
 
 void VirtualDevice::set_up(const std::shared_ptr< Message >& cmd)
 {
+    qDebug() << "VirtualDevice" << "setUp";
+
     auto rpl = Message::createReply(Setup, nullType, cmd->head->reference);
     emit reply(rpl);
 }
 
 void VirtualDevice::start_logger(const std::shared_ptr< Message >& cmd)
 {
+    qDebug() << "VirtualDevice" << "startLogger" << cmd->getInt(0);
+
     count = 0;
     logger.setInterval(cmd->getInt(0));
     logger.start();
@@ -76,11 +82,15 @@ void VirtualDevice::start_logger(const std::shared_ptr< Message >& cmd)
 
 void VirtualDevice::stop_logger(const std::shared_ptr< Message >& cmd)
 {
+    qDebug() << "VirtualDevice" << "stopLogger";
+
     logger.stop();
 }
 
 void VirtualDevice::start_oscilloscope(const std::shared_ptr< Message >& cmd)
 {
+    qDebug() << "VirtualDevice" << "startOscilloscope" << cmd->getInt(0);
+
     for (auto c = 0; c < 2; ++c) {
         for (auto i = 0; i < 12; ++i) {
             auto rpl = Message::createReply(OscilloscopeData, ShortArray, 0);

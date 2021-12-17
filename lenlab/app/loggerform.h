@@ -6,6 +6,7 @@
 namespace model {
 class Lenlab;
 class Logger;
+class Waveform;
 }
 
 namespace app {
@@ -33,6 +34,9 @@ private:
 private slots:
     void on_startButton_clicked();
     void on_stopButton_clicked();
+    void on_resetButton_clicked();
+
+    void setWaveform(model::Waveform* waveform);
 };
 
 } // namespace app

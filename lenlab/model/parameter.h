@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include <QObject>
 #include <QString>
 
 namespace model {
@@ -13,10 +14,10 @@ class LabelIterator
     const QString label;
 
 protected:
-    int i;
+    int index;
 
 public:
-    explicit LabelIterator(const std::function< int(int) > value, const QString label, int i);
+    explicit LabelIterator(const std::function< int(int) > value, const QString label, int index);
 
     LabelIterator(const LabelIterator&) = delete;
     const LabelIterator& operator=(const LabelIterator&) = delete;
@@ -26,22 +27,29 @@ public:
     LabelIterator& operator++();
 };
 
-class Parameter
+class Parameter : public QObject
 {
-    const int length;
+    Q_OBJECT
 
-public:
+    const int length;
     const std::function< int(int) > value;
     const QString label;
-    const int default_index;
 
-    explicit Parameter(int length, const std::function< int(int) > value, const QString label, int default_index = 0);
+    int index;
+
+public:
+    explicit Parameter(int length, const std::function< int(int) > value, const QString label, int index = 0, QObject *parent = nullptr);
 
     Parameter(const Parameter&) = delete;
     const Parameter& operator=(const Parameter&) = delete;
 
     LabelIterator begin() const;
     LabelIterator end() const;
+
+    int getIndex() const;
+    void setIndex(int index);
+
+    int getValue() const;
 };
 
 } // namespace model

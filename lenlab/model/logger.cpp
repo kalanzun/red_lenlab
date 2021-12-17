@@ -1,7 +1,5 @@
 #include "logger.h"
 
-#include <QDebug>
-
 #include "protocol/board.h"
 #include "protocol/message.h"
 #include "waveform.h"
@@ -32,39 +30,51 @@ Logger::Logger(protocol::Board* board)
 
 void Logger::start()
 {
+    if (running) return;
+    running = true;
+
+    if (!waveform->is_locked()) {
+        waveform->setInterval(interval.getValue());
+        waveform->setLocked();
+    }
+
     auto start_logger = protocol::Message::createCommand(startLogger, IntArray);
-    start_logger->addInt(waveform->interval);
+    start_logger->addInt(waveform->getInterval());
     board->send(start_logger);
 }
 
 void Logger::stop()
 {
+    if (!running) return;
+    running = false;
+
     auto stop_logger = protocol::Message::createCommand(stopLogger);
     board->send(stop_logger);
 }
 
 void Logger::reset()
 {
-    auto interval = waveform->interval;
+    if (running) stop();
+
     waveform->deleteLater();
 
     waveform = new Waveform{this};
-    waveform->interval = interval;
     emit WaveformCreated(waveform);
 }
 
 void Logger::setup(const std::shared_ptr< protocol::Message >& message)
 {
-    qDebug() << "Logger::setup";
+    running = false;
 }
 
 void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 {
-    if (message->head->reply == Log) {
-        qDebug() << "Log" << message->getInt(0);
+    if (!running) return;
+    assert(waveform->is_locked());
 
+    if (message->head->reply == Log) {
         struct Sample sample;
-        sample.x = (float) (message->getInt(1) * waveform->interval) / 1000.0;
+        sample.x = (float) (message->getInt(1) * waveform->getInterval()) / 1000.0;
         for (auto i = 0; i < sample.channels; ++i) {
             sample.y[i] = (float) message->getInt(i + 1) / 4096.0 * 3.3;
         }
@@ -74,12 +84,7 @@ void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 
 void Logger::error()
 {
-    qDebug() << "Logger::error";
-}
-
-void Logger::setIntervalIndex(int index)
-{
-    waveform->interval = interval.value(index);
+    running = false;
 }
 
 } // namespace model

@@ -3,6 +3,7 @@
 
 #include "model/lenlab.h"
 #include "model/logger.h"
+#include "model/waveform.h"
 
 namespace app {
 
@@ -32,13 +33,17 @@ void LoggerForm::setModel(model::Lenlab* lenlab)
     this->lenlab = lenlab;
     this->logger = lenlab->logger;
 
-    ui->labChart->setModel(lenlab->logger);
+    connect(logger, &model::Logger::WaveformCreated,
+            this, &LoggerForm::setWaveform);
+    setWaveform(logger->getWaveform());
+
+    ui->labChart->setModel(logger);
     setupChart();
 
     for (auto&& item : logger->interval) ui->intervalBox->addItem(item);
-    connect(ui->intervalBox, &QComboBox::currentIndexChanged,
-            logger, &model::Logger::setIntervalIndex);
-    ui->intervalBox->setCurrentIndex(logger->interval.default_index);
+    connect(ui->intervalBox, &QComboBox::activated,
+            &logger->interval, &model::Parameter::setIndex);
+    ui->intervalBox->setCurrentIndex(logger->interval.getIndex());
 }
 
 void LoggerForm::setupChart() const
@@ -62,6 +67,19 @@ void LoggerForm::on_startButton_clicked()
 void LoggerForm::on_stopButton_clicked()
 {
     logger->stop();
+}
+
+void LoggerForm::on_resetButton_clicked()
+{
+    logger->reset();
+}
+
+void LoggerForm::setWaveform(model::Waveform* waveform)
+{
+    ui->intervalBox->setEnabled(true);
+
+    connect(waveform, &model::Waveform::Locked,
+            ui->intervalBox, [this]() { ui->intervalBox->setEnabled(false); });
 }
 
 } // namespace app

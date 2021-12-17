@@ -56,11 +56,13 @@ class Waveform : public QObject
 {
     Q_OBJECT
 
+    bool locked = false;
+    int interval = 0;
+
 public:
     static const int channels = Sample::channels;
     static const int samples = 5500;
     static const char* const delimiter;
-    uint32_t interval = 0;
 
     QVector< float > x;
     QVector< float > y[channels];
@@ -72,10 +74,17 @@ public:
     int getLength() const;
     Channel getChannel(int channel) const;
 
+    void setLocked();
+    bool is_locked();
+
+    int getInterval();
+    void setInterval(int interval);
+
     void csv(std::ostream& out) const;
 
 signals:
     void SampleAppended(const struct Sample& sample);
+    void Locked();
 };
 
 } // namespace model

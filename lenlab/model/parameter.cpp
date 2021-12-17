@@ -2,35 +2,36 @@
 
 namespace model {
 
-LabelIterator::LabelIterator(const std::function< int(int) > value, const QString label, int i)
+LabelIterator::LabelIterator(const std::function< int(int) > value, const QString label, int index)
     : value{value}
     , label{std::move(label)}
-    , i{i}
+    , index{index}
 {
 
 }
 
 bool LabelIterator::operator!=(const LabelIterator& other)
 {
-    return i != other.i;
+    return index != other.index;
 }
 
 QString LabelIterator::operator*()
 {
-    return label.arg(value(i));
+    return label.arg(value(index));
 }
 
 LabelIterator& LabelIterator::operator++()
 {
-    ++i;
+    ++index;
     return *this;
 }
 
-Parameter::Parameter(int length, const std::function< int(int) > value, const QString label, int default_index)
-    : length{length}
+Parameter::Parameter(int length, const std::function< int(int) > value, const QString label, int index, QObject *parent)
+    : QObject{parent}
+    , length{length}
     , value{value}
     , label{std::move(label)}
-    , default_index{default_index}
+    , index{index}
 {
 
 }
@@ -43,6 +44,23 @@ LabelIterator Parameter::begin() const
 LabelIterator Parameter::end() const
 {
     return LabelIterator{value, label, length};
+}
+
+int Parameter::getIndex() const
+{
+    return index;
+}
+
+void Parameter::setIndex(int index)
+{
+    assert(index >= 0);
+    assert(index < length);
+    this->index = index;
+}
+
+int Parameter::getValue() const
+{
+    return value(index);
 }
 
 } // namespace model

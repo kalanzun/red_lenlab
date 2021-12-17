@@ -37,10 +37,11 @@ public:
 
     void setModel(model::Component* component);
 
+    void setVisible(int channel, bool visible);
+
+public slots:
     void setWaveform(model::Waveform* waveform);
     void setRange(model::Waveform* waveform);
-
-    void setVisible(int channel, bool visible);
 
 private:
     Ui::LabChart *ui;

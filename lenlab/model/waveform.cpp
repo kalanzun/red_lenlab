@@ -75,6 +75,29 @@ Channel Waveform::getChannel(int channel) const
     return Channel{&x, &y[channel]};
 }
 
+void Waveform::setLocked()
+{
+    assert(!locked);
+    locked = true;
+    emit Locked();
+}
+
+bool Waveform::is_locked()
+{
+    return locked;
+}
+
+int Waveform::getInterval()
+{
+    return interval;
+}
+
+void Waveform::setInterval(int interval)
+{
+    assert(!locked);
+    this->interval = interval;
+}
+
 const char* const Waveform::delimiter = ", ";
 
 void Waveform::csv(std::ostream& out) const

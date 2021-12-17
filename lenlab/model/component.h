@@ -17,6 +17,8 @@ protected:
     protocol::Board* board;
     model::Waveform* waveform;
 
+    bool running = false;
+
 public:
     explicit Component(protocol::Board* board);
 

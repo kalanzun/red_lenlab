@@ -1,7 +1,5 @@
 #include "oscilloscope.h"
 
-#include <QDebug>
-
 #include "protocol/board.h"
 #include "waveform.h"
 
@@ -46,7 +44,7 @@ void Oscilloscope::start()
     waveform = new Waveform{this};
 
     auto start_logger = protocol::Message::createCommand(startOscilloscope, IntArray);
-    start_logger->addInt(waveform->interval);
+    start_logger->addInt(waveform->getInterval());
     board->send(start_logger);
 }
 
@@ -56,8 +54,6 @@ void Oscilloscope::reset()
 
 void Oscilloscope::setup(const std::shared_ptr< protocol::Message >& message)
 {
-    qDebug() << "Oscilloscope::setup";
-
     auto set_signal_sine = protocol::Message::createCommand(setSignalSine, IntArray);
     set_signal_sine->addInt(8); // mutliplier
     set_signal_sine->addInt(2); // predivider
@@ -72,27 +68,19 @@ void Oscilloscope::reply(const std::shared_ptr< protocol::Message >& message)
     if (message->head->reply == OscilloscopeData) {
         auto page = (struct Page*) message->getBuffer();
 
-        qDebug() << "OscilloscopeData" << page->channel << page->index;
-
         for (auto i = 0; i < 500; ++i) {
             if (page->channel == 0) waveform->x.append((float) page->index * 500 + i);
             waveform->y[page->channel].append((float) page->values[i] / 4096.0 * 3.3 - 1.65);
         }
 
         if (page->index == 11 && page->channel == 1) {
-            qDebug() << "emit WaveformCreated";
             emit WaveformCreated(waveform);
         }
-    }
-
-    if (message->head->reply == SignalSine) {
-        qDebug() << "SignalSine";
     }
 }
 
 void Oscilloscope::error()
 {
-    qDebug() << "Oscilloscope::error";
 }
 
 } // namespace model
