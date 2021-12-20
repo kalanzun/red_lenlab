@@ -9,8 +9,6 @@ class SpectrumAnalyzer : public Component
 {
     Q_OBJECT
 
-    static const QStringList names;
-
 public:
     explicit SpectrumAnalyzer(protocol::Board* board);
 };
