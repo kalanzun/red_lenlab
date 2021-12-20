@@ -1,6 +1,8 @@
 #ifndef MODEL_LOGGER_H
 #define MODEL_LOGGER_H
 
+#include <memory>
+
 #include "component.h"
 #include "parameter.h"
 

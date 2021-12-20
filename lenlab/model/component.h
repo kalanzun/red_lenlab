@@ -1,8 +1,6 @@
 #ifndef MODEL_COMPONENT_H
 #define MODEL_COMPONENT_H
 
-#include <memory>
-
 #include <QObject>
 
 namespace protocol { class Board; }
@@ -17,7 +15,7 @@ class Component : public QObject
 
 protected:
     protocol::Board* board;
-    std::shared_ptr< model::Waveform > waveform;
+    model::Waveform* waveform;
 
     bool running = false;
 

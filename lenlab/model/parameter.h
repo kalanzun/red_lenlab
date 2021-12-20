@@ -40,18 +40,17 @@ class Parameter : public QObject
 public:
     explicit Parameter(int length, const std::function< int(int) > value, const QString label, int index = 0, QObject *parent = nullptr);
 
-    Parameter(const Parameter&) = delete;
-    const Parameter& operator=(const Parameter&) = delete;
-
     int getLength() const;
 
     LabelIterator begin() const;
     LabelIterator end() const;
 
     int getIndex() const;
-    void setIndex(int index);
 
     int getValue() const;
+
+public slots:
+    void setIndex(int index);
 };
 
 } // namespace model

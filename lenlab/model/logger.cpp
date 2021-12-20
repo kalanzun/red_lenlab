@@ -60,9 +60,10 @@ void Logger::reset()
 {
     if (running) stop();
 
-    waveform = std::make_shared< Waveform >();
+    waveform->deleteLater();
+    waveform = new Waveform{this};
     setupWaveform();
-    emit WaveformCreated(waveform.get());
+    emit WaveformCreated(waveform);
 }
 
 void Logger::setup(const std::shared_ptr< protocol::Message >& message)

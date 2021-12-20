@@ -1,6 +1,8 @@
 #ifndef MODEL_OSCILLOSCOPE_H
 #define MODEL_OSCILLOSCOPE_H
 
+#include <memory>
+
 #include "component.h"
 #include "parameter.h"
 
@@ -41,7 +43,7 @@ public slots:
     void error();
 
 private:
-    std::shared_ptr< model::Waveform > incoming;
+    model::Waveform* incoming;
 
     void setupWaveform();
 };

@@ -45,7 +45,8 @@ void Oscilloscope::start()
     if (running) return;
     running = true;
 
-    incoming = std::make_shared< model::Waveform >();
+    if (incoming) incoming->deleteLater();
+    incoming = new model::Waveform{this};
 
     auto cmd = protocol::Message::createCommand(startOscilloscope, IntArray);
     cmd->addInt(samplerate.getIndex());
@@ -84,9 +85,11 @@ void Oscilloscope::reply(const std::shared_ptr< protocol::Message >& message)
         }
 
         if (page->index == 11 && page->channel == 1) {
-            waveform.swap(incoming);
+            waveform->deleteLater();
+            waveform = incoming;
+            incoming = nullptr;
             setupWaveform();
-            emit WaveformCreated(waveform.get());
+            emit WaveformCreated(waveform);
         }
     }
 }
