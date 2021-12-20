@@ -153,7 +153,7 @@ const Parameter SignalGenerator::amplitude{
 const Parameter SignalGenerator::frequency{
     frequency_values.size(),
     [](int index) { return BASE_FREQUENCY * frequency_values[index][0] / (frequency_values[index][1] * frequency_values[index][2]); },
-    "%1 kHz"
+    "%1 Hz"
 };
 
 const Parameter SignalGenerator::multiplier{

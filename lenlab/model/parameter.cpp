@@ -36,6 +36,11 @@ Parameter::Parameter(int length, const std::function< int(int) > value, const QS
 
 }
 
+int Parameter::getLength() const
+{
+    return length;
+}
+
 LabelIterator Parameter::begin() const
 {
     return LabelIterator{value, label, 0};

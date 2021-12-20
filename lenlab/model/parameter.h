@@ -43,6 +43,8 @@ public:
     Parameter(const Parameter&) = delete;
     const Parameter& operator=(const Parameter&) = delete;
 
+    int getLength() const;
+
     LabelIterator begin() const;
     LabelIterator end() const;
 
