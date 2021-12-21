@@ -4,6 +4,7 @@
 
 #include "model/lenlab.h"
 #include "model/logger.h"
+#include "model/oscilloscope.h"
 #include "model/waveform.h"
 #include "protocol/board.h"
 #include "usb/context.h"
@@ -26,6 +27,7 @@ public:
 private slots:
     void initTestCase();
     void test_logger();
+    void test_oscilloscope();
 
 };
 
@@ -64,6 +66,20 @@ void ModelTest::test_logger()
     QVERIFY(spy.wait(100 + short_timeout)); // ms
 
     logger->stop();
+}
+
+void ModelTest::test_oscilloscope()
+{
+    auto osci = lenlab->oscilloscope;
+
+    osci->samplerate->setIndex(0);
+    QCOMPARE(osci->samplerate->getValue(), 1000); // kHz
+
+    QSignalSpy spy(osci, &Component::WaveformCreated);
+    QVERIFY(spy.isValid());
+
+    osci->start();
+    QVERIFY(spy.wait(100 + short_timeout)); // ms
 }
 
 } // namespace model

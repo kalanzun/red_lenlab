@@ -28,9 +28,9 @@ class Oscilloscope : public Component
     static const std::array< int, 3 > timerange_values;
 
 public:
-    static const Parameter samplerate;
-    static const Parameter timerange;
-    static const Parameter valuerange;
+    Parameter* samplerate;
+    Parameter* timerange;
+    Parameter* valuerange;
 
     explicit Oscilloscope(protocol::Board* board);
 

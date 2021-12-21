@@ -7,27 +7,33 @@ namespace model {
 
 const std::array< int, 3 > Oscilloscope::timerange_values{2, 4, 5};
 
-const Parameter Oscilloscope::samplerate{
-    4,
-    [](int index) { return 1'000 >> index; },
-    "%1 kHz"
-};
-
-const Parameter Oscilloscope::timerange{
-    timerange_values.size(),
-    [](int index) { return timerange_values[index]; },
-    "%1 ms"
-};
-
-const Parameter Oscilloscope::valuerange{
-    2,
-    [](int index) { return 1650 / (index + 1); },
-    "%1 mV"
-};
-
 Oscilloscope::Oscilloscope(protocol::Board* board)
     : Component{board}
 {
+    samplerate = new Parameter{
+        4,
+        [](int index) { return 1'000 >> index; },
+        "%1 kHz",
+        0,
+        this
+    };
+
+    timerange = new Parameter{
+        timerange_values.size(),
+        [](int index) { return timerange_values[index]; },
+        "%1 ms",
+        0,
+        this
+    };
+
+    valuerange = new Parameter{
+        2,
+        [](int index) { return 1650 / (index + 1); },
+        "%1 mV",
+        0,
+        this
+    };
+
     setupWaveform();
 
     connect(board, &protocol::Board::setup,
@@ -49,7 +55,7 @@ void Oscilloscope::start()
     incoming = new model::Waveform{this};
 
     auto cmd = protocol::Message::createCommand(startOscilloscope, IntArray);
-    cmd->addInt(samplerate.getIndex());
+    cmd->addInt(samplerate->getIndex());
     board->send(cmd);
 }
 
