@@ -25,13 +25,13 @@ public:
     void stop();
     void reset();
 
-public slots:
+private:
+    void setupWaveform();
+
+private slots:
     void setup(const std::shared_ptr< protocol::Message >& message);
     void reply(const std::shared_ptr< protocol::Message >& message);
     void error();
-
-private:
-    void setupWaveform();
 };
 
 } // namespace model

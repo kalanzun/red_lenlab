@@ -87,7 +87,7 @@ void Waveform::setLocked()
     emit Locked();
 }
 
-bool Waveform::is_locked()
+bool Waveform::isLocked()
 {
     return locked;
 }

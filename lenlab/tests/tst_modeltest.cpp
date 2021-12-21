@@ -29,6 +29,7 @@ public:
 private slots:
     void initTestCase();
     void test_logger();
+    void test_resetLogger();
     void test_oscilloscope();
     void test_signalgenerator();
     void test_spectrumanalyzer();
@@ -48,7 +49,7 @@ ModelTest::~ModelTest()
 
 void ModelTest::initTestCase()
 {
-    QSignalSpy spy(lenlab->board, &protocol::Board::setup);
+    QSignalSpy spy{lenlab->board, &protocol::Board::setup};
     QVERIFY(spy.isValid());
 
     lenlab->lookForDevice(true);
@@ -62,13 +63,29 @@ void ModelTest::test_logger()
     logger->interval->setIndex(0);
     QCOMPARE(logger->interval->getValue(), 100); // ms
 
-    QSignalSpy spy(logger->waveform, &Waveform::SampleAppended);
+    QSignalSpy spy{logger->waveform, &Waveform::SampleAppended};
     QVERIFY(spy.isValid());
 
     logger->start();
     QVERIFY(spy.wait(100 + short_timeout)); // ms
 
     logger->stop();
+    QVERIFY(spy.wait(100 + short_timeout) == false); // ms
+}
+
+void ModelTest::test_resetLogger()
+{
+    auto logger = lenlab->logger;
+
+    QSignalSpy spy{logger, &Component::WaveformCreated};
+    QVERIFY(spy.isValid());
+
+    QSignalSpy destroy_spy{logger->waveform, &QObject::destroyed};
+    QVERIFY(spy.isValid());
+
+    logger->reset();
+    QCOMPARE(spy.count(), 1);
+    QVERIFY(destroy_spy.wait(short_timeout));
 }
 
 void ModelTest::test_oscilloscope()
@@ -78,7 +95,7 @@ void ModelTest::test_oscilloscope()
     osci->samplerate->setIndex(0);
     QCOMPARE(osci->samplerate->getValue(), 1000); // kHz
 
-    QSignalSpy spy(osci, &Component::WaveformCreated);
+    QSignalSpy spy{osci, &Component::WaveformCreated};
     QVERIFY(spy.isValid());
 
     osci->start();

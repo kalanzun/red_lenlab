@@ -38,7 +38,7 @@ void Logger::start()
     if (running) return;
     running = true;
 
-    if (!waveform->is_locked()) {
+    if (!waveform->isLocked()) {
         waveform->setInterval(interval->getValue());
         waveform->setLocked();
     }
@@ -67,6 +67,12 @@ void Logger::reset()
     emit WaveformCreated(waveform);
 }
 
+void Logger::setupWaveform()
+{
+    waveform->x_range.b = 40.f;
+    waveform->y_range.b = 3.3f;
+}
+
 void Logger::setup(const std::shared_ptr< protocol::Message >& message)
 {
     running = false;
@@ -75,7 +81,7 @@ void Logger::setup(const std::shared_ptr< protocol::Message >& message)
 void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 {
     if (!running) return;
-    assert(waveform->is_locked());
+    assert(waveform->isLocked());
 
     if (message->head->reply == Log) {
         struct Sample sample;
@@ -92,12 +98,6 @@ void Logger::reply(const std::shared_ptr< protocol::Message >& message)
 void Logger::error()
 {
     running = false;
-}
-
-void Logger::setupWaveform()
-{
-    waveform->x_range.b = 40.f;
-    waveform->y_range.b = 3.3f;
 }
 
 } // namespace model

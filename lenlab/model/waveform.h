@@ -86,7 +86,7 @@ public:
     Channel getChannel(int channel) const;
 
     void setLocked();
-    bool is_locked();
+    bool isLocked();
 
     int getInterval();
     void setInterval(int interval);

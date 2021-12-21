@@ -65,6 +65,14 @@ void Oscilloscope::stop()
     running = false;
 }
 
+void Oscilloscope::setupWaveform()
+{
+    waveform->x_range.a = -2.f;
+    waveform->x_range.b = 2.f;
+    waveform->y_range.a = -1.65f;
+    waveform->y_range.b = 1.65f;
+}
+
 void Oscilloscope::setup(const std::shared_ptr< protocol::Message >& message)
 {
     running = false;
@@ -103,14 +111,6 @@ void Oscilloscope::reply(const std::shared_ptr< protocol::Message >& message)
 void Oscilloscope::error()
 {
     running = false;
-}
-
-void Oscilloscope::setupWaveform()
-{
-    waveform->x_range.a = -2.f;
-    waveform->x_range.b = 2.f;
-    waveform->y_range.a = -1.65f;
-    waveform->y_range.b = 1.65f;
 }
 
 } // namespace model
