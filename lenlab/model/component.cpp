@@ -13,9 +13,4 @@ Component::Component(protocol::Board* board)
 
 }
 
-model::Waveform* Component::getWaveform() const
-{
-    return waveform;
-}
-
 } // namespace model

@@ -67,7 +67,7 @@ void LabChart::setModel(model::Component* component)
 
     connect(component, &model::Component::WaveformCreated,
             this, &LabChart::setWaveform);
-    setWaveform(component->getWaveform());
+    setWaveform(component->waveform);
 }
 
 void LabChart::setVisible(int channel, bool visible)

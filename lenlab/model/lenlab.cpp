@@ -24,4 +24,4 @@ void Lenlab::lookForDevice(bool create_virtual_device)
     board->lookForDevice(create_virtual_device);
 }
 
-} // namespace protocol
+} // namespace model

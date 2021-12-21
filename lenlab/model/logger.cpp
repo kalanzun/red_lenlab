@@ -10,16 +10,17 @@ namespace model {
 
 const std::array< int, 6 > Logger::interval_values{100, 200, 500, 1000, 2000, 5000};
 
-const Parameter Logger::interval{
-    interval_values.size(),
-    [](int index) { return interval_values[index]; },
-    "%1 ms",
-    3
-};
-
 Logger::Logger(protocol::Board* board)
     : Component{board}
 {
+    interval = new Parameter{
+        interval_values.size(),
+        [](int index) { return interval_values[index]; },
+        "%1 ms",
+        3,
+        this
+    };
+
     setupWaveform();
 
     connect(board, &protocol::Board::setup,
@@ -38,7 +39,7 @@ void Logger::start()
     running = true;
 
     if (!waveform->is_locked()) {
-        waveform->setInterval(interval.getValue());
+        waveform->setInterval(interval->getValue());
         waveform->setLocked();
     }
 

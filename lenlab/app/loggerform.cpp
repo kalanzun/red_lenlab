@@ -37,14 +37,14 @@ void LoggerForm::setModel(model::Lenlab* lenlab)
 
     connect(logger, &model::Logger::WaveformCreated,
             this, &LoggerForm::setWaveform);
-    setWaveform(logger->getWaveform());
+    setWaveform(logger->waveform);
 
     ui->labChart->setModel(logger);
 
-    for (auto&& item : logger->interval) ui->intervalBox->addItem(item);
+    for (auto&& item : *logger->interval) ui->intervalBox->addItem(item);
     connect(ui->intervalBox, &QComboBox::activated,
-            &logger->interval, &model::Parameter::setIndex);
-    ui->intervalBox->setCurrentIndex(logger->interval.getIndex());
+            logger->interval, &model::Parameter::setIndex);
+    ui->intervalBox->setCurrentIndex(logger->interval->getIndex());
 }
 
 void LoggerForm::setupChart() const

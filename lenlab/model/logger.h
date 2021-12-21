@@ -17,7 +17,7 @@ class Logger : public Component
     static const std::array< int, 6 > interval_values;
 
 public:
-    static const Parameter interval;
+    Parameter* interval;
 
     explicit Logger(protocol::Board* board);
 

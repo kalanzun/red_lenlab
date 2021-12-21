@@ -15,14 +15,13 @@ class Component : public QObject
 
 protected:
     protocol::Board* board;
-    model::Waveform* waveform;
 
     bool running = false;
 
 public:
-    explicit Component(protocol::Board* board);
+    model::Waveform* waveform;
 
-    model::Waveform* getWaveform() const;
+    explicit Component(protocol::Board* board);
 
 signals:
     void WaveformCreated(model::Waveform* waveform);
