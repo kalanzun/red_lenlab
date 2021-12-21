@@ -16,9 +16,9 @@ class SignalGenerator : public QObject
     static const std::array< std::array< uint8_t, 3 >, 130 > frequency_values;
 
 public:
-    static const Parameter amplitude;
-    static const Parameter frequency;
-    static const Parameter multiplier;
+    Parameter* amplitude;
+    Parameter* frequency;
+    Parameter* multiplier;
 
     explicit SignalGenerator(protocol::Board* board);
 };

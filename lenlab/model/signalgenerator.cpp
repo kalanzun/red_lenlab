@@ -137,12 +137,6 @@ const std::array< std::array< uint8_t, 3 >, 130 > SignalGenerator::frequency_val
     {9, 2, 2}, // 129 10285.71
 }};
 
-const Parameter SignalGenerator::amplitude{
-    18,
-    [](int index) { return 800 + 50 * index; },
-    "%1 mV"
-};
-
 #define SYSCLK 80'000'000
 #define CHANNELS 2
 #define SAMPLES 500
@@ -150,22 +144,32 @@ const Parameter SignalGenerator::amplitude{
 #define OVERHEAD 160 / 175
 #define BASE_FREQUENCY SYSCLK / CHANNELS / SAMPLES / BITS_PER_SAMPLE * OVERHEAD
 
-const Parameter SignalGenerator::frequency{
-    frequency_values.size(),
-    [](int index) { return BASE_FREQUENCY * frequency_values[index][0] / (frequency_values[index][1] * frequency_values[index][2]); },
-    "%1 Hz"
-};
-
-const Parameter SignalGenerator::multiplier{
-    21,
-    [](int index) { return index; },
-    "%1"
-};
-
 SignalGenerator::SignalGenerator(protocol::Board* board)
     : QObject{board}
 {
+    amplitude = new Parameter{
+        18,
+        [](int index) { return 800 + 50 * index; },
+        "%1 mV",
+        0,
+        this
+    };
 
+    frequency = new Parameter{
+        frequency_values.size(),
+        [](int index) { return BASE_FREQUENCY * frequency_values[index][0] / (frequency_values[index][1] * frequency_values[index][2]); },
+        "%1 Hz",
+        0,
+        this
+    };
+
+    multiplier = new Parameter{
+        21,
+        [](int index) { return index; },
+        "%1",
+        0,
+        this
+    };
 }
 
 } // namespace model

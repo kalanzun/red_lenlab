@@ -5,6 +5,8 @@
 #include "model/lenlab.h"
 #include "model/logger.h"
 #include "model/oscilloscope.h"
+#include "model/signalgenerator.h"
+#include "model/spectrumanalyzer.h"
 #include "model/waveform.h"
 #include "protocol/board.h"
 #include "usb/context.h"
@@ -28,7 +30,8 @@ private slots:
     void initTestCase();
     void test_logger();
     void test_oscilloscope();
-
+    void test_signalgenerator();
+    void test_spectrumanalyzer();
 };
 
 ModelTest::ModelTest()
@@ -80,6 +83,16 @@ void ModelTest::test_oscilloscope()
 
     osci->start();
     QVERIFY(spy.wait(100 + short_timeout)); // ms
+}
+
+void ModelTest::test_signalgenerator()
+{
+    auto signal = lenlab->signal;
+}
+
+void ModelTest::test_spectrumanalyzer()
+{
+    auto spectrum = lenlab->spectrum;
 }
 
 } // namespace model
