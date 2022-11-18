@@ -22,8 +22,8 @@ jobs:
         uses: actions/cache@v2
         id: cache
         with:
-          key: ccs1100
-          path: ~/ti/ccs1100
+          key: ccs1210
+          path: ~/ti/ccs1210
       - name: Install CCS
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
