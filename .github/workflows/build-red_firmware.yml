@@ -27,16 +27,16 @@ jobs:
       - name: Install CCS
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          wget --no-verbose https://software-dl.ti.com/ccs/esd/CCSv11/CCS_11_0_0/exports/CCS11.0.0.00012_linux-x64.tar.gz
-          tar xf CCS11.0.0.00012_linux-x64.tar.gz
-          CCS11.0.0.00012_linux-x64/ccs_setup_11.0.0.00012.run --mode unattended --prefix ~/ti/ccs1100 --enable-components PF_C28,PF_TM4C
+          wget --no-verbose https://dr-download.ti.com/software-development/ide-configuration-compiler-or-debugger/MD-J1VdearkvK/12.1.0/CCS12.1.0.00007_linux-x64.tar.gz
+          tar xf CCS12.1.0.00007_linux-x64.tar.gz
+          CCS12.1.0.00007_linux-x64/ccs_setup_12.1.0.00007.run --mode unattended --prefix ~/ti/ccs1210 --enable-components PF_C28,PF_TM4C
       - name: Checkout
         uses: actions/checkout@v2
       # https://software-dl.ti.com/ccs/esd/documents/ccs_projects-command-line.html
       - name: Import
-        run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectImport -ccs.location ${{ github.workspace }}/firmware/
+        run: ~/ti/ccs1210/ccs/eclipse/eclipse -noSplash -data workspace_v12 -application com.ti.ccstudio.apps.projectImport -ccs.location ${{ github.workspace }}/firmware/
       - name: Build
-        run: ~/ti/ccs1100/ccs/eclipse/eclipse -noSplash -data workspace_v11 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware -ccs.configuration Release
+        run: ~/ti/ccs1210/ccs/eclipse/eclipse -noSplash -data workspace_v12 -application com.ti.ccstudio.apps.projectBuild -ccs.projects red_firmware -ccs.configuration Release
       - name: Package
         run: cp firmware/Release/red_firmware.out lenlab_flash/red_firmware.out
       - name: Create archive

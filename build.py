@@ -113,8 +113,8 @@ def build_osx(tag: str):
     print_versions("Qt", Path.home() / "Qt")
     print_versions("Python", Path.home(), "venv*")
 
-    qmake = Path.home() / "Qt/6.1/macos/bin/qmake"
-    macdeployqt = Path.home() / "Qt/6.1/macos/bin/macdeployqt"
+    qmake = Path.home() / "Qt/6.2/macos/bin/qmake"
+    macdeployqt = Path.home() / "Qt/6.2/macos/bin/macdeployqt"
     print_qt_version(qmake)
 
     print_header("build")
@@ -155,7 +155,7 @@ def build_windows(tag: str):
 
     env = dict(os.environ)
 
-    qmake = Path(r"C:\Qt\6.2\mingw81_64\bin\qmake.exe")
+    qmake = Path(r"C:\Qt\6.4.0\mingw81_64\bin\qmake.exe")
     make = Path(r"C:\Qt\Tools\mingw810_64\bin\mingw32-make.exe")
     env["PATH"] = f"{qmake.parent};{make.parent};{env['PATH']}"
     windeployqt = qmake.parent / "windeployqt.exe"
@@ -166,13 +166,13 @@ def build_windows(tag: str):
         [
             "appveyor",
             "DownloadFile",
-            "https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.7z",
+            "https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26-binaries.7z",
         ],
     )
     libusb_dir = Path("libusb")
     libusb_dir.mkdir()
     run(
-        ["7z", "x", r"..\\libusb-1.0.24.7z"],
+        ["7z", "x", r"..\\libusb-1.0.26-binaries.7z"],
         cwd=libusb_dir,
     )
 

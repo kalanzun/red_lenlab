@@ -4,10 +4,10 @@ branches:
 image:
   - Ubuntu
   - macOS
-  - Visual Studio 2019
+  - Visual Studio 2022
 build_script:
-  - cmd: C:\Python39-x64\python -u build.py
-  - sh: $HOME/venv3.9/bin/python build.py
+  - cmd: C:\Python311-x64\python -u build.py
+  - sh: $HOME/venv3.10/bin/python build.py
 artifacts:
   - path: 'Lenlab-*-linux-x86_64.AppImage'
   - path: 'Lenlab-*-mac.dmg'
