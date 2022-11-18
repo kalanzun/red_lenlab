@@ -155,8 +155,8 @@ def build_windows(tag: str):
 
     env = dict(os.environ)
 
-    qmake = Path(r"C:\Qt\6.4.0\mingw81_64\bin\qmake.exe")
-    make = Path(r"C:\Qt\Tools\mingw810_64\bin\mingw32-make.exe")
+    qmake = Path(r"C:\Qt\6.4.0\mingw_64\bin\qmake.exe")
+    make = Path(r"C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe")
     env["PATH"] = f"{qmake.parent};{make.parent};{env['PATH']}"
     windeployqt = qmake.parent / "windeployqt.exe"
     print_qt_version(qmake)
@@ -166,13 +166,13 @@ def build_windows(tag: str):
         [
             "appveyor",
             "DownloadFile",
-            "https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26-binaries.7z",
+            "https://github.com/libusb/libusb/releases/download/v1.0.25/libusb-1.0.25.7z",
         ],
     )
     libusb_dir = Path("libusb")
     libusb_dir.mkdir()
     run(
-        ["7z", "x", r"..\\libusb-1.0.26-binaries.7z"],
+        ["7z", "x", r"..\\libusb-1.0.25.7z"],
         cwd=libusb_dir,
     )
 
