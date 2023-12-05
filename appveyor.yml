@@ -7,7 +7,7 @@ image:
   - Visual Studio 2022
 build_script:
   - cmd: C:\Python311-x64\python -u build.py
-  - sh: $HOME/venv3.10/bin/python build.py
+  - sh: $HOME/venv3.11/bin/python build.py
 artifacts:
   - path: 'Lenlab-*-linux-x86_64.AppImage'
   - path: 'Lenlab-*-mac.dmg'

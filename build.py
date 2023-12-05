@@ -113,8 +113,8 @@ def build_osx(tag: str):
     print_versions("Qt", Path.home() / "Qt")
     print_versions("Python", Path.home(), "venv*")
 
-    qmake = Path.home() / "Qt/6.2/macos/bin/qmake"
-    macdeployqt = Path.home() / "Qt/6.2/macos/bin/macdeployqt"
+    qmake = Path.home() / "Qt/6.4/macos/bin/qmake"
+    macdeployqt = Path.home() / "Qt/6.4/macos/bin/macdeployqt"
     print_qt_version(qmake)
 
     print_header("build")
@@ -151,11 +151,12 @@ def build_osx(tag: str):
 
 def build_windows(tag: str):
     print_versions("Qt", Path(r"C:\Qt"))
+    print_versions("Qt Tools", Path(r"C:\Qt\Tools"))
     print_versions("Python", Path(r"C:"), "Python*")
 
     env = dict(os.environ)
 
-    qmake = Path(r"C:\Qt\6.4.0\mingw_64\bin\qmake.exe")
+    qmake = Path(r"C:\Qt\6.5.3\mingw_64\bin\qmake.exe")
     make = Path(r"C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe")
     env["PATH"] = f"{qmake.parent};{make.parent};{env['PATH']}"
     windeployqt = qmake.parent / "windeployqt.exe"
