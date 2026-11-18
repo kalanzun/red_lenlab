@@ -21,6 +21,20 @@ Lenlab ist eine Software für den PC und eine Firmware für das TI Tiva C series
 Launchpad EK-TM4C123GXL für den Workshop Elektrotechnik und Informationstechnik
 am Karlsruher Institut für Technologie.
 
+.. attention::
+
+    Version 7 ist eine alte Version (2017 - 2019) für die Launchpads mit dem TI Tiva C series Mikroprozessor.
+
+    Seit dem Wintersemester 2024/2025 gibt es Version 8 für die Launchpads mit dem TI MSPM0 Mikroprozessor
+    unter `https://github.com/kalanzun/lenlab_mspm0 <https://github.com/kalanzun/lenlab_mspm0>`_
+
+.. attention::
+
+    Version 7 is an old version (2017 - 2019) for the launchpads with the TI Tiva C series microcontroller.
+
+    Since the winter term 2024/2025 there is a version 8 for the launchpads with the TI MSPM0 microcontroller
+    at `https://github.com/kalanzun/lenlab_mspm0 <https://github.com/kalanzun/lenlab_mspm0>`_
+
 Homepage: `https://github.com/kalanzun/red_lenlab <https://github.com/kalanzun/red_lenlab>`_
 
 Download: `https://github.com/kalanzun/red_lenlab/releases <https://github.com/kalanzun/red_lenlab/releases>`_
